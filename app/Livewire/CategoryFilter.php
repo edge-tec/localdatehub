@@ -122,3 +122,4 @@ class CategoryFilter extends Component
         return view('livewire.category-filter');
     }
 }
+

@@ -125,3 +125,4 @@ class CategoryApiController extends Controller
         ]);
     }
 }
+

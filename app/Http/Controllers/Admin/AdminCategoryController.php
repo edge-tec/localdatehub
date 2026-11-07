@@ -370,3 +370,4 @@ class AdminCategoryController extends Controller
         return back()->with('status', "Option '{$label}' removed.");
     }
 }
+

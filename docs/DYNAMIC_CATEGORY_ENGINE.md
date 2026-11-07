@@ -157,3 +157,4 @@ Automated tests in `tests/Feature/CategoryEngineTest.php`:
 13. `test_livewire_category_filter_component`: **PASS**
 
 Total Project Suite: **65 passing tests, 417 assertions, 0 errors, 0 failures.**
+

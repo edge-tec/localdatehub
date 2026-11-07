@@ -45,7 +45,15 @@
                     <a href="{{ route('register') }}" class="text-sm font-medium text-slate-300 hover:text-white px-3 py-2">Register</a>
                 @else
                     <div class="flex items-center space-x-3">
-                        <a href="{{ route('account.profile') }}" class="text-sm font-medium text-slate-300 hover:text-white flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+                        <a href="{{ route('account.listings.index') }}" class="text-xs font-semibold text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 transition">
+                            My Ads
+                        </a>
+                        @if(Auth::user()->role && in_array(Auth::user()->role, ['admin', 'super_admin', 'moderator']))
+                            <a href="{{ route('admin.moderation.listings.queue') }}" class="text-xs font-semibold text-amber-400 hover:text-amber-300 px-2.5 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 transition">
+                                Moderation
+                            </a>
+                        @endif
+                        <a href="{{ route('account.profile') }}" class="text-sm font-medium text-slate-300 hover:text-white flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-800 transition">
                             <span class="w-6 h-6 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center text-xs font-bold border border-rose-500/30">
                                 {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                             </span>
@@ -57,7 +65,7 @@
                         </form>
                     </div>
                 @endguest
-                <a href="#post-ad" class="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-lg bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white shadow-md shadow-rose-600/20 transition">
+                <a href="{{ route('listings.create') }}" class="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-lg bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white shadow-md shadow-rose-600/20 transition">
                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>

@@ -336,3 +336,4 @@ class CategoryManagementService
         return ($max !== null) ? $max + 1 : 1;
     }
 }
+

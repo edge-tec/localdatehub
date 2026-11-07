@@ -21,6 +21,15 @@ class Listing extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public const STATUS_DRAFT = 'draft';
+    public const STATUS_PENDING_REVIEW = 'pending_review';
+    public const STATUS_ACTIVE = 'active';
+    public const STATUS_PAUSED = 'paused';
+    public const STATUS_EXPIRED = 'expired';
+    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_SUSPENDED = 'suspended';
+    public const STATUS_ARCHIVED = 'archived';
+
     protected $fillable = [
         'user_id',
         'category_id',
@@ -30,10 +39,14 @@ class Listing extends Model
         'title',
         'slug',
         'description',
+        'content_hash',
         'poster_age',
         'poster_gender',
         'intent',
         'status',
+        'rejection_reason',
+        'rejection_count',
+        'is_autosaved',
         'is_featured',
         'is_verified_poster',
         'has_photos',
@@ -49,6 +62,8 @@ class Listing extends Model
     {
         return [
             'poster_age' => 'integer',
+            'rejection_count' => 'integer',
+            'is_autosaved' => 'boolean',
             'is_featured' => 'boolean',
             'is_verified_poster' => 'boolean',
             'has_photos' => 'boolean',
@@ -97,6 +112,13 @@ class Listing extends Model
         return $this->hasMany(ListingMedia::class)->orderBy('display_order');
     }
 
+    public function approvedMedia(): HasMany
+    {
+        return $this->hasMany(ListingMedia::class)
+            ->where('moderation_status', 'approved')
+            ->orderBy('display_order');
+    }
+
     public function primaryPhoto(): HasOne
     {
         return $this->hasOne(ListingMedia::class)->where('is_primary', true);
@@ -114,12 +136,12 @@ class Listing extends Model
 
     public function revisions(): HasMany
     {
-        return $this->hasMany(ListingRevision::class)->latest();
+        return $this->hasMany(ListingRevision::class)->latest('created_at');
     }
 
     public function statusHistory(): HasMany
     {
-        return $this->hasMany(ListingStatusHistory::class)->latest();
+        return $this->hasMany(ListingStatusHistory::class)->latest('created_at');
     }
 
     public function analytics(): HasMany
@@ -137,13 +159,124 @@ class Listing extends Model
         return $this->hasMany(ContactMessage::class);
     }
 
+    // Status Helpers
+    public function isActive(): bool
+    {
+        return $this->status === self::STATUS_ACTIVE &&
+            ($this->expires_at === null || $this->expires_at->isFuture());
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === self::STATUS_PENDING_REVIEW;
+    }
+
+    public function isDraft(): bool
+    {
+        return $this->status === self::STATUS_DRAFT;
+    }
+
+    public function isExpired(): bool
+    {
+        return $this->status === self::STATUS_EXPIRED ||
+            ($this->status === self::STATUS_ACTIVE && $this->expires_at && $this->expires_at->isPast());
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->status === self::STATUS_REJECTED;
+    }
+
+    public function canBeRenewed(): bool
+    {
+        return in_array($this->status, [self::STATUS_ACTIVE, self::STATUS_EXPIRED]);
+    }
+
+    /**
+     * Compute standardized content hash for duplicate detection.
+     */
+    public function computeContentHash(): string
+    {
+        $normalized = strtolower(preg_replace('/\s+/', ' ', trim($this->title . ' ' . $this->description)));
+        return hash('sha256', $normalized);
+    }
+
+    /**
+     * Record a snapshot revision before major updates.
+     */
+    public function recordRevision(string $summary, ?int $userId = null): ListingRevision
+    {
+        $snapshot = $this->attributes()->with('selectedOption')->get()->map(fn ($attr) => [
+            'code' => $attr->attribute_code,
+            'text' => $attr->value_text,
+            'number' => $attr->value_number,
+            'option' => $attr->selectedOption?->label,
+        ])->all();
+
+        return ListingRevision::create([
+            'listing_id' => $this->id,
+            'user_id' => $userId ?: $this->user_id,
+            'title' => $this->title,
+            'description' => $this->description,
+            'attributes_snapshot' => $snapshot,
+            'change_summary' => $summary,
+            'created_at' => now(),
+        ]);
+    }
+
+    /**
+     * Record status change in status history.
+     */
+    public function recordStatusChange(string $newStatus, ?string $reason = null, ?int $changedByUserId = null): ListingStatusHistory
+    {
+        $oldStatus = $this->status;
+        $this->status = $newStatus;
+        if ($reason) {
+            $this->rejection_reason = $reason;
+        }
+        $this->save();
+
+        return ListingStatusHistory::create([
+            'listing_id' => $this->id,
+            'from_status' => $oldStatus,
+            'to_status' => $newStatus,
+            'reason' => $reason,
+            'changed_by_user_id' => $changedByUserId,
+            'created_at' => now(),
+        ]);
+    }
+
+    /**
+     * Increment analytics metric for today.
+     */
+    public function recordAnalyticsEvent(string $metric = 'views', int $count = 1): void
+    {
+        $today = now()->toDateString();
+        $record = ListingAnalytics::firstOrCreate(
+            ['listing_id' => $this->id, 'metric_date' => $today],
+            ['views' => 0, 'unique_visitors' => 0, 'contact_clicks' => 0, 'favorite_adds' => 0]
+        );
+
+        if (in_array($metric, ['views', 'unique_visitors', 'contact_clicks', 'favorite_adds'], true)) {
+            $record->increment($metric, $count);
+            if ($metric === 'views') {
+                $this->increment('view_count', $count);
+            }
+        }
+    }
+
     // Scopes
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where('status', 'active')
+        return $query->where('status', self::STATUS_ACTIVE)
             ->where(function ($q) {
                 $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
             });
+    }
+
+    public function scopePendingReview(Builder $query): Builder
+    {
+        return $query->where('status', self::STATUS_PENDING_REVIEW);
     }
 
     public function scopeFeatured(Builder $query): Builder
