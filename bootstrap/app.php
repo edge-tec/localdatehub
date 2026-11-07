@@ -27,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'age.verify' => VerifyAgeMiddleware::class,
             'active' => \App\Http\Middleware\EnsureAccountIsActive::class,
             'age.assured' => \App\Http\Middleware\EnsureAgeAssurance::class,
+            'admin.rbac' => \App\Http\Middleware\AdminRbacMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

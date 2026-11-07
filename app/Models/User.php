@@ -148,13 +148,49 @@ class User extends Authenticatable implements MustVerifyEmail
         return $query->where('is_age_verified', true);
     }
 
-    public function hasRole(string $roleSlug): bool
+    public function hasRole(string|array $roleSlug): bool
     {
-        if ($this->role === $roleSlug || $this->role === 'admin' || $this->role === 'super_admin') {
+        if ($this->role === 'super_admin' || $this->role === 'admin') {
             return true;
         }
 
-        return $this->roles->contains('slug', $roleSlug);
+        $roles = (array) $roleSlug;
+        if (in_array($this->role, $roles, true)) {
+            return true;
+        }
+
+        return $this->roles()->whereIn('slug', $roles)->exists();
+    }
+
+    public function hasPermission(string $permissionSlug): bool
+    {
+        if ($this->role === 'super_admin' || $this->role === 'admin') {
+            return true;
+        }
+
+        // Permissions granted through the primary role column (e.g. role = 'finance_manager')
+        $primaryRoleGrants = \App\Modules\Admin\Models\Role::where('slug', $this->role)
+            ->whereHas('permissions', fn($q) => $q->where('slug', $permissionSlug))
+            ->exists();
+
+        if ($primaryRoleGrants) {
+            return true;
+        }
+
+        // Permissions granted through additional pivot role assignments
+        return $this->roles()
+            ->whereHas('permissions', fn($q) => $q->where('slug', $permissionSlug))
+            ->exists();
+    }
+
+    public function isStaff(): bool
+    {
+        $staffRoles = [
+            'super_admin', 'admin', 'senior_moderator', 'listing_moderator',
+            'compliance_officer', 'customer_support', 'finance_manager', 'seo_manager',
+        ];
+
+        return in_array($this->role, $staffRoles, true) || $this->roles()->whereIn('slug', $staffRoles)->exists();
     }
 
     public function isSuspended(): bool

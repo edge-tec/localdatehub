@@ -7,6 +7,7 @@ use App\Http\Controllers\Account\SuspensionController;
 use App\Http\Controllers\Account\UserListingController;
 use App\Http\Controllers\Account\UserMessagesController;
 use App\Http\Controllers\Admin\AdminCategoryController;
+use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminLocationController;
 use App\Http\Controllers\Admin\ModerationListingController;
 use App\Http\Controllers\Admin\ModerationMessagesController;
@@ -183,8 +184,14 @@ Route::prefix('api/search')->name('api.search.')->group(function () {
     Route::get('/autocomplete', [SearchApiController::class, 'autocomplete'])->name('autocomplete');
 });
 
+// Central Enterprise Administration Hub
+Route::middleware(['auth', 'admin.rbac'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('index');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+});
+
 // Administrative Location Management
-Route::middleware('auth')->prefix('admin/locations')->name('admin.locations.')->group(function () {
+Route::middleware(['auth', 'admin.rbac:locations.manage'])->prefix('admin/locations')->name('admin.locations.')->group(function () {
     Route::get('/', [AdminLocationController::class, 'index'])->name('index');
     Route::get('/history', [AdminLocationController::class, 'importHistory'])->name('history');
     Route::post('/reimport', [AdminLocationController::class, 'triggerImport'])->name('reimport');
@@ -214,7 +221,7 @@ Route::prefix('api/categories')->name('api.categories.')->group(function () {
 });
 
 // Administrative Category Management
-Route::middleware('auth')->prefix('admin/categories')->name('admin.categories.')->group(function () {
+Route::middleware(['auth', 'admin.rbac:categories.manage'])->prefix('admin/categories')->name('admin.categories.')->group(function () {
     Route::get('/', [AdminCategoryController::class, 'index'])->name('index');
     Route::get('/create', [AdminCategoryController::class, 'create'])->name('create');
     Route::post('/', [AdminCategoryController::class, 'store'])->name('store');
@@ -267,7 +274,7 @@ Route::middleware('auth')->prefix('account/listings')->name('account.listings.')
 });
 
 // Admin Moderation Queue
-Route::middleware('auth')->prefix('admin/moderation/listings')->name('admin.moderation.listings.')->group(function () {
+Route::middleware(['auth', 'admin.rbac:moderation.view'])->prefix('admin/moderation/listings')->name('admin.moderation.listings.')->group(function () {
     Route::get('/', [ModerationListingController::class, 'queue'])->name('queue');
     Route::post('/{listing}/approve', [ModerationListingController::class, 'approve'])->name('approve');
     Route::post('/{listing}/reject', [ModerationListingController::class, 'reject'])->name('reject');
@@ -275,7 +282,7 @@ Route::middleware('auth')->prefix('admin/moderation/listings')->name('admin.mode
 });
 
 // Admin Moderation Messages & Safety Reports Queue
-Route::middleware('auth')->prefix('admin/moderation/messages')->name('admin.moderation.messages.')->group(function () {
+Route::middleware(['auth', 'admin.rbac:moderation.view'])->prefix('admin/moderation/messages')->name('admin.moderation.messages.')->group(function () {
     Route::get('/', [ModerationMessagesController::class, 'index'])->name('queue');
     Route::post('/{message}/dismiss', [ModerationMessagesController::class, 'dismiss'])->name('dismiss');
     Route::post('/{message}/action', [ModerationMessagesController::class, 'takeAction'])->name('action');
