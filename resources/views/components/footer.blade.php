@@ -32,6 +32,7 @@
                 <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-200 mb-3">Trust & Legal</h4>
                 <ul class="space-y-2 text-xs">
                     <li><a href="{{ route('pages.safety') }}" class="hover:text-white transition">Community Safety (18+)</a></li>
+                    <li><a href="{{ route('dmca.show') }}" class="hover:text-white transition">DMCA & Takedown Notices</a></li>
                     <li><a href="{{ route('pages.terms') }}" class="hover:text-white transition">Terms of Service</a></li>
                     <li><a href="{{ route('pages.privacy') }}" class="hover:text-white transition">Privacy & Geolocation Policy</a></li>
                     <li><a href="{{ route('pages.contact') }}" class="hover:text-white transition">Contact & Report Abuse</a></li>

@@ -704,6 +704,14 @@ class AccountDashboard extends Component
         /** @var User $user */
         $user = Auth::user();
 
+        // Compliance evidence preservation check
+        $canErase = app(\App\Modules\Moderation\Services\ComplianceService::class)->canEraseUserData($user);
+        if (!$canErase['can_erase']) {
+            throw ValidationException::withMessages([
+                'deleteAccountPassword' => "Account erasure cannot be processed at this time: {$canErase['reason']}",
+            ]);
+        }
+
         if (!Hash::check($this->deleteAccountPassword, $user->password)) {
             throw ValidationException::withMessages([
                 'deleteAccountPassword' => 'Incorrect password provided.',

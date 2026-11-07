@@ -322,18 +322,31 @@
             </div>
             <div class="{{ $card }} overflow-x-auto">
                 <table class="min-w-full">
-                    <thead><tr><th class="{{ $th }}">#</th><th class="{{ $th }}">Reason</th><th class="{{ $th }}">Target</th><th class="{{ $th }}">Details</th><th class="{{ $th }}">Status</th><th class="{{ $th }}">Actions</th></tr></thead>
+                    <thead><tr><th class="{{ $th }}">#</th><th class="{{ $th }}">Severity / Reason</th><th class="{{ $th }}">Target</th><th class="{{ $th }}">Details</th><th class="{{ $th }}">Status</th><th class="{{ $th }}">Actions</th></tr></thead>
                     <tbody>
                     @forelse($reports as $r)
                         <tr class="border-t border-slate-800" wire:key="report-{{ $r->id }}">
                             <td class="{{ $td }}">{{ $r->id }}</td>
-                            <td class="{{ $td }}"><span class="font-semibold {{ in_array($r->reason_code, ['minor_exploitation', 'commercial_solicitation', 'non_consensual']) ? 'text-red-300' : '' }}">{{ str_replace('_', ' ', $r->reason_code) }}</span></td>
+                            <td class="{{ $td }}">
+                                <div class="flex items-center space-x-1.5 mb-1">
+                                    <span class="px-1.5 py-0.2 rounded text-[10px] font-bold uppercase tracking-wider border {{ $r->risk_level === 'critical' ? 'bg-red-950 text-red-300 border-red-700 animate-pulse' : ($r->risk_level === 'high' ? 'bg-amber-950 text-amber-300 border-amber-700' : 'bg-slate-800 text-slate-300 border-slate-600') }}">
+                                        {{ $r->risk_level ?? 'medium' }}
+                                    </span>
+                                    @if($r->is_urgent_takedown)
+                                        <span class="px-1.5 py-0.2 rounded text-[10px] font-bold uppercase tracking-wider bg-rose-900 text-white border border-rose-700">URGENT</span>
+                                    @endif
+                                </div>
+                                <span class="font-semibold {{ in_array($r->reason_code, ['minor_exploitation', 'commercial_solicitation', 'non_consensual', 'underage_suspected']) ? 'text-red-300' : '' }}">{{ str_replace('_', ' ', $r->reason_code) }}</span>
+                            </td>
                             <td class="{{ $td }}">{{ class_basename($r->reportable_type) }} #{{ $r->reportable_id }}</td>
                             <td class="{{ $td }}">{{ \Illuminate\Support\Str::limit($r->details, 140) }}<div class="text-xs text-slate-500">by {{ $r->reporter?->name ?? 'Anonymous' }} · {{ $r->created_at?->diffForHumans() }}</div></td>
                             <td class="{{ $td }}"><span class="px-2 py-0.5 rounded border text-xs {{ $badge($r->status) }}">{{ $r->status }}</span></td>
-                            <td class="{{ $td }}">
+                            <td class="{{ $td }} space-x-1 whitespace-nowrap">
                                 @if(in_array($r->status, ['open', 'investigating']))
                                     <button wire:click="openResolveReportModal({{ $r->id }})" class="{{ $btn }} bg-slate-700 hover:bg-slate-600 text-white">Action</button>
+                                @endif
+                                @if($r->reportable_type === 'App\Modules\Listings\Models\Listing')
+                                    <button wire:click="quarantineReportedListing({{ $r->id }})" wire:confirm="Quarantine and immediately remove this listing from public view?" class="{{ $btn }} bg-red-800 hover:bg-red-700 text-white">Quarantine</button>
                                 @endif
                             </td>
                         </tr>
@@ -367,6 +380,141 @@
                     </tbody>
                 </table>
                 <div class="p-3">{{ $abuseMessages->links() }}</div>
+            </div>
+        @endif
+
+        {{-- ================= DMCA TAKEDOWNS (Phase 12) ================= --}}
+        @if($tab === 'dmca')
+            <div class="{{ $card }} p-4 mb-4 md:w-1/3">
+                <select wire:model.live="dmcaStatusFilter" class="{{ $input }}" aria-label="DMCA status filter">
+                    <option value="all">All statuses</option><option value="pending">Pending</option><option value="takedown_issued">Takedown issued</option><option value="counter_noticed">Counter-noticed</option><option value="rejected">Rejected</option><option value="resolved">Resolved</option>
+                </select>
+            </div>
+            <div class="{{ $card }} overflow-x-auto">
+                <table class="min-w-full">
+                    <thead><tr><th class="{{ $th }}">Ticket</th><th class="{{ $th }}">Claimant</th><th class="{{ $th }}">Infringing URL</th><th class="{{ $th }}">Work Description</th><th class="{{ $th }}">Status</th><th class="{{ $th }}">Actions</th></tr></thead>
+                    <tbody>
+                    @forelse($dmcaRequests as $dmca)
+                        <tr class="border-t border-slate-800" wire:key="dmca-{{ $dmca->id }}">
+                            <td class="{{ $td }} font-mono text-xs">{{ $dmca->ticket_number }}<div class="text-slate-500">{{ $dmca->created_at?->format('M j, Y') }}</div></td>
+                            <td class="{{ $td }}"><div class="font-semibold">{{ $dmca->claimant_name }}</div><div class="text-xs text-slate-400">{{ $dmca->claimant_email }}</div></td>
+                            <td class="{{ $td }} text-xs font-mono break-all max-w-xs">{{ $dmca->infringing_url }}</td>
+                            <td class="{{ $td }} text-xs">{{ \Illuminate\Support\Str::limit($dmca->copyrighted_work, 120) }}</td>
+                            <td class="{{ $td }}"><span class="px-2 py-0.5 rounded border text-xs {{ $badge($dmca->status) }}">{{ str_replace('_', ' ', $dmca->status) }}</span></td>
+                            <td class="{{ $td }} space-x-1 whitespace-nowrap">
+                                @if($dmca->status === 'pending')
+                                    <button wire:click="openDmcaModal({{ $dmca->id }}, 'takedown_issued')" class="{{ $btn }} bg-rose-700 hover:bg-rose-600 text-white">Takedown</button>
+                                    <button wire:click="openDmcaModal({{ $dmca->id }}, 'rejected')" class="{{ $btn }} bg-slate-700 hover:bg-slate-600 text-white">Reject</button>
+                                @elseif($dmca->status === 'takedown_issued')
+                                    <button wire:click="openDmcaModal({{ $dmca->id }}, 'restored')" class="{{ $btn }} bg-emerald-700 hover:bg-emerald-600 text-white">Restore</button>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="6" class="{{ $td }} text-center text-slate-400">No DMCA notices on file.</td></tr>
+                    @endforelse
+                    </tbody>
+                </table>
+                <div class="p-3">{{ $dmcaRequests->links() }}</div>
+            </div>
+        @endif
+
+        {{-- ================= LEGAL & LAW ENFORCEMENT (Phase 12) ================= --}}
+        @if($tab === 'legal')
+            <div class="{{ $card }} p-4 mb-4 md:w-1/3">
+                <select wire:model.live="legalStatusFilter" class="{{ $input }}" aria-label="Legal status filter">
+                    <option value="all">All statuses</option><option value="received">Received</option><option value="under_legal_review">Under legal review</option><option value="fulfilled">Fulfilled</option><option value="rejected">Rejected</option>
+                </select>
+            </div>
+            <div class="{{ $card }} overflow-x-auto">
+                <table class="min-w-full">
+                    <thead><tr><th class="{{ $th }}">Reference</th><th class="{{ $th }}">Agency / Officer</th><th class="{{ $th }}">Type / Case</th><th class="{{ $th }}">Target</th><th class="{{ $th }}">Status</th><th class="{{ $th }}">Actions</th></tr></thead>
+                    <tbody>
+                    @forelse($legalRequests as $req)
+                        <tr class="border-t border-slate-800" wire:key="legal-{{ $req->id }}">
+                            <td class="{{ $td }} font-mono text-xs">{{ $req->reference_code }}<div class="text-slate-500">{{ $req->created_at?->format('M j, Y') }}</div></td>
+                            <td class="{{ $td }}"><div class="font-semibold">{{ $req->agency_name }}</div><div class="text-xs text-slate-400">{{ $req->officer_name }} ({{ $req->official_email }})</div></td>
+                            <td class="{{ $td }}"><span class="font-mono text-xs text-rose-300 uppercase">{{ str_replace('_', ' ', $req->request_type) }}</span><div class="text-xs text-slate-400">Case #{{ $req->case_number }}</div></td>
+                            <td class="{{ $td }}">{{ $req->targetUser?->name ?? ($req->targetListing?->title ?? 'Platform Inquiry') }}</td>
+                            <td class="{{ $td }}"><span class="px-2 py-0.5 rounded border text-xs {{ $badge($req->status) }}">{{ str_replace('_', ' ', $req->status) }}</span></td>
+                            <td class="{{ $td }} space-x-1 whitespace-nowrap">
+                                <button wire:click="openLegalModal({{ $req->id }})" class="{{ $btn }} bg-slate-700 hover:bg-slate-600 text-white">Review</button>
+                                <button wire:click="freezeLegalEvidence({{ $req->id }})" class="{{ $btn }} bg-red-800 hover:bg-red-700 text-white">Freeze 2703(f)</button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="6" class="{{ $td }} text-center text-slate-400">No law enforcement inquiries recorded.</td></tr>
+                    @endforelse
+                    </tbody>
+                </table>
+                <div class="p-3">{{ $legalRequests->links() }}</div>
+            </div>
+        @endif
+
+        {{-- ================= STATE COMPLIANCE (Phase 12) ================= --}}
+        @if($tab === 'compliance')
+            <div class="flex justify-between items-center mb-3">
+                <p class="text-xs text-slate-400">Statutory state age assurance, warning text, and geofencing configurations.</p>
+                @if($this->userCan('settings.manage'))
+                    <button wire:click="openStateComplianceModal" class="{{ $btn }} bg-rose-600 hover:bg-rose-500 text-white">+ New State Rule</button>
+                @endif
+            </div>
+            <div class="{{ $card }} overflow-x-auto">
+                <table class="min-w-full">
+                    <thead><tr><th class="{{ $th }}">State</th><th class="{{ $th }}">Min Age</th><th class="{{ $th }}">Mandatory Digital ID</th><th class="{{ $th }}">Statutory Reference</th><th class="{{ $th }}">Warning Text</th><th class="{{ $th }}">Actions</th></tr></thead>
+                    <tbody>
+                    @forelse($stateCompliances as $st)
+                        <tr class="border-t border-slate-800" wire:key="st-{{ $st->id }}">
+                            <td class="{{ $td }} font-semibold">{{ $st->state_name }} <span class="font-mono text-xs text-slate-400">({{ $st->state_code }})</span></td>
+                            <td class="{{ $td }}">{{ $st->statutory_min_age }}+</td>
+                            <td class="{{ $td }}"><span class="px-2 py-0.5 rounded border text-xs {{ $badge((bool) $st->requires_id_verification) }}">{{ $st->requires_id_verification ? 'Required' : 'Attestation' }}</span></td>
+                            <td class="{{ $td }} text-xs font-mono text-slate-300">{{ $st->legal_reference ?? '—' }}</td>
+                            <td class="{{ $td }} text-xs text-slate-400 max-w-xs truncate">{{ $st->mandatory_warning_text ?? 'Standard 18+ Gate' }}</td>
+                            <td class="{{ $td }} space-x-1 whitespace-nowrap">
+                                @if($this->userCan('settings.manage'))
+                                    <button wire:click="toggleStateIdRequirement({{ $st->id }})" class="{{ $btn }} bg-slate-700 hover:bg-slate-600 text-white">{{ $st->requires_id_verification ? 'Disable ID' : 'Require ID' }}</button>
+                                    <button wire:click="openStateComplianceModal({{ $st->id }})" class="{{ $btn }} bg-slate-700 hover:bg-slate-600 text-white">Edit</button>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="6" class="{{ $td }} text-center text-slate-400">No state rules configured.</td></tr>
+                    @endforelse
+                    </tbody>
+                </table>
+            </div>
+        @endif
+
+        {{-- ================= EVIDENCE VAULT (Phase 12) ================= --}}
+        @if($tab === 'evidence')
+            <div class="mb-3 text-xs text-slate-400">
+                Statutory 18 U.S.C. 2703(f) holds, subpoena preservation freezes, and litigation hold snapshots.
+            </div>
+            <div class="{{ $card }} overflow-x-auto">
+                <table class="min-w-full">
+                    <thead><tr><th class="{{ $th }}">Hold #</th><th class="{{ $th }}">Target Entity</th><th class="{{ $th }}">Reason</th><th class="{{ $th }}">Frozen By</th><th class="{{ $th }}">Expires</th><th class="{{ $th }}">Status</th><th class="{{ $th }}">Actions</th></tr></thead>
+                    <tbody>
+                    @forelse($preservations as $pr)
+                        <tr class="border-t border-slate-800" wire:key="hold-{{ $pr->id }}">
+                            <td class="{{ $td }} font-mono text-xs">HOLD-{{ $pr->id }}</td>
+                            <td class="{{ $td }}">{{ class_basename($pr->preservable_type) }} #{{ $pr->preservable_id }}</td>
+                            <td class="{{ $td }} text-xs">{{ $pr->hold_reason }}</td>
+                            <td class="{{ $td }}">{{ $pr->frozenBy?->name ?? 'System' }}</td>
+                            <td class="{{ $td }} text-xs">{{ $pr->expires_at?->format('M j, Y') ?? 'Indefinite' }}</td>
+                            <td class="{{ $td }}"><span class="px-2 py-0.5 rounded border text-xs {{ $badge((bool) $pr->is_active) }}">{{ $pr->is_active ? 'Active Hold' : 'Released' }}</span></td>
+                            <td class="{{ $td }} space-x-1 whitespace-nowrap">
+                                <button wire:click="inspectPreservation({{ $pr->id }})" class="{{ $btn }} bg-slate-700 hover:bg-slate-600 text-white">Snapshot</button>
+                                @if($pr->is_active && $this->userCan('verification.manage'))
+                                    <button wire:click="releaseEvidenceHold({{ $pr->id }})" wire:confirm="Release this evidence hold?" class="{{ $btn }} bg-amber-800 hover:bg-amber-700 text-white">Release</button>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="7" class="{{ $td }} text-center text-slate-400">No active evidence preservation holds.</td></tr>
+                    @endforelse
+                    </tbody>
+                </table>
+                <div class="p-3">{{ $preservations->links() }}</div>
             </div>
         @endif
 
@@ -769,7 +917,8 @@
     @php
         $anyModal = $showSuspendUserModal || $showAssignRoleModal || $showRejectListingModal || $showAppealModal
             || $showResolveReportModal || $showRefundModal || $showPlanModal || $showCmsModal || $showSeoModal
-            || $showAdModal || $showAuditDetailModal;
+            || $showAdModal || $showAuditDetailModal || $showDmcaModal || $showLegalModal || $showStateComplianceModal
+            || $showPreservationModal;
     @endphp
     @if($anyModal)
         <div class="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" wire:keydown.escape.window="closeModals">
@@ -927,6 +1076,96 @@
                     <p class="text-[11px] text-slate-500 mt-3">Target: {{ $inspectedAuditLog->target_type ?? '—' }} {{ $inspectedAuditLog->target_id ? '#' . $inspectedAuditLog->target_id : '' }} · IP {{ $inspectedAuditLog->ip_address }}</p>
                     <p class="text-[11px] text-slate-500 break-all">UA: {{ $inspectedAuditLog->user_agent }}</p>
                     <div class="flex justify-end pt-3"><button type="button" wire:click="closeModals" class="px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-sm">Close</button></div>
+                @endif
+
+                @if($showDmcaModal)
+                    <h3 class="text-lg font-bold text-white mb-2">Process DMCA Takedown Notice</h3>
+                    <form wire:submit="processDmca" class="space-y-3">
+                        <label class="block text-sm">Decision Action
+                            <select wire:model="dmcaAction" class="{{ $input }} mt-1">
+                                <option value="takedown_issued">Issue Takedown (Remove Listing)</option>
+                                <option value="counter_noticed">Counter-Notice Received</option>
+                                <option value="rejected">Reject Notice (Deficient / Bad Faith)</option>
+                                <option value="resolved">Mark Resolved</option>
+                                <option value="restored">Restore Material</option>
+                            </select>
+                        </label>
+                        <label class="block text-sm">Reviewer Notes
+                            <textarea wire:model="dmcaNotes" rows="3" class="{{ $input }} mt-1" placeholder="Internal justification, claimant correspondence notes..."></textarea>
+                        </label>
+                        <div class="flex justify-end gap-2 pt-2">
+                            <button type="button" wire:click="closeModals" class="px-3 py-2 text-sm text-slate-300">Cancel</button>
+                            <button type="submit" class="px-3 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold">Save Decision</button>
+                        </div>
+                    </form>
+                @endif
+
+                @if($showLegalModal)
+                    <h3 class="text-lg font-bold text-white mb-2">Law Enforcement / Legal Request Action</h3>
+                    <form wire:submit="processLegalRequest" class="space-y-3">
+                        <label class="block text-sm">Status Action
+                            <select wire:model="legalStatusAction" class="{{ $input }} mt-1">
+                                <option value="under_legal_review">Under Legal Review</option>
+                                <option value="fulfilled">Fulfilled / Disclosed Pursuant to Process</option>
+                                <option value="rejected">Rejected (Deficient / Quashed)</option>
+                            </select>
+                        </label>
+                        <label class="block text-sm">Compliance &amp; Fulfillment Notes
+                            <textarea wire:model="legalComplianceNotes" rows="4" class="{{ $input }} mt-1" required placeholder="Details on legal fulfillment, counsel sign-off, responsive records produced..."></textarea>
+                        </label>
+                        @error('legalComplianceNotes') <p class="text-xs text-red-400">{{ $message }}</p> @enderror
+                        <div class="flex justify-end gap-2 pt-2">
+                            <button type="button" wire:click="closeModals" class="px-3 py-2 text-sm text-slate-300">Cancel</button>
+                            <button type="submit" class="px-3 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold">Save Status</button>
+                        </div>
+                    </form>
+                @endif
+
+                @if($showStateComplianceModal)
+                    <h3 class="text-lg font-bold text-white mb-3">{{ $editingStateComplianceId ? 'Edit' : 'New' }} State Compliance Rule</h3>
+                    <form wire:submit="saveStateCompliance" class="space-y-3">
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="block text-sm">State Code
+                                <input type="text" maxlength="2" wire:model="stateComplianceForm.state_code" class="{{ $input }} mt-1 uppercase font-mono" required>
+                            </label>
+                            <label class="block text-sm">State Name
+                                <input type="text" wire:model="stateComplianceForm.state_name" class="{{ $input }} mt-1" required>
+                            </label>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="block text-sm">Min Age
+                                <input type="number" min="18" max="21" wire:model="stateComplianceForm.statutory_min_age" class="{{ $input }} mt-1" required>
+                            </label>
+                            <label class="block text-sm">Legal Reference
+                                <input type="text" wire:model="stateComplianceForm.legal_reference" class="{{ $input }} mt-1" placeholder="e.g. TX HB 1181">
+                            </label>
+                        </div>
+                        <label class="flex items-center gap-2 text-sm">
+                            <input type="checkbox" wire:model="stateComplianceForm.requires_id_verification" class="rounded border-slate-600 bg-slate-950 text-rose-600">
+                            Require Mandatory Digital ID Verification
+                        </label>
+                        <label class="flex items-center gap-2 text-sm">
+                            <input type="checkbox" wire:model="stateComplianceForm.requires_age_gate" class="rounded border-slate-600 bg-slate-950 text-rose-600">
+                            Require 18+ Age Gate Affirmation
+                        </label>
+                        <label class="block text-sm">Mandatory Warning Text
+                            <textarea wire:model="stateComplianceForm.mandatory_warning_text" rows="2" class="{{ $input }} mt-1"></textarea>
+                        </label>
+                        <div class="flex justify-end gap-2 pt-2">
+                            <button type="button" wire:click="closeModals" class="px-3 py-2 text-sm text-slate-300">Cancel</button>
+                            <button type="submit" class="px-3 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold">Save Rule</button>
+                        </div>
+                    </form>
+                @endif
+
+                @if($showPreservationModal && $inspectedPreservation)
+                    <h3 class="text-lg font-bold text-white mb-1">Evidence Hold #{{ $inspectedPreservation->id }}</h3>
+                    <p class="text-xs text-slate-400 mb-3">{{ $inspectedPreservation->hold_reason }} · Frozen by {{ $inspectedPreservation->frozenBy?->name ?? 'System' }}</p>
+                    <div class="text-xs font-bold text-slate-400 mb-1">Snapshot JSON Payload</div>
+                    <pre class="text-[11px] bg-slate-950 border border-slate-800 rounded-lg p-3 max-h-60 overflow-y-auto whitespace-pre-wrap font-mono text-slate-300">{{ json_encode($inspectedPreservation->snapshot_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
+                    <div class="flex justify-end pt-3">
+                        <button type="button" wire:click="closeModals" class="px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-sm">Close</button>
+                    </div>
                 @endif
             </div>
         </div>

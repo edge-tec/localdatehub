@@ -20,12 +20,14 @@ use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\CategoryWebController;
+use App\Http\Controllers\DmcaWebController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ListingWebController;
 use App\Http\Controllers\LocationWebController;
 use App\Http\Controllers\PublicPageController;
 use App\Http\Controllers\SearchWebController;
+use App\Http\Controllers\UserReportWebController;
 use App\Modules\Categories\Services\CategoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -52,6 +54,17 @@ Route::post('/contact', [PublicPageController::class, 'submitContact'])
 Route::get('/privacy', [PublicPageController::class, 'privacy'])->name('pages.privacy');
 Route::get('/terms', [PublicPageController::class, 'terms'])->name('pages.terms');
 Route::get('/pricing', [PublicPageController::class, 'pricing'])->name('pages.pricing');
+
+// DMCA Notice & Takedown Portal
+Route::get('/dmca', [DmcaWebController::class, 'show'])->name('dmca.show');
+Route::post('/dmca', [DmcaWebController::class, 'submit'])
+    ->middleware('throttle:10,1')
+    ->name('dmca.submit');
+
+// User Account Reporting
+Route::post('/users/{user}/report', [UserReportWebController::class, 'submit'])
+    ->middleware(['throttle:10,1'])
+    ->name('users.report.submit');
 
 // Health Check Endpoints
 Route::prefix('health')->group(function () {

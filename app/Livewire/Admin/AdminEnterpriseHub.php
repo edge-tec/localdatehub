@@ -24,7 +24,12 @@ use App\Modules\Locations\Models\City;
 use App\Modules\Locations\Models\State;
 use App\Modules\Moderation\Models\AppealRequest;
 use App\Modules\Moderation\Models\ContentReport;
+use App\Modules\Moderation\Models\DmcaRequest;
+use App\Modules\Moderation\Models\EvidencePreservation;
+use App\Modules\Moderation\Models\LegalRequest;
+use App\Modules\Moderation\Models\StateCompliance;
 use App\Modules\Moderation\Models\UserSuspension;
+use App\Modules\Moderation\Services\ComplianceService;
 use App\Modules\SEO\Models\CmsPage;
 use App\Modules\SEO\Models\SeoMeta;
 use Illuminate\Contracts\View\View;
@@ -70,6 +75,10 @@ class AdminEnterpriseHub extends Component
         'verification'  => ['Age Verification', 'verification.manage', 'Trust & Safety'],
         'reports'       => ['Reports', 'reports.manage', 'Trust & Safety'],
         'abuse'         => ['Contact Abuse', 'moderation.view', 'Trust & Safety'],
+        'dmca'          => ['DMCA Takedowns', 'reports.manage', 'Trust & Safety'],
+        'legal'         => ['Legal Requests', 'verification.manage', 'Trust & Safety'],
+        'compliance'    => ['State Compliance', 'settings.manage', 'Trust & Safety'],
+        'evidence'      => ['Evidence Vault', 'audit.view', 'Trust & Safety'],
         'categories'    => ['Categories', 'categories.manage', 'Catalog'],
         'attributes'    => ['Attributes', 'categories.manage', 'Catalog'],
         'locations'     => ['Locations', 'locations.manage', 'Catalog'],
@@ -124,6 +133,30 @@ class AdminEnterpriseHub extends Component
     public string $reportResolutionNotes = '';
     public bool $showResolveReportModal = false;
 
+    // DMCA Takedowns
+    public string $dmcaStatusFilter = 'all';
+    public ?int $targetDmcaId = null;
+    public string $dmcaAction = 'takedown_issued';
+    public string $dmcaNotes = '';
+    public bool $showDmcaModal = false;
+
+    // Legal & Law Enforcement Requests
+    public string $legalStatusFilter = 'all';
+    public ?int $targetLegalId = null;
+    public string $legalComplianceNotes = '';
+    public string $legalStatusAction = 'fulfilled';
+    public bool $showLegalModal = false;
+
+    // State Compliance
+    public ?int $editingStateComplianceId = null;
+    public array $stateComplianceForm = [];
+    public bool $showStateComplianceModal = false;
+
+    // Evidence Vault Holds
+    public ?int $targetPreservationId = null;
+    public ?EvidencePreservation $inspectedPreservation = null;
+    public bool $showPreservationModal = false;
+
     // Refunds
     public ?int $targetTransactionId = null;
     public string $refundReason = '';
@@ -173,6 +206,7 @@ class AdminEnterpriseHub extends Component
         $this->resetCmsForm();
         $this->resetSeoForm();
         $this->resetAdForm();
+        $this->resetStateComplianceForm();
         $this->loadSettings();
     }
 
@@ -625,6 +659,216 @@ class AdminEnterpriseHub extends Component
 
         AdminAuditService::log('contact_abuse.dismiss', $message, ['is_flagged' => true], ['is_flagged' => false]);
         session()->flash('success', "Flag on message #{$message->id} dismissed.");
+    }
+
+    public function quarantineReportedListing(int $reportId): void
+    {
+        $this->authorizePermission('reports.manage');
+        $report = ContentReport::findOrFail($reportId);
+        if ($report->reportable_type === Listing::class) {
+            $listing = Listing::findOrFail($report->reportable_id);
+            app(ComplianceService::class)->quarantineListing($listing, "Quarantined via report #{$report->id}: {$report->reason_code}", Auth::id());
+            session()->flash('success', "Listing [{$listing->title}] quarantined immediately.");
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | DMCA, Legal Requests & Compliance (Phase 12 Controls)
+    |--------------------------------------------------------------------------
+    */
+
+    public function openDmcaModal(int $id, string $action = 'takedown_issued'): void
+    {
+        $this->authorizePermission('reports.manage');
+        $this->targetDmcaId = $id;
+        $this->dmcaAction = $action;
+        $this->dmcaNotes = '';
+        $this->showDmcaModal = true;
+    }
+
+    public function processDmca(): void
+    {
+        $this->authorizePermission('reports.manage');
+        $this->validate([
+            'targetDmcaId' => ['required', 'exists:dmca_requests,id'],
+            'dmcaAction' => ['required', Rule::in(['takedown_issued', 'counter_noticed', 'rejected', 'resolved', 'restored'])],
+            'dmcaNotes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $dmca = DmcaRequest::findOrFail($this->targetDmcaId);
+        app(ComplianceService::class)->actionDmca(
+            $dmca,
+            $this->dmcaAction,
+            $this->dmcaNotes,
+            Auth::user()
+        );
+
+        $this->showDmcaModal = false;
+        $this->targetDmcaId = null;
+        session()->flash('success', "DMCA Ticket #{$dmca->ticket_number} processed with status [{$this->dmcaAction}].");
+    }
+
+    public function openLegalModal(int $id): void
+    {
+        $this->authorizePermission('verification.manage');
+        $this->targetLegalId = $id;
+        $this->legalComplianceNotes = '';
+        $this->legalStatusAction = 'fulfilled';
+        $this->showLegalModal = true;
+    }
+
+    public function processLegalRequest(): void
+    {
+        $this->authorizePermission('verification.manage');
+        $this->validate([
+            'targetLegalId' => ['required', 'exists:legal_requests,id'],
+            'legalStatusAction' => ['required', Rule::in(['under_legal_review', 'fulfilled', 'rejected'])],
+            'legalComplianceNotes' => ['required', 'string', 'min:5', 'max:2000'],
+        ]);
+
+        $req = LegalRequest::findOrFail($this->targetLegalId);
+        $before = ['status' => $req->status];
+        $req->status = $this->legalStatusAction;
+        $req->compliance_notes = $this->legalComplianceNotes;
+        $req->handled_by_admin_id = Auth::id();
+        if ($this->legalStatusAction === 'fulfilled') {
+            $req->fulfilled_at = now();
+        }
+        $req->save();
+
+        AdminAuditService::log('legal.action', $req, $before, [
+            'status' => $this->legalStatusAction,
+            'notes' => $this->legalComplianceNotes,
+        ]);
+
+        $this->showLegalModal = false;
+        $this->targetLegalId = null;
+        session()->flash('success', "Legal Request #{$req->reference_code} updated to [{$this->legalStatusAction}].");
+    }
+
+    public function freezeLegalEvidence(int $legalId): void
+    {
+        $this->authorizePermission('verification.manage');
+        $req = LegalRequest::findOrFail($legalId);
+
+        $target = $req->targetListing ?: $req->targetUser;
+        if (!$target) {
+            session()->flash('error', 'No identifiable target record linked to this legal request.');
+            return;
+        }
+
+        app(ComplianceService::class)->freezeEvidence(
+            $target,
+            "Statutory 18 U.S.C. 2703(f) legal hold for case {$req->case_number} ({$req->agency_name})",
+            Auth::id(),
+            $req->id,
+            90
+        );
+
+        session()->flash('success', "Evidence hold successfully applied to target record.");
+    }
+
+    public function resetStateComplianceForm(): void
+    {
+        $this->editingStateComplianceId = null;
+        $this->stateComplianceForm = [
+            'state_code' => '',
+            'state_name' => '',
+            'requires_age_gate' => true,
+            'requires_id_verification' => false,
+            'statutory_min_age' => 18,
+            'mandatory_warning_text' => '',
+            'is_restricted' => false,
+            'legal_reference' => '',
+        ];
+    }
+
+    public function openStateComplianceModal(?int $id = null): void
+    {
+        $this->authorizePermission('settings.manage');
+        $this->resetStateComplianceForm();
+        if ($id) {
+            $st = StateCompliance::findOrFail($id);
+            $this->editingStateComplianceId = $st->id;
+            $this->stateComplianceForm = [
+                'state_code' => $st->state_code,
+                'state_name' => $st->state_name,
+                'requires_age_gate' => (bool) $st->requires_age_gate,
+                'requires_id_verification' => (bool) $st->requires_id_verification,
+                'statutory_min_age' => $st->statutory_min_age,
+                'mandatory_warning_text' => (string) $st->mandatory_warning_text,
+                'is_restricted' => (bool) $st->is_restricted,
+                'legal_reference' => (string) $st->legal_reference,
+            ];
+        }
+        $this->showStateComplianceModal = true;
+    }
+
+    public function saveStateCompliance(): void
+    {
+        $this->authorizePermission('settings.manage');
+        $data = $this->validate([
+            'stateComplianceForm.state_code' => ['required', 'string', 'size:2', Rule::unique('state_compliances', 'state_code')->ignore($this->editingStateComplianceId)],
+            'stateComplianceForm.state_name' => ['required', 'string', 'max:80'],
+            'stateComplianceForm.requires_age_gate' => ['boolean'],
+            'stateComplianceForm.requires_id_verification' => ['boolean'],
+            'stateComplianceForm.statutory_min_age' => ['required', 'integer', 'min:18', 'max:21'],
+            'stateComplianceForm.mandatory_warning_text' => ['nullable', 'string', 'max:1000'],
+            'stateComplianceForm.is_restricted' => ['boolean'],
+            'stateComplianceForm.legal_reference' => ['nullable', 'string', 'max:120'],
+        ])['stateComplianceForm'];
+
+        $data['state_code'] = strtoupper($data['state_code']);
+        $data['requires_age_gate'] = (bool) ($data['requires_age_gate'] ?? false);
+        $data['requires_id_verification'] = (bool) ($data['requires_id_verification'] ?? false);
+        $data['is_restricted'] = (bool) ($data['is_restricted'] ?? false);
+
+        if ($this->editingStateComplianceId) {
+            $compliance = StateCompliance::findOrFail($this->editingStateComplianceId);
+            $before = $compliance->toArray();
+            $compliance->update($data);
+            AdminAuditService::log('compliance.state_update', $compliance, $before, $data);
+        } else {
+            $compliance = StateCompliance::create($data);
+            AdminAuditService::log('compliance.state_create', $compliance, null, $data);
+        }
+
+        $this->showStateComplianceModal = false;
+        $this->resetStateComplianceForm();
+        session()->flash('success', "Compliance rule for [{$compliance->state_code} - {$compliance->state_name}] saved.");
+    }
+
+    public function toggleStateIdRequirement(int $id): void
+    {
+        $this->authorizePermission('settings.manage');
+        $st = StateCompliance::findOrFail($id);
+        $before = ['requires_id_verification' => $st->requires_id_verification];
+        $st->requires_id_verification = !$st->requires_id_verification;
+        $st->save();
+
+        AdminAuditService::log('compliance.state_id_toggle', $st, $before, ['requires_id_verification' => $st->requires_id_verification]);
+        session()->flash('success', "Mandatory ID verification for [{$st->state_name}] " . ($st->requires_id_verification ? 'enabled' : 'disabled') . '.');
+    }
+
+    public function inspectPreservation(int $id): void
+    {
+        $this->authorizePermission('audit.view');
+        $this->targetPreservationId = $id;
+        $this->inspectedPreservation = EvidencePreservation::with(['legalRequest', 'frozenBy'])->findOrFail($id);
+        $this->showPreservationModal = true;
+    }
+
+    public function releaseEvidenceHold(int $id): void
+    {
+        $this->authorizePermission('verification.manage');
+        $hold = EvidencePreservation::findOrFail($id);
+        $before = ['is_active' => $hold->is_active];
+        $hold->is_active = false;
+        $hold->save();
+
+        AdminAuditService::log('evidence.release', $hold, $before, ['is_active' => false]);
+        session()->flash('success', "Evidence preservation hold #{$hold->id} released.");
     }
 
     /*
@@ -1144,6 +1388,11 @@ class AdminEnterpriseHub extends Component
         $this->showSeoModal = false;
         $this->showAdModal = false;
         $this->showAuditDetailModal = false;
+        $this->showDmcaModal = false;
+        $this->showLegalModal = false;
+        $this->showStateComplianceModal = false;
+        $this->showPreservationModal = false;
+        $this->inspectedPreservation = null;
         $this->inspectedAuditLogId = null;
         $this->resetValidation();
     }
@@ -1302,12 +1551,47 @@ class AdminEnterpriseHub extends Component
 
     protected function dataReports(): array
     {
-        $query = ContentReport::with(['reporter'])->latest();
+        $query = ContentReport::with(['reporter'])
+            ->orderByDesc('is_urgent_takedown')
+            ->orderByRaw("CASE WHEN risk_level = 'critical' THEN 1 WHEN risk_level = 'high' THEN 2 WHEN risk_level = 'medium' THEN 3 ELSE 4 END")
+            ->latest();
         if ($this->reportStatusFilter !== 'all') {
             $query->where('status', $this->reportStatusFilter);
         }
 
         return ['reports' => $query->paginate(15, ['*'], 'reportsPage')];
+    }
+
+    protected function dataDmca(): array
+    {
+        $query = DmcaRequest::with(['targetListing', 'reviewer'])->latest();
+        if ($this->dmcaStatusFilter !== 'all') {
+            $query->where('status', $this->dmcaStatusFilter);
+        }
+
+        return ['dmcaRequests' => $query->paginate(15, ['*'], 'dmcaPage')];
+    }
+
+    protected function dataLegal(): array
+    {
+        $query = LegalRequest::with(['targetUser', 'targetListing', 'handler'])->latest();
+        if ($this->legalStatusFilter !== 'all') {
+            $query->where('status', $this->legalStatusFilter);
+        }
+
+        return ['legalRequests' => $query->paginate(15, ['*'], 'legalPage')];
+    }
+
+    protected function dataCompliance(): array
+    {
+        return ['stateCompliances' => StateCompliance::orderBy('state_code')->get()];
+    }
+
+    protected function dataEvidence(): array
+    {
+        return [
+            'preservations' => EvidencePreservation::with(['legalRequest', 'frozenBy'])->latest()->paginate(15, ['*'], 'evidencePage'),
+        ];
     }
 
     protected function dataAbuse(): array

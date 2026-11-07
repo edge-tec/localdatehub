@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             RoleAndPermissionSeeder::class,
             PricingPlanSeeder::class,
             SystemSettingSeeder::class,
+            TrustAndSafetySeeder::class,
             DemoListingSeeder::class,
         ]);
     }

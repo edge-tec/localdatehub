@@ -131,6 +131,14 @@ class SecurityController extends Controller
 
         $user = $request->user();
 
+        // Evidence preservation check: verify no active statutory legal hold exists
+        $canErase = app(\App\Modules\Moderation\Services\ComplianceService::class)->canEraseUserData($user);
+        if (!$canErase['can_erase']) {
+            return redirect()->back()->withErrors([
+                'password' => "Account erasure cannot be processed at this time: {$canErase['reason']}",
+            ]);
+        }
+
         DB::transaction(function () use ($user) {
             // Unpublish and soft-delete user's listings
             $user->listings()->update(['status' => 'archived']);
