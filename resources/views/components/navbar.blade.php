@@ -50,6 +50,9 @@
                     <a href="{{ route('register') }}" class="text-sm font-medium text-slate-300 hover:text-white px-3 py-2">Register</a>
                 @else
                     <div class="flex items-center space-x-3">
+                        <a href="{{ route('account.dashboard') }}" class="text-xs font-semibold text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 transition">
+                            Dashboard
+                        </a>
                         <a href="{{ route('account.listings.index') }}" class="text-xs font-semibold text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 transition">
                             My Ads
                         </a>
@@ -58,7 +61,7 @@
                                 Moderation
                             </a>
                         @endif
-                        <a href="{{ route('account.profile') }}" class="text-sm font-medium text-slate-300 hover:text-white flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-800 transition">
+                        <a href="{{ route('account.dashboard') }}" class="text-sm font-medium text-slate-300 hover:text-white flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-800 transition">
                             <span class="w-6 h-6 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center text-xs font-bold border border-rose-500/30">
                                 {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                             </span>
@@ -102,6 +105,7 @@
                 <a href="{{ route('login') }}" class="w-full text-center py-2 text-sm font-medium text-slate-300 hover:text-white">Sign In</a>
                 <a href="{{ route('register') }}" class="w-full text-center py-2 text-sm font-medium text-slate-300 hover:text-white">Register (18+)</a>
             @else
+                <a href="{{ route('account.dashboard') }}" class="w-full text-left py-2 px-3 text-sm font-medium text-slate-200 hover:bg-slate-800 rounded-md">Dashboard</a>
                 <a href="{{ route('account.listings.index') }}" class="w-full text-left py-2 px-3 text-sm font-medium text-slate-200 hover:bg-slate-800 rounded-md">My Ads</a>
                 <a href="{{ route('account.profile') }}" class="w-full text-left py-2 px-3 text-sm font-medium text-slate-200 hover:bg-slate-800 rounded-md">Account Profile</a>
             @endguest

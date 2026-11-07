@@ -3,10 +3,14 @@
 namespace App\Models;
 
 use App\Modules\Accounts\Models\AgeAssurance;
+use App\Modules\Accounts\Models\UserBlock;
 use App\Modules\Accounts\Models\UserConsent;
 use App\Modules\Accounts\Models\UserPreference;
 use App\Modules\Accounts\Models\UserProfile;
 use App\Modules\Admin\Models\Role;
+use App\Modules\Billing\Models\FeaturedListing;
+use App\Modules\Billing\Models\PaymentTransaction;
+use App\Modules\Billing\Models\Subscription;
 use App\Modules\Contact\Models\ContactMessage;
 use App\Modules\Listings\Models\Listing;
 use Database\Factories\UserFactory;
@@ -106,6 +110,31 @@ class User extends Authenticatable implements MustVerifyEmail
     public function receivedMessages(): HasMany
     {
         return $this->hasMany(ContactMessage::class, 'recipient_id');
+    }
+
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(PaymentTransaction::class);
+    }
+
+    public function featuredListings(): HasMany
+    {
+        return $this->hasMany(FeaturedListing::class);
+    }
+
+    public function blockedUsers(): HasMany
+    {
+        return $this->hasMany(UserBlock::class, 'blocker_id');
+    }
+
+    public function blockedBy(): HasMany
+    {
+        return $this->hasMany(UserBlock::class, 'blocked_id');
     }
 
     // Scopes & Helpers

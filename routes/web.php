@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Account\DashboardController;
 use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Account\SecurityController;
 use App\Http\Controllers\Account\SuspensionController;
@@ -123,6 +124,10 @@ Route::middleware('auth')->group(function () {
 
     // Protected Account Settings (Must be active)
     Route::middleware('active')->prefix('account')->name('account.')->group(function () {
+        // Central Unified Account Dashboard (Livewire-Powered)
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/', [DashboardController::class, 'index'])->name('index');
+
         // Profile Management
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');

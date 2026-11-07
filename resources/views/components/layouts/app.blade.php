@@ -31,7 +31,7 @@
         @if(session('error'))
             <x-alert type="danger" :message="session('error')" />
         @endif
-        @if($errors->any())
+        @if(isset($errors) && $errors->any())
             <x-alert type="danger" :message="$errors->first()" />
         @endif
     </div>
