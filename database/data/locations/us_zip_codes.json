@@ -41,5 +41,11 @@
   {"zip_code": "15219", "state_code": "PA", "city_slug": "pittsburgh", "latitude": 40.4428, "longitude": -79.9866},
   {"zip_code": "55401", "state_code": "MN", "city_slug": "minneapolis", "latitude": 44.9864, "longitude": -93.2705},
   {"zip_code": "55101", "state_code": "MN", "city_slug": "saint-paul", "latitude": 44.9497, "longitude": -93.0931},
-  {"zip_code": "75024", "state_code": "TX", "city_slug": "dallas", "latitude": 33.0784, "longitude": -96.8083}
+  {"zip_code": "75024", "state_code": "TX", "city_slug": "dallas", "latitude": 33.0784, "longitude": -96.8083},
+  {"zip_code": "00901", "state_code": "PR", "city_slug": "san-juan", "latitude": 18.4655, "longitude": -66.1057},
+  {"zip_code": "96910", "state_code": "GU", "city_slug": "dededo", "latitude": 13.5178, "longitude": 144.8391},
+  {"zip_code": "00802", "state_code": "VI", "city_slug": "charlotte-amalie", "latitude": 18.3419, "longitude": -64.9307},
+  {"zip_code": "96799", "state_code": "AS", "city_slug": "pago-pago", "latitude": -14.2756, "longitude": -170.7020},
+  {"zip_code": "96950", "state_code": "MP", "city_slug": "saipan", "latitude": 15.1834, "longitude": 145.7483}
 ]
+

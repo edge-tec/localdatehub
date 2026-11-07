@@ -81,5 +81,11 @@
   {"state_code": "WV", "name": "Charleston", "slug": "charleston-wv", "county": "Kanawha County", "latitude": 38.3498, "longitude": -81.6326, "population": 48864, "timezone": "America/New_York", "is_popular": true},
   {"state_code": "WI", "name": "Milwaukee", "slug": "milwaukee", "county": "Milwaukee County", "latitude": 43.0389, "longitude": -87.9065, "population": 577222, "timezone": "America/Chicago", "is_popular": true},
   {"state_code": "WI", "name": "Madison", "slug": "madison", "county": "Dane County", "latitude": 43.0731, "longitude": -89.4012, "population": 269840, "timezone": "America/Chicago", "is_popular": true},
-  {"state_code": "WY", "name": "Cheyenne", "slug": "cheyenne", "county": "Laramie County", "latitude": 41.1400, "longitude": -104.8202, "population": 65132, "timezone": "America/Denver", "is_popular": true}
+  {"state_code": "WY", "name": "Cheyenne", "slug": "cheyenne", "county": "Laramie County", "latitude": 41.1400, "longitude": -104.8202, "population": 65132, "timezone": "America/Denver", "is_popular": true},
+  {"state_code": "PR", "name": "San Juan", "slug": "san-juan", "county": "San Juan Municipio", "latitude": 18.4655, "longitude": -66.1057, "population": 342259, "timezone": "America/Puerto_Rico", "is_popular": true},
+  {"state_code": "GU", "name": "Dededo", "slug": "dededo", "county": "Guam", "latitude": 13.5178, "longitude": 144.8391, "population": 44943, "timezone": "Pacific/Guam", "is_popular": true},
+  {"state_code": "VI", "name": "Charlotte Amalie", "slug": "charlotte-amalie", "county": "St. Thomas Island", "latitude": 18.3419, "longitude": -64.9307, "population": 14477, "timezone": "America/St_Thomas", "is_popular": true},
+  {"state_code": "AS", "name": "Pago Pago", "slug": "pago-pago", "county": "Eastern District", "latitude": -14.2756, "longitude": -170.7020, "population": 3656, "timezone": "Pacific/Pago_Pago", "is_popular": false},
+  {"state_code": "MP", "name": "Saipan", "slug": "saipan", "county": "Saipan Municipality", "latitude": 15.1834, "longitude": 145.7483, "population": 43388, "timezone": "Pacific/Saipan", "is_popular": true}
 ]
+

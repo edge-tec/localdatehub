@@ -128,6 +128,7 @@ Route::prefix('locations')->name('locations.')->group(function () {
     Route::get('/', [LocationWebController::class, 'index'])->name('index');
     Route::get('/{stateCode}', [LocationWebController::class, 'showState'])->name('state');
     Route::get('/{stateCode}/{citySlug}', [LocationWebController::class, 'showCity'])->name('city');
+    Route::get('/{stateCode}/{citySlug}/{categorySlug}', [LocationWebController::class, 'showCity'])->name('city.category');
 });
 
 // Location API Endpoints
@@ -143,6 +144,8 @@ Route::prefix('api/locations')->name('api.locations.')->group(function () {
 // Administrative Location Management
 Route::middleware('auth')->prefix('admin/locations')->name('admin.locations.')->group(function () {
     Route::get('/', [AdminLocationController::class, 'index'])->name('index');
+    Route::get('/history', [AdminLocationController::class, 'importHistory'])->name('history');
+    Route::post('/reimport', [AdminLocationController::class, 'triggerImport'])->name('reimport');
     Route::put('/cities/{city}', [AdminLocationController::class, 'updateCity'])->name('updateCity');
     Route::post('/cities/{city}/aliases', [AdminLocationController::class, 'storeAlias'])->name('storeAlias');
     Route::delete('/aliases/{alias}', [AdminLocationController::class, 'destroyAlias'])->name('destroyAlias');

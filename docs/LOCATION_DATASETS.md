@@ -136,3 +136,4 @@ When new Census Bureau Tiger/Line Gazetteer releases or USPS ZCTA updates are pu
 3. Transform into the standard `us_cities.json` and `us_zip_codes.json` schemas.
 4. Execute `php artisan locations:validate` on staging before deployment.
 5. Deploy changes and execute `php artisan locations:import` with zero downtime.
+

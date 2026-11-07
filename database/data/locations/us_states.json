@@ -49,5 +49,11 @@
   {"code": "WA", "name": "Washington", "fips": "53", "capital": "Olympia", "latitude": 47.0379, "longitude": -122.9007, "timezone": "America/Los_Angeles"},
   {"code": "WV", "name": "West Virginia", "fips": "54", "capital": "Charleston", "latitude": 38.3498, "longitude": -81.6326, "timezone": "America/New_York"},
   {"code": "WI", "name": "Wisconsin", "fips": "55", "capital": "Madison", "latitude": 43.0731, "longitude": -89.4012, "timezone": "America/Chicago"},
-  {"code": "WY", "name": "Wyoming", "fips": "56", "capital": "Cheyenne", "latitude": 41.1400, "longitude": -104.8202, "timezone": "America/Denver"}
+  {"code": "WY", "name": "Wyoming", "fips": "56", "capital": "Cheyenne", "latitude": 41.1400, "longitude": -104.8202, "timezone": "America/Denver"},
+  {"code": "PR", "name": "Puerto Rico", "fips": "72", "capital": "San Juan", "latitude": 18.4655, "longitude": -66.1057, "timezone": "America/Puerto_Rico", "is_territory": true},
+  {"code": "GU", "name": "Guam", "fips": "66", "capital": "Hagatna", "latitude": 13.4443, "longitude": 144.7937, "timezone": "Pacific/Guam", "is_territory": true},
+  {"code": "VI", "name": "U.S. Virgin Islands", "fips": "78", "capital": "Charlotte Amalie", "latitude": 18.3419, "longitude": -64.9307, "timezone": "America/St_Thomas", "is_territory": true},
+  {"code": "AS", "name": "American Samoa", "fips": "60", "capital": "Pago Pago", "latitude": -14.2756, "longitude": -170.7020, "timezone": "Pacific/Pago_Pago", "is_territory": true},
+  {"code": "MP", "name": "Northern Mariana Islands", "fips": "69", "capital": "Saipan", "latitude": 15.1834, "longitude": 145.7483, "timezone": "Pacific/Saipan", "is_territory": true}
 ]
+

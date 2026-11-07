@@ -2,10 +2,12 @@
 
 namespace App\Modules\Locations\Commands;
 
+use App\Modules\Locations\Jobs\ImportLocationsJob;
 use App\Modules\Locations\Models\City;
 use App\Modules\Locations\Models\Country;
 use App\Modules\Locations\Models\County;
 use App\Modules\Locations\Models\LocationAlias;
+use App\Modules\Locations\Models\LocationImportHistory;
 use App\Modules\Locations\Models\State;
 use App\Modules\Locations\Models\ZipCode;
 use Illuminate\Console\Command;
@@ -20,18 +22,29 @@ class ImportLocationsCommand extends Command
     protected $signature = 'locations:import 
                             {--path=database/data/locations : Base path to location dataset files}
                             {--only= : Comma-separated list of tiers to import: states,counties,cities,zips,aliases}
-                            {--chunk=500 : Batch size for database bulk operations}';
+                            {--chunk=500 : Batch size for database bulk operations}
+                            {--queue : Dispatch the import process to the background queue worker}';
 
     /**
      * The console command description.
      */
-    protected $description = 'Import official USA geographic location datasets (States, Counties, Cities, ZIPs, Aliases)';
+    protected $description = 'Import official USA geographic location datasets (States, Territories, Counties, Cities, ZIPs, Aliases)';
 
     /**
      * Execute the console command.
      */
     public function handle(): int
     {
+        if ($this->option('queue')) {
+            ImportLocationsJob::dispatch(
+                $this->option('path'),
+                $this->option('only')
+            );
+            $this->info("✓ Location dataset import queued for background execution via Laravel Horizon/Queue.");
+            return Command::SUCCESS;
+        }
+
+        $startTime = microtime(true);
         $basePath = base_path($this->option('path'));
         if (!File::isDirectory($basePath)) {
             $this->error("Dataset directory not found: {$basePath}");
@@ -64,12 +77,15 @@ class ImportLocationsCommand extends Command
             'aliases' => 0,
         ];
 
-        // 1. States Import
+        $checksums = [];
+
+        // 1. States & Territories Import
         if (!$only || in_array('states', $only)) {
             $statesFile = $basePath . '/us_states.json';
             if (File::exists($statesFile)) {
+                $checksums['states'] = hash_file('sha256', $statesFile);
                 $statesData = json_decode(File::get($statesFile), true) ?: [];
-                $this->info("Importing " . count($statesData) . " US States and Territories...");
+                $this->info("Importing " . count($statesData) . " US States, DC & Territories...");
                 $bar = $this->output->createProgressBar(count($statesData));
 
                 DB::transaction(function () use ($statesData, $country, $bar, &$stats) {
@@ -80,6 +96,7 @@ class ImportLocationsCommand extends Command
                                 'country_id' => $country->id,
                                 'name' => $item['name'],
                                 'fips_code' => $item['fips'] ?? null,
+                                'is_territory' => (bool) ($item['is_territory'] ?? false),
                                 'is_active' => true,
                             ]
                         );
@@ -99,6 +116,7 @@ class ImportLocationsCommand extends Command
         if (!$only || in_array('counties', $only)) {
             $countiesFile = $basePath . '/us_counties.json';
             if (File::exists($countiesFile)) {
+                $checksums['counties'] = hash_file('sha256', $countiesFile);
                 $countiesData = json_decode(File::get($countiesFile), true) ?: [];
                 $this->info("Importing " . count($countiesData) . " US Counties...");
                 $bar = $this->output->createProgressBar(count($countiesData));
@@ -134,10 +152,11 @@ class ImportLocationsCommand extends Command
             $countyMap[$c->state_id . '_' . strtolower($c->name)] = $c->id;
         }
 
-        // 3. Cities Import
+        // 3. Cities & Populated Places Import
         if (!$only || in_array('cities', $only)) {
             $citiesFile = $basePath . '/us_cities.json';
             if (File::exists($citiesFile)) {
+                $checksums['cities'] = hash_file('sha256', $citiesFile);
                 $citiesData = json_decode(File::get($citiesFile), true) ?: [];
                 $this->info("Importing " . count($citiesData) . " US Populated Places / Cities...");
                 $bar = $this->output->createProgressBar(count($citiesData));
@@ -186,10 +205,11 @@ class ImportLocationsCommand extends Command
             $cityMap[$ct->state_id . '_' . $ct->slug] = $ct->id;
         }
 
-        // 4. ZIP Codes Import
+        // 4. Postal ZIP Codes Import
         if (!$only || in_array('zips', $only)) {
             $zipsFile = $basePath . '/us_zip_codes.json';
             if (File::exists($zipsFile)) {
+                $checksums['zips'] = hash_file('sha256', $zipsFile);
                 $zipsData = json_decode(File::get($zipsFile), true) ?: [];
                 $this->info("Importing " . count($zipsData) . " US Postal ZIP Codes...");
                 $bar = $this->output->createProgressBar(count($zipsData));
@@ -230,6 +250,7 @@ class ImportLocationsCommand extends Command
         if (!$only || in_array('aliases', $only)) {
             $aliasesFile = $basePath . '/us_location_aliases.json';
             if (File::exists($aliasesFile)) {
+                $checksums['aliases'] = hash_file('sha256', $aliasesFile);
                 $aliasesData = json_decode(File::get($aliasesFile), true) ?: [];
                 $this->info("Importing " . count($aliasesData) . " Metropolitan & Neighborhood Aliases...");
                 $bar = $this->output->createProgressBar(count($aliasesData));
@@ -264,14 +285,31 @@ class ImportLocationsCommand extends Command
             }
         }
 
+        $durationMs = (int) round((microtime(true) - $startTime) * 1000);
+        $totalProcessed = array_sum($stats);
+
+        // Record version history in database
+        LocationImportHistory::create([
+            'dataset_name' => $only ? implode(',', $only) : 'full_usa_suite',
+            'version' => '2026.1',
+            'source_file' => $basePath,
+            'checksum' => md5(json_encode($checksums)),
+            'records_processed' => $totalProcessed,
+            'records_created' => $totalProcessed,
+            'records_updated' => 0,
+            'status' => 'completed',
+            'duration_ms' => $durationMs,
+            'notes' => "Imported {$stats['states']} states/territories, {$stats['counties']} counties, {$stats['cities']} cities, {$stats['zips']} ZIPs, and {$stats['aliases']} aliases.",
+        ]);
+
         $this->newLine();
-        $this->info("✓ Location Dataset Import Completed Successfully!");
+        $this->info("✓ Location Dataset Import Completed Successfully in {$durationMs}ms!");
         $this->table(
             ['Dataset Entity', 'Records Processed / Updated'],
             [
                 ['States & Territories', $stats['states']],
                 ['Counties', $stats['counties']],
-                ['Cities & Places', $stats['cities']],
+                ['Cities & Populated Places', $stats['cities']],
                 ['Postal ZIP Codes', $stats['zips']],
                 ['Location Aliases', $stats['aliases']],
             ]

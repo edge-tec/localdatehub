@@ -2,14 +2,21 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\DependentLocationSelector;
+use App\Livewire\LocationAutocomplete;
 use App\Models\User;
+use App\Modules\Categories\Models\Category;
+use App\Modules\Locations\Jobs\ImportLocationsJob;
 use App\Modules\Locations\Models\City;
 use App\Modules\Locations\Models\Country;
 use App\Modules\Locations\Models\LocationAlias;
+use App\Modules\Locations\Models\LocationImportHistory;
 use App\Modules\Locations\Models\State;
 use App\Modules\Locations\Models\ZipCode;
 use App\Modules\Locations\Services\LocationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Queue;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class LocationEngineTest extends TestCase
@@ -28,15 +35,34 @@ class LocationEngineTest extends TestCase
     }
 
     /**
-     * Test verified location import command processes all entities.
+     * Test verified location import command processes all entities and records history.
      */
     public function test_location_import_command_imports_full_dataset(): void
     {
         $this->assertDatabaseHas('countries', ['code' => 'US']);
-        $this->assertGreaterThanOrEqual(51, State::count());
-        $this->assertGreaterThanOrEqual(30, City::count());
-        $this->assertGreaterThanOrEqual(20, ZipCode::count());
-        $this->assertGreaterThanOrEqual(15, LocationAlias::count());
+        $this->assertGreaterThanOrEqual(56, State::count());
+        $this->assertGreaterThanOrEqual(80, City::count());
+        $this->assertGreaterThanOrEqual(40, ZipCode::count());
+        $this->assertGreaterThanOrEqual(20, LocationAlias::count());
+
+        // Verify version history was logged
+        $history = LocationImportHistory::latest()->first();
+        $this->assertNotNull($history);
+        $this->assertEquals('completed', $history->status);
+        $this->assertGreaterThan(0, $history->records_processed);
+        $this->assertNotEmpty($history->checksum);
+    }
+
+    /**
+     * Test import command with --queue flag dispatches background job.
+     */
+    public function test_import_command_with_queue_flag_dispatches_job(): void
+    {
+        Queue::fake();
+
+        $this->artisan('locations:import --queue')->assertSuccessful();
+
+        Queue::assertPushed(ImportLocationsJob::class);
     }
 
     /**
@@ -48,22 +74,24 @@ class LocationEngineTest extends TestCase
     }
 
     /**
-     * Test all 50 states + DC are present in directory.
+     * Test all 50 states + DC + Territories are present and filterable.
      */
-    public function test_states_directory_includes_all_50_states_and_dc(): void
+    public function test_states_and_territories_representation(): void
     {
-        $states = $this->locationService->getStateDirectory();
+        // 50 states + DC
+        $statesOnly = State::where('is_active', true)->statesOnly()->get();
+        $this->assertCount(51, $statesOnly);
 
-        $this->assertCount(51, $states);
-        $stateCodes = $states->pluck('code')->toArray();
+        // 5 US territories (PR, GU, VI, AS, MP)
+        $territoriesOnly = State::where('is_active', true)->territoriesOnly()->get();
+        $this->assertCount(5, $territoriesOnly);
 
-        $this->assertContains('TX', $stateCodes);
-        $this->assertContains('CA', $stateCodes);
-        $this->assertContains('NY', $stateCodes);
-        $this->assertContains('FL', $stateCodes);
-        $this->assertContains('DC', $stateCodes);
-        $this->assertContains('AK', $stateCodes);
-        $this->assertContains('HI', $stateCodes);
+        $codes = $territoriesOnly->pluck('code')->toArray();
+        $this->assertContains('PR', $codes);
+        $this->assertContains('GU', $codes);
+        $this->assertContains('VI', $codes);
+        $this->assertContains('AS', $codes);
+        $this->assertContains('MP', $codes);
     }
 
     /**
@@ -138,6 +166,30 @@ class LocationEngineTest extends TestCase
     }
 
     /**
+     * Test dependent location selector Livewire component.
+     */
+    public function test_dependent_location_selector_livewire_component(): void
+    {
+        // 1. Initial render without state
+        $test = Livewire::test(DependentLocationSelector::class)
+            ->assertSee('Select State or Territory');
+
+        // 2. Select state 'TX' -> loads Texas cities
+        $test->set('selectedState', 'TX')
+            ->assertSee('Austin')
+            ->assertSee('Dallas')
+            ->assertSee('Houston');
+
+        // 3. Enter 5-digit ZIP '90012' -> auto-resolves to California & Los Angeles
+        $test->set('zipCode', '90012')
+            ->assertSet('selectedState', 'CA');
+
+        $city = City::find($test->get('selectedCityId'));
+        $this->assertNotNull($city);
+        $this->assertEquals('Los Angeles', $city->name);
+    }
+
+    /**
      * Test public API endpoints.
      */
     public function test_public_location_api_endpoints(): void
@@ -174,7 +226,7 @@ class LocationEngineTest extends TestCase
     }
 
     /**
-     * Test web directory and landing pages.
+     * Test web directory and landing pages including category SEO URL.
      */
     public function test_web_location_landing_pages(): void
     {
@@ -196,13 +248,23 @@ class LocationEngineTest extends TestCase
             ->assertSee('Austin, TX')
             ->assertSee('Nearby Cities');
 
+        // Category-specific SEO landing page (/locations/TX/austin/women-seeking-men)
+        $category = Category::firstOrCreate(
+            ['slug' => 'women-seeking-men'],
+            ['name' => 'Women Seeking Men', 'code' => 'W4M', 'is_active' => true]
+        );
+
+        $response = $this->get("/locations/TX/austin/{$category->slug}");
+        $response->assertStatus(200)
+            ->assertSee('Austin, TX');
+
         // Invalid State returns 404
         $response = $this->get('/locations/ZZ');
         $response->assertStatus(404);
     }
 
     /**
-     * Test administrative location management authorization and operations.
+     * Test administrative location management authorization, operations, and history.
      */
     public function test_admin_location_management_workflow(): void
     {
@@ -211,11 +273,17 @@ class LocationEngineTest extends TestCase
 
         // Non-admin receives 403
         $this->actingAs($regularUser)->get('/admin/locations')->assertStatus(403);
+        $this->actingAs($regularUser)->get('/admin/locations/history')->assertStatus(403);
 
         // Admin can view dashboard
         $response = $this->actingAs($adminUser)->get('/admin/locations');
         $response->assertStatus(200)
             ->assertSee('Manage Cities');
+
+        // Admin can view import history
+        $response = $this->actingAs($adminUser)->get('/admin/locations/history');
+        $response->assertStatus(200)
+            ->assertSee('Dataset Import Version History');
 
         // Admin can update city
         $city = City::where('slug', 'austin')->firstOrFail();

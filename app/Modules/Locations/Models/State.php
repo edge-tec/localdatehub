@@ -17,6 +17,7 @@ class State extends Model
         'name',
         'code',
         'fips_code',
+        'is_territory',
         'is_active',
     ];
 
@@ -24,6 +25,7 @@ class State extends Model
     {
         return [
             'is_active' => 'boolean',
+            'is_territory' => 'boolean',
         ];
     }
 
@@ -50,5 +52,15 @@ class State extends Model
     public function listings(): HasMany
     {
         return $this->hasMany(Listing::class);
+    }
+
+    public function scopeStatesOnly($query)
+    {
+        return $query->where('is_territory', false);
+    }
+
+    public function scopeTerritoriesOnly($query)
+    {
+        return $query->where('is_territory', true);
     }
 }

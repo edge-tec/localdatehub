@@ -158,3 +158,4 @@ class ValidateLocationsCommand extends Command
         return Command::SUCCESS;
     }
 }
+

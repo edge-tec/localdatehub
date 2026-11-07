@@ -47,9 +47,10 @@ class LocationWebController extends Controller
     }
 
     /**
-     * City Landing Page (e.g. /locations/TX/austin).
+     * City Landing Page with optional Category filter and distance radius expansion.
+     * e.g. /locations/TX/austin or /locations/TX/austin/women-seeking-men
      */
-    public function showCity(string $stateCode, string $citySlug): View
+    public function showCity(Request $request, string $stateCode, string $citySlug, ?string $categorySlug = null): View
     {
         $city = $this->locationService->getCityWithDetails($stateCode, $citySlug);
         if (!$city) {
@@ -57,20 +58,49 @@ class LocationWebController extends Controller
         }
 
         $categories = $this->categoryService->getActiveCategories();
+        $selectedCategory = null;
+
+        if ($categorySlug) {
+            $selectedCategory = \App\Modules\Categories\Models\Category::where('slug', $categorySlug)->first();
+            if (!$selectedCategory) {
+                abort(404, "Category [{$categorySlug}] not found.");
+            }
+        }
+
+        $radiusMiles = (float) $request->query('radius', 0);
+        $radiusListings = null;
+
+        if ($radiusMiles > 0 && $city->latitude && $city->longitude) {
+            $radiusListings = $this->locationService->findNearbyListings(
+                $city->latitude,
+                $city->longitude,
+                $radiusMiles,
+                $selectedCategory?->id
+            );
+        }
 
         // Load active listings for this city
-        $listings = $city->listings()
+        $query = $city->listings()
             ->active()
             ->with(['category', 'primaryPhoto'])
-            ->latest('published_at')
-            ->paginate(15);
+            ->latest('published_at');
+
+        if ($selectedCategory) {
+            $query->where('category_id', $selectedCategory->id);
+        }
+
+        $listings = $query->paginate(15)->withQueryString();
 
         return view('locations.city', [
             'city' => $city,
             'state' => $city->state,
             'categories' => $categories,
+            'selectedCategory' => $selectedCategory,
             'listings' => $listings,
+            'radiusListings' => $radiusListings,
+            'radiusMiles' => $radiusMiles,
             'nearbyCities' => $city->nearby_cities ?? collect(),
         ]);
     }
 }
+

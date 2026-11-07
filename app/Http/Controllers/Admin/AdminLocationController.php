@@ -60,6 +60,38 @@ class AdminLocationController extends Controller
     }
 
     /**
+     * Display location dataset import version history.
+     */
+    public function importHistory(Request $request): View
+    {
+        $this->authorizeAdmin($request);
+
+        $histories = \App\Modules\Locations\Models\LocationImportHistory::latest()->paginate(20);
+
+        return view('admin.locations.history', [
+            'histories' => $histories,
+        ]);
+    }
+
+    /**
+     * Trigger manual or queued location dataset re-import.
+     */
+    public function triggerImport(Request $request): RedirectResponse
+    {
+        $this->authorizeAdmin($request);
+
+        $useQueue = $request->boolean('use_queue', true);
+
+        if ($useQueue) {
+            \App\Modules\Locations\Jobs\ImportLocationsJob::dispatch();
+            return back()->with('status', 'Location dataset import dispatched to background queue.');
+        }
+
+        \Illuminate\Support\Facades\Artisan::call('locations:import');
+        return back()->with('status', 'Location dataset successfully refreshed from verified sources.');
+    }
+
+    /**
      * Update an existing city record.
      */
     public function updateCity(Request $request, City $city): RedirectResponse
@@ -152,3 +184,4 @@ class AdminLocationController extends Controller
         return back()->with('status', "ZIP code {$validated['zip_code']} linked to {$city->name}.");
     }
 }
+

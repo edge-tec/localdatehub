@@ -13,6 +13,9 @@
             </div>
 
             <div class="flex items-center gap-2">
+                <a href="{{ route('admin.locations.history') }}" class="text-xs text-slate-300 hover:text-white px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 transition">
+                    Audit Import History
+                </a>
                 <a href="{{ route('locations.index') }}" target="_blank" class="text-xs text-slate-400 hover:text-white px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 transition">
                     View Public Directory ↗
                 </a>
@@ -138,3 +141,4 @@
         </div>
     </div>
 </x-layouts.app>
+
