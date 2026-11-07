@@ -188,3 +188,4 @@ class AuthenticatedSessionController extends Controller
         return Str::transliterate(Str::lower($request->input('login')) . '|' . $request->ip());
     }
 }
+

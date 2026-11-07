@@ -17,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withCommands([
+        \App\Modules\Locations\Commands\ImportLocationsCommand::class,
+        \App\Modules\Locations\Commands\ValidateLocationsCommand::class,
+    ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'health.auth' => HealthCheckAuthMiddleware::class,

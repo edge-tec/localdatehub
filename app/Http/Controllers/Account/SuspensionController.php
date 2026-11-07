@@ -59,3 +59,4 @@ class SuspensionController extends Controller
         return back()->with('status', 'Your appeal has been submitted to the compliance team for review.');
     }
 }
+

@@ -16,8 +16,14 @@
             <!-- Desktop Navigation Links -->
             <nav class="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-300">
                 <a href="{{ url('/') }}" class="hover:text-white transition">Browse Personals</a>
+                <a href="{{ route('locations.index') }}" class="hover:text-white transition flex items-center gap-1">
+                    <svg class="w-4 h-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Locations
+                </a>
                 <a href="#categories" class="hover:text-white transition">Categories</a>
-                <a href="#date-spots" class="hover:text-white transition">Date Spots</a>
                 <a href="{{ url('/health') }}" class="hover:text-white transition">System Health</a>
                 <a href="#safety-standards" class="text-rose-400 hover:text-rose-300 transition flex items-center space-x-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,8 +75,8 @@
     <!-- Mobile Drawer -->
     <div x-show="mobileMenuOpen" class="md:hidden border-b border-slate-800 bg-slate-900 px-4 pt-2 pb-4 space-y-2">
         <a href="{{ url('/') }}" class="block px-3 py-2 text-base font-medium text-slate-300 hover:bg-slate-800 rounded-md">Browse Personals</a>
+        <a href="{{ route('locations.index') }}" class="block px-3 py-2 text-base font-medium text-slate-300 hover:bg-slate-800 rounded-md">US Locations Directory</a>
         <a href="#categories" class="block px-3 py-2 text-base font-medium text-slate-300 hover:bg-slate-800 rounded-md">Categories</a>
-        <a href="#date-spots" class="block px-3 py-2 text-base font-medium text-slate-300 hover:bg-slate-800 rounded-md">Date Spots</a>
         <a href="{{ url('/health') }}" class="block px-3 py-2 text-base font-medium text-slate-300 hover:bg-slate-800 rounded-md">System Health</a>
         <a href="#safety-standards" class="block px-3 py-2 text-base font-medium text-rose-400 hover:bg-slate-800 rounded-md">Trust & Safety (18+)</a>
         <div class="pt-2 border-t border-slate-800 flex flex-col space-y-2">

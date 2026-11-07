@@ -3,11 +3,14 @@
 use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Account\SecurityController;
 use App\Http\Controllers\Account\SuspensionController;
+use App\Http\Controllers\Admin\AdminLocationController;
+use App\Http\Controllers\Api\LocationApiController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\LocationWebController;
 use App\Modules\Categories\Services\CategoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -112,4 +115,36 @@ Route::middleware('auth')->group(function () {
         // Self-Service Account Deletion (GDPR / CCPA)
         Route::delete('/', [SecurityController::class, 'destroy'])->name('destroy');
     });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Geographic Location Engine Routes
+|--------------------------------------------------------------------------
+*/
+
+// Public Web Location Directory & Landing Pages
+Route::prefix('locations')->name('locations.')->group(function () {
+    Route::get('/', [LocationWebController::class, 'index'])->name('index');
+    Route::get('/{stateCode}', [LocationWebController::class, 'showState'])->name('state');
+    Route::get('/{stateCode}/{citySlug}', [LocationWebController::class, 'showCity'])->name('city');
+});
+
+// Location API Endpoints
+Route::prefix('api/locations')->name('api.locations.')->group(function () {
+    Route::get('/states', [LocationApiController::class, 'indexStates'])->name('states');
+    Route::get('/states/{stateCode}/cities', [LocationApiController::class, 'stateCities'])->name('state.cities');
+    Route::get('/cities/{cityId}', [LocationApiController::class, 'cityDetails'])->name('city.details');
+    Route::get('/zip/{zip}', [LocationApiController::class, 'lookupZip'])->name('zip');
+    Route::get('/autocomplete', [LocationApiController::class, 'autocomplete'])->name('autocomplete');
+    Route::get('/nearby', [LocationApiController::class, 'nearby'])->name('nearby');
+});
+
+// Administrative Location Management
+Route::middleware('auth')->prefix('admin/locations')->name('admin.locations.')->group(function () {
+    Route::get('/', [AdminLocationController::class, 'index'])->name('index');
+    Route::put('/cities/{city}', [AdminLocationController::class, 'updateCity'])->name('updateCity');
+    Route::post('/cities/{city}/aliases', [AdminLocationController::class, 'storeAlias'])->name('storeAlias');
+    Route::delete('/aliases/{alias}', [AdminLocationController::class, 'destroyAlias'])->name('destroyAlias');
+    Route::post('/cities/{city}/zips', [AdminLocationController::class, 'storeZip'])->name('storeZip');
 });

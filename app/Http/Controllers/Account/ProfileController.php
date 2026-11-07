@@ -98,3 +98,4 @@ class ProfileController extends Controller
         return back()->with('status', 'Profile photo uploaded and sanitized (EXIF metadata stripped).');
     }
 }
+

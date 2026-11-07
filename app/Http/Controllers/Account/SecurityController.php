@@ -148,3 +148,4 @@ class SecurityController extends Controller
         return redirect()->route('home')->with('status', 'Your account has been deleted.');
     }
 }
+

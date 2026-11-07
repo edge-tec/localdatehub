@@ -36,3 +36,4 @@ class EnsureAgeAssurance
         return $next($request);
     }
 }
+
