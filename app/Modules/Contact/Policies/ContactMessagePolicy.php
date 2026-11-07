@@ -37,3 +37,4 @@ class ContactMessagePolicy
         return $user->id === $message->recipient_id;
     }
 }
+

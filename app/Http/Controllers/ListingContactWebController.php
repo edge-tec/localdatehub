@@ -96,3 +96,4 @@ class ListingContactWebController extends Controller
         return redirect()->back()->with('status', $msg);
     }
 }
+

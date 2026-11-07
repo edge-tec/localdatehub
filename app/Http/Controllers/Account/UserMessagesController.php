@@ -125,3 +125,4 @@ class UserMessagesController extends Controller
         return redirect()->route('account.messages.index')->with('success', 'Inquiry deleted from your inbox.');
     }
 }
+

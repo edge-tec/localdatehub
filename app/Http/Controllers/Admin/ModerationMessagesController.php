@@ -83,3 +83,4 @@ class ModerationMessagesController extends Controller
         return $this->dismiss($message);
     }
 }
+
