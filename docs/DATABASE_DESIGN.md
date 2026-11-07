@@ -1,54 +1,88 @@
-# Database Design & Schema Specification: LocalDateHub
+# Database Architecture & Entity-Relationship Specification: LocalDateHub
 
-**Author:** Principal Software Architect  
+**Author:** Principal Software Architect & Database Engineer  
 **Date:** November 2026  
-**Status:** Approved Schema Blueprint  
+**Status:** Approved Master Schema Specification  
+**Version:** 2.0.0 (Phase 02 Implementation)  
 **Target RDBMS:** MySQL 8.0+ / 8.4+ (InnoDB Engine)  
-**Character Set & Collation:** `utf8mb4` / `utf8mb4_unicode_ci`
+**Charset & Collation:** `utf8mb4` / `utf8mb4_unicode_ci`
 
 ---
 
-## 1. Database Architecture & Principles
+## 1. Architectural Principles
 
-The database schema for **LocalDateHub** is designed for high concurrent throughput, spatial GIS performance, strict relational integrity, and total location privacy.
+LocalDateHub's database architecture is designed for a high-volume, location-based personal classifieds platform in the United States. It adheres to the following foundational principles:
 
-### Key Database Standards
-1. **Spatial Coordinates:** Spatial data is stored using the OpenGIS standard via MySQL `POINT` data types with `SRID 4326` (WGS 84 coordinate reference system). Spatial indexes (`SPATIAL INDEX`) are utilized for fast bounding-box queries.
-2. **Compound Indexing for High-Speed Feeds:** Swipe cards, mutual match calculations, and chat histories utilize targeted composite indexes to avoid table scans.
-3. **Data Anonymization & Soft Deletes:** Sensitive interactions support graceful soft-deletion, and user erasure triggers cascades to preserve data privacy according to GDPR standards.
-4. **Relational Constraints:** Strict foreign keys with cascading deletions where appropriate (e.g., deleting a user cascades to profile, photos, and preferences; interactions and reports are preserved/anonymized for safety auditing).
+1. **Normalized & Relational Integrity:** Full foreign key constraints with explicit referential actions (`cascadeOnDelete`, `nullOnDelete`).
+2. **Encrypted Field-Level Privacy:** Sensitive contact details (message contents, unmasked phone numbers, external handles) are encrypted at rest using AES-256-CBC via Laravel's `encrypted` cast.
+3. **Anti-Triangulation Geolocation:** Dual coordinate model with raw coordinates (`latitude`, `longitude`) strictly isolated from public views, and fuzzed coordinates (`fuzzed_latitude`, `fuzzed_longitude`) offset by 300m–800m.
+4. **Dynamic Category & Attribute Engine:** EAV-hybrid model where categories and attributes are 100% database-driven (never hardcoded), allowing administrators to configure custom fields per personal category (M4W, W4M, M4M, W4W, Activity Partners, etc.).
+5. **Auditing & Moderation Records:** Immutable moderation logs, administrative action history, listing revisions, and status progression logs.
 
 ---
 
-## 2. Entity-Relationship Diagram (ERD)
+## 2. Master Entity-Relationship Diagram (ERD)
 
 ```mermaid
 erDiagram
     USERS ||--o| USER_PROFILES : "has one"
-    USERS ||--o{ USER_PHOTOS : "has many"
     USERS ||--o| USER_PREFERENCES : "has one"
-    USERS ||--o{ INTERACTIONS : "initiates"
-    USERS ||--o{ INTERACTIONS : "receives"
-    USERS ||--o{ CONNECTIONS : "participates in"
+    USERS ||--o{ AGE_ASSURANCES : "submits"
+    USERS ||--o{ USER_CONSENTS : "grants"
     USERS ||--o{ USER_BLOCKS : "blocks"
-    USERS ||--o{ USER_REPORTS : "files report"
-    USERS ||--o{ USER_VERIFICATIONS : "submits"
-    
-    CONNECTIONS ||--o| CONVERSATIONS : "initiates"
-    CONVERSATIONS ||--o{ MESSAGES : "contains"
-    CONVERSATIONS ||--o{ DATE_PROPOSALS : "links"
-    
-    DATE_SPOTS ||--o{ DATE_PROPOSALS : "referenced in"
+    USERS ||--o{ USER_ROLES : "assigned"
+    ROLES ||--o{ USER_ROLES : "has"
+    ROLES ||--o{ ROLE_PERMISSIONS : "holds"
+    PERMISSIONS ||--o{ ROLE_PERMISSIONS : "granted to"
+
+    COUNTRIES ||--o{ STATES : "contains"
+    STATES ||--o{ COUNTIES : "contains"
+    STATES ||--o{ CITIES : "contains"
+    CITIES ||--o{ ZIP_CODES : "contains"
+    CITIES ||--o{ LOCATION_ALIASES : "has aliases"
+
+    CATEGORIES ||--o{ CATEGORIES : "subcategories"
+    CATEGORIES ||--o{ CATEGORY_ATTRIBUTES : "defines"
+    CATEGORY_ATTRIBUTES ||--o{ CATEGORY_ATTRIBUTE_OPTIONS : "has options"
+
+    USERS ||--o{ LISTINGS : "authors"
+    CATEGORIES ||--o{ LISTINGS : "classifies"
+    STATES ||--o{ LISTINGS : "located in"
+    CITIES ||--o{ LISTINGS : "located in"
+
+    LISTINGS ||--o| LISTING_LOCATIONS : "spatial coordinates"
+    LISTINGS ||--o{ LISTING_MEDIA : "photos"
+    LISTINGS ||--o| LISTING_CONTACTS : "contact prefs"
+    LISTINGS ||--o{ LISTING_ATTRIBUTES : "values"
+    LISTINGS ||--o{ LISTING_REVISIONS : "revision history"
+    LISTINGS ||--o{ LISTING_STATUS_HISTORY : "lifecycle transitions"
+    LISTINGS ||--o{ LISTING_FAVORITES : "saved by"
+    LISTINGS ||--o{ LISTING_ANALYTICS : "daily metrics"
+
+    LISTINGS ||--o{ CONTACT_MESSAGES : "receives inquiries"
+    USERS ||--o{ CONTACT_MESSAGES : "sends / receives"
+
+    USERS ||--o{ CONTENT_REPORTS : "submits"
+    USERS ||--o{ USER_SUSPENSIONS : "receives"
+    USER_SUSPENSIONS ||--o{ APPEAL_REQUESTS : "appeals"
+
+    PRICING_PLANS ||--o{ SUBSCRIPTIONS : "subscribes to"
+    PRICING_PLANS ||--o{ FEATURED_LISTINGS : "features"
+    USERS ||--o{ PAYMENT_TRANSACTIONS : "pays"
+    PAYMENT_TRANSACTIONS ||--o{ REFUNDS : "refunds"
 
     USERS {
         bigint id PK
         string name
+        string username UK
         string email UK
         string phone UK
         string password
-        enum role "user, moderator, admin"
-        boolean is_active
-        boolean is_verified
+        string role
+        string account_status
+        boolean is_age_verified
+        boolean is_identity_verified
+        boolean two_factor_enabled
         timestamp email_verified_at
         timestamp phone_verified_at
         timestamp last_active_at
@@ -59,281 +93,165 @@ erDiagram
     USER_PROFILES {
         bigint id PK
         bigint user_id FK,UK
+        string display_name
         text bio
-        enum gender "male, female, non_binary, other"
-        enum interested_in "men, women, everyone"
+        string gender
+        string seeking
         date birthdate
-        enum relationship_intent "dating, serious, casual, friendship"
-        int height_cm
-        string occupation
-        string education
         string city
-        point location "SRID 4326"
-        point location_fuzzed "SRID 4326"
-        boolean hide_distance
+        string state_code
+        string zip_code
+        string avatar_path
+        json social_handles
+        boolean hide_location_details
         boolean hide_age
-        timestamps created_at_updated_at
     }
 
-    USER_PHOTOS {
+    CITIES {
+        bigint id PK
+        bigint state_id FK
+        string name
+        string slug
+        decimal latitude
+        decimal longitude
+        int population
+        boolean is_popular
+        boolean is_active
+    }
+
+    CATEGORIES {
+        bigint id PK
+        bigint parent_id FK
+        string name
+        string slug UK
+        string code
+        text description
+        string icon
+        int display_order
+        boolean is_active
+        boolean is_featured
+    }
+
+    LISTINGS {
         bigint id PK
         bigint user_id FK
-        string file_path
-        string thumbnail_path
-        boolean is_primary
-        tinyint display_order
-        enum moderation_status "pending, approved, rejected"
-        timestamps created_at_updated_at
-    }
-
-    USER_PREFERENCES {
-        bigint id PK
-        bigint user_id FK,UK
-        tinyint min_age
-        tinyint max_age
-        int max_distance_km
-        json preferred_genders
-        boolean verified_only
-        timestamps created_at_updated_at
-    }
-
-    INTERACTIONS {
-        bigint id PK
-        bigint user_id FK
-        bigint target_user_id FK
-        enum action "like, pass, superlike"
-        timestamp created_at
-    }
-
-    CONNECTIONS {
-        bigint id PK
-        bigint user_one_id FK
-        bigint user_two_id FK
-        enum status "active, unmatched, blocked"
-        timestamp matched_at
-        timestamps created_at_updated_at
-    }
-
-    CONVERSATIONS {
-        bigint id PK
-        bigint connection_id FK,UK
-        timestamp last_message_at
-        timestamps created_at_updated_at
-    }
-
-    MESSAGES {
-        bigint id PK
-        bigint conversation_id FK
-        bigint sender_id FK
-        bigint recipient_id FK
-        enum message_type "text, image, date_proposal"
-        text content
-        json metadata
-        boolean is_read
-        timestamp read_at
-        timestamps created_at_updated_at
+        bigint category_id FK
+        bigint state_id FK
+        bigint city_id FK
+        bigint zip_code_id FK
+        string title
+        string slug UK
+        text description
+        int poster_age
+        string poster_gender
+        string intent
+        string status
+        boolean is_featured
+        boolean is_verified_poster
+        int view_count
+        int reply_count
+        timestamp published_at
+        timestamp expires_at
         softDeletes deleted_at
     }
 
-    DATE_SPOTS {
+    CONTACT_MESSAGES {
         bigint id PK
-        string name
-        string slug UK
-        string category "cafe, restaurant, bar, park, activity"
-        text description
-        string address
-        string city
-        point location "SRID 4326"
-        string phone
-        string website
-        tinyint price_level "1 to 4"
-        decimal rating
-        boolean is_verified
-        boolean is_active
-        timestamps created_at_updated_at
-    }
-
-    DATE_PROPOSALS {
-        bigint id PK
-        bigint conversation_id FK
+        bigint listing_id FK
         bigint sender_id FK
-        bigint date_spot_id FK
-        datetime proposed_time
-        enum status "pending, accepted, declined, cancelled"
-        text note
-        timestamps created_at_updated_at
-    }
-
-    USER_BLOCKS {
-        bigint id PK
-        bigint blocker_id FK
-        bigint blocked_id FK
-        string reason
-        timestamp created_at
-    }
-
-    USER_REPORTS {
-        bigint id PK
-        bigint reporter_id FK
-        bigint reported_id FK
-        enum reason "harassment, fake_profile, scam, inappropriate_content, safety_hazard, other"
-        text details
-        json evidence_urls
-        enum status "pending, investigating, resolved, dismissed"
-        text resolution_notes
-        bigint resolved_by FK
-        timestamps created_at_updated_at
-    }
-
-    USER_VERIFICATIONS {
-        bigint id PK
-        bigint user_id FK
-        string selfie_path
-        string gesture_code
-        enum status "pending, approved, rejected"
-        text reviewer_notes
-        bigint reviewed_by FK
-        timestamp reviewed_at
-        timestamps created_at_updated_at
+        bigint recipient_id FK
+        string sender_name
+        text sender_email_encrypted
+        text sender_phone_encrypted
+        string subject
+        text message_encrypted
+        boolean is_read
+        boolean is_flagged
+        softDeletes deleted_at
     }
 ```
 
 ---
 
-## 3. Data Dictionary & Detailed Table Definitions
+## 3. Data Dictionary: The 20 Subsystems
 
-### 3.1 `users`
-Core authentication and account status table.
+### 3.1 Users and Accounts (`users`)
+Core identity, credentials, role tiering, and security status.
+- `username`: Unique handle for privacy.
+- `role`: `user`, `advertiser`, `moderator`, `admin`.
+- `account_status`: `active`, `suspended`, `pending_verification`, `closed`.
+- `is_age_verified`: 18+ verification badge.
+- `two_factor_enabled` / `two_factor_secret`: Privileged MFA support.
 
-| Column | Type | Constraints / Modifiers | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | `BIGINT UNSIGNED` | `AUTO_INCREMENT, PRIMARY KEY` | Unique account identifier. |
-| `name` | `VARCHAR(100)` | `NOT NULL` | Display name. |
-| `email` | `VARCHAR(255)` | `NOT NULL, UNIQUE` | Normalized login email. |
-| `phone` | `VARCHAR(30)` | `NULL, UNIQUE` | International format (+E.164) phone number. |
-| `password` | `VARCHAR(255)` | `NOT NULL` | Argon2id / Bcrypt password hash. |
-| `role` | `ENUM('user', 'moderator', 'admin')` | `DEFAULT 'user', NOT NULL` | Access tier. |
-| `is_active` | `BOOLEAN` | `DEFAULT TRUE, NOT NULL` | Account suspension flag. |
-| `is_verified` | `BOOLEAN` | `DEFAULT FALSE, NOT NULL` | Badge indicator for selfie verification. |
-| `email_verified_at` | `TIMESTAMP` | `NULL` | Timestamp of email confirmation. |
-| `phone_verified_at` | `TIMESTAMP` | `NULL` | Timestamp of OTP confirmation. |
-| `last_active_at` | `TIMESTAMP` | `NULL, INDEX` | Presence and feed sorting freshness indicator. |
-| `created_at` / `updated_at` | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP` | Standard auditing timestamps. |
-| `deleted_at` | `TIMESTAMP` | `NULL` | Soft-delete timestamp. |
+### 3.2 User Profiles & Preferences (`user_profiles`, `user_preferences`)
+- `user_profiles`: User bio, gender, birthdate, locality, avatar, and privacy toggles.
+- `user_preferences`: Notification settings, search defaults, contact permissions.
 
-### 3.2 `user_profiles`
-Detailed profile attributes, dating lifestyle, and spatial coordinates.
+### 3.3 Age Assurance & Consent Records (`age_assurances`, `user_consents`, `user_blocks`)
+- `age_assurances`: Records method of age assurance (self-declaration, government ID, payment card auth, token), verification hashes, and reviewer metadata.
+- `user_consents`: Timestamped, IP-stamped audit records of adult terms acceptance and privacy consent.
+- `user_blocks`: Two-way user blocking suppressing contact and listing interactions.
 
-| Column | Type | Constraints / Modifiers | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | `BIGINT UNSIGNED` | `AUTO_INCREMENT, PRIMARY KEY` | Profile identifier. |
-| `user_id` | `BIGINT UNSIGNED` | `NOT NULL, UNIQUE, FK -> users.id (CASCADE)` | Associated user. |
-| `bio` | `TEXT` | `NULL` | User personal statement (max 1000 chars). |
-| `gender` | `ENUM('male', 'female', 'non_binary', 'other')` | `NOT NULL` | Gender identity. |
-| `interested_in`| `ENUM('men', 'women', 'everyone')` | `NOT NULL` | Dating preference filter. |
-| `birthdate` | `DATE` | `NOT NULL` | Used to compute real-time age (18+ enforced). |
-| `relationship_intent` | `ENUM('dating', 'serious', 'casual', 'friendship')` | `NOT NULL` | Intent badge. |
-| `height_cm` | `SMALLINT UNSIGNED` | `NULL` | Height in centimeters. |
-| `occupation` | `VARCHAR(120)` | `NULL` | Job title or field. |
-| `education` | `VARCHAR(120)` | `NULL` | College or degree. |
-| `city` | `VARCHAR(100)` | `NOT NULL` | Locality name (e.g., "Austin, TX"). |
-| `location` | `POINT` | `NOT NULL, SRID 4326, SPATIAL INDEX` | Internal precise GPS coordinates (Latitude, Longitude). |
-| `location_fuzzed` | `POINT` | `NOT NULL, SRID 4326` | Obfuscated coordinates for radius calculations. |
-| `hide_distance`| `BOOLEAN` | `DEFAULT FALSE` | Privacy toggle to suppress distance rendering. |
-| `hide_age` | `BOOLEAN` | `DEFAULT FALSE` | Privacy toggle to suppress age display. |
+### 3.4 US Geographic Location Engine (`countries`, `states`, `counties`, `cities`, `zip_codes`, `location_aliases`)
+- Complete coverage of all 50 US states + District of Columbia.
+- Cities and populated places with verified coordinates, population rank, and timezone.
+- ZIP codes mapped to cities without rigid 1:1 assumptions.
+- Location aliases supporting colloquial metro areas ("Silicon Valley", "DFW Metro", "Manhattan").
 
-### 3.3 `interactions`
-High-volume interaction log powering swipe decks and matching.
+### 3.5 Dynamic Category Engine (`categories`, `category_attributes`, `category_attribute_options`)
+- Hierarchical categories (parent/subcategories).
+- Pre-seeded with M4W, W4M, M4M, W4W, LGBTQ+ Connections, Activity Partners, Casual Dating, Serious Dating, Friendship.
+- Dynamic attributes per category with field types (select, radio, text, boolean, multiselect).
 
-| Column | Type | Constraints / Modifiers | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | `BIGINT UNSIGNED` | `AUTO_INCREMENT, PRIMARY KEY` | Interaction identifier. |
-| `user_id` | `BIGINT UNSIGNED` | `NOT NULL, FK -> users.id (CASCADE)` | User performing the action. |
-| `target_user_id` | `BIGINT UNSIGNED` | `NOT NULL, FK -> users.id (CASCADE)` | User being evaluated. |
-| `action` | `ENUM('like', 'pass', 'superlike')` | `NOT NULL` | Action taken. |
-| `created_at` | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP, INDEX` | Timestamp of swipe. |
+### 3.6 Listings & Listing Locations (`listings`, `listing_locations`)
+- Full lifecycle: `draft` -> `pending_review` -> `active` -> `expired` -> `suspended` / `archived`.
+- Spatial bounding and anti-triangulation fuzzing (`fuzzed_latitude`, `fuzzed_longitude`).
+- Integrated view, reply, and favorite counters.
 
-> **Key Index:** `UNIQUE INDEX uq_user_target (user_id, target_user_id)` ensures a user cannot swipe twice on the same candidate.  
-> **Lookup Index:** `INDEX idx_target_action (target_user_id, action)` allows instant lookup for incoming likes during reciprocal match checks.
+### 3.7 Media & Contact Preferences (`listing_media`, `listing_contacts`, `listing_attributes`)
+- `listing_media`: Photos with WebP format, dimensions, primary flag, and moderation state.
+- `listing_contacts`: Masked email relay address, encrypted phone, encrypted external handle, and contact instructions.
+- `listing_attributes`: Values for dynamic category attributes (EAV pattern).
 
-### 3.4 `connections` & `conversations`
-Mutual match pairings and chat threads.
+### 3.8 Lifecycle & Analytics (`listing_revisions`, `listing_status_history`, `listing_favorites`, `listing_analytics`)
+- Revisions: Snapshot of prior titles and descriptions on edit.
+- Status history: Records state transitions (`from_status`, `to_status`, `reason`).
+- Analytics: Daily aggregated metrics (`views`, `unique_visitors`, `contact_clicks`, `favorite_adds`).
 
-- **`connections`**:
-  - `user_one_id` and `user_two_id` with check constraint `user_one_id < user_two_id` ensuring a single canonical representation of any matched pair.
-  - Unique composite index `(user_one_id, user_two_id)`.
-  - `status`: `ENUM('active', 'unmatched', 'blocked')`.
-- **`conversations`**:
-  - `connection_id` (Unique FK to `connections.id`).
-  - `last_message_at` (Indexed for mailbox ordering).
+### 3.9 Contact Messages (`contact_messages`)
+- In-platform private messaging with field-level encryption for sender email, sender phone, and message body.
 
-### 3.5 `messages`
-Real-time chat messages with encryption metadata.
+### 3.10 Moderation & Compliance (`moderation_rules`, `moderation_queue`, `moderation_actions`, `content_reports`, `user_suspensions`, `appeal_requests`)
+- Content reporting across 6 standardized offense codes (commercial solicitation, exploitation, harassment, fraud, non-consensual media).
+- Administrative actions, suspension tracking, and user appeal request workflow.
 
-| Column | Type | Constraints / Modifiers | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | `BIGINT UNSIGNED` | `AUTO_INCREMENT, PRIMARY KEY` | Message identifier. |
-| `conversation_id` | `BIGINT UNSIGNED` | `NOT NULL, FK -> conversations.id (CASCADE)` | Chat thread. |
-| `sender_id` | `BIGINT UNSIGNED` | `NOT NULL, FK -> users.id (CASCADE)` | Author. |
-| `recipient_id` | `BIGINT UNSIGNED` | `NOT NULL, FK -> users.id (CASCADE)` | Intended recipient. |
-| `message_type` | `ENUM('text', 'image', 'date_proposal')` | `DEFAULT 'text', NOT NULL` | Type of payload. |
-| `content` | `TEXT` | `NOT NULL` | Ciphertext or sanitized message body. |
-| `metadata` | `JSON` | `NULL` | Dimensions, proposal ID, or thumbnail URL. |
-| `is_read` | `BOOLEAN` | `DEFAULT FALSE, INDEX` | Read status. |
-| `read_at` | `TIMESTAMP` | `NULL` | Receipt timestamp. |
-| `created_at` | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP, INDEX` | Chronological sort index. |
-| `deleted_at` | `TIMESTAMP` | `NULL` | Soft-delete flag (per user or global). |
+### 3.11 Admin & RBAC (`roles`, `permissions`, `role_permissions`, `user_roles`, `admin_audit_logs`)
+- Granular permission matrix across Super Admin, Administrator, Senior Moderator, Listing Moderator, Compliance Officer, and Support.
+- Tamper-evident admin audit trail capturing before/after JSON states, admin user ID, IP address, and timestamp.
 
-### 3.6 `date_spots`
-Curated venue directory for safe in-person meetups.
+### 3.12 Monetization & Payments (`pricing_plans`, `subscriptions`, `featured_listings`, `payment_transactions`, `payment_webhooks`, `coupons`, `refunds`)
+- Pricing plans for free listings, featured city upgrades, metro spotlight, and verified memberships.
+- Idempotent payment webhook logs and transaction tracking.
 
-| Column | Type | Constraints / Modifiers | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | `BIGINT UNSIGNED` | `AUTO_INCREMENT, PRIMARY KEY` | Spot identifier. |
-| `name` | `VARCHAR(150)` | `NOT NULL` | Venue name. |
-| `slug` | `VARCHAR(180)` | `NOT NULL, UNIQUE` | SEO-friendly URL slug. |
-| `category` | `VARCHAR(50)` | `NOT NULL, INDEX` | e.g., 'cafe', 'rooftop', 'cocktail_bar', 'museum'. |
-| `description` | `TEXT` | `NULL` | Ambience, best time to visit, vibe. |
-| `address` | `VARCHAR(255)` | `NOT NULL` | Street address. |
-| `city` | `VARCHAR(100)` | `NOT NULL, INDEX` | City. |
-| `location` | `POINT` | `NOT NULL, SRID 4326, SPATIAL INDEX` | Venue GIS coordinates. |
-| `price_level` | `TINYINT UNSIGNED`| `DEFAULT 2` | 1 ($), 2 ($$), 3 ($$$), 4 ($$$$). |
-| `rating` | `DECIMAL(3, 2)` | `DEFAULT 5.00` | Community rating. |
-| `is_verified` | `BOOLEAN` | `DEFAULT TRUE` | Platform-approved safe spot. |
-| `is_active` | `BOOLEAN` | `DEFAULT TRUE` | Operating status. |
+### 3.13 Notifications & Templates (`email_templates`, `notifications_log`)
+- Configurable HTML and plaintext email templates with dynamic placeholder variables.
+- Audit log of dispatched notifications.
+
+### 3.14 SEO, CMS & Settings (`seo_metas`, `cms_pages`, `system_settings`)
+- Dynamic meta tags, OpenGraph imagery, and structured data specifications.
+- CMS static pages (Terms of Service, Privacy Policy, Community Standards, Anti-Trafficking Policy).
+- Global key-value system settings.
 
 ---
 
-## 4. Indexing & Query Optimization Strategy
+## 4. Encryption & Retention Policies
 
-1. **Nearby Profile Query (GIS Spatial Bounding + Spherical Filtering):**
-   ```sql
-   -- Step 1: Rapid Bounding Box Filter via Spatial Index
-   -- Step 2: Exact Distance Calculation with Distance Filter
-   SELECT 
-       u.id, 
-       up.city, 
-       ROUND(ST_Distance_Sphere(up.location_fuzzed, ST_GeomFromText('POINT(lon lat)', 4326)) / 1000, 1) AS distance_km
-   FROM users u
-   JOIN user_profiles up ON u.id = up.user_id
-   WHERE u.is_active = TRUE
-     AND u.id NOT IN (SELECT target_user_id FROM interactions WHERE user_id = :current_user_id)
-     AND u.id NOT IN (SELECT blocked_id FROM user_blocks WHERE blocker_id = :current_user_id)
-     AND ST_Distance_Sphere(up.location_fuzzed, ST_GeomFromText('POINT(lon lat)', 4326)) <= :max_distance_meters
-   ORDER BY u.last_active_at DESC
-   LIMIT 30;
-   ```
-
-2. **Mutual Match Detection (Atomic Evaluation):**
-   ```sql
-   -- Fast index check on reciprocal like
-   SELECT id FROM interactions 
-   WHERE user_id = :target_user_id 
-     AND target_user_id = :current_user_id 
-     AND action IN ('like', 'superlike')
-   LIMIT 1;
-   ```
-
-3. **Partitioning Roadmap:**
-   - At high scale (> 10 million interactions), the `interactions` table will be partitioned by hash on `user_id` or by range on `created_at` (monthly partitions) to optimize storage engine indexing.
-
+| Data Element | Table | Storage Mechanism | Retention & Deletion Policy |
+| :--- | :--- | :--- | :--- |
+| **User Passwords** | `users` | Argon2id Hash | Permanent until updated or account deleted. |
+| **Contact Message Content** | `contact_messages` | AES-256-CBC (`encrypted` cast) | Retained for 90 days; deleted on user request or account deletion. |
+| **Sender Email & Phone** | `contact_messages` | AES-256-CBC (`encrypted` cast) | Masked in UI; purged upon conversation deletion. |
+| **External Contact Handles**| `listing_contacts`| AES-256-CBC (`encrypted` cast) | Purged when listing expires or is deleted. |
+| **Audit Logs** | `admin_audit_logs` | Plaintext JSON | Immutable; retained for 7 years for compliance. |
+| **Safety Reports** | `content_reports` | Plaintext | Retained for 3 years for legal & compliance audits. |
+| **Expired Listings** | `listings` | Soft-deleted | Auto-archived after 30 days of expiration. |
