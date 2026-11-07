@@ -7,3 +7,4 @@
     </svg>
     <span>{{ $text }}</span>
 </div>
+

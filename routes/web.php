@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\AdminLocationController;
 use App\Http\Controllers\Admin\ModerationListingController;
 use App\Http\Controllers\Api\CategoryApiController;
 use App\Http\Controllers\Api\LocationApiController;
+use App\Http\Controllers\Api\SearchApiController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\PasswordResetController;
@@ -158,6 +159,11 @@ Route::prefix('api/locations')->name('api.locations.')->group(function () {
     Route::get('/zip/{zip}', [LocationApiController::class, 'lookupZip'])->name('zip');
     Route::get('/autocomplete', [LocationApiController::class, 'autocomplete'])->name('autocomplete');
     Route::get('/nearby', [LocationApiController::class, 'nearby'])->name('nearby');
+});
+
+// Search API Endpoints
+Route::prefix('api/search')->name('api.search.')->group(function () {
+    Route::get('/autocomplete', [SearchApiController::class, 'autocomplete'])->name('autocomplete');
 });
 
 // Administrative Location Management

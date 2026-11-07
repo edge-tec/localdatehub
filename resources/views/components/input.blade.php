@@ -31,3 +31,4 @@
         <p class="text-xs text-rose-400 font-medium">{{ $error }}</p>
     @endif
 </div>
+

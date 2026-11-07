@@ -37,7 +37,8 @@ flowchart LR
 | **Phase 05** | Dynamic Personal Category Engine | Hierarchical personal categories, dynamic attribute schema engine, safe deletion with listing reassignment, admin CRUD & live preview. | 13 feature tests passing, 63 total suite tests passing. ✅ **[COMPLETED]** |
 | **Phase 06** | Complete Listing Management Engine | 12-step Livewire listing wizard, autosave/resume, duplicate hash detection, FOSTA-SESTA safety rules, media moderation & EXIF stripping, lifecycle controls. | 16 feature tests passing, 79 total suite tests passing. ✅ **[COMPLETED]** |
 | **Phase 07** | Public Website UI & Search | Modern, accessible classified portal with 18 pages/sections, multi-parameter search & filtering, live homepage data binding, responsive navbar/footer, encrypted support forms, and custom error pages. | 12 feature tests passing, 91 total suite tests passing. ✅ **[COMPLETED]** |
-| **Phase 08** | Protected Contact & Masked Messaging | Encrypted member-to-member inquiries, email relay masking, reply forms, rate limiting, and spam protection. | In queue. |
+| **Phase 08** | Advanced Classified Search Engine | Multi-parameter search across all 11 criteria, Meilisearch with transparent database fallback, ZIP geocoding & nearby radius, category counts, transparent ranking, queued indexing jobs, and autocomplete API. | 12 feature tests passing, 103 total suite tests passing. ✅ **[COMPLETED]** |
+| **Phase 09** | Protected Contact & Masked Messaging Engine | Encrypted member inquiries, masked relay emails, reply forms, rate limiting, anti-spam safeguards, poster inbox. | In queue. |
 
 ---
 

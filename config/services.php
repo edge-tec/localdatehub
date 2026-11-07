@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'meilisearch' => [
+        'host' => env('MEILISEARCH_HOST'),
+        'key' => env('MEILISEARCH_KEY'),
+        'index' => env('MEILISEARCH_INDEX', 'listings'),
+        'timeout' => (float) env('MEILISEARCH_TIMEOUT', 2.0),
+    ],
+
 ];

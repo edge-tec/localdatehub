@@ -7,11 +7,17 @@ use App\Modules\Listings\Models\Listing;
 use App\Modules\Locations\DTOs\CoordinateDTO;
 use App\Modules\Locations\Services\LocationService;
 use App\Modules\Search\DTOs\SearchFilterDTO;
+use App\Modules\Search\Drivers\DatabaseSearchDriver;
+use App\Modules\Search\Drivers\MeilisearchDriver;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class SearchService
 {
     public function __construct(
+        protected DatabaseSearchDriver $databaseDriver,
+        protected MeilisearchDriver $meilisearchDriver,
         protected LocationService $locationService
     ) {}
 
@@ -32,90 +38,86 @@ class SearchService
     }
 
     /**
-     * Perform structured search over active classified listings.
+     * Perform structured search using Meilisearch if available, with transparent database fallback.
      */
     public function searchListings(SearchFilterDTO $filter, int $perPage = 15): LengthAwarePaginator
     {
-        $query = Listing::query()
-            ->active()
-            ->with(['category', 'city.state', 'state', 'primaryPhoto']);
-
-        // Keyword search in title & description
-        if (!empty($filter->query)) {
-            $keyword = $filter->query;
-            $query->where(function ($q) use ($keyword) {
-                $q->where('title', 'like', "%{$keyword}%")
-                  ->orWhere('description', 'like', "%{$keyword}%");
-            });
-        }
-
-        // Category filter (including child subcategories)
-        if (!empty($filter->categorySlug)) {
-            $category = Category::where('slug', $filter->categorySlug)->first();
-            if ($category) {
-                $categoryIds = $category->descendantIds(true);
-                $query->whereIn('category_id', $categoryIds);
+        if ($this->meilisearchDriver->isAvailable()) {
+            try {
+                $results = $this->meilisearchDriver->search($filter, $perPage);
+                if ($results !== null) {
+                    return $results;
+                }
+            } catch (Throwable $e) {
+                Log::warning('Meilisearch search failure: ' . $e->getMessage() . '. Falling back to database engine.');
             }
         }
 
-        // City filter
-        if (!empty($filter->cityName)) {
-            $cityName = $filter->cityName;
-            $query->whereHas('city', function ($q) use ($cityName) {
-                $q->where('name', 'like', "%{$cityName}%");
-            });
-        }
+        return $this->databaseDriver->search($filter, $perPage);
+    }
 
-        // State filter
+    /**
+     * Calculate listing counts per active category group for faceted search navigation.
+     *
+     * @return array<string, int>
+     */
+    public function getCategoryCounts(SearchFilterDTO $filter): array
+    {
+        $query = Listing::query()->active();
+
+        // Apply location filtering to count estimates
         if (!empty($filter->stateCode)) {
             $stateCode = $filter->stateCode;
-            $query->whereHas('state', function ($q) use ($stateCode) {
-                $q->where('code', $stateCode);
-            });
+            $query->whereHas('state', fn ($q) => $q->where('code', $stateCode));
         }
 
-        // Photos only
-        if ($filter->withPhotosOnly) {
-            $query->where('has_photos', true);
+        if (!empty($filter->cityName)) {
+            $cityName = $filter->cityName;
+            $query->whereHas('city', fn ($q) => $q->where('name', 'like', "%{$cityName}%"));
         }
 
-        // Verified poster only
-        if ($filter->verifiedOnly) {
-            $query->where('is_verified_poster', true);
+        $counts = $query->selectRaw('category_id, count(*) as count')
+            ->groupBy('category_id')
+            ->pluck('count', 'category_id')
+            ->all();
+
+        // Aggregate counts up to parent categories
+        $categories = Category::with('children')->get();
+        $aggregated = [];
+
+        foreach ($categories as $cat) {
+            $descendantIds = $cat->descendantIds(true);
+            $sum = 0;
+            foreach ($descendantIds as $id) {
+                $sum += ($counts[$id] ?? 0);
+            }
+            $aggregated[$cat->slug] = $sum;
         }
 
-        // Age filter
-        if ($filter->minAge > 18 || $filter->maxAge < 99) {
-            $query->whereBetween('poster_age', [$filter->minAge, $filter->maxAge]);
-        }
+        return $aggregated;
+    }
 
-        // Radius coordinates filter if provided
-        if ($filter->latitude !== null && $filter->longitude !== null) {
-            $origin = new CoordinateDTO($filter->latitude, $filter->longitude);
-            $boundingBox = $this->locationService->calculateBoundingBox($origin, $filter->radiusKm);
+    /**
+     * Index a listing across configured search drivers.
+     */
+    public function indexListing(Listing $listing): bool
+    {
+        return $this->meilisearchDriver->indexListing($listing);
+    }
 
-            $query->whereHas('location', function ($q) use ($boundingBox) {
-                $q->whereBetween('fuzzed_latitude', [$boundingBox['minLat'], $boundingBox['maxLat']])
-                  ->whereBetween('fuzzed_longitude', [$boundingBox['minLng'], $boundingBox['maxLng']]);
-            });
-        }
+    /**
+     * Remove a listing from search indexes.
+     */
+    public function removeFromIndex(int $listingId): bool
+    {
+        return $this->meilisearchDriver->removeListing($listingId);
+    }
 
-        // Sort: featured listings priority first, then chosen sort
-        $query->orderByDesc('is_featured');
-
-        switch ($filter->sort) {
-            case 'views':
-                $query->orderByDesc('view_count')->orderByDesc('id');
-                break;
-            case 'oldest':
-                $query->orderBy('published_at')->orderBy('id');
-                break;
-            case 'latest':
-            default:
-                $query->orderByDesc('published_at')->orderByDesc('id');
-                break;
-        }
-
-        return $query->paginate($perPage)->withQueryString();
+    /**
+     * Return active driver identifier.
+     */
+    public function getActiveDriverName(): string
+    {
+        return $this->meilisearchDriver->isAvailable() ? 'meilisearch' : 'database';
     }
 }

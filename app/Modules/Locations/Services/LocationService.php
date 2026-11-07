@@ -64,6 +64,26 @@ class LocationService
     }
 
     /**
+     * Compute latitude and longitude bounding box for a given origin and radius in kilometers.
+     *
+     * @return array{minLat: float, maxLat: float, minLng: float, maxLng: float}
+     */
+    public function calculateBoundingBox(CoordinateDTO $origin, float $radiusKm): array
+    {
+        // 1 degree latitude ~= 111.045 km
+        $latDelta = $radiusKm / 111.045;
+        $cosLat = cos(deg2rad($origin->latitude));
+        $lngDelta = $radiusKm / (111.045 * max(abs($cosLat), 0.0001));
+
+        return [
+            'minLat' => $origin->latitude - $latDelta,
+            'maxLat' => $origin->latitude + $latDelta,
+            'minLng' => $origin->longitude - $lngDelta,
+            'maxLng' => $origin->longitude + $lngDelta,
+        ];
+    }
+
+    /**
      * Apply random geographic jitter to coordinates (anti-triangulation protection).
      * Displaces point randomly by 300 to 800 meters.
      */
