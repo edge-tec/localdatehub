@@ -42,3 +42,4 @@ class SearchFilterRequest extends FormRequest
         return SearchFilterDTO::fromArray($this->validated());
     }
 }
+

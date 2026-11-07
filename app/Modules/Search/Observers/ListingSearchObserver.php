@@ -46,3 +46,4 @@ class ListingSearchObserver
         RemoveListingFromSearchIndexJob::dispatch($listing->id);
     }
 }
+

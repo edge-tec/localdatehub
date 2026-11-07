@@ -33,3 +33,4 @@ interface SearchDriverInterface
      */
     public function removeListing(int $listingId): bool;
 }
+

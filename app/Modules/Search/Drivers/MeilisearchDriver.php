@@ -242,3 +242,4 @@ class MeilisearchDriver implements SearchDriverInterface
         }
     }
 }
+

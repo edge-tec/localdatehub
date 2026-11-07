@@ -40,3 +40,4 @@ class SyncListingToSearchIndexJob implements ShouldQueue
         }
     }
 }
+

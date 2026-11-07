@@ -188,3 +188,4 @@ class DatabaseSearchDriver implements SearchDriverInterface
         return true;
     }
 }
+

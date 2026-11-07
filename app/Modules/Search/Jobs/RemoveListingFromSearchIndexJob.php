@@ -30,3 +30,4 @@ class RemoveListingFromSearchIndexJob implements ShouldQueue
         }
     }
 }
+

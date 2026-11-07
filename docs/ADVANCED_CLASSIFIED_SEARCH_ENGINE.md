@@ -119,3 +119,4 @@ The platform follows a clear and auditable ranking hierarchy:
 - **Test Suite:** `tests/Feature/AdvancedClassifiedSearchEngineTest.php` (12 tests, 54 assertions)
 - **Full Application Suite:** 103 tests passing, 592 assertions, 0 errors, 0 regressions.
 - **Frontend Assets:** Clean Vite 8 production build (`npm run build`).
+

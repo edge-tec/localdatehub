@@ -73,3 +73,4 @@ class SearchApiController extends Controller
         ]);
     }
 }
+
