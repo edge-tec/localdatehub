@@ -64,3 +64,4 @@ Automated testing is maintained in [`tests/Feature/UserAccountDashboardTest.php`
 - Profile, privacy, age assurance, password security, user blocking, and account deletion workflows.
 
 **Results:** **22 passed (73 assertions, 0 errors). Full suite: 145 passed (765 assertions, 0 errors).**
+
