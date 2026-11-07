@@ -18,6 +18,7 @@ class ContactMessage extends Model
         'listing_id',
         'sender_id',
         'recipient_id',
+        'inquiry_type',
         'sender_name',
         'sender_email_encrypted',
         'sender_phone_encrypted',

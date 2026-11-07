@@ -53,3 +53,4 @@ class ListingWebController extends Controller
         ]);
     }
 }
+

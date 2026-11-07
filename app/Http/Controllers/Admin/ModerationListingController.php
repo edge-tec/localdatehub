@@ -88,3 +88,4 @@ class ModerationListingController extends Controller
         return back()->with('status', "Listing #{$listing->id} suspended.");
     }
 }
+

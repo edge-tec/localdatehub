@@ -15,13 +15,11 @@
 
             <!-- Desktop Navigation Links -->
             <nav class="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-300">
-                <a href="{{ url('/') }}" class="hover:text-white transition">Browse Personals</a>
-                <a href="{{ route('locations.index') }}" class="hover:text-white transition flex items-center gap-1">
+                <a href="{{ route('search.index') }}" class="hover:text-white transition flex items-center gap-1.5">
                     <svg class="w-4 h-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
-                    Locations
+                    <span>Search</span>
                 </a>
                 <a href="{{ route('categories.index') }}" class="hover:text-white transition flex items-center gap-1">
                     <svg class="w-4 h-4 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -29,8 +27,15 @@
                     </svg>
                     Categories
                 </a>
-                <a href="{{ url('/health') }}" class="hover:text-white transition">System Health</a>
-                <a href="#safety-standards" class="text-rose-400 hover:text-rose-300 transition flex items-center space-x-1">
+                <a href="{{ route('locations.index') }}" class="hover:text-white transition flex items-center gap-1">
+                    <svg class="w-4 h-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Locations
+                </a>
+                <a href="{{ route('pages.pricing') }}" class="hover:text-white transition">Pricing</a>
+                <a href="{{ route('pages.safety') }}" class="text-rose-400 hover:text-rose-300 transition flex items-center space-x-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                     </svg>
@@ -87,24 +92,20 @@
 
     <!-- Mobile Drawer -->
     <div x-show="mobileMenuOpen" class="md:hidden border-b border-slate-800 bg-slate-900 px-4 pt-2 pb-4 space-y-2">
-        <a href="{{ url('/') }}" class="block px-3 py-2 text-base font-medium text-slate-300 hover:bg-slate-800 rounded-md">Browse Personals</a>
+        <a href="{{ route('search.index') }}" class="block px-3 py-2 text-base font-medium text-slate-300 hover:bg-slate-800 rounded-md">Search Classifieds</a>
+        <a href="{{ route('categories.index') }}" class="block px-3 py-2 text-base font-medium text-slate-300 hover:bg-slate-800 rounded-md">Categories</a>
         <a href="{{ route('locations.index') }}" class="block px-3 py-2 text-base font-medium text-slate-300 hover:bg-slate-800 rounded-md">US Locations Directory</a>
-        <a href="#categories" class="block px-3 py-2 text-base font-medium text-slate-300 hover:bg-slate-800 rounded-md">Categories</a>
-        <a href="{{ url('/health') }}" class="block px-3 py-2 text-base font-medium text-slate-300 hover:bg-slate-800 rounded-md">System Health</a>
-        <a href="#safety-standards" class="block px-3 py-2 text-base font-medium text-rose-400 hover:bg-slate-800 rounded-md">Trust & Safety (18+)</a>
+        <a href="{{ route('pages.pricing') }}" class="block px-3 py-2 text-base font-medium text-slate-300 hover:bg-slate-800 rounded-md">Pricing & Upgrades</a>
+        <a href="{{ route('pages.safety') }}" class="block px-3 py-2 text-base font-medium text-rose-400 hover:bg-slate-800 rounded-md">Trust & Safety (18+)</a>
         <div class="pt-2 border-t border-slate-800 flex flex-col space-y-2">
             @guest
                 <a href="{{ route('login') }}" class="w-full text-center py-2 text-sm font-medium text-slate-300 hover:text-white">Sign In</a>
                 <a href="{{ route('register') }}" class="w-full text-center py-2 text-sm font-medium text-slate-300 hover:text-white">Register (18+)</a>
             @else
+                <a href="{{ route('account.listings.index') }}" class="w-full text-left py-2 px-3 text-sm font-medium text-slate-200 hover:bg-slate-800 rounded-md">My Ads</a>
                 <a href="{{ route('account.profile') }}" class="w-full text-left py-2 px-3 text-sm font-medium text-slate-200 hover:bg-slate-800 rounded-md">Account Profile</a>
-                <a href="{{ route('account.security') }}" class="w-full text-left py-2 px-3 text-sm font-medium text-slate-200 hover:bg-slate-800 rounded-md">Security & 2FA</a>
-                <form method="POST" action="{{ route('logout') }}" class="w-full">
-                    @csrf
-                    <button type="submit" class="w-full text-left py-2 px-3 text-sm font-medium text-rose-400 hover:bg-slate-800 rounded-md">Sign Out</button>
-                </form>
             @endguest
-            <a href="#post-ad" class="w-full text-center py-2 text-sm font-semibold rounded-lg bg-rose-600 text-white">Post Personal Ad</a>
+            <a href="{{ route('listings.create') }}" class="w-full text-center py-2 text-sm font-semibold rounded-lg bg-rose-600 text-white">Post Personal Ad</a>
         </div>
     </div>
 </header>

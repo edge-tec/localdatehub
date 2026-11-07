@@ -75,3 +75,4 @@ class ListingPolicy
         return in_array($user->role, ['admin', 'moderator'], true);
     }
 }
+

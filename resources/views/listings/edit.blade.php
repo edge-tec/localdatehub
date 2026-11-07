@@ -24,3 +24,4 @@
         @livewire('listing-wizard', ['listingId' => $listing->id])
     </div>
 </x-layouts.app>
+

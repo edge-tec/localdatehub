@@ -7,3 +7,4 @@ use App\Policies\ListingPolicy as BasePolicy;
 class ListingPolicy extends BasePolicy
 {
 }
+

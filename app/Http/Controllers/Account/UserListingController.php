@@ -98,3 +98,4 @@ class UserListingController extends Controller
         return back()->with('status', "Listing '{$listing->title}' removed.");
     }
 }
+

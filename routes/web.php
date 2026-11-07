@@ -15,8 +15,11 @@ use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\CategoryWebController;
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ListingWebController;
 use App\Http\Controllers\LocationWebController;
+use App\Http\Controllers\PublicPageController;
+use App\Http\Controllers\SearchWebController;
 use App\Modules\Categories\Services\CategoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -28,11 +31,21 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Public Welcome & Discovery Landing Page
-Route::get('/', function (CategoryService $categoryService) {
-    return view('welcome', [
-        'categories' => $categoryService->getActiveCategories(),
-    ]);
-})->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Search & Filtering Classifieds Stream
+Route::get('/search', [SearchWebController::class, 'index'])->name('search.index');
+
+// Public Information & Trust Pages
+Route::get('/about', [PublicPageController::class, 'about'])->name('pages.about');
+Route::get('/safety', [PublicPageController::class, 'safety'])->name('pages.safety');
+Route::get('/contact', [PublicPageController::class, 'contact'])->name('pages.contact');
+Route::post('/contact', [PublicPageController::class, 'submitContact'])
+    ->middleware('throttle:10,1')
+    ->name('pages.contact.submit');
+Route::get('/privacy', [PublicPageController::class, 'privacy'])->name('pages.privacy');
+Route::get('/terms', [PublicPageController::class, 'terms'])->name('pages.terms');
+Route::get('/pricing', [PublicPageController::class, 'pricing'])->name('pages.pricing');
 
 // Health Check Endpoints
 Route::prefix('health')->group(function () {
