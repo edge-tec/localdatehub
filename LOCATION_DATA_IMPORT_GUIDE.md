@@ -124,3 +124,4 @@ Or trigger an immediate dataset refresh directly from the administrative UI.
 2. **Convert:** Format places into `database/data/locations/us_cities.json` and ZIPs into `us_zip_codes.json`.
 3. **Audit:** Execute `php artisan locations:validate` in local/staging environment.
 4. **Deploy:** Deploy updated JSON files and execute `php artisan locations:import`.
+

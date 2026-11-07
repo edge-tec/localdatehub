@@ -3,12 +3,15 @@
 use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Account\SecurityController;
 use App\Http\Controllers\Account\SuspensionController;
+use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminLocationController;
+use App\Http\Controllers\Api\CategoryApiController;
 use App\Http\Controllers\Api\LocationApiController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\CategoryWebController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\LocationWebController;
 use App\Modules\Categories\Services\CategoryService;
@@ -150,4 +153,43 @@ Route::middleware('auth')->prefix('admin/locations')->name('admin.locations.')->
     Route::post('/cities/{city}/aliases', [AdminLocationController::class, 'storeAlias'])->name('storeAlias');
     Route::delete('/aliases/{alias}', [AdminLocationController::class, 'destroyAlias'])->name('destroyAlias');
     Route::post('/cities/{city}/zips', [AdminLocationController::class, 'storeZip'])->name('storeZip');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Dynamic Personal Category Engine Routes
+|--------------------------------------------------------------------------
+*/
+
+// Public Category Directory & Landing Pages
+Route::prefix('categories')->name('categories.')->group(function () {
+    Route::get('/', [CategoryWebController::class, 'index'])->name('index');
+    Route::get('/{slug}', [CategoryWebController::class, 'show'])->name('show');
+});
+
+// Category API Endpoints
+Route::prefix('api/categories')->name('api.categories.')->group(function () {
+    Route::get('/tree', [CategoryApiController::class, 'tree'])->name('tree');
+    Route::get('/{slug}', [CategoryApiController::class, 'show'])->name('show');
+    Route::get('/{category}/attributes', [CategoryApiController::class, 'attributes'])->name('attributes');
+});
+
+// Administrative Category Management
+Route::middleware('auth')->prefix('admin/categories')->name('admin.categories.')->group(function () {
+    Route::get('/', [AdminCategoryController::class, 'index'])->name('index');
+    Route::get('/create', [AdminCategoryController::class, 'create'])->name('create');
+    Route::post('/', [AdminCategoryController::class, 'store'])->name('store');
+    Route::get('/{category}/edit', [AdminCategoryController::class, 'edit'])->name('edit');
+    Route::put('/{category}', [AdminCategoryController::class, 'update'])->name('update');
+    Route::delete('/{category}', [AdminCategoryController::class, 'destroy'])->name('destroy');
+    Route::get('/{category}/preview', [AdminCategoryController::class, 'preview'])->name('preview');
+    Route::get('/{category}/reassign', [AdminCategoryController::class, 'reassign'])->name('reassign');
+    Route::post('/{category}/reassign', [AdminCategoryController::class, 'doReassign'])->name('reassign.action');
+    
+    // Dynamic Attributes Management
+    Route::get('/{category}/attributes', [AdminCategoryController::class, 'attributes'])->name('attributes');
+    Route::post('/{category}/attributes', [AdminCategoryController::class, 'storeAttribute'])->name('attributes.store');
+    Route::delete('/attributes/{attribute}', [AdminCategoryController::class, 'deleteAttribute'])->name('attributes.destroy');
+    Route::post('/attributes/{attribute}/options', [AdminCategoryController::class, 'storeAttributeOption'])->name('attributes.options.store');
+    Route::delete('/attributes/options/{option}', [AdminCategoryController::class, 'deleteAttributeOption'])->name('attributes.options.destroy');
 });

@@ -32,3 +32,4 @@ class LocationImportHistory extends Model
         ];
     }
 }
+

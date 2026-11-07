@@ -23,7 +23,12 @@
                     </svg>
                     Locations
                 </a>
-                <a href="#categories" class="hover:text-white transition">Categories</a>
+                <a href="{{ route('categories.index') }}" class="hover:text-white transition flex items-center gap-1">
+                    <svg class="w-4 h-4 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                    Categories
+                </a>
                 <a href="{{ url('/health') }}" class="hover:text-white transition">System Health</a>
                 <a href="#safety-standards" class="text-rose-400 hover:text-rose-300 transition flex items-center space-x-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
