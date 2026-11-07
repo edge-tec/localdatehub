@@ -29,7 +29,23 @@
 
             <!-- Actions / Auth CTA -->
             <div class="hidden md:flex items-center space-x-3">
-                <a href="#sign-in" class="text-sm font-medium text-slate-300 hover:text-white px-3 py-2">Sign In</a>
+                @guest
+                    <a href="{{ route('login') }}" class="text-sm font-medium text-slate-300 hover:text-white px-3 py-2">Sign In</a>
+                    <a href="{{ route('register') }}" class="text-sm font-medium text-slate-300 hover:text-white px-3 py-2">Register</a>
+                @else
+                    <div class="flex items-center space-x-3">
+                        <a href="{{ route('account.profile') }}" class="text-sm font-medium text-slate-300 hover:text-white flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+                            <span class="w-6 h-6 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center text-xs font-bold border border-rose-500/30">
+                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                            </span>
+                            <span>{{ Auth::user()->name }}</span>
+                        </a>
+                        <form method="POST" action="{{ route('logout') }}" class="inline">
+                            @csrf
+                            <button type="submit" class="text-xs text-slate-400 hover:text-white px-2 py-1 transition">Sign Out</button>
+                        </form>
+                    </div>
+                @endguest
                 <a href="#post-ad" class="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-lg bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white shadow-md shadow-rose-600/20 transition">
                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -58,7 +74,17 @@
         <a href="{{ url('/health') }}" class="block px-3 py-2 text-base font-medium text-slate-300 hover:bg-slate-800 rounded-md">System Health</a>
         <a href="#safety-standards" class="block px-3 py-2 text-base font-medium text-rose-400 hover:bg-slate-800 rounded-md">Trust & Safety (18+)</a>
         <div class="pt-2 border-t border-slate-800 flex flex-col space-y-2">
-            <a href="#sign-in" class="w-full text-center py-2 text-sm font-medium text-slate-300 hover:text-white">Sign In</a>
+            @guest
+                <a href="{{ route('login') }}" class="w-full text-center py-2 text-sm font-medium text-slate-300 hover:text-white">Sign In</a>
+                <a href="{{ route('register') }}" class="w-full text-center py-2 text-sm font-medium text-slate-300 hover:text-white">Register (18+)</a>
+            @else
+                <a href="{{ route('account.profile') }}" class="w-full text-left py-2 px-3 text-sm font-medium text-slate-200 hover:bg-slate-800 rounded-md">Account Profile</a>
+                <a href="{{ route('account.security') }}" class="w-full text-left py-2 px-3 text-sm font-medium text-slate-200 hover:bg-slate-800 rounded-md">Security & 2FA</a>
+                <form method="POST" action="{{ route('logout') }}" class="w-full">
+                    @csrf
+                    <button type="submit" class="w-full text-left py-2 px-3 text-sm font-medium text-rose-400 hover:bg-slate-800 rounded-md">Sign Out</button>
+                </form>
+            @endguest
             <a href="#post-ad" class="w-full text-center py-2 text-sm font-semibold rounded-lg bg-rose-600 text-white">Post Personal Ad</a>
         </div>
     </div>

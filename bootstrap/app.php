@@ -21,6 +21,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'health.auth' => HealthCheckAuthMiddleware::class,
             'age.verify' => VerifyAgeMiddleware::class,
+            'active' => \App\Http\Middleware\EnsureAccountIsActive::class,
+            'age.assured' => \App\Http\Middleware\EnsureAgeAssurance::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
