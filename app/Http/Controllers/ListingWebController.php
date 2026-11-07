@@ -40,7 +40,7 @@ class ListingWebController extends Controller
     public function show(string $slug, Request $request): View
     {
         $listing = Listing::where('slug', $slug)
-            ->with(['category', 'state', 'city', 'zipCode', 'location', 'contact', 'attributes.selectedOption', 'approvedMedia'])
+            ->with(['user', 'category.parent', 'state', 'city', 'zipCode', 'location', 'contact', 'attributes.selectedOption', 'approvedMedia'])
             ->firstOrFail();
 
         Gate::authorize('view', $listing);
@@ -48,8 +48,27 @@ class ListingWebController extends Controller
         // Record daily analytics view
         $listing->recordAnalyticsEvent('views');
 
+        // Fetch similar listings in same category or city
+        $similarListings = Listing::query()
+            ->active()
+            ->where('id', '!=', $listing->id)
+            ->where(function ($q) use ($listing) {
+                $q->where('category_id', $listing->category_id)
+                  ->orWhere('city_id', $listing->city_id);
+            })
+            ->with(['category', 'city.state', 'state', 'primaryPhoto'])
+            ->latest('published_at')
+            ->take(3)
+            ->get();
+
+        $isFavorited = $request->user()
+            ? $request->user()->favorites()->where('listing_id', $listing->id)->exists()
+            : false;
+
         return view('listings.show', [
             'listing' => $listing,
+            'similarListings' => $similarListings,
+            'isFavorited' => $isFavorited,
         ]);
     }
 }

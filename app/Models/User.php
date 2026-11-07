@@ -90,7 +90,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function favorites(): BelongsToMany
     {
-        return $this->belongsToMany(Listing::class, 'listing_favorites')->withTimestamps();
+        return $this->belongsToMany(Listing::class, 'listing_favorites')->withPivot('created_at');
     }
 
     public function roles(): BelongsToMany

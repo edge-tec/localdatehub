@@ -151,7 +151,7 @@ class Listing extends Model
 
     public function favoritedBy(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'listing_favorites')->withTimestamps();
+        return $this->belongsToMany(User::class, 'listing_favorites')->withPivot('created_at');
     }
 
     public function messages(): HasMany

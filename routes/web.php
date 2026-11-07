@@ -4,9 +4,12 @@ use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Account\SecurityController;
 use App\Http\Controllers\Account\SuspensionController;
 use App\Http\Controllers\Account\UserListingController;
+use App\Http\Controllers\Account\UserMessagesController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminLocationController;
 use App\Http\Controllers\Admin\ModerationListingController;
+use App\Http\Controllers\Admin\ModerationMessagesController;
+use App\Http\Controllers\ListingContactWebController;
 use App\Http\Controllers\Api\CategoryApiController;
 use App\Http\Controllers\Api\LocationApiController;
 use App\Http\Controllers\Api\SearchApiController;
@@ -134,6 +137,15 @@ Route::middleware('auth')->group(function () {
 
         // Self-Service Account Deletion (GDPR / CCPA)
         Route::delete('/', [SecurityController::class, 'destroy'])->name('destroy');
+
+        // Private Message Inbox & Inquiry Management
+        Route::prefix('messages')->name('messages.')->group(function () {
+            Route::get('/', [UserMessagesController::class, 'index'])->name('index');
+            Route::get('/{message}', [UserMessagesController::class, 'show'])->name('show');
+            Route::post('/{message}/replied', [UserMessagesController::class, 'markReplied'])->name('replied');
+            Route::post('/{message}/flag', [UserMessagesController::class, 'flag'])->name('flag');
+            Route::delete('/{message}', [UserMessagesController::class, 'destroy'])->name('destroy');
+        });
     });
 });
 
@@ -230,6 +242,16 @@ Route::middleware('auth')->prefix('listings')->name('listings.')->group(function
 
 Route::get('/listings/{slug}', [ListingWebController::class, 'show'])->name('listings.show');
 
+// Public Listing Inquiries, Abuse Reporting, and Favorites
+Route::post('/listings/{listing}/contact', [ListingContactWebController::class, 'submitInquiry'])
+    ->middleware('throttle:5,10')
+    ->name('listings.contact.submit');
+Route::post('/listings/{listing}/report', [ListingContactWebController::class, 'reportListing'])
+    ->middleware('throttle:5,10')
+    ->name('listings.report.submit');
+Route::post('/listings/{listing}/favorite', [ListingContactWebController::class, 'toggleFavorite'])
+    ->name('listings.favorite.toggle');
+
 // User Account Listing Dashboard
 Route::middleware('auth')->prefix('account/listings')->name('account.listings.')->group(function () {
     Route::get('/', [UserListingController::class, 'index'])->name('index');
@@ -245,4 +267,11 @@ Route::middleware('auth')->prefix('admin/moderation/listings')->name('admin.mode
     Route::post('/{listing}/approve', [ModerationListingController::class, 'approve'])->name('approve');
     Route::post('/{listing}/reject', [ModerationListingController::class, 'reject'])->name('reject');
     Route::post('/{listing}/suspend', [ModerationListingController::class, 'suspend'])->name('suspend');
+});
+
+// Admin Moderation Messages & Safety Reports Queue
+Route::middleware('auth')->prefix('admin/moderation/messages')->name('admin.moderation.messages.')->group(function () {
+    Route::get('/', [ModerationMessagesController::class, 'index'])->name('queue');
+    Route::post('/{message}/dismiss', [ModerationMessagesController::class, 'dismiss'])->name('dismiss');
+    Route::post('/{message}/action', [ModerationMessagesController::class, 'takeAction'])->name('action');
 });

@@ -2,6 +2,11 @@
 
 namespace App\Providers;
 
+use App\Modules\Contact\Models\ContactMessage;
+use App\Modules\Contact\Policies\ContactMessagePolicy;
+use App\Modules\Listings\Models\Listing;
+use App\Modules\Search\Observers\ListingSearchObserver;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        \App\Modules\Listings\Models\Listing::observe(\App\Modules\Search\Observers\ListingSearchObserver::class);
+        Listing::observe(ListingSearchObserver::class);
+        Gate::policy(ContactMessage::class, ContactMessagePolicy::class);
     }
 }
