@@ -71,3 +71,4 @@ Notifications are managed via `NotificationService` and respect user privacy and
 
 ### Expiration Scheduler:
 - Artisan command `php artisan listings:notify-expiring` scans listings expiring within 72 hours and dispatches reminder notifications.
+

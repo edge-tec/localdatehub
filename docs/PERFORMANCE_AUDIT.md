@@ -107,3 +107,4 @@ Heavy background tasks are isolated from the web request lifecycle and routed th
 - **Alpine.js:** Replaces heavyweight client frameworks (React/Vue) with micro-reactive bindings (14KB gzipped footprint).
 - **Responsive Media Delivery:** Images converted to modern `.webp` formats with responsive `<picture>` tags, explicit `width`/`height` dimensions to prevent Cumulative Layout Shift (CLS), and native browser lazy-loading (`loading="lazy"`).
 - **CDN Caching:** Static assets versioned with cache-busting hashes (`build/manifest.json`), enabling aggressive edge caching (`Cache-Control: public, max-age=31536000, immutable`).
+

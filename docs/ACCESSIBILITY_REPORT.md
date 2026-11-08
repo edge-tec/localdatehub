@@ -60,3 +60,4 @@ The application utilizes a dark slate and rose color palette (`slate-900`, `slat
 | **NVDA (Windows)** | Search & Filter Controls | **Passed** | Dynamic Alpine.js filter updates and Livewire pagination announced smoothly. |
 | **Keyboard-Only** | Full User Journey | **Passed** | Complete listing creation, search, checkout, and contact forms operable via keyboard alone. |
 | **Lighthouse Accessibility** | Core Pages | **98 - 100%** | Complies with contrast, landmark structure, and ARIA attributes. |
+

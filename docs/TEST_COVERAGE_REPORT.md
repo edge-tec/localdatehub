@@ -82,3 +82,4 @@
 1. **Pre-Commit Checks:** Local test runner executes `php artisan test` before code merge.
 2. **Automated Regression Prevention:** Every new feature branch must include corresponding integration/feature tests. Zero test failures or skipped tests allowed on `main`.
 3. **Database Isolation:** Unit and feature tests execute using memory-backed databases with transaction rollbacks (`RefreshDatabase`), preventing cross-test pollution.
+

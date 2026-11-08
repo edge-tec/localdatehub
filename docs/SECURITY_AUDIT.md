@@ -79,3 +79,4 @@ While the application code demonstrates robust security engineering, operational
 2. **WAF Deployment:** Deploy a Web Application Firewall (Cloudflare Enterprise, AWS WAF, or Fastly) with managed OWASP rulesets to protect against volumetric L7 DDoS and scraper bots.
 3. **Regular Dependency Audits:** Schedule automated dependency scanning (`composer audit`, `npm audit`) in continuous integration pipelines to catch third-party library CVEs immediately upon disclosure.
 4. **Audit Log Retention:** Persist administrative action logs (`activity_log` and `notifications_log`) to an append-only, immutable centralized logging service (e.g. Datadog, AWS CloudWatch, or Splunk).
+
