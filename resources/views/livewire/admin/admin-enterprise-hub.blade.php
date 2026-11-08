@@ -1,21 +1,21 @@
 <div class="flex flex-col lg:flex-row gap-6">
-    {{-- ================= Sidebar Navigation (Matching Reference Screenshot) ================= --}}
+    {{-- ================= Sidebar Navigation (Matching Pure White Theme) ================= --}}
     <aside class="lg:w-64 shrink-0" aria-label="Administrative modules">
-        <nav class="bg-[#171328] border border-[#2A233D] rounded-2xl p-3.5 lg:sticky lg:top-24 space-y-1 shadow-xl">
+        <nav class="bg-white border border-slate-200 rounded-2xl p-3.5 lg:sticky lg:top-24 space-y-1 shadow-sm">
             
             <!-- Admin Profile Card -->
-            <div class="flex items-center space-x-3 p-2.5 mb-3 rounded-xl bg-[#201833] border border-[#33264E]">
+            <div class="flex items-center space-x-3 p-2.5 mb-3 rounded-xl bg-slate-50 border border-slate-200">
                 <div class="relative">
                     <img src="{{ asset('images/admin-avatar.jpg') }}" alt="Admin" class="w-10 h-10 rounded-full object-cover border-2 border-[#F20B83]" />
-                    <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-[#171328]"></span>
+                    <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <div class="text-xs font-bold text-white truncate flex items-center justify-between">
+                    <div class="text-xs font-bold text-slate-900 truncate flex items-center justify-between">
                         <span>Admin</span>
                         <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                     </div>
-                    <div class="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    <div class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                         <span>Online</span>
                     </div>
                 </div>
@@ -51,9 +51,9 @@
                     $isActive = ($tab === $key);
                 @endphp
                 <button type="button" wire:click="setTab('{{ $key }}')"
-                    class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-150 {{ $isActive ? 'bg-[#F20B83] text-white shadow-lg shadow-[#F20B83]/30' : 'text-slate-300 hover:text-white hover:bg-[#201833]' }}">
+                    class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-150 {{ $isActive ? 'bg-[#F20B83] text-white shadow-md' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
                     <div class="flex items-center space-x-2.5 truncate">
-                        <svg class="w-4 h-4 shrink-0 {{ $isActive ? 'text-white' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 shrink-0 {{ $isActive ? 'text-white' : 'text-slate-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $path }}" />
                         </svg>
                         <span class="truncate">{{ $label }}</span>
@@ -70,7 +70,7 @@
             @endforeach
 
             <!-- View Website Button (Pink Outline) -->
-            <div class="pt-4 mt-4 border-t border-[#2A233D]">
+            <div class="pt-4 mt-4 border-t border-slate-200">
                 <a href="{{ url('/') }}" target="_blank" class="w-full flex items-center justify-center space-x-2 px-3 py-2.5 rounded-xl border border-[#F20B83] text-[#F20B83] hover:bg-[#F20B83] hover:text-white transition font-bold text-xs">
                     <span>View Website</span>
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
@@ -82,31 +82,31 @@
     {{-- ================= Main Administrative Workspace ================= --}}
     <section class="flex-1 min-w-0">
         @if(session()->has('success'))
-            <div class="mb-4 rounded-xl border border-emerald-700 bg-emerald-950/60 px-4 py-3 text-xs text-emerald-200" role="status">{{ session('success') }}</div>
+            <div class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-800 font-medium" role="status">{{ session('success') }}</div>
         @endif
         @if(session()->has('error'))
-            <div class="mb-4 rounded-xl border border-red-700 bg-red-950/60 px-4 py-3 text-xs text-red-200" role="alert">{{ session('error') }}</div>
+            <div class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-800 font-medium" role="alert">{{ session('error') }}</div>
         @endif
         @if($errors->any())
-            <div class="mb-4 rounded-xl border border-red-700 bg-red-950/60 px-4 py-3 text-xs text-red-200" role="alert">{{ $errors->first() }}</div>
+            <div class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-800 font-medium" role="alert">{{ $errors->first() }}</div>
         @endif
 
         @php
-            $card = 'bg-[#171328] border border-[#2A233D] rounded-2xl shadow-xl';
-            $th = 'px-3 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-400';
-            $td = 'px-3 py-2.5 text-xs text-slate-200 align-top';
+            $card = 'bg-white border border-slate-200 rounded-2xl shadow-xs text-slate-800';
+            $th = 'px-3 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500 bg-slate-50 border-b border-slate-200';
+            $td = 'px-3 py-2.5 text-xs text-slate-700 align-top border-b border-slate-100';
             $btn = 'inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold transition';
-            $input = 'w-full rounded-xl bg-[#201833] border border-[#33264E] text-xs text-slate-100 px-3 py-2 focus:border-[#F20B83] focus:ring-[#F20B83]';
+            $input = 'w-full rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 px-3 py-2 focus:bg-white focus:border-[#F20B83] focus:ring-[#F20B83]';
             $badge = fn ($s) => match ($s) {
-                'active', 'approved', 'completed', 'resolved', 'granted', 'published', true => 'bg-emerald-900/60 text-emerald-300 border-emerald-700',
-                'pending', 'pending_review', 'open', 'investigating', 'under_review', 'past_due' => 'bg-amber-900/60 text-amber-300 border-amber-700',
-                'suspended', 'rejected', 'failed', 'refunded', 'canceled', 'dismissed', false => 'bg-red-900/60 text-red-300 border-red-700',
-                default => 'bg-slate-800 text-slate-300 border-slate-600',
+                'active', 'approved', 'completed', 'resolved', 'granted', 'published', true => 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+                'pending', 'pending_review', 'open', 'investigating', 'under_review', 'past_due' => 'bg-amber-50 text-amber-700 border border-amber-200',
+                'suspended', 'rejected', 'failed', 'refunded', 'canceled', 'dismissed', false => 'bg-rose-50 text-rose-700 border border-rose-200',
+                default => 'bg-slate-100 text-slate-700 border border-slate-200',
             };
         @endphp
 
         @if(!$tabAllowed)
-            <div class="{{ $card }} p-8 text-center text-slate-300">Access denied for this module.</div>
+            <div class="{{ $card }} p-8 text-center text-slate-600">Access denied for this module.</div>
         @else
 
         {{-- ================= 0. DASHBOARD (Matching Reference Screenshot) ================= --}}
@@ -114,14 +114,14 @@
             <div class="space-y-6">
                 <!-- Welcome Title -->
                 <div>
-                    <h1 class="text-2xl font-black text-white">Admin Dashboard</h1>
-                    <p class="text-xs text-slate-400 mt-0.5">Welcome back, Super Admin! Here's what's happening with your website.</p>
+                    <h1 class="text-2xl font-black text-slate-900">Admin Dashboard</h1>
+                    <p class="text-xs text-slate-500 mt-0.5">Welcome back, Super Admin! Here's what's happening with your website.</p>
                 </div>
 
                 <!-- Row 1: 4 Stat Cards + Promotional Banner -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                     <!-- Stat 1: Total Users -->
-                    <div class="bg-white rounded-2xl p-4 text-[#171923] shadow-md border border-slate-200 flex flex-col justify-between">
+                    <div class="bg-white rounded-2xl p-4 text-[#171923] shadow-xs border border-slate-200 flex flex-col justify-between">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-bold text-slate-500">Total Users <span class="sr-only">Total Accounts</span></span>
                             <div class="w-8 h-8 rounded-full bg-[#F20B83]/10 text-[#F20B83] flex items-center justify-center">
@@ -137,7 +137,7 @@
                     </div>
 
                     <!-- Stat 2: Total Listings -->
-                    <div class="bg-white rounded-2xl p-4 text-[#171923] shadow-md border border-slate-200 flex flex-col justify-between">
+                    <div class="bg-white rounded-2xl p-4 text-[#171923] shadow-xs border border-slate-200 flex flex-col justify-between">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-bold text-slate-500">Total Listings</span>
                             <div class="w-8 h-8 rounded-full bg-purple-500/10 text-purple-600 flex items-center justify-center">
@@ -153,7 +153,7 @@
                     </div>
 
                     <!-- Stat 3: Total Views -->
-                    <div class="bg-white rounded-2xl p-4 text-[#171923] shadow-md border border-slate-200 flex flex-col justify-between">
+                    <div class="bg-white rounded-2xl p-4 text-[#171923] shadow-xs border border-slate-200 flex flex-col justify-between">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-bold text-slate-500">Total Views</span>
                             <div class="w-8 h-8 rounded-full bg-teal-500/10 text-teal-600 flex items-center justify-center">
@@ -169,7 +169,7 @@
                     </div>
 
                     <!-- Stat 4: Revenue -->
-                    <div class="bg-white rounded-2xl p-4 text-[#171923] shadow-md border border-slate-200 flex flex-col justify-between">
+                    <div class="bg-white rounded-2xl p-4 text-[#171923] shadow-xs border border-slate-200 flex flex-col justify-between">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-bold text-slate-500">Revenue</span>
                             <div class="w-8 h-8 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center">
@@ -185,7 +185,7 @@
                     </div>
 
                     <!-- Stat 5: Promotional Banner Card -->
-                    <div class="rounded-2xl overflow-hidden shadow-md relative min-h-[110px] group border border-[#33264E]">
+                    <div class="rounded-2xl overflow-hidden shadow-xs relative min-h-[110px] group border border-slate-200">
                         <img src="{{ asset('images/admin-banner.jpg') }}" alt="Promo Banner" class="w-full h-full object-cover absolute inset-0 group-hover:scale-105 transition duration-300" />
                         <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-3.5 flex flex-col justify-end">
                             <div class="text-xs font-black text-white">LocalDate<span class="text-[#F20B83]">Hub</span></div>
@@ -204,19 +204,19 @@
                     <div class="lg:col-span-6 {{ $card }} p-5">
                         <div class="flex items-center justify-between mb-4">
                             <div>
-                                <h2 class="text-sm font-extrabold text-white">Website Analytics</h2>
-                                <p class="text-[11px] text-slate-400">Weekly traffic and inquiry metrics</p>
+                                <h2 class="text-sm font-extrabold text-slate-900">Website Analytics</h2>
+                                <p class="text-[11px] text-slate-500">Weekly traffic and inquiry metrics</p>
                             </div>
-                            <div class="flex items-center space-x-3 text-[11px] font-semibold">
+                            <div class="flex items-center space-x-3 text-[11px] font-semibold text-slate-600">
                                 <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#F20B83]"></span>Views</span>
                                 <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#8B35F6]"></span>Contacts</span>
                             </div>
                         </div>
 
                         <!-- Active Tooltip Badge -->
-                        <div class="inline-flex items-center space-x-2 px-2.5 py-1 rounded-lg bg-[#201833] border border-[#33264E] text-xs font-bold text-white mb-2">
+                        <div class="inline-flex items-center space-x-2 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-xs font-bold text-slate-900 mb-2">
                             <span>124,560</span>
-                            <span class="text-emerald-400 font-extrabold text-[10px]">↗ +24.8%</span>
+                            <span class="text-emerald-600 font-extrabold text-[10px]">↗ +24.8%</span>
                         </div>
 
                         <!-- Responsive SVG Area Chart matching reference -->
@@ -224,18 +224,18 @@
                             <svg viewBox="0 0 500 160" class="w-full h-full overflow-visible">
                                 <defs>
                                     <linearGradient id="viewsGrad" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stop-color="#F20B83" stop-opacity="0.4" />
+                                        <stop offset="0%" stop-color="#F20B83" stop-opacity="0.3" />
                                         <stop offset="100%" stop-color="#F20B83" stop-opacity="0.0" />
                                     </linearGradient>
                                     <linearGradient id="contactsGrad" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stop-color="#8B35F6" stop-opacity="0.3" />
+                                        <stop offset="0%" stop-color="#8B35F6" stop-opacity="0.2" />
                                         <stop offset="100%" stop-color="#8B35F6" stop-opacity="0.0" />
                                     </linearGradient>
                                 </defs>
                                 <!-- Grid Lines -->
-                                <line x1="0" y1="30" x2="500" y2="30" stroke="#2A233D" stroke-dasharray="3,3" />
-                                <line x1="0" y1="80" x2="500" y2="80" stroke="#2A233D" stroke-dasharray="3,3" />
-                                <line x1="0" y1="130" x2="500" y2="130" stroke="#2A233D" />
+                                <line x1="0" y1="30" x2="500" y2="30" stroke="#E2E8F0" stroke-dasharray="3,3" />
+                                <line x1="0" y1="80" x2="500" y2="80" stroke="#E2E8F0" stroke-dasharray="3,3" />
+                                <line x1="0" y1="130" x2="500" y2="130" stroke="#E2E8F0" />
 
                                 <!-- Area Path Views -->
                                 <path d="M 0,110 C 60,95 120,60 180,85 C 240,110 300,30 360,50 C 420,70 460,20 500,35 L 500,130 L 0,130 Z" fill="url(#viewsGrad)" />
@@ -249,7 +249,7 @@
                                 <circle cx="360" cy="50" r="4.5" fill="#F20B83" stroke="#FFFFFF" stroke-width="2" />
                             </svg>
                         </div>
-                        <div class="flex justify-between text-[10px] font-bold text-slate-400 mt-1 px-1">
+                        <div class="flex justify-between text-[10px] font-bold text-slate-500 mt-1 px-1">
                             <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
                         </div>
                     </div>
@@ -257,11 +257,11 @@
                     <!-- Listing Status Donut Chart -->
                     <div class="lg:col-span-3 {{ $card }} p-5 flex flex-col justify-between">
                         <div>
-                            <h2 class="text-sm font-extrabold text-white mb-2">Listing Status</h2>
+                            <h2 class="text-sm font-extrabold text-slate-900 mb-2">Listing Status</h2>
                             <div class="relative w-36 h-36 mx-auto my-3 flex items-center justify-center">
                                 <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                                     <!-- Background Circle -->
-                                    <path class="text-[#201833]" stroke-width="4.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                    <path class="text-slate-100" stroke-width="4.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                     <!-- Published (72% Teal/Emerald) -->
                                     <path class="text-emerald-500" stroke-width="4.5" stroke-dasharray="72, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                     <!-- Pending (15% Amber) -->
@@ -270,17 +270,17 @@
                                     <path class="text-[#F20B83]" stroke-width="4.5" stroke-dasharray="13, 100" stroke-dashoffset="-87" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                 </svg>
                                 <div class="absolute text-center">
-                                    <div class="text-xs font-black text-white">128,430</div>
+                                    <div class="text-xs font-black text-slate-900">128,430</div>
                                     <div class="text-[9px] font-bold text-slate-400 uppercase">Total</div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Legend -->
-                        <div class="space-y-1 text-[11px] font-medium pt-2 border-t border-[#2A233D]">
-                            <div class="flex justify-between items-center"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Published</span><span class="font-bold text-white">72%</span></div>
-                            <div class="flex justify-between items-center"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Pending</span><span class="font-bold text-white">15%</span></div>
-                            <div class="flex justify-between items-center"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#F20B83]"></span>Rejected</span><span class="font-bold text-white">13%</span></div>
+                        <div class="space-y-1 text-[11px] font-medium pt-2 border-t border-slate-200">
+                            <div class="flex justify-between items-center"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Published</span><span class="font-bold text-slate-900">72%</span></div>
+                            <div class="flex justify-between items-center"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Pending</span><span class="font-bold text-slate-900">15%</span></div>
+                            <div class="flex justify-between items-center"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#F20B83]"></span>Rejected</span><span class="font-bold text-slate-900">13%</span></div>
                         </div>
                     </div>
 
@@ -288,28 +288,28 @@
                     <div class="lg:col-span-3 {{ $card }} p-5 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between mb-3">
-                                <h2 class="text-sm font-extrabold text-white">Quick Actions</h2>
+                                <h2 class="text-sm font-extrabold text-slate-900">Quick Actions</h2>
                                 <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                             </div>
                             <div class="space-y-2">
-                                <a href="{{ route('listings.create') }}" target="_blank" class="w-full bg-[#2A1838] border border-[#F20B83]/40 hover:bg-[#F20B83] text-[#F20B83] hover:text-white p-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition">
+                                <a href="{{ route('listings.create') }}" target="_blank" class="w-full bg-pink-50 border border-pink-200 hover:bg-[#F20B83] text-[#F20B83] hover:text-white p-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                     <span>Add New Listing</span>
                                 </a>
-                                <button type="button" wire:click="setTab('users')" class="w-full bg-[#201833] hover:bg-[#2A2042] text-slate-200 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition">
-                                    <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1z"/></svg>
+                                <button type="button" wire:click="setTab('users')" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition border border-slate-200">
+                                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1z"/></svg>
                                     <span>Manage Users</span>
                                 </button>
-                                <button type="button" wire:click="setTab('reports')" class="w-full bg-[#201833] hover:bg-[#2A2042] text-slate-200 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition">
+                                <button type="button" wire:click="setTab('reports')" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition border border-slate-200">
                                     <svg class="w-4 h-4 text-[#F20B83]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                     <span>View Reports</span>
                                 </button>
-                                <button type="button" wire:click="setTab('payments')" class="w-full bg-[#201833] hover:bg-[#2A2042] text-slate-200 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition">
-                                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                                <button type="button" wire:click="setTab('payments')" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition border border-slate-200">
+                                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
                                     <span>Manage Payments</span>
                                 </button>
-                                <button type="button" wire:click="setTab('seo')" class="w-full bg-[#201833] hover:bg-[#2A2042] text-slate-200 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition">
-                                    <svg class="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <button type="button" wire:click="setTab('seo')" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition border border-slate-200">
+                                    <svg class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                     <span>SEO Settings</span>
                                 </button>
                             </div>
@@ -324,7 +324,7 @@
                     <!-- Recent Listings (8 cols) -->
                     <div class="lg:col-span-8 {{ $card }} p-5">
                         <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-sm font-extrabold text-white">Recent Listings</h2>
+                            <h2 class="text-sm font-extrabold text-slate-900">Recent Listings</h2>
                             <button type="button" wire:click="setTab('listings')" class="text-xs font-bold text-[#F20B83] hover:underline flex items-center gap-1">
                                 <span>View All</span>
                                 <span>→</span>
@@ -333,20 +333,20 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                             @foreach($recentListings as $rListing)
-                                <div class="bg-[#201833] rounded-xl border border-[#33264E] overflow-hidden flex flex-col justify-between group">
-                                    <div class="relative h-28 bg-slate-900 overflow-hidden">
+                                <div class="bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col justify-between group shadow-xs">
+                                    <div class="relative h-28 bg-slate-100 overflow-hidden">
                                         <img src="{{ $rListing->primary_photo_url }}" alt="{{ $rListing->title }}" class="w-full h-full object-cover group-hover:scale-105 transition" />
-                                        <span class="absolute top-1.5 left-1.5 bg-[#F20B83] text-white text-[9px] font-extrabold px-1.5 py-0.2 rounded-full">
+                                        <span class="absolute top-1.5 left-1.5 bg-[#F20B83] text-white text-[9px] font-extrabold px-1.5 py-0.2 rounded-full shadow-xs">
                                             Featured
                                         </span>
                                     </div>
                                     <div class="p-2.5 flex-1 flex flex-col justify-between">
                                         <div>
-                                            <div class="text-[11px] font-bold text-white truncate">{{ $rListing->title }}</div>
-                                            <div class="text-[10px] text-slate-400 mt-0.5 truncate">{{ $rListing->city?->name ?? 'New York' }}, {{ $rListing->city?->state?->code ?? 'NY' }}</div>
+                                            <div class="text-[11px] font-bold text-slate-900 truncate">{{ $rListing->title }}</div>
+                                            <div class="text-[10px] text-slate-500 mt-0.5 truncate">{{ $rListing->city?->name ?? 'New York' }}, {{ $rListing->city?->state?->code ?? 'NY' }}</div>
                                         </div>
-                                        <div class="mt-2.5 pt-2 border-t border-[#33264E] flex items-center justify-between text-[10px]">
-                                            <span class="text-slate-400 flex items-center gap-0.5">👁 {{ number_format(($rListing->views_count ?? 2500) / 1000, 1) }}k</span>
+                                        <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
+                                            <span class="text-slate-500 flex items-center gap-0.5 font-medium">👁 {{ number_format(($rListing->views_count ?? 2500) / 1000, 1) }}k</span>
                                             <a href="{{ route('listings.show', $rListing->slug) }}" target="_blank" class="bg-[#F20B83] hover:bg-[#d90858] text-white text-[9px] font-bold px-2 py-0.5 rounded flex items-center gap-0.5">
                                                 <span>View Ad</span>
                                                 <span>→</span>
@@ -361,7 +361,7 @@
                     <!-- Top Locations (4 cols) -->
                     <div class="lg:col-span-4 {{ $card }} p-5">
                         <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-sm font-extrabold text-white">Top Locations</h2>
+                            <h2 class="text-sm font-extrabold text-slate-900">Top Locations</h2>
                             <button type="button" wire:click="setTab('locations')" class="text-xs font-bold text-[#F20B83] hover:underline flex items-center gap-1">
                                 <span>View All</span>
                                 <span>→</span>
@@ -370,17 +370,17 @@
 
                         <div class="space-y-2.5">
                             @foreach($topLocations as $idx => $st)
-                                <div class="flex items-center justify-between p-2 rounded-xl bg-[#201833] border border-[#33264E] text-xs">
+                                <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200 text-xs">
                                     <div class="flex items-center space-x-2.5">
-                                        <span class="w-5 h-5 rounded-full bg-[#F20B83]/20 text-[#F20B83] text-[10px] font-extrabold flex items-center justify-center">
+                                        <span class="w-5 h-5 rounded-full bg-pink-100 text-[#F20B83] text-[10px] font-extrabold flex items-center justify-center">
                                             {{ $idx + 1 }}
                                         </span>
-                                        <span class="text-pink-400">
+                                        <span class="text-[#F20B83]">
                                             <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
                                         </span>
-                                        <span class="font-bold text-white">{{ $st->name }}</span>
+                                        <span class="font-bold text-slate-900">{{ $st->name }}</span>
                                     </div>
-                                    <span class="text-slate-300 font-extrabold text-[11px]">{{ number_format($st->listings_count / 1000, 1) }}k</span>
+                                    <span class="text-slate-600 font-extrabold text-[11px]">{{ number_format($st->listings_count / 1000, 1) }}k</span>
                                 </div>
                             @endforeach
                         </div>
@@ -393,59 +393,59 @@
                     
                     <!-- System Health with 4 Radial Progress Gauges (4 cols) -->
                     <div class="lg:col-span-4 {{ $card }} p-5">
-                        <h2 class="text-sm font-extrabold text-white mb-4">System Health</h2>
+                        <h2 class="text-sm font-extrabold text-slate-900 mb-4">System Health</h2>
                         <div class="grid grid-cols-4 gap-2 text-center mb-4">
                             <!-- Server Gauge -->
                             <div>
                                 <div class="relative w-12 h-12 mx-auto">
                                     <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                                        <path class="text-[#201833]" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                        <path class="text-emerald-400" stroke-width="3" stroke-dasharray="98, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        <path class="text-emerald-500" stroke-width="3" stroke-dasharray="98, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                     </svg>
-                                    <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white">98%</span>
+                                    <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">98%</span>
                                 </div>
-                                <div class="text-[10px] font-bold text-slate-400 mt-1">Server</div>
+                                <div class="text-[10px] font-bold text-slate-500 mt-1">Server</div>
                             </div>
 
                             <!-- Database Gauge -->
                             <div>
                                 <div class="relative w-12 h-12 mx-auto">
                                     <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                                        <path class="text-[#201833]" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                        <path class="text-emerald-400" stroke-width="3" stroke-dasharray="100, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        <path class="text-emerald-500" stroke-width="3" stroke-dasharray="100, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                     </svg>
-                                    <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white">100%</span>
+                                    <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">100%</span>
                                 </div>
-                                <div class="text-[10px] font-bold text-slate-400 mt-1">Database</div>
+                                <div class="text-[10px] font-bold text-slate-500 mt-1">Database</div>
                             </div>
 
                             <!-- Queue Gauge -->
                             <div>
                                 <div class="relative w-12 h-12 mx-auto">
                                     <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                                        <path class="text-[#201833]" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                        <path class="text-emerald-400" stroke-width="3" stroke-dasharray="99, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        <path class="text-emerald-500" stroke-width="3" stroke-dasharray="99, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                     </svg>
-                                    <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white">99%</span>
+                                    <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">99%</span>
                                 </div>
-                                <div class="text-[10px] font-bold text-slate-400 mt-1">Queue</div>
+                                <div class="text-[10px] font-bold text-slate-500 mt-1">Queue</div>
                             </div>
 
                             <!-- Cache Gauge -->
                             <div>
                                 <div class="relative w-12 h-12 mx-auto">
                                     <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                                        <path class="text-[#201833]" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                        <path class="text-emerald-400" stroke-width="3" stroke-dasharray="97, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        <path class="text-emerald-500" stroke-width="3" stroke-dasharray="97, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                     </svg>
-                                    <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white">97%</span>
+                                    <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">97%</span>
                                 </div>
-                                <div class="text-[10px] font-bold text-slate-400 mt-1">Cache</div>
+                                <div class="text-[10px] font-bold text-slate-500 mt-1">Cache</div>
                             </div>
                         </div>
 
-                        <div class="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-800 text-center flex items-center justify-center gap-1.5 text-xs font-bold text-emerald-400">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-center flex items-center justify-center gap-1.5 text-xs font-bold text-emerald-700">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                             <span>All Systems Operational</span>
                         </div>
                     </div>
@@ -453,7 +453,7 @@
                     <!-- Recent Activities (4 cols) -->
                     <div class="lg:col-span-4 {{ $card }} p-5">
                         <div class="flex items-center justify-between mb-3">
-                            <h2 class="text-sm font-extrabold text-white">Recent Activities</h2>
+                            <h2 class="text-sm font-extrabold text-slate-900">Recent Activities</h2>
                             <button type="button" wire:click="setTab('audit')" class="text-xs font-bold text-[#F20B83] hover:underline flex items-center gap-1">
                                 <span>View All</span>
                                 <span>→</span>
@@ -461,27 +461,27 @@
                         </div>
 
                         <div class="space-y-2 text-xs">
-                            <div class="flex items-center justify-between p-2 rounded-lg bg-[#201833]">
+                            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100 text-slate-700">
                                 <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#F20B83]"></span>New listing submitted</span>
-                                <span class="text-[10px] text-slate-400">2 min ago</span>
+                                <span class="text-[10px] text-slate-500 font-medium">2 min ago</span>
                             </div>
-                            <div class="flex items-center justify-between p-2 rounded-lg bg-[#201833]">
-                                <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>User registered</span>
-                                <span class="text-[10px] text-slate-400">5 min ago</span>
+                            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100 text-slate-700">
+                                <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>User registered</span>
+                                <span class="text-[10px] text-slate-500 font-medium">5 min ago</span>
                             </div>
-                            <div class="flex items-center justify-between p-2 rounded-lg bg-[#201833]">
-                                <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-400"></span>Payment received: $29.99</span>
-                                <span class="text-[10px] text-slate-400">10 min ago</span>
+                            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100 text-slate-700">
+                                <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Payment received: $29.99</span>
+                                <span class="text-[10px] text-slate-500 font-medium">10 min ago</span>
                             </div>
-                            <div class="flex items-center justify-between p-2 rounded-lg bg-[#201833]">
-                                <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-400"></span>New report submitted</span>
-                                <span class="text-[10px] text-slate-400">12 min ago</span>
+                            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100 text-slate-700">
+                                <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-500"></span>New report submitted</span>
+                                <span class="text-[10px] text-slate-500 font-medium">12 min ago</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Grow Your Community Card (4 cols) -->
-                    <div class="lg:col-span-4 rounded-2xl overflow-hidden relative shadow-xl border border-[#33264E] group flex flex-col justify-between p-5 min-h-[160px]">
+                    <div class="lg:col-span-4 rounded-2xl overflow-hidden relative shadow-sm border border-slate-200 group flex flex-col justify-between p-5 min-h-[160px]">
                         <img src="{{ asset('images/promo-banner.jpg') }}" alt="Community" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-300" />
                         <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
                         <div class="relative z-10">
@@ -605,9 +605,9 @@
                     <thead><tr><th class="{{ $th }}"><span class="sr-only">Select</span></th><th class="{{ $th }}">Listing</th><th class="{{ $th }}">Category / City</th><th class="{{ $th }}">Owner</th><th class="{{ $th }}">Status</th><th class="{{ $th }}">Actions</th></tr></thead>
                     <tbody>
                     @forelse($listings as $l)
-                        <tr class="border-t border-slate-800" wire:key="listing-{{ $l->id }}">
-                            <td class="{{ $td }}"><input type="checkbox" value="{{ $l->id }}" wire:model.live="selectedListingIds" class="rounded border-slate-600 bg-slate-950 text-rose-600" aria-label="Select listing {{ $l->id }}"></td>
-                            <td class="{{ $td }}"><a href="{{ route('listings.show', $l->slug) }}" target="_blank" class="font-semibold hover:text-rose-300">{{ $l->title }}</a><div class="text-xs text-slate-500">#{{ $l->id }} · {{ $l->created_at?->format('M j, Y') }}</div></td>
+                        <tr class="border-t border-slate-100 hover:bg-slate-50/60" wire:key="listing-{{ $l->id }}">
+                            <td class="{{ $td }}"><input type="checkbox" value="{{ $l->id }}" wire:model.live="selectedListingIds" class="rounded border-slate-300 text-[#F20B83] focus:ring-[#F20B83]" aria-label="Select listing {{ $l->id }}"></td>
+                            <td class="{{ $td }}"><a href="{{ route('listings.show', $l->slug) }}" target="_blank" class="font-semibold text-slate-900 hover:text-[#F20B83]">{{ $l->title }}</a><div class="text-xs text-slate-500">#{{ $l->id }} · {{ $l->created_at?->format('M j, Y') }}</div></td>
                             <td class="{{ $td }}">{{ $l->category?->name }}<div class="text-xs text-slate-400">{{ $l->city?->name }}</div></td>
                             <td class="{{ $td }}">{{ $l->user?->name }}</td>
                             <td class="{{ $td }}"><span class="px-2 py-0.5 rounded border text-xs {{ $badge($l->status) }}">{{ str_replace('_', ' ', $l->status) }}</span></td>
@@ -725,18 +725,18 @@
                     <thead><tr><th class="{{ $th }}">#</th><th class="{{ $th }}">Severity / Reason</th><th class="{{ $th }}">Target</th><th class="{{ $th }}">Details</th><th class="{{ $th }}">Status</th><th class="{{ $th }}">Actions</th></tr></thead>
                     <tbody>
                     @forelse($reports as $r)
-                        <tr class="border-t border-slate-800" wire:key="report-{{ $r->id }}">
+                        <tr class="border-t border-slate-100 hover:bg-slate-50/60" wire:key="report-{{ $r->id }}">
                             <td class="{{ $td }}">{{ $r->id }}</td>
                             <td class="{{ $td }}">
                                 <div class="flex items-center space-x-1.5 mb-1">
-                                    <span class="px-1.5 py-0.2 rounded text-[10px] font-bold uppercase tracking-wider border {{ $r->risk_level === 'critical' ? 'bg-red-950 text-red-300 border-red-700 animate-pulse' : ($r->risk_level === 'high' ? 'bg-amber-950 text-amber-300 border-amber-700' : 'bg-slate-800 text-slate-300 border-slate-600') }}">
+                                    <span class="px-1.5 py-0.2 rounded text-[10px] font-bold uppercase tracking-wider border {{ $r->risk_level === 'critical' ? 'bg-red-50 text-red-700 border-red-200' : ($r->risk_level === 'high' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-slate-100 text-slate-700 border-slate-200') }}">
                                         {{ $r->risk_level ?? 'medium' }}
                                     </span>
                                     @if($r->is_urgent_takedown)
-                                        <span class="px-1.5 py-0.2 rounded text-[10px] font-bold uppercase tracking-wider bg-rose-900 text-white border border-rose-700">URGENT</span>
+                                        <span class="px-1.5 py-0.2 rounded text-[10px] font-bold uppercase tracking-wider bg-rose-600 text-white">URGENT</span>
                                     @endif
                                 </div>
-                                <span class="font-semibold {{ in_array($r->reason_code, ['minor_exploitation', 'commercial_solicitation', 'non_consensual', 'underage_suspected']) ? 'text-red-300' : '' }}">{{ str_replace('_', ' ', $r->reason_code) }}</span>
+                                <span class="font-semibold {{ in_array($r->reason_code, ['minor_exploitation', 'commercial_solicitation', 'non_consensual', 'underage_suspected']) ? 'text-red-600 font-bold' : 'text-slate-800' }}">{{ str_replace('_', ' ', $r->reason_code) }}</span>
                             </td>
                             <td class="{{ $td }}">{{ class_basename($r->reportable_type) }} #{{ $r->reportable_id }}</td>
                             <td class="{{ $td }}">{{ \Illuminate\Support\Str::limit($r->details, 140) }}<div class="text-xs text-slate-500">by {{ $r->reporter?->name ?? 'Anonymous' }} · {{ $r->created_at?->diffForHumans() }}</div></td>
@@ -1337,23 +1337,23 @@
                 <table class="min-w-full text-xs">
                     <thead>
                         <tr>
-                            <th class="{{ $th }} sticky left-0 bg-slate-900">Permission</th>
+                            <th class="{{ $th }} sticky left-0 bg-slate-50">Permission</th>
                             @foreach($roles as $role)<th class="{{ $th }} text-center whitespace-nowrap">{{ $role->name }}</th>@endforeach
                         </tr>
                     </thead>
                     <tbody>
                     @foreach($permissionsByModule as $module => $perms)
-                        <tr class="bg-slate-950/60"><td colspan="{{ $roles->count() + 1 }}" class="px-3 py-1 font-bold uppercase tracking-widest text-[10px] text-rose-300">{{ $module }}</td></tr>
+                        <tr class="bg-pink-50/50"><td colspan="{{ $roles->count() + 1 }}" class="px-3 py-1 font-bold uppercase tracking-widest text-[10px] text-[#F20B83]">{{ $module }}</td></tr>
                         @foreach($perms as $perm)
-                            <tr class="border-t border-slate-800" wire:key="perm-{{ $perm->id }}">
-                                <td class="px-3 py-1.5 font-mono sticky left-0 bg-slate-900">{{ $perm->slug }}</td>
+                            <tr class="border-t border-slate-100 hover:bg-slate-50/60" wire:key="perm-{{ $perm->id }}">
+                                <td class="px-3 py-1.5 font-mono sticky left-0 bg-white text-slate-800">{{ $perm->slug }}</td>
                                 @foreach($roles as $role)
                                     @php $granted = $role->permissions->contains('id', $perm->id); $locked = !$isSuperAdmin || in_array($role->slug, ['super_admin', 'admin']); @endphp
                                     <td class="px-3 py-1.5 text-center">
                                         <input type="checkbox" @checked($granted) @disabled($locked)
                                             wire:click="toggleRolePermission({{ $role->id }}, {{ $perm->id }})"
                                             aria-label="{{ $role->name }} – {{ $perm->slug }}"
-                                            class="rounded border-slate-600 bg-slate-950 text-rose-600 disabled:opacity-50">
+                                            class="rounded border-slate-300 text-[#F20B83] focus:ring-[#F20B83] disabled:opacity-50">
                                     </td>
                                 @endforeach
                             </tr>

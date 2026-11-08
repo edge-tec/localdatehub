@@ -1,4 +1,4 @@
-<footer class="bg-[#17131A] border-t border-[#2A2330] text-slate-400 text-sm mt-auto">
+<footer class="bg-white border-t border-slate-200 text-slate-600 text-sm mt-auto">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <!-- Brand Column -->
@@ -10,11 +10,11 @@
                         </svg>
                     </div>
                     <div>
-                        <span class="text-xl font-black text-white tracking-tight">LocalDate<span class="text-[#F20B65]">Hub</span></span>
-                        <div class="text-[10px] text-slate-400 tracking-wider">Connect • Meet • Enjoy</div>
+                        <span class="text-xl font-black text-slate-900 tracking-tight">LocalDate<span class="text-[#F20B65]">Hub</span></span>
+                        <div class="text-[10px] text-slate-500 tracking-wider">Connect • Meet • Enjoy</div>
                     </div>
                 </div>
-                <p class="text-xs text-slate-400 leading-relaxed">
+                <p class="text-xs text-slate-600 leading-relaxed">
                     A premium, privacy-first local adult classifieds and dating connections platform across all 50 US states. Connecting real adults safely and discreetly.
                 </p>
                 <div class="inline-flex items-center space-x-2 text-xs text-[#F20B65] font-semibold bg-[#F20B65]/10 px-2.5 py-1 rounded-full">
@@ -25,55 +25,46 @@
 
             <!-- Discovery Column -->
             <div>
-                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-200 mb-3">Discovery</h4>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 mb-3">Discovery</h4>
                 <ul class="space-y-2 text-xs">
-                    <li><a href="{{ route('categories.index') }}" class="hover:text-white transition">Browse All Categories</a></li>
-                    <li><a href="{{ route('locations.index') }}" class="hover:text-white transition">All 50 US States Directory</a></li>
-                    <li><a href="{{ route('search.index') }}" class="hover:text-white transition">Advanced Search Engine</a></li>
-                    <li><a href="{{ route('listings.create') }}" class="hover:text-white transition">Post a Classified Ad</a></li>
+                    <li><a href="{{ route('categories.index') }}" class="hover:text-[#F20B65] transition">Browse All Categories</a></li>
+                    <li><a href="{{ route('locations.index') }}" class="hover:text-[#F20B65] transition">All 50 US States Directory</a></li>
+                    <li><a href="{{ route('search.index') }}" class="hover:text-[#F20B65] transition">Advanced Search Engine</a></li>
+                    <li><a href="{{ route('listings.create') }}" class="hover:text-[#F20B65] transition">Post a Classified Ad</a></li>
                 </ul>
             </div>
 
             <!-- Safety & Legal Column -->
             <div>
-                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-200 mb-3">Trust & Legal</h4>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 mb-3">Trust & Legal</h4>
                 <ul class="space-y-2 text-xs">
-                    <li><a href="{{ route('pages.safety') }}" class="hover:text-white transition">Community Safety & Age Assurance</a></li>
-                    <li><a href="{{ route('dmca.show') }}" class="hover:text-white transition">DMCA & Legal Takedown Notices</a></li>
-                    <li><a href="{{ route('pages.terms') }}" class="hover:text-white transition">Terms of Service</a></li>
-                    <li><a href="{{ route('pages.privacy') }}" class="hover:text-white transition">Privacy & Geolocation Shield</a></li>
-                    <li><a href="{{ route('pages.contact') }}" class="hover:text-white transition">Contact Support & Report Abuse</a></li>
+                    <li><a href="{{ route('pages.safety') }}" class="hover:text-[#F20B65] transition">Community Safety & Age Assurance</a></li>
+                    <li><a href="{{ route('dmca.show') }}" class="hover:text-[#F20B65] transition">DMCA & Legal Takedown Notices</a></li>
+                    <li><a href="{{ route('pages.terms') }}" class="hover:text-[#F20B65] transition">Terms of Service</a></li>
+                    <li><a href="{{ route('pages.privacy') }}" class="hover:text-[#F20B65] transition">Privacy & Geolocation Shield</a></li>
+                    <li><a href="{{ route('pages.contact') }}" class="hover:text-[#F20B65] transition">Contact Support & Report Abuse</a></li>
                 </ul>
             </div>
 
             <!-- Company & Status Column -->
             <div>
-                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-200 mb-3">About & Systems</h4>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 mb-3">About & Systems</h4>
                 <ul class="space-y-2 text-xs">
-                    <li><a href="{{ route('pages.about') }}" class="hover:text-white transition">About LocalDateHub</a></li>
-                    <li><a href="{{ route('pages.pricing') }}" class="hover:text-white transition">Pricing & Upgrades</a></li>
+                    <li><a href="{{ route('pages.about') }}" class="hover:text-[#F20B65] transition">About LocalDateHub</a></li>
+                    <li><a href="{{ route('pages.pricing') }}" class="hover:text-[#F20B65] transition">Pricing & Upgrades</a></li>
                     <li class="pt-2">
                         <div class="flex items-center space-x-2">
                             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                            <span class="text-slate-300 font-medium text-xs">All Systems Operational</span>
+                            <span class="text-slate-700 font-semibold text-xs">All Systems Operational</span>
                         </div>
-                    </li>
-                    <li class="pt-1">
-                        <a href="{{ url('/up') }}" class="inline-block text-[#F20B65] hover:underline font-bold text-xs">
-                            System Health Probe →
-                        </a>
                     </li>
                 </ul>
             </div>
         </div>
 
-        <div class="border-t border-[#2A2330] pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 space-y-3 sm:space-y-0">
-            <div>
-                &copy; {{ date('Y') }} LocalDateHub. All rights reserved. Adult personal classifieds only.
-            </div>
-            <div class="text-[11px] text-slate-500">
-                Commercial sexual solicitation, trafficking, and non-consensual imagery are strictly prohibited.
-            </div>
+        <div class="border-t border-slate-200 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
+            <p>&copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved. Strictly 18+ adult classifieds and local dating community.</p>
+            <p class="text-[11px] text-slate-500">Commercial sexual solicitation, prostitution, and unlawful trafficking are strictly prohibited and actively reported.</p>
         </div>
     </div>
 </footer>

@@ -3,7 +3,7 @@
     <!-- ======================================================================= -->
     <!-- 1. HERO SECTION (Dark Burgundy & Black with Search Bar & Trust Badges)   -->
     <!-- ======================================================================= -->
-    <section class="bg-gradient-to-r from-[#17131A] via-[#24131D] to-[#17131A] border-b border-[#2A2330] relative overflow-hidden py-8 sm:py-12 lg:py-16">
+    <section class="bg-gradient-to-b from-pink-50/70 via-white to-slate-50 border-b border-slate-200 relative overflow-hidden py-8 sm:py-12 lg:py-16">
         <!-- Ambient Background Glow -->
         <div class="absolute top-0 right-1/4 w-96 h-96 bg-[#F20B65]/10 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -13,29 +13,29 @@
                 <!-- Left Column: Attractive Model Photograph -->
                 <div class="lg:col-span-5 flex justify-center lg:justify-start">
                     <div class="relative w-full max-w-md lg:max-w-none group">
-                        <div class="absolute -inset-1 bg-gradient-to-r from-[#F20B65]/30 to-purple-600/30 rounded-2xl blur-lg opacity-60 group-hover:opacity-90 transition duration-500"></div>
+                        <div class="absolute -inset-1 bg-gradient-to-r from-[#F20B65]/30 to-purple-600/30 rounded-2xl blur-lg opacity-40 group-hover:opacity-70 transition duration-500"></div>
                         <img 
                             src="{{ asset('images/hero-model.jpg') }}" 
                             alt="LocalDateHub Dating Lifestyle" 
-                            class="relative w-full h-[320px] sm:h-[380px] lg:h-[420px] object-cover rounded-2xl shadow-2xl border border-white/10"
+                            class="relative w-full h-[320px] sm:h-[380px] lg:h-[420px] object-cover rounded-2xl shadow-xl border border-slate-200"
                         />
                     </div>
                 </div>
 
                 <!-- Right Column: Brand Heading, Search Bar & Trust Badges -->
                 <div class="lg:col-span-7 text-center lg:text-left">
-                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#F20B65]/15 border border-[#F20B65]/30 text-[#F20B65] text-xs font-bold mb-3">
+                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#F20B65]/10 border border-[#F20B65]/30 text-[#F20B65] text-xs font-bold mb-3">
                         <span class="w-2 h-2 rounded-full bg-[#F20B65] animate-pulse"></span>
                         <span>Privacy-First Adult Dating &amp; Personals</span>
                     </div>
 
-                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-none">
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-none">
                         LocalDate<span class="text-[#F20B65]">Hub</span>
                     </h1>
-                    <p class="text-lg sm:text-2xl font-bold text-slate-100 mt-2 sm:mt-3">
+                    <p class="text-lg sm:text-2xl font-bold text-slate-800 mt-2 sm:mt-3">
                         Your Local Adult Classifieds & Dating Community
                     </p>
-                    <p class="text-xs sm:text-sm text-slate-300 mt-1 sm:mt-2 font-normal">
+                    <p class="text-xs sm:text-sm text-slate-600 mt-1 sm:mt-2 font-normal">
                         Find someone special near you – discreet, easy and free!
                     </p>
 
@@ -266,18 +266,18 @@
                     </div>
 
                     <!-- Four Trust Badges Underneath Search Bar -->
-                    <div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-semibold text-slate-200">
+                    <div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-semibold text-slate-700">
                         <div class="flex items-center justify-center lg:justify-start space-x-2">
-                            <div class="w-5 h-5 rounded-md bg-[#F20B65]/20 flex items-center justify-center text-[#F20B65]">
+                            <div class="w-6 h-6 rounded-md bg-[#F20B65]/10 flex items-center justify-center text-[#F20B65]">
                                 <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                 </svg>
                             </div>
-                            <span>Safe & Discreet</span>
+                            <span>Safe &amp; Discreet</span>
                         </div>
 
                         <div class="flex items-center justify-center lg:justify-start space-x-2">
-                            <div class="w-5 h-5 rounded-md bg-[#F20B65]/20 flex items-center justify-center text-[#F20B65]">
+                            <div class="w-6 h-6 rounded-md bg-[#F20B65]/10 flex items-center justify-center text-[#F20B65]">
                                 <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
                                 </svg>
@@ -286,7 +286,7 @@
                         </div>
 
                         <div class="flex items-center justify-center lg:justify-start space-x-2">
-                            <div class="w-5 h-5 rounded-md bg-[#F20B65]/20 flex items-center justify-center text-[#F20B65]">
+                            <div class="w-6 h-6 rounded-md bg-[#F20B65]/10 flex items-center justify-center text-[#F20B65]">
                                 <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
                                 </svg>
@@ -295,7 +295,7 @@
                         </div>
 
                         <div class="flex items-center justify-center lg:justify-start space-x-2">
-                            <div class="w-5 h-5 rounded-md bg-[#F20B65]/20 flex items-center justify-center text-[#F20B65]">
+                            <div class="w-6 h-6 rounded-md bg-[#F20B65]/10 flex items-center justify-center text-[#F20B65]">
                                 <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
                                 </svg>
@@ -312,7 +312,7 @@
     <!-- ======================================================================= -->
     <!-- 2. CATEGORY NAVIGATION ROW (Clean White Cards with Pink Icons)          -->
     <!-- ======================================================================= -->
-    <section class="bg-[#F8F7FA] border-b border-[#E8E4EC] py-6 sm:py-8">
+    <section class="bg-white border-b border-slate-200 py-6 sm:py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between mb-3.5">
                 <span class="text-xs font-bold text-[#737784] uppercase tracking-wider">Explore Personal Classifications</span>
@@ -505,18 +505,18 @@
                 <div class="lg:col-span-3 space-y-5">
                     
                     <!-- 1. Join Our Community Card -->
-                    <div class="bg-[#17131A] text-white rounded-2xl p-5 border border-[#2E2636] shadow-xl relative overflow-hidden">
+                    <div class="bg-white text-slate-900 rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden">
                         <!-- Decorative ambient glow -->
-                        <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-[#F20B65]/15 rounded-full blur-2xl"></div>
+                        <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-[#F20B65]/10 rounded-full blur-2xl"></div>
 
-                        <h3 class="text-lg font-extrabold text-white">
+                        <h3 class="text-lg font-black text-slate-900">
                             Join Our Community
                         </h3>
-                        <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+                        <p class="text-xs text-slate-600 mt-2 leading-relaxed">
                             Create your free account today and start connecting locally!
                         </p>
 
-                        <a href="{{ route('register') }}" class="mt-4 w-full bg-[#F20B65] hover:bg-[#d90858] text-white py-2.5 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 shadow-lg shadow-[#F20B65]/30 transition transform hover:scale-[1.02]">
+                        <a href="{{ route('register') }}" class="mt-4 w-full bg-[#F20B65] hover:bg-[#d90858] text-white py-2.5 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 shadow-md shadow-[#F20B65]/20 transition transform hover:scale-[1.02]">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                             </svg>
@@ -525,14 +525,14 @@
                     </div>
 
                     <!-- 2. Sunset Romance Promotional Banner -->
-                    <div class="rounded-2xl overflow-hidden shadow-xl border border-[#2E2636] relative group">
+                    <div class="rounded-2xl overflow-hidden shadow-sm border border-slate-200 relative group">
                         <a href="{{ route('register') }}" class="block relative">
                             <img 
                                 src="{{ asset('images/promo-banner.jpg') }}" 
                                 alt="Find Your Perfect Match" 
                                 class="w-full h-auto object-cover group-hover:scale-105 transition duration-300"
                             />
-                            <div class="absolute inset-0 bg-gradient-to-t from-[#17131A]/80 via-transparent to-transparent flex flex-col justify-end p-4">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-4">
                                 <div class="text-xl font-bold font-serif italic text-pink-400 drop-shadow-md">
                                     Find Your Perfect Match
                                 </div>

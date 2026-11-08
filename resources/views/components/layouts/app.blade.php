@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-slate-950 text-slate-100 antialiased">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-[#F8FAFC] text-slate-900 antialiased">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,7 +16,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="min-h-full flex flex-col font-sans selection:bg-rose-500 selection:text-white">
+<body class="min-h-full flex flex-col font-sans selection:bg-[#F20B65] selection:text-white bg-[#F8FAFC] text-slate-800">
     <!-- 18+ Adult Safety Notice Banner -->
     <x-safety-banner />
 

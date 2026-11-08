@@ -50,3 +50,4 @@ class SocialAuthController extends Controller
         return redirect()->route('login')->with('error', ucfirst($provider) . ' authentication completed callback.');
     }
 }
+

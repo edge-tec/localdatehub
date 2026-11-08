@@ -1,8 +1,8 @@
-<x-layouts.auth>
-    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
+<x-layouts.auth title="Set New Password — LocalDateHub">
+    <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-xl text-slate-800">
         <div class="mb-6 text-center">
-            <h1 class="text-2xl font-bold text-white tracking-tight">Set New Password</h1>
-            <p class="text-sm text-slate-400 mt-1">Please enter your account email and your new secure password.</p>
+            <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Set New Password</h1>
+            <p class="text-sm text-slate-600 mt-1">Please enter your account email and your new secure password.</p>
         </div>
 
         <form method="POST" action="{{ route('password.update') }}" class="space-y-4">
@@ -13,35 +13,35 @@
 
             <!-- Email Address -->
             <div>
-                <label for="email" class="block text-xs font-medium text-slate-300 mb-1">Email Address</label>
+                <label for="email" class="block text-xs font-bold text-slate-700 mb-1">Email Address</label>
                 <input id="email" type="email" name="email" value="{{ old('email', $email) }}" required autofocus
-                    class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500">
+                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83]">
                 @error('email')
-                    <p class="text-xs text-rose-400 mt-1">{{ $message }}</p>
+                    <p class="text-xs text-rose-500 font-medium mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
             <!-- Password -->
             <div>
-                <label for="password" class="block text-xs font-medium text-slate-300 mb-1">New Password</label>
+                <label for="password" class="block text-xs font-bold text-slate-700 mb-1">New Password</label>
                 <input id="password" type="password" name="password" required autocomplete="new-password"
-                    class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83]"
                     placeholder="Minimum 8 characters">
                 @error('password')
-                    <p class="text-xs text-rose-400 mt-1">{{ $message }}</p>
+                    <p class="text-xs text-rose-500 font-medium mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
             <!-- Confirm Password -->
             <div>
-                <label for="password_confirmation" class="block text-xs font-medium text-slate-300 mb-1">Confirm New Password</label>
+                <label for="password_confirmation" class="block text-xs font-bold text-slate-700 mb-1">Confirm New Password</label>
                 <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password"
-                    class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83]"
                     placeholder="Repeat new password">
             </div>
 
             <button type="submit"
-                class="w-full mt-2 bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white font-semibold py-3 px-4 rounded-xl text-sm transition shadow-lg shadow-rose-600/30">
+                class="w-full mt-2 bg-[#F20B83] hover:bg-[#d90858] active:bg-[#c0074d] text-white font-bold py-3.5 px-4 rounded-xl text-sm transition shadow-lg shadow-pink-500/20">
                 Reset Password
             </button>
         </form>
