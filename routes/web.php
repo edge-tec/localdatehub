@@ -58,6 +58,12 @@ Route::get('/privacy', [PublicPageController::class, 'privacy'])->name('pages.pr
 Route::get('/terms', [PublicPageController::class, 'terms'])->name('pages.terms');
 Route::get('/pricing', [PublicPageController::class, 'pricing'])->name('pages.pricing');
 
+// Convenient route name aliases
+Route::get('/about-us', [PublicPageController::class, 'about'])->name('about');
+Route::get('/contact-us', [PublicPageController::class, 'contact'])->name('contact');
+Route::get('/privacy-policy', [PublicPageController::class, 'privacy'])->name('privacy');
+Route::get('/terms-of-service', [PublicPageController::class, 'terms'])->name('terms');
+
 // DMCA Notice & Takedown Portal
 Route::get('/dmca', [DmcaWebController::class, 'show'])->name('dmca.show');
 Route::post('/dmca', [DmcaWebController::class, 'submit'])

@@ -60,7 +60,7 @@
             <!-- Right: Contact Us Button -->
             <div class="relative z-10 shrink-0">
                 <a 
-                    href="{{ route('contact') }}" 
+                    href="{{ Route::has('pages.contact') ? route('pages.contact') : url('/contact') }}" 
                     class="inline-flex items-center space-x-2 bg-[#F20B83] hover:bg-[#d90858] text-white px-6 py-2.5 rounded-full font-bold text-sm shadow-lg transition"
                 >
                     <span>Contact Us</span>
