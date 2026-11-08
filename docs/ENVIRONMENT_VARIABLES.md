@@ -100,3 +100,4 @@ This document details every environment variable used in LocalAdZone, its securi
 | `ADMIN_MFA_REQUIRED` | Boolean | No | Must be `true` in production to enforce 2FA on admin portal. |
 | `HEALTH_CHECK_SECRET` | String | Yes | Secret Bearer token for accessing `/api/health` without rate limiting. |
 | `SENTRY_LARAVEL_DSN` | URL | Yes | Sentry crash reporting DSN. |
+

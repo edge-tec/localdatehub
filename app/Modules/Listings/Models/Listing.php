@@ -128,6 +128,15 @@ class Listing extends Model
         return $this->hasOne(ListingMedia::class)->where('is_primary', true);
     }
 
+    public function getPrimaryPhotoUrlAttribute(): string
+    {
+        if ($this->primaryPhoto && $this->primaryPhoto->url) {
+            return $this->primaryPhoto->url;
+        }
+        $index = (($this->id - 1) % 4) + 1;
+        return asset("images/featured-{$index}.jpg");
+    }
+
     public function contact(): HasOne
     {
         return $this->hasOne(ListingContact::class);

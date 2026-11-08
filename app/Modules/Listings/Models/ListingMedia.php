@@ -47,4 +47,15 @@ class ListingMedia extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function getUrlAttribute(): string
+    {
+        if (empty($this->file_path)) {
+            return asset('images/featured-1.jpg');
+        }
+        if (str_starts_with($this->file_path, 'http://') || str_starts_with($this->file_path, 'https://') || str_starts_with($this->file_path, '/')) {
+            return $this->file_path;
+        }
+        return asset('storage/' . $this->file_path);
+    }
 }

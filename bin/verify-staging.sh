@@ -40,3 +40,4 @@ php artisan test --filter=SeoAnalyticsAndNotificationsTest
 echo "================================================================="
 echo " PRE-FLIGHT READINESS VERIFICATION COMPLETED SUCCESSFULLY"
 echo "================================================================="
+

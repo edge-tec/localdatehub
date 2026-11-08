@@ -86,3 +86,4 @@ php artisan up
 3. Execute `./bin/restore.sh` to restore schema and state.
 4. Update DNS records (Cloudflare) to point to the new server IP.
 5. Deactivate maintenance mode. Recovery Time Objective (RTO): **< 45 minutes**. Recovery Point Objective (RPO): **< 1 hour**.
+

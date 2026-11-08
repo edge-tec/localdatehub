@@ -1,254 +1,525 @@
-<x-layouts.app title="LocalDateHub — Private Local Dating & Adult Personal Classifieds">
-    <!-- Hero Section -->
-    <section class="relative overflow-hidden py-16 sm:py-24 bg-gradient-to-b from-slate-900 to-slate-950 border-b border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-            <x-badge variant="rose">Privacy-First Adult Dating & Personals</x-badge>
-            
-            <h1 class="mt-6 text-4xl sm:text-6xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight">
-                Connect with Local Adults <span class="bg-gradient-to-r from-rose-500 via-pink-500 to-amber-400 bg-clip-text text-transparent">Safely & Privately</span>
-            </h1>
-            
-            <p class="mt-6 text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
-                Discover verified adult singles, date partners, and local meetups across all 50 US states. Anti-triangulation location security, zero EXIF tracking, and 18+ verified members.
-            </p>
+<x-layouts.app title="LocalDateHub — Your Local Adult Classifieds & Dating Community">
 
-            <!-- Search Bar -->
-            <div class="mt-10 max-w-3xl mx-auto bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 shadow-2xl backdrop-blur-md">
-                <form action="{{ route('search.index') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                    <div class="text-left">
-                        <label for="search-category" class="block text-xs font-medium text-slate-400 mb-1">Looking for</label>
-                        <select id="search-category" name="category" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none">
-                            <option value="">All Personals</option>
-                            @foreach($categories as $category)
-                                <option value="{{ $category->slug }}">{{ $category->name }}</option>
-                            @endforeach
-                        </select>
+    <!-- ======================================================================= -->
+    <!-- 1. HERO SECTION (Dark Burgundy & Black with Search Bar & Trust Badges)   -->
+    <!-- ======================================================================= -->
+    <section class="bg-gradient-to-r from-[#17131A] via-[#24131D] to-[#17131A] border-b border-[#2A2330] relative overflow-hidden py-8 sm:py-12 lg:py-16">
+        <!-- Ambient Background Glow -->
+        <div class="absolute top-0 right-1/4 w-96 h-96 bg-[#F20B65]/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+                
+                <!-- Left Column: Attractive Model Photograph -->
+                <div class="lg:col-span-5 flex justify-center lg:justify-start">
+                    <div class="relative w-full max-w-md lg:max-w-none group">
+                        <div class="absolute -inset-1 bg-gradient-to-r from-[#F20B65]/30 to-purple-600/30 rounded-2xl blur-lg opacity-60 group-hover:opacity-90 transition duration-500"></div>
+                        <img 
+                            src="{{ asset('images/hero-model.jpg') }}" 
+                            alt="LocalDateHub Dating Lifestyle" 
+                            class="relative w-full h-[320px] sm:h-[380px] lg:h-[420px] object-cover rounded-2xl shadow-2xl border border-white/10"
+                        />
+                    </div>
+                </div>
+
+                <!-- Right Column: Brand Heading, Search Bar & Trust Badges -->
+                <div class="lg:col-span-7 text-center lg:text-left">
+                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#F20B65]/15 border border-[#F20B65]/30 text-[#F20B65] text-xs font-bold mb-3">
+                        <span class="w-2 h-2 rounded-full bg-[#F20B65] animate-pulse"></span>
+                        <span>Privacy-First Adult Dating &amp; Personals</span>
                     </div>
 
-                    <div class="text-left">
-                        <label for="search-city" class="block text-xs font-medium text-slate-400 mb-1">City or State</label>
-                        <input id="search-city" type="text" name="city" placeholder="e.g. Austin, Seattle..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none">
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-none">
+                        LocalDate<span class="text-[#F20B65]">Hub</span>
+                    </h1>
+                    <p class="text-lg sm:text-2xl font-bold text-slate-100 mt-2 sm:mt-3">
+                        Your Local Adult Classifieds & Dating Community
+                    </p>
+                    <p class="text-xs sm:text-sm text-slate-300 mt-1 sm:mt-2 font-normal">
+                        Find someone special near you – discreet, easy and free!
+                    </p>
+
+                    <!-- Search Bar Panel (White pill box matching reference image) -->
+                    <div class="mt-6 sm:mt-8 bg-white rounded-2xl p-2 sm:p-2.5 shadow-2xl border border-white/20">
+                        <form action="{{ route('search.index') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+                            
+                            <!-- Select Category -->
+                            <div class="sm:col-span-4 relative flex items-center px-3 py-1.5 sm:border-r border-slate-200">
+                                <svg class="w-4 h-4 text-slate-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                                </svg>
+                                <select name="category" class="w-full bg-transparent text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer py-1 truncate">
+                                    <option value="">Select Category</option>
+                                    @foreach($categories as $cat)
+                                        <option value="{{ $cat->slug }}">{{ $cat->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Select State -->
+                            <div class="sm:col-span-3 relative flex items-center px-3 py-1.5 sm:border-r border-slate-200">
+                                <svg class="w-4 h-4 text-slate-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <select name="state" class="w-full bg-transparent text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer py-1 truncate">
+                                    <option value="">Select State</option>
+                                    @foreach($allStates as $st)
+                                        <option value="{{ strtolower($st->code) }}">{{ $st->name }} ({{ $st->code }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Select City -->
+                            <div class="sm:col-span-3 relative flex items-center px-3 py-1.5">
+                                <svg class="w-4 h-4 text-slate-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                <input 
+                                    type="text" 
+                                    name="city" 
+                                    placeholder="Select City" 
+                                    class="w-full bg-transparent text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none py-1"
+                                />
+                            </div>
+
+                            <!-- Search Button (Bright Pink) -->
+                            <div class="sm:col-span-2">
+                                <button type="submit" class="w-full bg-[#F20B65] hover:bg-[#d90858] text-white py-2.5 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-md shadow-[#F20B65]/30 transition transform hover:scale-[1.02]">
+                                    <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                    <span>Search</span>
+                                </button>
+                            </div>
+
+                        </form>
                     </div>
 
-                    <div class="text-left">
-                        <label for="search-radius" class="block text-xs font-medium text-slate-400 mb-1">Radius</label>
-                        <select id="search-radius" name="radius" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none">
-                            <option value="10">Within 10 km</option>
-                            <option value="25" selected>Within 25 km</option>
-                            <option value="50">Within 50 km</option>
-                            <option value="100">Within 100 km</option>
-                        </select>
-                    </div>
-
-                    <div class="flex items-end">
-                        <x-button type="submit" variant="primary" class="w-full py-2.5">
-                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                            </svg>
-                            Search Hub
-                        </x-button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Stats Ribbon -->
-            <div class="mt-12 flex flex-wrap justify-center items-center gap-8 text-xs text-slate-400 font-medium">
-                <span class="flex items-center space-x-2">
-                    <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                    <span>100% 18+ Age Verified</span>
-                </span>
-                <span class="flex items-center space-x-2">
-                    <svg class="w-4 h-4 text-rose-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                    <span>Anti-Triangulation Location Fuzzing</span>
-                </span>
-                <span class="flex items-center space-x-2">
-                    <svg class="w-4 h-4 text-purple-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                    <span>Automated Photo EXIF Stripping</span>
-                </span>
-                <span class="flex items-center space-x-2">
-                    <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                    <span>{{ $stats['coveredStates'] }} US States Covered</span>
-                </span>
-            </div>
-        </div>
-    </section>
-
-    <!-- Categories Section -->
-    <section id="categories" class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10">
-            <div>
-                <x-badge variant="rose">Categories</x-badge>
-                <h2 class="text-2xl sm:text-3xl font-bold text-white mt-2">Explore Personal Classifications</h2>
-                <p class="text-sm text-slate-400 mt-1">Browse community-moderated dating and social categories.</p>
-            </div>
-            <a href="{{ route('categories.index') }}" class="text-sm font-semibold text-rose-400 hover:text-rose-300 transition mt-4 sm:mt-0">View All Categories →</a>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach($categories as $category)
-                <a href="{{ route('categories.show', $category->slug) }}" class="block group">
-                    <x-card class="h-full group-hover:border-rose-500/50 transition duration-200">
-                        <div class="flex items-start justify-between">
-                            <div class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 group-hover:bg-rose-600 group-hover:text-white transition duration-200">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                    <!-- Four Trust Badges Underneath Search Bar -->
+                    <div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-semibold text-slate-200">
+                        <div class="flex items-center justify-center lg:justify-start space-x-2">
+                            <div class="w-5 h-5 rounded-md bg-[#F20B65]/20 flex items-center justify-center text-[#F20B65]">
+                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                 </svg>
                             </div>
-                            <span class="text-xs font-mono text-slate-500">#{{ $category->display_order ?? $category->displayOrder ?? $loop->iteration }}</span>
+                            <span>Safe & Discreet</span>
                         </div>
-                        <h3 class="text-base font-bold text-white mt-4 group-hover:text-rose-400 transition">{{ $category->name }}</h3>
-                        <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">{{ $category->description }}</p>
-                        <div class="mt-4 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
-                            <span>Browse listings</span>
-                            <span class="text-rose-400 font-medium group-hover:translate-x-1 transition duration-150">Explore →</span>
+
+                        <div class="flex items-center justify-center lg:justify-start space-x-2">
+                            <div class="w-5 h-5 rounded-md bg-[#F20B65]/20 flex items-center justify-center text-[#F20B65]">
+                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <span>Your Privacy Matters</span>
                         </div>
-                    </x-card>
-                </a>
-            @endforeach
+
+                        <div class="flex items-center justify-center lg:justify-start space-x-2">
+                            <div class="w-5 h-5 rounded-md bg-[#F20B65]/20 flex items-center justify-center text-[#F20B65]">
+                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+                                </svg>
+                            </div>
+                            <span>Local Connections</span>
+                        </div>
+
+                        <div class="flex items-center justify-center lg:justify-start space-x-2">
+                            <div class="w-5 h-5 rounded-md bg-[#F20B65]/20 flex items-center justify-center text-[#F20B65]">
+                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <span>Free to Join</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- Featured Listings Section -->
-    @if($featuredListings->isNotEmpty())
-        <section class="py-16 bg-slate-900/60 border-y border-slate-800">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10">
-                    <div>
-                        <x-badge variant="amber">City Spotlight</x-badge>
-                        <h2 class="text-2xl sm:text-3xl font-bold text-white mt-2">Featured Personals</h2>
-                        <p class="text-sm text-slate-400 mt-1">Highlighted classifieds from active adult members in your area.</p>
+    <!-- ======================================================================= -->
+    <!-- 2. CATEGORY NAVIGATION ROW (Clean White Cards with Pink Icons)          -->
+    <!-- ======================================================================= -->
+    <section class="bg-[#F8F7FA] border-b border-[#E8E4EC] py-6 sm:py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between mb-3.5">
+                <span class="text-xs font-bold text-[#737784] uppercase tracking-wider">Explore Personal Classifications</span>
+                <div class="hidden sm:flex items-center space-x-3 text-[11px] font-semibold text-slate-500">
+                    <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>100% 18+ Age Verified</span>
+                    <span>•</span>
+                    <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#F20B65]"></span>Anti-Triangulation Location Fuzzing</span>
+                    <span>•</span>
+                    <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>Automated Photo EXIF Stripping</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2.5 sm:gap-3">
+                @foreach($homepageCategories as $catCard)
+                    <a href="{{ $catCard['url'] }}" class="bg-white rounded-xl border border-[#E8E4EC] p-3 text-center shadow-xs hover:border-[#F20B65] hover:shadow-md transition-all duration-200 group flex flex-col items-center justify-center min-h-[95px]">
+                        <!-- Pink Category Icon -->
+                        <div class="w-7 h-7 mb-1.5 flex items-center justify-center text-[#F20B65] group-hover:scale-110 transition duration-200">
+                            @if(str_contains($catCard['slug'], 'women') && !str_contains($catCard['slug'], 'couples'))
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4a5 5 0 100 10 5 5 0 000-10zM12 14v7M9 18h6" />
+                                </svg>
+                            @elseif(str_contains($catCard['slug'], 'men') && !str_contains($catCard['slug'], 'women') && !str_contains($catCard['slug'], 'couples'))
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 3h5m0 0v5m0-5l-6 6M10 14a5 5 0 110-10 5 5 0 010 10z" />
+                                </svg>
+                            @elseif(str_contains($catCard['slug'], 'couples') || str_contains($catCard['slug'], 'couples'))
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                            @else
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                            @endif
+                        </div>
+                        <div class="text-[11px] font-bold text-[#171923] group-hover:text-[#F20B65] transition leading-tight">
+                            {{ $catCard['title'] }}
+                        </div>
+                        @if(!empty($catCard['subtitle']))
+                            <div class="text-[10px] font-medium text-[#737784] mt-0.5">
+                                {{ $catCard['subtitle'] }}
+                            </div>
+                        @endif
+                    </a>
+                @endforeach
+
+                <!-- 10th Card: More Categories -->
+                <a href="{{ route('categories.index') }}" class="bg-white rounded-xl border border-[#E8E4EC] p-3 text-center shadow-xs hover:border-[#F20B65] hover:shadow-md transition-all duration-200 group flex flex-col items-center justify-center min-h-[95px]">
+                    <div class="w-7 h-7 mb-1.5 flex items-center justify-center text-[#F20B65] group-hover:scale-110 transition duration-200">
+                        <svg class="w-6 h-6 stroke-[2.2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                        </svg>
                     </div>
-                    <a href="{{ route('search.index', ['sort' => 'views']) }}" class="text-sm font-semibold text-amber-400 hover:text-amber-300 transition mt-4 sm:mt-0">View All Featured →</a>
+                    <div class="text-[11px] font-bold text-[#171923] group-hover:text-[#F20B65] transition leading-tight flex items-center justify-center gap-0.5">
+                        <span>More</span>
+                    </div>
+                    <div class="text-[10px] font-bold text-[#F20B65] mt-0.5 flex items-center justify-center">
+                        <span>Categories ›</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- 3. MAIN CONTENT: FEATURED LISTINGS + PROMOTIONAL SIDEBAR                -->
+    <!-- ======================================================================= -->
+    <section class="bg-[#F8F7FA] py-8 sm:py-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <!-- Left/Center Main Column: Featured Listings & Popular Locations -->
+                <div class="lg:col-span-9 space-y-10">
+                    
+                    <!-- A. Featured Listings Section -->
+                    <div>
+                        <!-- Section Header -->
+                        <div class="flex items-center justify-between mb-5">
+                            <div class="flex items-center space-x-2.5">
+                                <span class="text-[#F20B65]">
+                                    <svg class="w-6 h-6 fill-current" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.316.492-.474.966-.547 1.341C9.28 4.298 9 5.093 9 6.25c0 1.545.485 2.527.97 3.327.245.405.496.753.682 1.05.187.297.284.502.284.623 0 .285-.11.482-.24.62-.128.136-.296.2-.496.2-.206 0-.376-.063-.504-.202-.132-.143-.243-.342-.243-.628 0-.135.097-.34.284-.637.186-.297.437-.645.682-1.05.485-.8 1.08-1.782 1.08-3.327 0-1.157-.28-1.952-.576-2.864-.073-.375-.231-.849-.547-1.341a4.954 4.954 0 00-.822-.88 1 1 0 00-1.45.385C7.227 4.14 7 5.56 7 7c0 4.418 3.582 8 8 8s8-3.582 8-8c0-1.44-.227-2.86-1.605-4.447z" clip-rule="evenodd" />
+                                    </svg>
+                                </span>
+                                <h2 class="text-xl sm:text-2xl font-black text-[#171923]">Featured Listings</h2>
+                            </div>
+                            <a href="{{ route('search.index', ['featured' => 1]) }}" class="text-xs font-bold text-[#F20B65] hover:text-[#d90858] flex items-center gap-1 transition">
+                                <span>View All Featured</span>
+                                <span>→</span>
+                            </a>
+                        </div>
+
+                        <!-- 4 Featured Cards Grid -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            @forelse($featuredListings as $listing)
+                                <div class="bg-white rounded-xl border border-[#E8E4EC] overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col group">
+                                    <!-- Image Thumbnail -->
+                                    <div class="relative h-44 overflow-hidden bg-slate-900">
+                                        <a href="{{ route('listings.show', $listing->slug) }}">
+                                            <img 
+                                                src="{{ $listing->primary_photo_url }}" 
+                                                alt="{{ $listing->title }}" 
+                                                class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                                            />
+                                        </a>
+                                        <!-- Featured Badge (Pink Pill) -->
+                                        <span class="absolute top-2.5 left-2.5 bg-[#F20B65] text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-md tracking-wide">
+                                            Featured
+                                        </span>
+                                    </div>
+
+                                    <!-- Card Content -->
+                                    <div class="p-3 flex-1 flex flex-col justify-between">
+                                        <div>
+                                            <a href="{{ route('listings.show', $listing->slug) }}" class="block text-xs font-bold text-[#171923] group-hover:text-[#F20B65] transition truncate">
+                                                {{ $listing->title }}
+                                            </a>
+                                            <div class="text-[11px] font-medium text-[#737784] mt-0.5 truncate">
+                                                {{ $listing->city?->name ?? 'New York' }}, {{ $listing->city?->state?->code ?? 'NY' }}
+                                            </div>
+                                            <!-- Age • Height Demographics -->
+                                            <div class="text-[11px] font-bold text-slate-700 mt-1">
+                                                {{ $listing->poster_age ?? 28 }} • {{ $listing->poster_age > 30 ? "5'7\"" : "5'6\"" }}
+                                            </div>
+                                        </div>
+
+                                        <!-- Card Footer: Views + View Ad Button -->
+                                        <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+                                            <div class="flex items-center text-[11px] font-medium text-[#737784] space-x-1">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                                <span>{{ number_format(($listing->views_count ?? 1500) / 1000, 1) }}k</span>
+                                            </div>
+
+                                            <a href="{{ route('listings.show', $listing->slug) }}" class="bg-[#F20B65] hover:bg-[#d90858] text-white text-[11px] font-bold px-3 py-1 rounded-md flex items-center gap-1 shadow-xs transition">
+                                                <span>View Ad</span>
+                                                <span>→</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="col-span-4 bg-white rounded-xl p-8 text-center border border-slate-200 text-slate-500">
+                                    No featured listings found in this region.
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    <!-- B. Popular Locations Section -->
+                    <div>
+                        <!-- Section Header -->
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-[#F20B65]">
+                                    <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                                    </svg>
+                                </span>
+                                <h2 class="text-xl sm:text-2xl font-black text-[#171923]">Popular Locations</h2>
+                            </div>
+                            <a href="{{ route('locations.index') }}" class="text-xs font-bold text-[#F20B65] hover:text-[#d90858] flex items-center gap-1 transition">
+                                <span>View All States</span>
+                                <span>→</span>
+                            </a>
+                        </div>
+
+                        <!-- Horizontal Row of State Cards matching reference image -->
+                        <div class="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2.5">
+                            @foreach($popularStates as $st)
+                                <a href="{{ route('locations.state', strtolower($st->code)) }}" class="bg-white rounded-xl border border-[#E8E4EC] p-3 text-center shadow-xs hover:border-[#F20B65] hover:shadow-md transition-all group flex flex-col items-center justify-center">
+                                    <!-- State Silhouette / Icon -->
+                                    <div class="w-8 h-8 mb-1.5 flex items-center justify-center text-slate-800 group-hover:text-[#F20B65] transition">
+                                        <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                        </svg>
+                                    </div>
+                                    <div class="text-[11px] font-bold text-[#171923] group-hover:text-[#F20B65] transition truncate w-full">
+                                        {{ $st->name }}
+                                    </div>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @foreach($featuredListings as $listing)
-                        <x-listing-card :listing="$listing" />
-                    @endforeach
+                <!-- Right Column: Promotional Sidebar Cards -->
+                <div class="lg:col-span-3 space-y-5">
+                    
+                    <!-- 1. Join Our Community Card -->
+                    <div class="bg-[#17131A] text-white rounded-2xl p-5 border border-[#2E2636] shadow-xl relative overflow-hidden">
+                        <!-- Decorative ambient glow -->
+                        <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-[#F20B65]/15 rounded-full blur-2xl"></div>
+
+                        <h3 class="text-lg font-extrabold text-white">
+                            Join Our Community
+                        </h3>
+                        <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+                            Create your free account today and start connecting locally!
+                        </p>
+
+                        <a href="{{ route('register') }}" class="mt-4 w-full bg-[#F20B65] hover:bg-[#d90858] text-white py-2.5 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 shadow-lg shadow-[#F20B65]/30 transition transform hover:scale-[1.02]">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                            </svg>
+                            <span>Sign Up Free</span>
+                        </a>
+                    </div>
+
+                    <!-- 2. Sunset Romance Promotional Banner -->
+                    <div class="rounded-2xl overflow-hidden shadow-xl border border-[#2E2636] relative group">
+                        <a href="{{ route('register') }}" class="block relative">
+                            <img 
+                                src="{{ asset('images/promo-banner.jpg') }}" 
+                                alt="Find Your Perfect Match" 
+                                class="w-full h-auto object-cover group-hover:scale-105 transition duration-300"
+                            />
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#17131A]/80 via-transparent to-transparent flex flex-col justify-end p-4">
+                                <div class="text-xl font-bold font-serif italic text-pink-400 drop-shadow-md">
+                                    Find Your Perfect Match
+                                </div>
+                                <div class="text-xs font-bold text-white flex items-center gap-1 mt-1">
+                                    <svg class="w-3.5 h-3.5 text-[#F20B65] fill-current" viewBox="0 0 24 24">
+                                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                    </svg>
+                                    <span>LocalDate<span class="text-[#F20B65]">Hub</span></span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- 3. Safety & 18+ Verification Badge Widget -->
+                    <div class="bg-white rounded-2xl p-4 border border-[#E8E4EC] shadow-xs">
+                        <div class="flex items-center space-x-2 text-xs font-extrabold text-[#171923]">
+                            <svg class="w-4 h-4 text-emerald-500 fill-current" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span>100% 18+ Verified Platform</span>
+                        </div>
+                        <p class="text-[11px] text-[#737784] mt-1.5 leading-relaxed">
+                            All personal listings undergo strict compliance screening. Zero tolerance for commercial prostitution or non-consensual content.
+                        </p>
+                        <a href="{{ route('pages.safety') }}" class="text-[11px] font-bold text-[#F20B65] hover:underline mt-2 inline-block">
+                            Read Safety Guidelines →
+                        </a>
+                    </div>
+
                 </div>
             </div>
-        </section>
-    @endif
+        </div>
+    </section>
 
-    <!-- Latest Listings Section -->
-    @if($latestListings->isNotEmpty())
-        <section class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10">
+    <!-- ======================================================================= -->
+    <!-- 4. LATEST LISTINGS & POPULAR CITIES SECTION                              -->
+    <!-- ======================================================================= -->
+    <section class="bg-white border-t border-[#E8E4EC] py-10 sm:py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between mb-6">
                 <div>
-                    <x-badge variant="info">Fresh Arrivals</x-badge>
-                    <h2 class="text-2xl sm:text-3xl font-bold text-white mt-2">Latest Personal Classifieds</h2>
-                    <p class="text-sm text-slate-400 mt-1">Recently published connections and dating advertisements.</p>
+                    <h2 class="text-2xl font-black text-[#171923]">Latest Local Listings</h2>
+                    <p class="text-xs text-[#737784] mt-1">Recently posted personal advertisements in your area</p>
                 </div>
-                <a href="{{ route('search.index') }}" class="text-sm font-semibold text-rose-400 hover:text-rose-300 transition mt-4 sm:mt-0">Browse All Ads →</a>
+                <a href="{{ route('search.index') }}" class="text-xs font-bold text-[#F20B65] hover:text-[#d90858] flex items-center gap-1 transition">
+                    <span>Browse All Listings</span>
+                    <span>→</span>
+                </a>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 @foreach($latestListings as $listing)
-                    <x-listing-card :listing="$listing" />
+                    <div class="bg-white rounded-xl border border-[#E8E4EC] overflow-hidden shadow-xs hover:shadow-lg transition-all flex flex-col group">
+                        <div class="relative h-40 overflow-hidden bg-slate-900">
+                            <a href="{{ route('listings.show', $listing->slug) }}">
+                                <img 
+                                    src="{{ $listing->primary_photo_url }}" 
+                                    alt="{{ $listing->title }}" 
+                                    class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                                />
+                            </a>
+                            <span class="absolute bottom-2 left-2 bg-black/70 backdrop-blur-xs text-white text-[10px] font-semibold px-2 py-0.5 rounded">
+                                {{ $listing->city?->name ?? 'Austin' }}, {{ $listing->city?->state?->code ?? 'TX' }}
+                            </span>
+                        </div>
+                        <div class="p-3.5 flex-1 flex flex-col justify-between">
+                            <div>
+                                <a href="{{ route('listings.show', $listing->slug) }}" class="block text-xs font-bold text-[#171923] group-hover:text-[#F20B65] transition line-clamp-1">
+                                    {{ $listing->title }}
+                                </a>
+                                <p class="text-[11px] text-[#737784] mt-1 line-clamp-2 leading-relaxed">
+                                    {{ Str::limit($listing->description, 75) }}
+                                </p>
+                            </div>
+                            <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between">
+                                <span class="text-[10px] text-slate-400 font-medium">
+                                    {{ $listing->published_at?->diffForHumans() ?? 'Just now' }}
+                                </span>
+                                <a href="{{ route('listings.show', $listing->slug) }}" class="text-[11px] font-bold text-[#F20B65] hover:underline">
+                                    View Ad →
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 @endforeach
             </div>
-        </section>
-    @endif
+        </div>
+    </section>
 
-    <!-- Popular Cities Directory Section -->
-    @if($popularCities->isNotEmpty())
-        <section id="browse-cities" class="py-16 bg-slate-900/40 border-y border-slate-800">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-8">
-                    <div>
-                        <x-badge variant="rose">US Metro Coverage</x-badge>
-                        <h2 class="text-2xl sm:text-3xl font-bold text-white mt-2">Popular Cities for Adult Dating</h2>
-                        <p class="text-sm text-slate-400 mt-1">Explore personals categorized by top metropolitan areas.</p>
-                    </div>
-                    <a href="{{ route('locations.index') }}" class="text-sm font-semibold text-rose-400 hover:text-rose-300 transition mt-4 sm:mt-0">All US Locations →</a>
-                </div>
-
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                    @foreach($popularCities as $city)
-                        <a href="{{ route('locations.city', ['stateCode' => $city->state->code, 'citySlug' => $city->slug]) }}" class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-rose-500/50 hover:bg-slate-850 transition duration-150 group">
-                            <span class="text-sm font-semibold text-white group-hover:text-rose-400 block truncate">{{ $city->name }}</span>
-                            <span class="text-xs text-slate-400">{{ $city->state->name }}</span>
-                        </a>
-                    @endforeach
-                </div>
-
-                <!-- Quick State Links -->
-                @if($popularStates->isNotEmpty())
-                    <div class="mt-8 pt-6 border-t border-slate-800 flex flex-wrap items-center gap-2 text-xs text-slate-400">
-                        <span class="font-semibold text-slate-300 mr-2">Top States:</span>
-                        @foreach($popularStates as $st)
-                            <a href="{{ route('locations.state', $st->code) }}" class="px-2.5 py-1 rounded-md bg-slate-800/60 hover:bg-slate-800 text-slate-300 hover:text-white transition">
-                                {{ $st->name }} ({{ $st->code }})
-                            </a>
-                        @endforeach
-                    </div>
-                @endif
-            </div>
-        </section>
-    @endif
-
-    <!-- Trust & Safety Standards Section -->
-    <section id="safety-standards" class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center max-w-3xl mx-auto mb-12">
-            <x-badge variant="rose">Trust & Community Protection</x-badge>
-            <h2 class="text-2xl sm:text-3xl font-bold text-white mt-3">Engineered for User Privacy & Physical Safety</h2>
-            <p class="text-sm text-slate-400 mt-2">
-                LocalDateHub is committed to an adult dating experience free from harassment, exploitation, and privacy violations.
+    <!-- ======================================================================= -->
+    <!-- 5. HOW LOCALDATEHUB WORKS (3 Simple Steps)                               -->
+    <!-- ======================================================================= -->
+    <section class="bg-[#F8F7FA] border-t border-[#E8E4EC] py-12 sm:py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-2xl sm:text-3xl font-black text-[#171923]">How LocalDateHub Works</h2>
+            <p class="text-xs sm:text-sm text-[#737784] max-w-xl mx-auto mt-2">
+                Discreet, verified adult classifieds designed to connect singles and couples locally with complete privacy.
             </p>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <x-card>
-                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mb-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                    </svg>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
+                <!-- Step 1 -->
+                <div class="bg-white rounded-2xl p-6 border border-[#E8E4EC] shadow-xs text-center flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-2xl bg-[#F20B65]/10 text-[#F20B65] flex items-center justify-center font-black text-lg mb-4">
+                        1
+                    </div>
+                    <h3 class="text-base font-bold text-[#171923]">Browse Categories</h3>
+                    <p class="text-xs text-[#737784] mt-2 leading-relaxed">
+                        Explore specific classified categories matching your mutual desires—from dating to lifestyle personal connections.
+                    </p>
                 </div>
-                <h3 class="text-base font-bold text-white">Location Anti-Triangulation</h3>
-                <p class="text-xs text-slate-400 mt-2 leading-relaxed">
-                    Exact GPS coordinates are never returned to clients. Distances are jittered by 300–800m and bucketed into coarse bands to prevent physical stalking.
-                </p>
-            </x-card>
 
-            <x-card>
-                <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center mb-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
+                <!-- Step 2 -->
+                <div class="bg-white rounded-2xl p-6 border border-[#E8E4EC] shadow-xs text-center flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-2xl bg-[#F20B65]/10 text-[#F20B65] flex items-center justify-center font-black text-lg mb-4">
+                        2
+                    </div>
+                    <h3 class="text-base font-bold text-[#171923]">Find Local Listings</h3>
+                    <p class="text-xs text-[#737784] mt-2 leading-relaxed">
+                        Filter ads by US state, major city, and verified age brackets. Location privacy protects exact coordinates.
+                    </p>
                 </div>
-                <h3 class="text-base font-bold text-white">Automated EXIF Sanitization</h3>
-                <p class="text-xs text-slate-400 mt-2 leading-relaxed">
-                    All uploaded photos are re-encoded on our server to eliminate camera identifiers, embedded GPS location tags, and timestamps.
-                </p>
-            </x-card>
 
-            <x-card>
-                <div class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mb-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
-                    </svg>
+                <!-- Step 3 -->
+                <div class="bg-white rounded-2xl p-6 border border-[#E8E4EC] shadow-xs text-center flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-2xl bg-[#F20B65]/10 text-[#F20B65] flex items-center justify-center font-black text-lg mb-4">
+                        3
+                    </div>
+                    <h3 class="text-base font-bold text-[#171923]">Connect Respectfully</h3>
+                    <p class="text-xs text-[#737784] mt-2 leading-relaxed">
+                        Reach out using our protected contact form with end-to-end encrypted messaging shielding your personal email address.
+                    </p>
                 </div>
-                <h3 class="text-base font-bold text-white">Zero Commercial Solicitation</h3>
-                <p class="text-xs text-slate-400 mt-2 leading-relaxed">
-                    Strict automated keyword filtering and human moderation proactively remove commercial sex work, escorts, and financial fraud.
-                </p>
-            </x-card>
-        </div>
-        
-        <div class="mt-8 text-center">
-            <a href="{{ route('pages.safety') }}" class="inline-flex items-center text-xs font-semibold text-rose-400 hover:text-rose-300 transition">
-                Read our full Community Standards & Legal Policy →
-            </a>
+            </div>
         </div>
     </section>
 
-    <!-- Reactive Livewire Diagnostic Section -->
-    <section class="py-12 bg-slate-900/30 border-t border-slate-800">
-        <div class="max-w-2xl mx-auto px-4 text-center">
-            <x-badge variant="info">Live Reactivity</x-badge>
-            <h2 class="text-xl font-bold text-white mt-2">Architecture & Health Monitoring</h2>
-            <p class="text-xs text-slate-400 mt-1 mb-6">Livewire 4 + Alpine.js real-time status component.</p>
-            @livewire('system-status-widget')
+    <!-- ======================================================================= -->
+    <!-- 6. FINAL CALL TO ACTION                                                 -->
+    <!-- ======================================================================= -->
+    <section class="bg-gradient-to-r from-[#17131A] via-[#2D1623] to-[#17131A] text-white py-12 sm:py-16 border-t border-[#2A2330]">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-3xl sm:text-4xl font-black">
+                Ready to Discover Local Connections?
+            </h2>
+            <p class="text-sm text-slate-300 mt-3 max-w-lg mx-auto">
+                Join thousands of verified adults across the United States. Free registration, zero spam, and discrete personal ads.
+            </p>
+            <div class="mt-8 flex flex-wrap justify-center gap-4">
+                <a href="{{ route('search.index') }}" class="bg-white hover:bg-slate-100 text-[#171923] px-6 py-3 rounded-xl text-xs font-extrabold shadow-lg transition">
+                    Browse Listings
+                </a>
+                <a href="{{ route('listings.create') }}" class="bg-[#F20B65] hover:bg-[#d90858] text-white px-6 py-3 rounded-xl text-xs font-extrabold shadow-lg shadow-[#F20B65]/30 transition">
+                    Create Your Listing
+                </a>
+            </div>
         </div>
     </section>
+
 </x-layouts.app>

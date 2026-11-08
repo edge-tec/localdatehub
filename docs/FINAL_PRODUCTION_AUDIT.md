@@ -75,3 +75,4 @@ The application codebase, database schema, automated test suite, security contro
    - Update authoritative DNS records and enable Cloudflare proxy with "Under Attack Mode" or managed bot protection enabled.
 
 Once the operator injects these four external credentials into the production environment, the platform immediately transitions from **CONDITIONALLY READY** to **FULLY LIVE / PRODUCTION ACTIVE**.
+

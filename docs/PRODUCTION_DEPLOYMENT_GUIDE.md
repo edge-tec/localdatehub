@@ -150,3 +150,4 @@ EXIT;
 - **Routine Deployment:** Run `./bin/deploy.sh` to fetch commits, install dependencies, compile assets, run migrations with `--force`, refresh cache layers, and reload PHP-FPM.
 - **Instant Rollback:** If an issue occurs, execute `./bin/rollback.sh <PREVIOUS_COMMIT_HASH>`.
 - **Database Rollback:** If a migration must be reverted, inspect `bin/rollback.sh` and restore from the pre-deployment database backup created by `bin/backup.sh`.
+

@@ -1,115 +1,159 @@
-<header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40" x-data="{ mobileMenuOpen: false }">
+@php
+    $navCategories = \App\Modules\Categories\Models\Category::where('is_active', true)->whereNull('parent_id')->take(8)->get();
+    $navStates = \App\Modules\Locations\Models\State::where('is_active', true)->orWhere('status', 'active')->orderBy('name')->take(12)->get();
+    $navCities = \App\Modules\Locations\Models\City::with('state')->where('is_major', true)->take(10)->get();
+@endphp
+
+<header class="bg-[#17131A] border-b border-[#2A2330] sticky top-0 z-50 shadow-md" x-data="{ mobileMenuOpen: false, browseOpen: false, statesOpen: false, citiesOpen: false }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-            <!-- Logo & Brand -->
-            <div class="flex items-center space-x-3">
-                <a href="{{ url('/') }}" class="flex items-center space-x-2.5 group">
-                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-rose-600 to-pink-500 flex items-center justify-center text-white shadow-lg shadow-rose-500/25 group-hover:scale-105 transition duration-200">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        <div class="flex items-center justify-between h-20">
+            <!-- Left: Logo & Tagline -->
+            <div class="flex items-center">
+                <a href="{{ route('home') }}" class="flex items-center space-x-3 group">
+                    <!-- Pink Heart Icon -->
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-[#F20B65] transition group-hover:scale-105">
+                        <svg class="w-9 h-9 stroke-[2.2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                         </svg>
                     </div>
-                    <span class="text-xl font-bold tracking-tight text-white">LocalDate<span class="text-rose-500">Hub</span></span>
+                    <div>
+                        <div class="text-2xl font-extrabold tracking-tight text-white flex items-center leading-none">
+                            LocalDate<span class="text-[#F20B65]">Hub</span>
+                        </div>
+                        <div class="text-[11px] font-medium text-slate-400 tracking-wider mt-1">
+                            Connect • Meet • Enjoy
+                        </div>
+                    </div>
                 </a>
             </div>
 
-            <!-- Desktop Navigation Links -->
-            <nav class="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-300">
-                <a href="{{ route('search.index') }}" class="hover:text-white transition flex items-center gap-1.5">
-                    <svg class="w-4 h-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <!-- Center: Navigation Links -->
+            <nav class="hidden lg:flex items-center space-x-1 font-medium text-sm text-slate-200">
+                <!-- Home Button (Pink Pill) -->
+                <a href="{{ route('home') }}" class="bg-[#F20B65] text-white px-3.5 py-1.5 rounded-md flex items-center gap-1.5 shadow-sm hover:bg-[#d90858] transition">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
                     </svg>
-                    <span>Search</span>
+                    <span>Home</span>
                 </a>
-                <a href="{{ route('categories.index') }}" class="hover:text-white transition flex items-center gap-1">
-                    <svg class="w-4 h-4 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                    </svg>
-                    Categories
-                </a>
-                <a href="{{ route('locations.index') }}" class="hover:text-white transition flex items-center gap-1">
-                    <svg class="w-4 h-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    Locations
-                </a>
-                <a href="{{ route('pages.pricing') }}" class="hover:text-white transition">Pricing</a>
-                <a href="{{ route('pages.safety') }}" class="text-rose-400 hover:text-rose-300 transition flex items-center space-x-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                    </svg>
-                    <span>Trust & Safety</span>
-                </a>
+
+                <!-- Browse Ads Dropdown -->
+                <div class="relative" @click.away="browseOpen = false">
+                    <button @click="browseOpen = !browseOpen; statesOpen = false; citiesOpen = false" class="px-3 py-2 rounded-md hover:text-white transition flex items-center gap-1">
+                        <span>Browse Ads</span>
+                        <svg class="w-3.5 h-3.5 text-slate-400 transition-transform" :class="{ 'rotate-180': browseOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="browseOpen" x-cloak x-transition class="absolute left-0 mt-2 w-56 rounded-xl bg-[#1C1720] border border-[#2E2636] shadow-2xl py-2 z-50">
+                        @foreach($navCategories as $cat)
+                            <a href="{{ route('categories.show', $cat->slug) }}" class="block px-4 py-2 text-xs text-slate-300 hover:text-white hover:bg-[#F20B65]/15 transition">
+                                {{ $cat->name }}
+                            </a>
+                        @endforeach
+                        <div class="border-t border-[#2E2636] my-1"></div>
+                        <a href="{{ route('categories.index') }}" class="block px-4 py-2 text-xs font-semibold text-[#F20B65] hover:underline">
+                            View All Categories →
+                        </a>
+                    </div>
+                </div>
+
+                <!-- States Dropdown -->
+                <div class="relative" @click.away="statesOpen = false">
+                    <button @click="statesOpen = !statesOpen; browseOpen = false; citiesOpen = false" class="px-3 py-2 rounded-md hover:text-white transition flex items-center gap-1">
+                        <span>States</span>
+                        <svg class="w-3.5 h-3.5 text-slate-400 transition-transform" :class="{ 'rotate-180': statesOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="statesOpen" x-cloak x-transition class="absolute left-0 mt-2 w-64 rounded-xl bg-[#1C1720] border border-[#2E2636] shadow-2xl py-2 z-50 grid grid-cols-2 gap-1 p-2">
+                        @foreach($navStates as $st)
+                            <a href="{{ route('locations.state', strtolower($st->code)) }}" class="px-2 py-1.5 text-xs text-slate-300 hover:text-white hover:bg-[#F20B65]/15 rounded transition">
+                                {{ $st->name }}
+                            </a>
+                        @endforeach
+                        <div class="col-span-2 border-t border-[#2E2636] mt-1 pt-1.5">
+                            <a href="{{ route('locations.index') }}" class="block px-2 text-xs font-semibold text-[#F20B65] hover:underline">
+                                View All 50 States →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cities Dropdown -->
+                <div class="relative" @click.away="citiesOpen = false">
+                    <button @click="citiesOpen = !citiesOpen; browseOpen = false; statesOpen = false" class="px-3 py-2 rounded-md hover:text-white transition flex items-center gap-1">
+                        <span>Cities</span>
+                        <svg class="w-3.5 h-3.5 text-slate-400 transition-transform" :class="{ 'rotate-180': citiesOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="citiesOpen" x-cloak x-transition class="absolute left-0 mt-2 w-56 rounded-xl bg-[#1C1720] border border-[#2E2636] shadow-2xl py-2 z-50">
+                        @foreach($navCities as $ct)
+                            <a href="{{ route('locations.city', ['stateCode' => strtolower($ct->state?->code ?? 'ca'), 'citySlug' => $ct->slug]) }}" class="block px-4 py-2 text-xs text-slate-300 hover:text-white hover:bg-[#F20B65]/15 transition">
+                                {{ $ct->name }}, {{ $ct->state?->code }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+
+                <a href="{{ route('pages.about') }}" class="px-3 py-2 rounded-md hover:text-white transition">About</a>
+                <a href="{{ route('pages.contact') }}" class="px-3 py-2 rounded-md hover:text-white transition">Contact</a>
             </nav>
 
-            <!-- Actions / Auth CTA -->
-            <div class="hidden md:flex items-center space-x-3">
+            <!-- Right: Login & Post Ad -->
+            <div class="hidden sm:flex items-center space-x-3">
                 @guest
-                    <a href="{{ route('login') }}" class="text-sm font-medium text-slate-300 hover:text-white px-3 py-2">Sign In</a>
-                    <a href="{{ route('register') }}" class="text-sm font-medium text-slate-300 hover:text-white px-3 py-2">Register</a>
+                    <!-- Login Button -->
+                    <a href="{{ route('login') }}" class="border border-[#382E40] bg-[#221C26] hover:bg-[#2B2330] hover:border-slate-500 text-white px-3.5 py-1.5 rounded-md flex items-center gap-1.5 text-xs font-semibold transition">
+                        <svg class="w-3.5 h-3.5 text-slate-300" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                        </svg>
+                        <span>Login</span>
+                    </a>
                 @else
-                    <div class="flex items-center space-x-3">
-                        <a href="{{ route('account.dashboard') }}" class="text-xs font-semibold text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 transition">
-                            Dashboard
-                        </a>
-                        <a href="{{ route('account.listings.index') }}" class="text-xs font-semibold text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 transition">
-                            My Ads
-                        </a>
-                        @if(Auth::user()->role && in_array(Auth::user()->role, ['admin', 'super_admin', 'moderator']))
-                            <a href="{{ route('admin.moderation.listings.queue') }}" class="text-xs font-semibold text-amber-400 hover:text-amber-300 px-2.5 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 transition">
-                                Moderation
-                            </a>
-                        @endif
-                        <a href="{{ route('account.dashboard') }}" class="text-sm font-medium text-slate-300 hover:text-white flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-800 transition">
-                            <span class="w-6 h-6 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center text-xs font-bold border border-rose-500/30">
-                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                            </span>
-                            <span>{{ Auth::user()->name }}</span>
-                        </a>
-                        <form method="POST" action="{{ route('logout') }}" class="inline">
-                            @csrf
-                            <button type="submit" class="text-xs text-slate-400 hover:text-white px-2 py-1 transition">Sign Out</button>
-                        </form>
-                    </div>
+                    <a href="{{ route('account.dashboard') }}" class="border border-[#382E40] bg-[#221C26] hover:bg-[#2B2330] text-white px-3 py-1.5 rounded-md text-xs font-semibold transition">
+                        Dashboard
+                    </a>
                 @endguest
-                <a href="{{ route('listings.create') }}" class="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-lg bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white shadow-md shadow-rose-600/20 transition">
-                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+
+                <!-- Post Ad Button (Bright Pink) -->
+                <a href="{{ route('listings.create') }}" class="bg-[#F20B65] hover:bg-[#d90858] text-white px-4 py-1.5 rounded-md flex items-center gap-1.5 text-xs font-bold shadow-md shadow-[#F20B65]/20 transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                     </svg>
-                    Post Personal Ad
+                    <span>Post Ad</span>
                 </a>
             </div>
 
             <!-- Mobile Hamburger Button -->
-            <div class="md:hidden flex items-center">
-                <button @click="mobileMenuOpen = !mobileMenuOpen" class="text-slate-400 hover:text-white p-2">
+            <div class="flex items-center lg:hidden">
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="text-slate-300 hover:text-white p-2 rounded-md focus:outline-none">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path x-show="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                        <path x-show="mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        <path x-show="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        <path x-show="mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Mobile Drawer -->
-    <div x-show="mobileMenuOpen" class="md:hidden border-b border-slate-800 bg-slate-900 px-4 pt-2 pb-4 space-y-2">
-        <a href="{{ route('search.index') }}" class="block px-3 py-2 text-base font-medium text-slate-300 hover:bg-slate-800 rounded-md">Search Classifieds</a>
-        <a href="{{ route('categories.index') }}" class="block px-3 py-2 text-base font-medium text-slate-300 hover:bg-slate-800 rounded-md">Categories</a>
-        <a href="{{ route('locations.index') }}" class="block px-3 py-2 text-base font-medium text-slate-300 hover:bg-slate-800 rounded-md">US Locations Directory</a>
-        <a href="{{ route('pages.pricing') }}" class="block px-3 py-2 text-base font-medium text-slate-300 hover:bg-slate-800 rounded-md">Pricing & Upgrades</a>
-        <a href="{{ route('pages.safety') }}" class="block px-3 py-2 text-base font-medium text-rose-400 hover:bg-slate-800 rounded-md">Trust & Safety (18+)</a>
-        <div class="pt-2 border-t border-slate-800 flex flex-col space-y-2">
+    <!-- Mobile Drawer Menu -->
+    <div x-show="mobileMenuOpen" x-cloak class="lg:hidden bg-[#17131A] border-t border-[#2A2330] px-4 pt-3 pb-6 space-y-2">
+        <a href="{{ route('home') }}" class="block px-3 py-2 rounded-md text-sm font-semibold bg-[#F20B65] text-white">Home</a>
+        <a href="{{ route('categories.index') }}" class="block px-3 py-2 rounded-md text-sm text-slate-200 hover:bg-[#2A2330]">Browse Categories</a>
+        <a href="{{ route('locations.index') }}" class="block px-3 py-2 rounded-md text-sm text-slate-200 hover:bg-[#2A2330]">All US States</a>
+        <a href="{{ route('search.index') }}" class="block px-3 py-2 rounded-md text-sm text-slate-200 hover:bg-[#2A2330]">Search Personals</a>
+        <a href="{{ route('pages.about') }}" class="block px-3 py-2 rounded-md text-sm text-slate-200 hover:bg-[#2A2330]">About</a>
+        <a href="{{ route('pages.contact') }}" class="block px-3 py-2 rounded-md text-sm text-slate-200 hover:bg-[#2A2330]">Contact</a>
+        <div class="pt-3 border-t border-[#2A2330] flex items-center space-x-3">
             @guest
-                <a href="{{ route('login') }}" class="w-full text-center py-2 text-sm font-medium text-slate-300 hover:text-white">Sign In</a>
-                <a href="{{ route('register') }}" class="w-full text-center py-2 text-sm font-medium text-slate-300 hover:text-white">Register (18+)</a>
+                <a href="{{ route('login') }}" class="flex-1 text-center py-2 rounded-md border border-[#382E40] text-sm text-white">Login</a>
+                <a href="{{ route('register') }}" class="flex-1 text-center py-2 rounded-md bg-[#F20B65] text-sm font-bold text-white">Register</a>
             @else
-                <a href="{{ route('account.dashboard') }}" class="w-full text-left py-2 px-3 text-sm font-medium text-slate-200 hover:bg-slate-800 rounded-md">Dashboard</a>
-                <a href="{{ route('account.listings.index') }}" class="w-full text-left py-2 px-3 text-sm font-medium text-slate-200 hover:bg-slate-800 rounded-md">My Ads</a>
-                <a href="{{ route('account.profile') }}" class="w-full text-left py-2 px-3 text-sm font-medium text-slate-200 hover:bg-slate-800 rounded-md">Account Profile</a>
+                <a href="{{ route('account.dashboard') }}" class="flex-1 text-center py-2 rounded-md bg-[#221C26] text-sm text-white">Dashboard</a>
             @endguest
-            <a href="{{ route('listings.create') }}" class="w-full text-center py-2 text-sm font-semibold rounded-lg bg-rose-600 text-white">Post Personal Ad</a>
+            <a href="{{ route('listings.create') }}" class="flex-1 text-center py-2 rounded-md bg-[#F20B65] text-sm font-bold text-white">+ Post Ad</a>
         </div>
     </div>
 </header>

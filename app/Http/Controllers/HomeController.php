@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Modules\Categories\Models\Category;
 use App\Modules\Categories\Services\CategoryService;
 use App\Modules\Listings\Models\Listing;
 use App\Modules\Locations\Models\City;
@@ -17,7 +18,7 @@ class HomeController extends Controller
     ) {}
 
     /**
-     * Public Homepage with dynamic classified listings, popular cities, and category taxonomy.
+     * Public Homepage for LocalDateHub — Premium Adult Classifieds & Dating Connections
      */
     public function index(): View
     {
@@ -25,8 +26,9 @@ class HomeController extends Controller
 
         $featuredListings = collect();
         $latestListings = collect();
-        $popularCities = collect();
         $popularStates = collect();
+        $allStates = collect();
+        $popularCities = collect();
         $stats = [
             'activeListings' => 0,
             'coveredStates' => 50,
@@ -39,7 +41,7 @@ class HomeController extends Controller
                 ->featured()
                 ->with(['category', 'city.state', 'state', 'primaryPhoto'])
                 ->latest('published_at')
-                ->take(6)
+                ->take(4)
                 ->get();
 
             $latestListings = Listing::active()
@@ -51,9 +53,27 @@ class HomeController extends Controller
             $stats['activeListings'] = Listing::active()->count();
         }
 
+        if (Schema::hasTable('states')) {
+            $allStates = State::orderBy('name')->get();
+            $stats['coveredStates'] = $allStates->count();
+
+            // Popular states in exact order matching reference design
+            $targetCodes = ['CA', 'TX', 'FL', 'NY', 'IL', 'NV', 'WA', 'GA', 'CO', 'AZ'];
+            $statesMap = State::whereIn('code', $targetCodes)->withCount(['listings' => fn($q) => $q->where('status', Listing::STATUS_ACTIVE)])->get()->keyBy('code');
+
+            $popularStates = collect($targetCodes)->map(function ($code) use ($statesMap) {
+                return $statesMap->get($code) ?? State::where('code', $code)->first();
+            })->filter()->values();
+
+            if ($popularStates->isEmpty()) {
+                $popularStates = State::take(10)->get();
+            }
+        }
+
         if (Schema::hasTable('cities')) {
-            $popularCities = City::where('is_popular', true)
-                ->with('state')
+            $popularCities = City::with('state')
+                ->where('is_major', true)
+                ->orWhere('population', '>', 500000)
                 ->orderBy('name')
                 ->take(12)
                 ->get();
@@ -61,27 +81,48 @@ class HomeController extends Controller
             $stats['citiesCount'] = City::count();
         }
 
-        if (Schema::hasTable('states')) {
-            $popularStates = State::where('is_supported', true)
-                ->orderBy('name')
-                ->take(12)
-                ->get();
-
-            $stats['coveredStates'] = State::where('is_supported', true)->count();
-        }
-
         if (Schema::hasTable('users')) {
             $stats['verifiedMembers'] = User::where('is_age_verified', true)->count();
         }
 
+        // Ordered Top Categories for horizontal card row matching reference design
+        $topCategoriesSlugs = [
+            'men-seeking-women' => ['title' => 'Men Seeking Women', 'subtitle' => '(M4W)', 'icon' => 'heart'],
+            'men-seeking-men' => ['title' => 'Men Seeking Men', 'subtitle' => '(M4M)', 'icon' => 'users-male'],
+            'men-seeking-couples' => ['title' => 'Men Seeking Couples', 'subtitle' => '', 'icon' => 'users-couple'],
+            'women-seeking-men' => ['title' => 'Women Seeking Men', 'subtitle' => '(W4M)', 'icon' => 'female'],
+            'women-seeking-women' => ['title' => 'Women Seeking Women', 'subtitle' => '(W4W)', 'icon' => 'users-female'],
+            'women-seeking-couples' => ['title' => 'Women Seeking Couples', 'subtitle' => '', 'icon' => 'users-group'],
+            'couples-seeking-men' => ['title' => 'Couples Seeking Men', 'subtitle' => '', 'icon' => 'couple-man'],
+            'couples-seeking-women' => ['title' => 'Couples Seeking Women', 'subtitle' => '', 'icon' => 'couple-woman'],
+            'couples-seeking-couples' => ['title' => 'Couples Seeking Couples', 'subtitle' => '', 'icon' => 'couples'],
+        ];
+
+        $homepageCategories = collect();
+        foreach ($topCategoriesSlugs as $slug => $meta) {
+            $cat = Category::where('slug', $slug)->first();
+            if ($cat) {
+                $homepageCategories->push([
+                    'id' => $cat->id,
+                    'name' => $cat->name,
+                    'title' => $meta['title'],
+                    'subtitle' => $meta['subtitle'],
+                    'slug' => $cat->slug,
+                    'icon' => $meta['icon'],
+                    'url' => route('categories.show', $cat->slug),
+                ]);
+            }
+        }
+
         return view('welcome', [
             'categories' => $categories,
+            'homepageCategories' => $homepageCategories,
             'featuredListings' => $featuredListings,
             'latestListings' => $latestListings,
-            'popularCities' => $popularCities,
             'popularStates' => $popularStates,
+            'allStates' => $allStates,
+            'popularCities' => $popularCities,
             'stats' => $stats,
         ]);
     }
 }
-

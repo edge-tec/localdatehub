@@ -53,3 +53,4 @@ echo ">>> Pruning local backups older than ${RETENTION_DAYS} days..."
 find "${BACKUP_DIR}" -name "localadzone_db_*.sql.gz*" -mtime +"${RETENTION_DAYS}" -delete
 
 echo ">>> Backup process completed successfully at $(date)."
+

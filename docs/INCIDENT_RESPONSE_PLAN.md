@@ -70,3 +70,4 @@ Within 48 hours of resolving any SEV-1 or SEV-2 incident:
 2. Document timeline of events, root cause, detection latency, and recovery time.
 3. Write automated regression tests covering the vulnerability or failure point.
 4. Update application security policies and deployment runbooks accordingly.
+

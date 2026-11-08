@@ -50,3 +50,4 @@ gunzip < "${RESTORE_FILE}" | mysql \
 echo ">>> Database restored successfully at $(date)."
 echo ">>> Clearing application cache..."
 php artisan optimize:clear || true
+
