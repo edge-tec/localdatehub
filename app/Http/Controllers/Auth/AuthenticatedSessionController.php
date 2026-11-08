@@ -33,6 +33,10 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        if (!$request->filled('login') && $request->filled('email')) {
+            $request->merge(['login' => $request->input('email')]);
+        }
+
         $request->validate([
             'login' => ['required', 'string'],
             'password' => ['required', 'string'],
