@@ -50,3 +50,4 @@ class PolicyVersion extends Model
         return static::where('policy_type', $type)->where('is_active', true)->latest('effective_at')->first();
     }
 }
+

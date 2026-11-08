@@ -59,3 +59,4 @@ class DmcaRequest extends Model
         return $query->where('status', self::STATUS_PENDING);
     }
 }
+

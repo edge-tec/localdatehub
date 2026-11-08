@@ -44,3 +44,4 @@ class UserReportWebController extends Controller
         );
     }
 }
+

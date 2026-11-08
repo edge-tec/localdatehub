@@ -38,7 +38,8 @@
 
     <!-- Main Page Content -->
     <main class="flex-grow">
-        {{ $slot }}
+        {{ $slot ?? '' }}
+        @yield('content')
     </main>
 
     <!-- Global Footer -->

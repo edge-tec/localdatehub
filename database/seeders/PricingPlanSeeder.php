@@ -74,10 +74,38 @@ class PricingPlanSeeder extends Seeder
                 ],
                 'is_active' => true,
             ],
+            [
+                'name' => 'Instant Bump to Top',
+                'slug' => 'bump-to-top',
+                'description' => 'Refresh and bump your listing immediately to the very top of category and city listings.',
+                'price_cents' => 199,
+                'currency' => 'USD',
+                'duration_days' => 1,
+                'plan_type' => 'bump',
+                'features' => [
+                    'Immediate bump to #1 ranking',
+                    'Timestamp refreshed to current time',
+                    'Maintains all photos & reviews',
+                ],
+                'is_active' => true,
+            ],
         ];
 
         foreach ($plans as $p) {
             PricingPlan::firstOrCreate(['slug' => $p['slug']], $p);
+        }
+
+        // Default Dynamic Pricing Rule: Permitted Free Listing in Launch Phase
+        $freePlan = PricingPlan::where('slug', 'free-listing')->first();
+        if ($freePlan) {
+            \App\Modules\Billing\Models\PricingRule::firstOrCreate(
+                ['rule_name' => 'General Community Permitted Free Listings'],
+                [
+                    'pricing_plan_id' => $freePlan->id,
+                    'is_free' => true,
+                    'is_active' => true,
+                ]
+            );
         }
     }
 }

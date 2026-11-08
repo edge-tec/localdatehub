@@ -20,6 +20,8 @@ use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\CategoryWebController;
+use App\Http\Controllers\Billing\InvoiceWebController;
+use App\Http\Controllers\Billing\PaymentWebhookController;
 use App\Http\Controllers\DmcaWebController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
@@ -300,3 +302,8 @@ Route::middleware(['auth', 'admin.rbac:moderation.view'])->prefix('admin/moderat
     Route::post('/{message}/dismiss', [ModerationMessagesController::class, 'dismiss'])->name('dismiss');
     Route::post('/{message}/action', [ModerationMessagesController::class, 'takeAction'])->name('action');
 });
+
+// Monetization, Invoices & Webhooks
+Route::middleware('auth')->get('/account/invoices/{invoice}', [InvoiceWebController::class, 'show'])->name('account.invoices.show');
+Route::post('/webhooks/payments/{gateway}', [PaymentWebhookController::class, 'handle'])->name('webhooks.payments');
+Route::post('/api/payments/webhook/{gateway}', [PaymentWebhookController::class, 'handle'])->name('api.webhooks.payments');

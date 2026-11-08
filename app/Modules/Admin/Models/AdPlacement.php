@@ -23,6 +23,8 @@ class AdPlacement extends Model
         'ends_at',
         'impressions',
         'clicks',
+        'price_cents',
+        'payment_transaction_id',
         'created_by_admin_id',
     ];
 
@@ -34,6 +36,7 @@ class AdPlacement extends Model
             'ends_at' => 'datetime',
             'impressions' => 'integer',
             'clicks' => 'integer',
+            'price_cents' => 'integer',
         ];
     }
 

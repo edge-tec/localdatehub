@@ -10,11 +10,16 @@ use App\Modules\Admin\Models\Permission;
 use App\Modules\Admin\Models\Role;
 use App\Modules\Admin\Models\SystemSetting;
 use App\Modules\Admin\Services\AdminAuditService;
+use App\Modules\Billing\Gateways\PaymentGatewayManager;
 use App\Modules\Billing\Models\FeaturedListing;
+use App\Modules\Billing\Models\Invoice;
+use App\Modules\Billing\Models\PaymentFraudLog;
 use App\Modules\Billing\Models\PaymentTransaction;
 use App\Modules\Billing\Models\PricingPlan;
+use App\Modules\Billing\Models\PricingRule;
 use App\Modules\Billing\Models\Refund;
 use App\Modules\Billing\Models\Subscription;
+use App\Modules\Billing\Services\ReconciliationService;
 use App\Modules\Categories\Models\Category;
 use App\Modules\Categories\Models\CategoryAttribute;
 use App\Modules\Contact\Models\ContactMessage;
@@ -167,6 +172,20 @@ class AdminEnterpriseHub extends Component
     public bool $showPlanModal = false;
     public ?int $editingPlanId = null;
     public array $planForm = [];
+
+    // Pricing Rules editor
+    public bool $showPricingRuleModal = false;
+    public ?int $editingPricingRuleId = null;
+    public array $pricingRuleForm = [
+        'rule_name' => '',
+        'pricing_plan_id' => null,
+        'category_id' => null,
+        'state_id' => null,
+        'discount_percentage' => 0,
+        'fixed_price_cents' => null,
+        'is_free' => false,
+        'is_active' => true,
+    ];
 
     // CMS editor
     public bool $showCmsModal = false;
@@ -1043,18 +1062,46 @@ class AdminEnterpriseHub extends Component
 
         $before = ['status' => $txn->status];
 
-        DB::transaction(function () use ($txn) {
+        $gatewayManager = app(PaymentGatewayManager::class);
+        $gatewayRefundId = 're_' . Str::random(16);
+
+        try {
+            $gateway = $gatewayManager->driver($txn->gateway);
+            $res = $gateway->refund($txn->gateway_transaction_id ?: $txn->reference_id, $txn->amount_cents, $this->refundReason);
+            if ($res->refundId) {
+                $gatewayRefundId = $res->refundId;
+            }
+        } catch (\Throwable) {
+            // Fall back to manual ledger recording
+        }
+
+        DB::transaction(function () use ($txn, $gatewayRefundId) {
             Refund::create([
                 'payment_transaction_id' => $txn->id,
                 'processed_by_admin_id' => Auth::id(),
                 'amount_cents' => $txn->amount_cents,
                 'reason' => $this->refundReason,
                 'status' => 'completed',
-                'gateway_refund_id' => 're_' . Str::random(16),
+                'gateway_refund_id' => $gatewayRefundId,
             ]);
 
             $txn->status = 'refunded';
             $txn->save();
+
+            if ($txn->invoice) {
+                $txn->invoice->status = 'refunded';
+                $txn->invoice->save();
+            }
+
+            if ($txn->listing_id) {
+                FeaturedListing::where('listing_id', $txn->listing_id)
+                    ->where('user_id', $txn->user_id)
+                    ->update(['is_active' => false, 'status' => 'deactivated']);
+
+                $txn->listing->is_featured = false;
+                $txn->listing->promoted_until = null;
+                $txn->listing->save();
+            }
         });
 
         AdminAuditService::log('billing.refund', $txn, $before, ['status' => 'refunded', 'amount_cents' => $txn->amount_cents, 'reason' => $this->refundReason]);
@@ -1062,6 +1109,105 @@ class AdminEnterpriseHub extends Component
         $this->showRefundModal = false;
         $this->targetTransactionId = null;
         session()->flash('success', 'Refund of $' . number_format($txn->amount_cents / 100, 2) . ' successfully recorded.');
+    }
+
+    public function reconcileTransactions(): void
+    {
+        $this->authorizePermission('billing.view');
+
+        $unreconciled = PaymentTransaction::where('is_reconciled', false)->get();
+        $records = [];
+        foreach ($unreconciled as $txn) {
+            $records[] = [
+                'gateway_id' => $txn->gateway_transaction_id ?: $txn->reference_id,
+                'reference_id' => $txn->reference_id,
+                'status' => $txn->status,
+                'amount_cents' => $txn->amount_cents,
+            ];
+        }
+
+        $reconciliationService = app(ReconciliationService::class);
+        $result = $reconciliationService->reconcileGatewayBatch(config('monetization.default', 'sandbox'), $records);
+
+        session()->flash('success', "Reconciliation completed: {$result['matched']} matched, {$result['updated']} updated, " . count($result['discrepancies']) . " discrepancies.");
+    }
+
+    public function openPricingRuleModal(?int $id = null): void
+    {
+        $this->authorizePermission('billing.plans');
+        $this->editingPricingRuleId = $id;
+
+        if ($id) {
+            $rule = PricingRule::findOrFail($id);
+            $this->pricingRuleForm = [
+                'rule_name' => $rule->rule_name,
+                'pricing_plan_id' => $rule->pricing_plan_id,
+                'category_id' => $rule->category_id,
+                'state_id' => $rule->state_id,
+                'discount_percentage' => $rule->discount_percentage,
+                'fixed_price_cents' => $rule->fixed_price_cents,
+                'is_free' => (bool) $rule->is_free,
+                'is_active' => (bool) $rule->is_active,
+            ];
+        } else {
+            $this->pricingRuleForm = [
+                'rule_name' => '',
+                'pricing_plan_id' => null,
+                'category_id' => null,
+                'state_id' => null,
+                'discount_percentage' => 0,
+                'fixed_price_cents' => null,
+                'is_free' => false,
+                'is_active' => true,
+            ];
+        }
+
+        $this->showPricingRuleModal = true;
+    }
+
+    public function savePricingRule(): void
+    {
+        $this->authorizePermission('billing.plans');
+        $this->validate([
+            'pricingRuleForm.rule_name' => ['required', 'string', 'max:150'],
+            'pricingRuleForm.discount_percentage' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'pricingRuleForm.fixed_price_cents' => ['nullable', 'integer', 'min:0'],
+            'pricingRuleForm.is_free' => ['boolean'],
+            'pricingRuleForm.is_active' => ['boolean'],
+        ]);
+
+        $data = [
+            'rule_name' => $this->pricingRuleForm['rule_name'],
+            'pricing_plan_id' => $this->pricingRuleForm['pricing_plan_id'] ?: null,
+            'category_id' => $this->pricingRuleForm['category_id'] ?: null,
+            'state_id' => $this->pricingRuleForm['state_id'] ?: null,
+            'discount_percentage' => (int) ($this->pricingRuleForm['discount_percentage'] ?? 0),
+            'fixed_price_cents' => $this->pricingRuleForm['fixed_price_cents'] !== null && $this->pricingRuleForm['fixed_price_cents'] !== '' ? (int) $this->pricingRuleForm['fixed_price_cents'] : null,
+            'is_free' => (bool) ($this->pricingRuleForm['is_free'] ?? false),
+            'is_active' => (bool) ($this->pricingRuleForm['is_active'] ?? true),
+        ];
+
+        if ($this->editingPricingRuleId) {
+            $rule = PricingRule::findOrFail($this->editingPricingRuleId);
+            $rule->update($data);
+            session()->flash('success', "Pricing rule [{$rule->rule_name}] updated.");
+        } else {
+            $rule = PricingRule::create($data);
+            session()->flash('success', "Pricing rule [{$rule->rule_name}] created.");
+        }
+
+        $this->showPricingRuleModal = false;
+        $this->editingPricingRuleId = null;
+    }
+
+    public function deletePricingRule(int $id): void
+    {
+        $this->authorizePermission('billing.plans');
+        $rule = PricingRule::findOrFail($id);
+        $name = $rule->rule_name;
+        $rule->delete();
+
+        session()->flash('success', "Pricing rule [{$name}] deleted.");
     }
 
     /*
@@ -1634,7 +1780,7 @@ class AdminEnterpriseHub extends Component
 
     protected function dataPayments(): array
     {
-        $query = PaymentTransaction::with(['user', 'plan'])->latest();
+        $query = PaymentTransaction::with(['user', 'plan', 'invoice'])->latest();
         if ($this->paymentStatusFilter !== 'all') {
             $query->where('status', $this->paymentStatusFilter);
         }
@@ -1642,6 +1788,9 @@ class AdminEnterpriseHub extends Component
         return [
             'transactions' => $query->paginate(15, ['*'], 'transactionsPage'),
             'refunds' => Refund::with(['transaction', 'processedBy'])->latest()->limit(10)->get(),
+            'pricingRules' => PricingRule::with(['plan', 'category', 'state'])->latest()->get(),
+            'fraudLogs' => PaymentFraudLog::with('user')->latest()->limit(15)->get(),
+            'unreconciledCount' => PaymentTransaction::where('is_reconciled', false)->count(),
         ];
     }
 

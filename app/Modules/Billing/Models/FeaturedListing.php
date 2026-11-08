@@ -18,6 +18,7 @@ class FeaturedListing extends Model
         'user_id',
         'pricing_plan_id',
         'placement',
+        'status',
         'starts_at',
         'ends_at',
         'is_active',

@@ -40,3 +40,4 @@ class StateCompliance extends Model
         return $query->where('requires_id_verification', true);
     }
 }
+

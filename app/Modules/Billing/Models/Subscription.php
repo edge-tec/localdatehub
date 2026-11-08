@@ -19,6 +19,9 @@ class Subscription extends Model
         'gateway_subscription_id',
         'starts_at',
         'ends_at',
+        'next_renewal_at',
+        'grace_period_ends_at',
+        'auto_renew',
         'canceled_at',
     ];
 
@@ -27,6 +30,9 @@ class Subscription extends Model
         return [
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
+            'next_renewal_at' => 'datetime',
+            'grace_period_ends_at' => 'datetime',
+            'auto_renew' => 'boolean',
             'canceled_at' => 'datetime',
         ];
     }

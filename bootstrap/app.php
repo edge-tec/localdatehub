@@ -20,8 +20,16 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withCommands([
         \App\Modules\Locations\Commands\ImportLocationsCommand::class,
         \App\Modules\Locations\Commands\ValidateLocationsCommand::class,
+        \App\Console\Commands\ProcessRenewalsCommand::class,
+        \App\Console\Commands\ExpirePromotionsCommand::class,
+        \App\Console\Commands\ReconcileTransactionsCommand::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/*',
+            'api/*',
+        ]);
+
         $middleware->alias([
             'health.auth' => HealthCheckAuthMiddleware::class,
             'age.verify' => VerifyAgeMiddleware::class,

@@ -81,3 +81,4 @@ class LegalRequest extends Model
         return $query->where('is_emergency', true);
     }
 }
+

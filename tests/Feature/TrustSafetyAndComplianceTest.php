@@ -443,3 +443,4 @@ class TrustSafetyAndComplianceTest extends TestCase
         $this->assertTrue($canErase['can_erase']);
     }
 }
+

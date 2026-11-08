@@ -48,6 +48,7 @@ class Listing extends Model
         'rejection_count',
         'is_autosaved',
         'is_featured',
+        'promoted_until',
         'is_verified_poster',
         'has_photos',
         'view_count',
@@ -56,6 +57,7 @@ class Listing extends Model
         'published_at',
         'expires_at',
         'renewed_at',
+        'bumped_at',
     ];
 
     protected function casts(): array
@@ -65,6 +67,7 @@ class Listing extends Model
             'rejection_count' => 'integer',
             'is_autosaved' => 'boolean',
             'is_featured' => 'boolean',
+            'promoted_until' => 'datetime',
             'is_verified_poster' => 'boolean',
             'has_photos' => 'boolean',
             'view_count' => 'integer',
@@ -73,6 +76,7 @@ class Listing extends Model
             'published_at' => 'datetime',
             'expires_at' => 'datetime',
             'renewed_at' => 'datetime',
+            'bumped_at' => 'datetime',
         ];
     }
 

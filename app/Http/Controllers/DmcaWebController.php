@@ -52,3 +52,4 @@ class DmcaWebController extends Controller
         );
     }
 }
+

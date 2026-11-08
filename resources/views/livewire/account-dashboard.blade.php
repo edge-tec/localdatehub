@@ -884,8 +884,15 @@
                                     {{ $txn->status }}
                                 </span>
                             </div>
-                            <div class="text-right uppercase font-mono text-[10px] text-slate-400 hidden sm:block">
-                                {{ $txn->payment_method }} ({{ $txn->gateway }})
+                            <div class="text-right flex items-center justify-end space-x-2">
+                                <span class="uppercase font-mono text-[10px] text-slate-400 hidden sm:inline">
+                                    {{ $txn->payment_method }} ({{ $txn->gateway }})
+                                </span>
+                                @if($txn->invoice)
+                                    <a href="{{ route('account.invoices.show', $txn->invoice) }}" target="_blank" class="inline-flex items-center px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-rose-400 text-[10px] font-medium border border-slate-700 transition-colors">
+                                        Invoice
+                                    </a>
+                                @endif
                             </div>
                         </div>
                     @endforeach

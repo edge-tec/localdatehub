@@ -11,6 +11,8 @@ use App\Modules\Billing\Models\FeaturedListing;
 use App\Modules\Billing\Models\PaymentTransaction;
 use App\Modules\Billing\Models\PricingPlan;
 use App\Modules\Billing\Models\Subscription;
+use App\Modules\Billing\Services\PromotionService;
+use App\Modules\Billing\Services\SubscriptionService;
 use App\Modules\Categories\Models\Category;
 use App\Modules\Contact\Models\ContactMessage;
 use App\Modules\Listings\Models\Listing;
@@ -400,37 +402,22 @@ class AccountDashboard extends Component
         $listing = Listing::where('user_id', Auth::id())->findOrFail($this->promoteListingId);
         $plan = PricingPlan::findOrFail($this->selectedPlanId);
 
-        // Create FeaturedListing record
+        $promotionService = app(PromotionService::class);
+        $result = $promotionService->promoteListing(
+            listing: $listing,
+            plan: $plan,
+            paymentData: [
+                'gateway' => config('monetization.default', 'sandbox'),
+                'payment_token' => 'tok_sandbox_default',
+                'card_last_four' => '4242',
+                'card_brand' => 'Visa',
+                'ip_address' => request()->ip() ?: '127.0.0.1',
+            ],
+            user: Auth::user(),
+            placement: $this->selectedPlacement
+        );
+
         $durationDays = $plan->duration_days ?: 7;
-        $featured = FeaturedListing::create([
-            'listing_id' => $listing->id,
-            'user_id' => Auth::id(),
-            'pricing_plan_id' => $plan->id,
-            'placement' => $this->selectedPlacement,
-            'starts_at' => now(),
-            'ends_at' => now()->addDays($durationDays),
-            'is_active' => true,
-        ]);
-
-        // Mark listing featured
-        $listing->is_featured = true;
-        $listing->save();
-
-        // Record mock transaction ledger
-        PaymentTransaction::create([
-            'user_id' => Auth::id(),
-            'pricing_plan_id' => $plan->id,
-            'listing_id' => $listing->id,
-            'reference_id' => 'TXN-' . strtoupper(Str::random(10)),
-            'amount_cents' => $plan->price_cents,
-            'currency' => $plan->currency,
-            'payment_method' => 'card',
-            'gateway' => 'stripe',
-            'gateway_transaction_id' => 'ch_' . Str::random(16),
-            'status' => 'completed',
-            'gateway_payload' => ['placement' => $this->selectedPlacement],
-        ]);
-
         $this->closePromoteModal();
         session()->flash('success', "Listing [{$listing->title}] has been successfully promoted as Featured for {$durationDays} days!");
     }
@@ -444,9 +431,7 @@ class AccountDashboard extends Component
     public function cancelSubscription(int $subscriptionId): void
     {
         $sub = Subscription::where('user_id', Auth::id())->findOrFail($subscriptionId);
-        $sub->status = 'canceled';
-        $sub->canceled_at = now();
-        $sub->save();
+        app(SubscriptionService::class)->cancelSubscription($sub);
 
         session()->flash('success', 'Your subscription has been canceled and will not renew.');
     }
@@ -455,36 +440,19 @@ class AccountDashboard extends Component
     {
         $plan = PricingPlan::findOrFail($planId);
 
-        // Cancel previous active subscriptions
-        Subscription::where('user_id', Auth::id())
-            ->where('status', 'active')
-            ->update(['status' => 'canceled', 'canceled_at' => now()]);
+        app(SubscriptionService::class)->createSubscription(
+            user: Auth::user(),
+            plan: $plan,
+            paymentData: [
+                'gateway' => config('monetization.default', 'sandbox'),
+                'payment_token' => 'tok_sandbox_default',
+                'card_last_four' => '4242',
+                'card_brand' => 'Visa',
+                'ip_address' => request()->ip() ?: '127.0.0.1',
+            ]
+        );
 
-        $durationDays = $plan->duration_days ?: 30;
-        Subscription::create([
-            'user_id' => Auth::id(),
-            'pricing_plan_id' => $plan->id,
-            'status' => 'active',
-            'gateway' => 'stripe',
-            'gateway_subscription_id' => 'sub_' . Str::random(14),
-            'starts_at' => now(),
-            'ends_at' => now()->addDays($durationDays),
-        ]);
-
-        // Record payment transaction
-        PaymentTransaction::create([
-            'user_id' => Auth::id(),
-            'pricing_plan_id' => $plan->id,
-            'reference_id' => 'SUB-' . strtoupper(Str::random(10)),
-            'amount_cents' => $plan->price_cents,
-            'currency' => $plan->currency,
-            'payment_method' => 'card',
-            'gateway' => 'stripe',
-            'gateway_transaction_id' => 'in_' . Str::random(16),
-            'status' => 'completed',
-        ]);
-
-        session()->flash('success', "Welcome to the {$plan->name}! Your membership is now active.");
+        session()->flash('success', "You have successfully subscribed to {$plan->name}!");
     }
 
     /*
@@ -858,7 +826,7 @@ class AccountDashboard extends Component
 
         // Billing History
         $billingTransactions = PaymentTransaction::where('user_id', $userId)
-            ->with(['plan', 'listing'])
+            ->with(['plan', 'listing', 'invoice'])
             ->latest()
             ->paginate(10, ['*'], 'billingPage');
 

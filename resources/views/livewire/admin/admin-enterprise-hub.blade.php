@@ -671,32 +671,148 @@
 
         {{-- ================= 13. PAYMENTS & REFUNDS ================= --}}
         @if($tab === 'payments')
-            <div class="{{ $card }} p-4 mb-4 md:w-1/3">
-                <select wire:model.live="paymentStatusFilter" class="{{ $input }}" aria-label="Payment status">
-                    <option value="all">All</option><option value="completed">Completed</option><option value="pending">Pending</option><option value="failed">Failed</option><option value="refunded">Refunded</option>
-                </select>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                <div class="{{ $card }} p-3 sm:w-1/3">
+                    <select wire:model.live="paymentStatusFilter" class="{{ $input }}" aria-label="Payment status">
+                        <option value="all">All Statuses</option><option value="completed">Completed</option><option value="pending">Pending</option><option value="failed">Failed</option><option value="refunded">Refunded</option>
+                    </select>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button wire:click="openPricingRuleModal" class="{{ $btn }} bg-purple-600 hover:bg-purple-500 text-white">
+                        + Dynamic Pricing Rule
+                    </button>
+                    <button wire:click="reconcileTransactions" class="{{ $btn }} bg-slate-700 hover:bg-slate-600 text-white flex items-center">
+                        <svg class="w-3.5 h-3.5 mr-1.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        Reconcile Transactions
+                        @if($unreconciledCount > 0)
+                            <span class="ml-1.5 px-1.5 py-0.2 bg-amber-500/20 text-amber-300 rounded-full text-[10px] font-mono">{{ $unreconciledCount }}</span>
+                        @endif
+                    </button>
+                </div>
             </div>
+
             <div class="{{ $card }} overflow-x-auto mb-6">
                 <table class="min-w-full">
-                    <thead><tr><th class="{{ $th }}">Reference</th><th class="{{ $th }}">User</th><th class="{{ $th }}">Plan</th><th class="{{ $th }}">Amount</th><th class="{{ $th }}">Status</th><th class="{{ $th }}">Date</th><th class="{{ $th }}">Actions</th></tr></thead>
+                    <thead><tr><th class="{{ $th }}">Reference</th><th class="{{ $th }}">User</th><th class="{{ $th }}">Plan / Listing</th><th class="{{ $th }}">Amount</th><th class="{{ $th }}">Gateway</th><th class="{{ $th }}">Status</th><th class="{{ $th }}">Date</th><th class="{{ $th }}">Actions</th></tr></thead>
                     <tbody>
                     @forelse($transactions as $t)
                         <tr class="border-t border-slate-800" wire:key="txn-{{ $t->id }}">
-                            <td class="{{ $td }} font-mono text-xs">{{ $t->reference_id }}</td>
+                            <td class="{{ $td }} font-mono text-xs">
+                                {{ $t->reference_id }}
+                                @if($t->is_reconciled)
+                                    <span class="block text-[9px] text-emerald-400">reconciled</span>
+                                @endif
+                            </td>
                             <td class="{{ $td }}">{{ $t->user?->name }}</td>
-                            <td class="{{ $td }}">{{ $t->plan?->name ?? '—' }}</td>
-                            <td class="{{ $td }}">${{ number_format($t->amount_cents / 100, 2) }}</td>
+                            <td class="{{ $td }} text-xs">
+                                <span class="font-semibold text-slate-200">{{ $t->plan?->name ?? 'Direct Upgrade' }}</span>
+                                @if($t->listing)
+                                    <span class="block text-[10px] text-slate-400 truncate max-w-xs">{{ $t->listing->title }}</span>
+                                @endif
+                            </td>
+                            <td class="{{ $td }} font-mono font-bold">${{ number_format($t->amount_cents / 100, 2) }}</td>
+                            <td class="{{ $td }} text-xs uppercase font-mono text-slate-400">{{ $t->gateway }}</td>
                             <td class="{{ $td }}"><span class="px-2 py-0.5 rounded border text-xs {{ $badge($t->status) }}">{{ $t->status }}</span></td>
-                            <td class="{{ $td }}">{{ $t->created_at?->format('M j, Y') }}</td>
-                            <td class="{{ $td }}">@if($t->status === 'completed' && $this->userCan('billing.refunds'))<button wire:click="openRefundModal({{ $t->id }})" class="{{ $btn }} bg-amber-700 hover:bg-amber-600 text-white">Refund</button>@endif</td>
+                            <td class="{{ $td }} text-xs">{{ $t->created_at?->format('M j, Y') }}</td>
+                            <td class="{{ $td }} space-x-1.5 whitespace-nowrap">
+                                @if($t->invoice)
+                                    <a href="{{ route('account.invoices.show', $t->invoice) }}" target="_blank" class="{{ $btn }} bg-slate-700 hover:bg-slate-600 text-rose-300">Invoice</a>
+                                @endif
+                                @if($t->status === 'completed' && $this->userCan('billing.refunds'))
+                                    <button wire:click="openRefundModal({{ $t->id }})" class="{{ $btn }} bg-amber-700 hover:bg-amber-600 text-white">Refund</button>
+                                @endif
+                            </td>
                         </tr>
                     @empty
-                        <tr><td colspan="7" class="{{ $td }} text-center text-slate-400">No transactions.</td></tr>
+                        <tr><td colspan="8" class="{{ $td }} text-center text-slate-400">No transactions recorded.</td></tr>
                     @endforelse
                     </tbody>
                 </table>
                 <div class="p-3">{{ $transactions->links() }}</div>
             </div>
+
+            <!-- Dynamic Pricing Rules Section -->
+            <div class="{{ $card }} p-5 mb-6">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="font-bold text-white text-base">Dynamic Pricing Rules (Overrides & Category Promos)</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-xs">
+                        <thead><tr class="text-slate-400 text-left border-b border-slate-800"><th class="pb-2">Rule Name</th><th class="pb-2">Target</th><th class="pb-2">Pricing Adjustment</th><th class="pb-2">Status</th><th class="pb-2 text-right">Actions</th></tr></thead>
+                        <tbody class="divide-y divide-slate-800">
+                        @forelse($pricingRules as $rule)
+                            <tr wire:key="prule-{{ $rule->id }}">
+                                <td class="py-2.5 font-semibold text-slate-200">{{ $rule->rule_name }}</td>
+                                <td class="py-2.5 text-slate-400">
+                                    {{ $rule->plan?->name ?? 'All Plans' }}
+                                    @if($rule->category) · Cat: {{ $rule->category->name }} @endif
+                                    @if($rule->state) · State: {{ $rule->state->code }} @endif
+                                </td>
+                                <td class="py-2.5 font-mono">
+                                    @if($rule->is_free)
+                                        <span class="text-emerald-400 font-bold">100% FREE</span>
+                                    @elseif($rule->fixed_price_cents !== null)
+                                        <span class="text-slate-200">${{ number_format($rule->fixed_price_cents / 100, 2) }} Fixed</span>
+                                    @elseif($rule->discount_percentage > 0)
+                                        <span class="text-purple-400 font-bold">-{{ $rule->discount_percentage }}% Off</span>
+                                    @endif
+                                </td>
+                                <td class="py-2.5">
+                                    <span class="px-2 py-0.5 rounded text-[10px] {{ $rule->is_active ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-700 text-slate-400' }}">
+                                        {{ $rule->is_active ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </td>
+                                <td class="py-2.5 text-right space-x-1">
+                                    <button wire:click="openPricingRuleModal({{ $rule->id }})" class="{{ $btn }} bg-slate-700 text-white">Edit</button>
+                                    <button wire:click="deletePricingRule({{ $rule->id }})" wire:confirm="Delete this pricing rule?" class="{{ $btn }} bg-rose-900/60 hover:bg-rose-800 text-rose-300">Delete</button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="5" class="py-3 text-center text-slate-400">No dynamic pricing rules configured. Default plan pricing applies.</td></tr>
+                        @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Fraud & Velocity Monitoring Section -->
+            <div class="{{ $card }} p-5 mb-6">
+                <h2 class="font-bold text-white text-base mb-3">Payment Fraud & Velocity Alerts (Last 15 Events)</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-xs">
+                        <thead><tr class="text-slate-400 text-left border-b border-slate-800"><th class="pb-2">User / IP</th><th class="pb-2">Risk Score</th><th class="pb-2">Risk Tier</th><th class="pb-2">Flags Triggered</th><th class="pb-2">Action</th><th class="pb-2">Time</th></tr></thead>
+                        <tbody class="divide-y divide-slate-800">
+                        @forelse($fraudLogs as $flog)
+                            <tr wire:key="flog-{{ $flog->id }}">
+                                <td class="py-2 font-mono">
+                                    {{ $flog->user?->name ?? 'Guest/Anonymous' }}<br>
+                                    <span class="text-[10px] text-slate-500">{{ $flog->ip_address }}</span>
+                                </td>
+                                <td class="py-2 font-mono font-bold">{{ $flog->risk_score }}/100</td>
+                                <td class="py-2">
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase
+                                        @if($flog->risk_tier === 'blocked') bg-red-900/80 text-red-300 border border-red-700
+                                        @elseif($flog->risk_tier === 'high') bg-amber-900/80 text-amber-300 border border-amber-700
+                                        @else bg-slate-800 text-slate-300 @endif
+                                    ">
+                                        {{ $flog->risk_tier }}
+                                    </span>
+                                </td>
+                                <td class="py-2 text-[11px] text-slate-300">
+                                    {{ !empty($flog->flags) ? implode(', ', $flog->flags) : 'Clean' }}
+                                </td>
+                                <td class="py-2 text-[11px] font-mono uppercase text-slate-400">{{ $flog->action_taken }}</td>
+                                <td class="py-2 text-slate-500">{{ $flog->created_at?->diffForHumans() }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="6" class="py-3 text-center text-slate-400">No recent fraud alerts. Risk levels are normal.</td></tr>
+                        @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Recent Refunds Section -->
             <div class="{{ $card }} p-5">
                 <h2 class="font-bold text-white mb-3">Recent Refunds</h2>
                 @forelse($refunds as $rf)
@@ -916,7 +1032,7 @@
     {{-- ================================================================= --}}
     @php
         $anyModal = $showSuspendUserModal || $showAssignRoleModal || $showRejectListingModal || $showAppealModal
-            || $showResolveReportModal || $showRefundModal || $showPlanModal || $showCmsModal || $showSeoModal
+            || $showResolveReportModal || $showRefundModal || $showPlanModal || $showPricingRuleModal || $showCmsModal || $showSeoModal
             || $showAdModal || $showAuditDetailModal || $showDmcaModal || $showLegalModal || $showStateComplianceModal
             || $showPreservationModal;
     @endphp
@@ -1009,6 +1125,58 @@
                         @error('planForm.price')<p class="text-xs text-red-400">{{ $message }}</p>@enderror
                         <label class="flex items-center gap-2 text-sm"><input type="checkbox" wire:model="planForm.is_active" class="rounded border-slate-600 bg-slate-950 text-rose-600"> Active</label>
                         <div class="flex justify-end gap-2 pt-2"><button type="button" wire:click="closeModals" class="px-3 py-2 text-sm text-slate-300">Cancel</button><button type="submit" class="px-3 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold">Save plan</button></div>
+                    </form>
+                @endif
+
+                @if($showPricingRuleModal)
+                    <h3 class="text-lg font-bold text-white mb-4">{{ $editingPricingRuleId ? 'Edit' : 'New' }} Dynamic Pricing Rule</h3>
+                    <form wire:submit="savePricingRule" class="space-y-3">
+                        <label class="block text-sm">Rule Name<input type="text" wire:model="pricingRuleForm.rule_name" class="{{ $input }} mt-1" required placeholder="e.g. Free Launch Promo or Weekend Special"></label>
+                        @error('pricingRuleForm.rule_name')<p class="text-xs text-red-400">{{ $message }}</p>@enderror
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="block text-sm">Target Plan (Optional)
+                                <select wire:model="pricingRuleForm.pricing_plan_id" class="{{ $input }} mt-1">
+                                    <option value="">All Plans</option>
+                                    @foreach(\App\Modules\Billing\Models\PricingPlan::where('is_active', true)->get() as $p)
+                                        <option value="{{ $p->id }}">{{ $p->name }}</option>
+                                    @endforeach
+                                </select>
+                            </label>
+                            <label class="block text-sm">Target Category (Optional)
+                                <select wire:model="pricingRuleForm.category_id" class="{{ $input }} mt-1">
+                                    <option value="">All Categories</option>
+                                    @foreach(\App\Modules\Categories\Models\Category::where('is_active', true)->get() as $cat)
+                                        <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                    @endforeach
+                                </select>
+                            </label>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="block text-sm">Discount Percentage (%)
+                                <input type="number" min="0" max="100" wire:model="pricingRuleForm.discount_percentage" class="{{ $input }} mt-1">
+                            </label>
+                            <label class="block text-sm">Fixed Price Override (Cents, e.g. 499 for $4.99)
+                                <input type="number" min="0" wire:model="pricingRuleForm.fixed_price_cents" class="{{ $input }} mt-1" placeholder="Optional fixed price">
+                            </label>
+                        </div>
+
+                        <div class="flex items-center gap-6 pt-1">
+                            <label class="flex items-center gap-2 text-sm">
+                                <input type="checkbox" wire:model="pricingRuleForm.is_free" class="rounded border-slate-600 bg-slate-950 text-rose-600">
+                                Make 100% Free (Permitted Free Listings)
+                            </label>
+                            <label class="flex items-center gap-2 text-sm">
+                                <input type="checkbox" wire:model="pricingRuleForm.is_active" class="rounded border-slate-600 bg-slate-950 text-rose-600">
+                                Active Rule
+                            </label>
+                        </div>
+
+                        <div class="flex justify-end gap-2 pt-3">
+                            <button type="button" wire:click="closeModals" class="px-3 py-2 text-sm text-slate-300">Cancel</button>
+                            <button type="submit" class="px-3 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold">Save Pricing Rule</button>
+                        </div>
                     </form>
                 @endif
 

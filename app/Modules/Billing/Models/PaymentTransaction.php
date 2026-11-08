@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class PaymentTransaction extends Model
 {
@@ -21,9 +22,13 @@ class PaymentTransaction extends Model
         'amount_cents',
         'currency',
         'payment_method',
+        'card_last_four',
+        'card_brand',
         'gateway',
         'gateway_transaction_id',
         'status',
+        'is_reconciled',
+        'reconciled_at',
         'gateway_payload',
     ];
 
@@ -31,6 +36,8 @@ class PaymentTransaction extends Model
     {
         return [
             'amount_cents' => 'integer',
+            'is_reconciled' => 'boolean',
+            'reconciled_at' => 'datetime',
             'gateway_payload' => 'array',
         ];
     }
@@ -53,5 +60,15 @@ class PaymentTransaction extends Model
     public function refunds(): HasMany
     {
         return $this->hasMany(Refund::class);
+    }
+
+    public function invoice(): HasOne
+    {
+        return $this->hasOne(Invoice::class);
+    }
+
+    public function fraudLogs(): HasMany
+    {
+        return $this->hasMany(PaymentFraudLog::class);
     }
 }

@@ -99,3 +99,4 @@ To prevent user tracking and comply with state biometric privacy laws (e.g., Ill
 1. **Zero Raw Storage:** No photos of driver's licenses, passports, or facial biometric scans are stored on LocalAdZone servers.
 2. **Ephemeral Verification:** Verification status is maintained as a binary flag `is_age_verified` with a verification date and unique non-reversible transaction hash.
 3. **Data Segregation:** Identity audit logs are kept in cold-storage audit vaults with restricted Level 3 access only.
+
