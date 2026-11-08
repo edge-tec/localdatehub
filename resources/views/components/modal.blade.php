@@ -35,7 +35,7 @@ $maxWidthClasses = [
         x-transition:leave="ease-in duration-200"
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
-        class="fixed inset-0 transform transition-all bg-slate-950/80 backdrop-blur-sm"
+        class="fixed inset-0 transform transition-all bg-slate-50 backdrop-blur-sm"
         x-on:click="show = false"
     ></div>
 
@@ -48,15 +48,15 @@ $maxWidthClasses = [
         x-transition:leave="ease-in duration-200"
         x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
         x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-        class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl transform transition-all sm:w-full {{ $maxWidthClasses }} z-10"
+        class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-2xl transform transition-all sm:w-full {{ $maxWidthClasses }} z-10"
     >
         @if($title)
-            <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-                <h3 class="text-base font-bold text-white">{{ $title }}</h3>
+            <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                <h3 class="text-base font-bold text-slate-900">{{ $title }}</h3>
                 <button
                     type="button"
                     x-on:click="show = false"
-                    class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
+                    class="text-slate-400 hover:text-slate-900 p-1 rounded-lg hover:bg-slate-100 transition"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>

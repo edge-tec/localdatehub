@@ -409,7 +409,7 @@
                             @forelse($featuredListings as $listing)
                                 <div class="bg-white rounded-xl border border-[#E8E4EC] overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col group">
                                     <!-- Image Thumbnail -->
-                                    <div class="relative h-44 overflow-hidden bg-slate-900">
+                                    <div class="relative h-44 overflow-hidden bg-white">
                                         <a href="{{ route('listings.show', $listing->slug) }}">
                                             <img 
                                                 src="{{ $listing->primary_photo_url }}" 
@@ -533,7 +533,7 @@
                                 class="w-full h-auto object-cover group-hover:scale-105 transition duration-300"
                             />
                             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-4">
-                                <div class="text-xl font-bold font-serif italic text-pink-400 drop-shadow-md">
+                                <div class="text-xl font-bold font-serif italic text-pink-600 drop-shadow-md">
                                     Find Your Perfect Match
                                 </div>
                                 <div class="text-xs font-bold text-white flex items-center gap-1 mt-1">
@@ -586,7 +586,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 @foreach($latestListings as $listing)
                     <div class="bg-white rounded-xl border border-[#E8E4EC] overflow-hidden shadow-xs hover:shadow-lg transition-all flex flex-col group">
-                        <div class="relative h-40 overflow-hidden bg-slate-900">
+                        <div class="relative h-40 overflow-hidden bg-white">
                             <a href="{{ route('listings.show', $listing->slug) }}">
                                 <img 
                                     src="{{ $listing->primary_photo_url }}" 
@@ -672,12 +672,12 @@
     <!-- ======================================================================= -->
     <!-- 6. FINAL CALL TO ACTION                                                 -->
     <!-- ======================================================================= -->
-    <section class="bg-gradient-to-r from-[#17131A] via-[#2D1623] to-[#17131A] text-white py-12 sm:py-16 border-t border-[#2A2330]">
+    <section class="bg-gradient-to-r from-[#17131A] via-[#2D1623] to-[#17131A] text-white py-12 sm:py-16 border-t border-slate-200">
         <div class="max-w-4xl mx-auto px-4 text-center">
             <h2 class="text-3xl sm:text-4xl font-black">
                 Ready to Discover Local Connections?
             </h2>
-            <p class="text-sm text-slate-300 mt-3 max-w-lg mx-auto">
+            <p class="text-sm text-slate-600 mt-3 max-w-lg mx-auto">
                 Join thousands of verified adults across the United States. Free registration, zero spam, and discrete personal ads.
             </p>
             <div class="mt-8 flex flex-wrap justify-center gap-4">

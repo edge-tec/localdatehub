@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-slate-950 text-slate-100 antialiased">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-slate-50 text-slate-800 antialiased">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,9 +10,9 @@
     <!-- Vite Assets -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-full flex flex-col font-sans selection:bg-rose-500 selection:text-white bg-slate-950">
+<body class="min-h-full flex flex-col font-sans selection:bg-rose-500 selection:text-white bg-slate-50">
     <!-- Top Bar -->
-    <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md py-4">
+    <header class="border-b border-slate-200 bg-white backdrop-blur-md py-4">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
             <a href="{{ url('/') }}" class="flex items-center space-x-2.5 group">
                 <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-rose-600 to-pink-500 flex items-center justify-center text-white font-bold shadow-md shadow-rose-500/20">
@@ -22,7 +22,7 @@
             </a>
 
             <div class="flex items-center space-x-3 text-xs">
-                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-950 text-rose-300 border border-rose-800 uppercase tracking-wider">Strictly 18+</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-600 border border-rose-200 uppercase tracking-wider">Strictly 18+</span>
                 <a href="{{ url('/') }}" class="text-slate-400 hover:text-white transition">← Back to Site</a>
             </div>
         </div>

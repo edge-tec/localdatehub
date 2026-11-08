@@ -6,7 +6,7 @@
 
     <!-- Fast ZIP Code Auto-Detector -->
     <div>
-        <label class="block text-xs font-medium text-slate-300 mb-1">
+        <label class="block text-xs font-medium text-slate-600 mb-1">
             Quick Auto-Fill by 5-Digit ZIP <span class="text-slate-500 font-normal">(Optional)</span>
         </label>
         <div class="relative">
@@ -17,7 +17,7 @@
                 pattern="[0-9]{5}"
                 inputmode="numeric"
                 placeholder="e.g. 78701 (Type to auto-select State & City)"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-rose-500">
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 text-xs font-mono text-slate-900 placeholder-slate-500 focus:outline-none focus:border-rose-500">
             <div wire:loading wire:target="zipCode" class="absolute inset-y-0 right-0 pr-3 flex items-center">
                 <svg class="animate-spin h-3.5 w-3.5 text-rose-500" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -31,12 +31,12 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <!-- 1. Searchable State Selector -->
         <div>
-            <label class="block text-xs font-medium text-slate-300 mb-1">
+            <label class="block text-xs font-medium text-slate-600 mb-1">
                 State / Territory <span class="text-rose-500">*</span>
             </label>
             <select 
                 wire:model.live="selectedState" 
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500">
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500">
                 <option value="">Select State or Territory</option>
                 <optgroup label="US States & DC">
                     @foreach($states->where('is_territory', false) as $st)
@@ -55,17 +55,17 @@
 
         <!-- 2. Dependent City Selector -->
         <div>
-            <label class="block text-xs font-medium text-slate-300 mb-1">
+            <label class="block text-xs font-medium text-slate-600 mb-1">
                 City / Municipality <span class="text-rose-500">*</span>
             </label>
             @if(!$selectedState)
-                <select disabled class="w-full bg-slate-950/50 border border-slate-800 rounded-lg px-3 py-2.5 text-xs text-slate-500 cursor-not-allowed">
+                <select disabled class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-xs text-slate-500 cursor-not-allowed">
                     <option>Select a State first...</option>
                 </select>
             @else
                 <select 
                     wire:model.live="selectedCityId" 
-                    class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500">
+                    class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500">
                     <option value="">Select City in {{ $selectedState }}</option>
                     @foreach($cities as $ct)
                         <option value="{{ $ct->id }}">

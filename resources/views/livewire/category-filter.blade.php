@@ -6,11 +6,11 @@
                 <button
                     type="button"
                     wire:click="selectGroup({{ $group['id'] }})"
-                    class="px-3.5 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-200 border flex items-center space-x-1.5 {{ $selectedGroupId === $group['id'] ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 shadow-sm' : 'bg-slate-900/80 text-slate-300 border-slate-800 hover:border-slate-700 hover:text-white' }}"
+                    class="px-3.5 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-200 border flex items-center space-x-1.5 {{ $selectedGroupId === $group['id'] ? 'bg-rose-500/20 text-rose-600 border-rose-500/50 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-200 hover:text-white' }}"
                 >
                     <span>{{ $group['name'] }}</span>
                     @if($group['subcategories_count'] > 0)
-                        <span class="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-400">
+                        <span class="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-400">
                             {{ $group['subcategories_count'] }}
                         </span>
                     @endif
@@ -21,7 +21,7 @@
 
     <!-- Subcategories (depth 2) -->
     @if(!empty($subcategories))
-        <div class="p-3 bg-slate-950/70 border border-slate-800/80 rounded-xl">
+        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
             <span class="block text-[11px] font-medium text-slate-400 uppercase tracking-wider mb-2">
                 Select Subcategory
             </span>
@@ -30,10 +30,10 @@
                     <button
                         type="button"
                         wire:click="selectSubcategory({{ $sub['id'] }})"
-                        class="px-3 py-1 rounded-md text-xs font-medium transition-all {{ $selectedSubcategoryId === $sub['id'] ? 'bg-rose-600 text-white shadow' : 'bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white' }}"
+                        class="px-3 py-1 rounded-md text-xs font-medium transition-all {{ $selectedSubcategoryId === $sub['id'] ? 'bg-rose-600 text-white shadow' : 'bg-white text-slate-600 hover:bg-slate-100 hover:text-white' }}"
                     >
                         @if(!empty($sub['code']))
-                            <span class="font-bold text-rose-300 mr-1">[{{ $sub['code'] }}]</span>
+                            <span class="font-bold text-rose-600 mr-1">[{{ $sub['code'] }}]</span>
                         @endif
                         {{ $sub['name'] }}
                     </button>

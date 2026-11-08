@@ -7,13 +7,13 @@
         ]" />
 
         <!-- Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
             <div>
                 <div class="flex items-center gap-3">
-                    <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
                         Trust & Safety Moderation Queue
                     </h1>
-                    <span class="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-400 font-bold text-xs border border-rose-500/30">
+                    <span class="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-600 font-bold text-xs border border-rose-500/30">
                         {{ $messages->total() }} Escalations
                     </span>
                 </div>
@@ -23,7 +23,7 @@
             </div>
 
             <div class="flex items-center gap-3">
-                <a href="{{ route('admin.moderation.listings.queue') }}" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition">
+                <a href="{{ route('admin.moderation.listings.queue') }}" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-800 border border-slate-200 transition">
                     Listings Moderation Queue &rarr;
                 </a>
             </div>
@@ -38,38 +38,38 @@
 
         <!-- Filter Stats -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <a href="{{ route('admin.moderation.messages.queue') }}" class="p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-rose-500/50 transition">
+            <a href="{{ route('admin.moderation.messages.queue') }}" class="p-4 rounded-2xl bg-white border border-slate-200 hover:border-rose-500/50 transition">
                 <span class="text-xs text-slate-400 block font-semibold">All Escalations</span>
-                <span class="text-2xl font-extrabold text-white mt-1 block">{{ $totalFlagged + $totalSafetyReports }}</span>
+                <span class="text-2xl font-extrabold text-slate-900 mt-1 block">{{ $totalFlagged + $totalSafetyReports }}</span>
             </a>
-            <a href="{{ route('admin.moderation.messages.queue', ['type' => 'safety_report']) }}" class="p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-amber-500/50 transition">
-                <span class="text-xs text-amber-400 block font-semibold">User Safety Reports</span>
-                <span class="text-2xl font-extrabold text-white mt-1 block">{{ $totalSafetyReports }}</span>
+            <a href="{{ route('admin.moderation.messages.queue', ['type' => 'safety_report']) }}" class="p-4 rounded-2xl bg-white border border-slate-200 hover:border-amber-500/50 transition">
+                <span class="text-xs text-amber-700 block font-semibold">User Safety Reports</span>
+                <span class="text-2xl font-extrabold text-slate-900 mt-1 block">{{ $totalSafetyReports }}</span>
             </a>
-            <a href="{{ route('admin.moderation.messages.queue', ['type' => 'listing_inquiry']) }}" class="p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-rose-500/50 transition">
-                <span class="text-xs text-rose-400 block font-semibold">Flagged Inquiries (Spam/Abuse)</span>
-                <span class="text-2xl font-extrabold text-white mt-1 block">{{ $totalFlagged }}</span>
+            <a href="{{ route('admin.moderation.messages.queue', ['type' => 'listing_inquiry']) }}" class="p-4 rounded-2xl bg-white border border-slate-200 hover:border-rose-500/50 transition">
+                <span class="text-xs text-rose-600 block font-semibold">Flagged Inquiries (Spam/Abuse)</span>
+                <span class="text-2xl font-extrabold text-slate-900 mt-1 block">{{ $totalFlagged }}</span>
             </a>
         </div>
 
         <!-- Moderation Stream -->
         @if($messages->isNotEmpty())
-            <div class="bg-slate-900 border border-slate-800 rounded-3xl divide-y divide-slate-800 overflow-hidden shadow-xl">
+            <div class="bg-white border border-slate-200 rounded-3xl divide-y divide-slate-200 overflow-hidden shadow-xl">
                 @foreach($messages as $msg)
                     <div class="p-6 space-y-4">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                             <div class="flex items-center gap-2 flex-wrap">
                                 @if($msg->inquiry_type === 'safety_report')
-                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase">
+                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-700 border border-amber-500/30 uppercase">
                                         Safety Report: {{ $msg->flagged_reason }}
                                     </span>
                                 @else
-                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 uppercase">
+                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-600 border border-rose-500/30 uppercase">
                                         Flagged Inquiry: {{ $msg->flagged_reason }}
                                     </span>
                                 @endif
 
-                                <span class="text-xs text-slate-400">Reporter / Sender: <strong class="text-white">{{ $msg->sender_name }}</strong></span>
+                                <span class="text-xs text-slate-400">Reporter / Sender: <strong class="text-slate-900">{{ $msg->sender_name }}</strong></span>
                                 <span class="text-xs text-slate-500">({{ $msg->sender_email_encrypted }})</span>
                                 <span class="text-xs text-slate-500">&bull; IP: {{ $msg->client_ip ?? 'Unknown' }}</span>
                             </div>
@@ -79,10 +79,10 @@
 
                         <!-- Listing Info -->
                         @if($msg->listing)
-                            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800/80 text-xs flex items-center justify-between">
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs flex items-center justify-between">
                                 <div>
                                     <span class="text-slate-400">Target Listing:</span>
-                                    <a href="{{ route('listings.show', $msg->listing->slug) }}" target="_blank" class="text-rose-400 font-bold hover:underline ml-1">
+                                    <a href="{{ route('listings.show', $msg->listing->slug) }}" target="_blank" class="text-rose-600 font-bold hover:underline ml-1">
                                         {{ $msg->listing->title }}
                                     </a>
                                     <span class="text-slate-500">({{ $msg->listing->city?->name }}, {{ $msg->listing->state?->code }} &bull; Status: {{ strtoupper($msg->listing->status) }})</span>
@@ -92,7 +92,7 @@
                         @endif
 
                         <!-- Message Body -->
-                        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 whitespace-pre-line">
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 whitespace-pre-line">
                             {{ $msg->message_encrypted }}
                         </div>
 
@@ -101,7 +101,7 @@
                             <!-- Dismiss Flag -->
                             <form action="{{ route('admin.moderation.messages.dismiss', $msg->id) }}" method="POST" class="inline">
                                 @csrf
-                                <button type="submit" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition">
+                                <button type="submit" class="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold border border-slate-200 transition">
                                     Dismiss Flag (False Positive)
                                 </button>
                             </form>

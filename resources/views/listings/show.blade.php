@@ -12,19 +12,19 @@
     >
         <!-- Breadcrumbs Navigation -->
         <nav class="flex text-xs text-slate-400 space-x-2 items-center" aria-label="Breadcrumb">
-            <a href="{{ route('home') }}" class="hover:text-white transition">Home</a>
+            <a href="{{ route('home') }}" class="hover:text-slate-900 transition">Home</a>
             <span>/</span>
-            <a href="{{ route('categories.index') }}" class="hover:text-white transition">Categories</a>
+            <a href="{{ route('categories.index') }}" class="hover:text-slate-900 transition">Categories</a>
             @if($listing->category)
                 @if($listing->category->parent)
                     <span>/</span>
-                    <a href="{{ route('categories.show', $listing->category->parent->slug) }}" class="hover:text-white transition">{{ $listing->category->parent->name }}</a>
+                    <a href="{{ route('categories.show', $listing->category->parent->slug) }}" class="hover:text-slate-900 transition">{{ $listing->category->parent->name }}</a>
                 @endif
                 <span>/</span>
-                <a href="{{ route('categories.show', $listing->category->slug) }}" class="hover:text-white transition">{{ $listing->category->name }}</a>
+                <a href="{{ route('categories.show', $listing->category->slug) }}" class="hover:text-slate-900 transition">{{ $listing->category->name }}</a>
             @endif
             <span>/</span>
-            <span class="text-white font-medium line-clamp-1">{{ $listing->title }}</span>
+            <span class="text-slate-900 font-medium line-clamp-1">{{ $listing->title }}</span>
         </nav>
 
         <!-- Flash Notifications -->
@@ -50,9 +50,9 @@
 
         <!-- Status Notice if not active -->
         @if(!$listing->isActive())
-            <div class="p-4 bg-amber-950/60 border border-amber-600/50 rounded-2xl text-amber-200 text-xs flex items-center justify-between shadow-lg">
+            <div class="p-4 bg-amber-50 border border-amber-600/50 rounded-2xl text-amber-700 text-xs flex items-center justify-between shadow-lg">
                 <div class="flex items-center space-x-2.5">
-                    <svg class="w-5 h-5 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <svg class="w-5 h-5 text-amber-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                     <span><strong>NON-PUBLIC STATUS:</strong> This listing has status <strong>{{ strtoupper(str_replace('_', ' ', $listing->status)) }}</strong>. It is not currently visible in public search.</span>
                 </div>
                 @can('update', $listing)
@@ -67,18 +67,18 @@
             <!-- Left 2 Cols: Main Content & Photos -->
             <div class="lg:col-span-2 space-y-8">
                 <!-- Header Card -->
-                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-5 shadow-xl">
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-5 shadow-xl">
                     <div class="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
                         <div class="flex items-center gap-2">
-                            <span class="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-400 font-bold text-xs border border-rose-500/30">
+                            <span class="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-600 font-bold text-xs border border-rose-500/30">
                                 {{ $listing->category?->name }}
                             </span>
                             @if($listing->is_featured)
-                                <span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold text-xs border border-amber-500/30 flex items-center gap-1">
+                                <span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-700 font-bold text-xs border border-amber-500/30 flex items-center gap-1">
                                     ★ Featured Spotlight
                                 </span>
                             @endif
-                            <span class="text-slate-300 font-medium">
+                            <span class="text-slate-600 font-medium">
                                 {{ $listing->city?->name }}, {{ $listing->state?->code }}
                             </span>
                         </div>
@@ -90,7 +90,7 @@
                                 <button
                                     type="submit"
                                     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border transition text-xs font-semibold"
-                                    :class="isFavorited ? 'bg-rose-500/10 border-rose-500/40 text-rose-400' : 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white'"
+                                    :class="isFavorited ? 'bg-rose-500/10 border-rose-500/40 text-rose-600' : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-white'"
                                     title="Save to favorites"
                                 >
                                     <svg class="w-4 h-4" :fill="isFavorited ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,11 +103,11 @@
                         </div>
                     </div>
 
-                    <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
                         {{ $listing->title }}
                     </h1>
 
-                    <div class="flex flex-wrap items-center gap-4 text-xs text-slate-300 pt-3 border-t border-slate-800">
+                    <div class="flex flex-wrap items-center gap-4 text-xs text-slate-600 pt-3 border-t border-slate-200">
                         <span><strong>Age:</strong> {{ $listing->poster_age }}</span>
                         <span>&bull;</span>
                         <span><strong>Gender:</strong> {{ $listing->poster_gender }}</span>
@@ -122,9 +122,9 @@
 
                 <!-- Verified Photos Gallery -->
                 @if($listing->approvedMedia->isNotEmpty())
-                    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
+                    <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl space-y-4">
                         <div class="flex items-center justify-between">
-                            <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                                 <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
@@ -136,7 +136,7 @@
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             @foreach($listing->approvedMedia as $photo)
                                 <div
-                                    class="rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 aspect-video relative group cursor-pointer"
+                                    class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 aspect-video relative group cursor-pointer"
                                     @click="activePhotoUrl = '{{ asset('storage/' . $photo->file_path) }}'; lightboxOpen = true"
                                 >
                                     <img
@@ -157,26 +157,26 @@
                 @endif
 
                 <!-- Advertisement Details -->
-                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4">
-                    <h2 class="text-sm font-bold text-white uppercase tracking-wider">
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4">
+                    <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">
                         Advertisement Details
                     </h2>
-                    <div class="text-slate-200 text-sm leading-relaxed whitespace-pre-line font-normal">
+                    <div class="text-slate-800 text-sm leading-relaxed whitespace-pre-line font-normal">
                         {{ $listing->description }}
                     </div>
                 </div>
 
                 <!-- Match Preferences & Dynamic Attributes -->
                 @if($listing->attributes->isNotEmpty())
-                    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
-                        <h2 class="text-sm font-bold text-white uppercase tracking-wider">
+                    <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl space-y-4">
+                        <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">
                             Match Details & Preferences
                         </h2>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             @foreach($listing->attributes as $attr)
-                                <div class="p-3 bg-slate-950 border border-slate-800/80 rounded-xl text-xs">
+                                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs">
                                     <span class="text-slate-400 block text-[11px] capitalize">{{ str_replace('_', ' ', $attr->attribute_code) }}</span>
-                                    <span class="font-bold text-white block mt-0.5">
+                                    <span class="font-bold text-slate-900 block mt-0.5">
                                         {{ $attr->selectedOption?->label ?: ($attr->value_text ?: $attr->value_number) }}
                                     </span>
                                 </div>
@@ -189,8 +189,8 @@
             <!-- Right Col: Contact & Safety Sidebar -->
             <div class="space-y-6">
                 <!-- Advertiser Identity Card -->
-                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
-                    <h2 class="text-sm font-bold text-white uppercase tracking-wider">
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl space-y-4">
+                    <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">
                         Advertiser Profile
                     </h2>
 
@@ -199,32 +199,32 @@
                             {{ strtoupper(substr($listing->user?->name ?? 'A', 0, 1)) }}
                         </div>
                         <div>
-                            <span class="text-base font-bold text-white block">{{ $listing->user?->name ?? 'Anonymous Poster' }}</span>
+                            <span class="text-base font-bold text-slate-900 block">{{ $listing->user?->name ?? 'Anonymous Poster' }}</span>
                             <span class="text-xs text-slate-400">Member since {{ $listing->user?->created_at?->format('M Y') ?? 'Recently' }}</span>
                         </div>
                     </div>
 
-                    <div class="pt-2 border-t border-slate-800 space-y-2 text-xs">
-                        <div class="flex items-center gap-2 text-emerald-400">
+                    <div class="pt-2 border-t border-slate-200 space-y-2 text-xs">
+                        <div class="flex items-center gap-2 text-emerald-700">
                             <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                             </svg>
-                            <span class="font-medium text-slate-200">18+ Age Verified</span>
+                            <span class="font-medium text-slate-800">18+ Age Verified</span>
                         </div>
                         @if($listing->is_verified_poster)
-                            <div class="flex items-center gap-2 text-purple-400">
+                            <div class="flex items-center gap-2 text-purple-700">
                                 <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                 </svg>
-                                <span class="font-medium text-slate-200">Verified Identity Badge</span>
+                                <span class="font-medium text-slate-800">Verified Identity Badge</span>
                             </div>
                         @endif
                     </div>
                 </div>
 
                 <!-- Contact Options Card -->
-                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
-                    <h2 class="text-sm font-bold text-white uppercase tracking-wider">
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl space-y-4">
+                    <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">
                         Contact Advertiser
                     </h2>
 
@@ -242,18 +242,18 @@
 
                     <!-- Masked Anonymous Email Relay -->
                     @if($listing->contact?->allow_email_relay && $listing->contact?->masked_relay_email)
-                        <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs space-y-1">
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1">
                             <span class="text-slate-400 block text-[11px] font-semibold">Anonymous Email Relay:</span>
-                            <span class="font-mono text-slate-200 text-xs block break-all select-all">{{ $listing->contact->masked_relay_email }}</span>
+                            <span class="font-mono text-slate-800 text-xs block break-all select-all">{{ $listing->contact->masked_relay_email }}</span>
                             <span class="text-[10px] text-slate-500 block">Personal email address is masked to protect advertiser privacy.</span>
                         </div>
                     @endif
 
                     <!-- External Phone Visibility (Only if explicitly enabled by poster) -->
                     @if($listing->contact?->show_phone && $listing->contact?->preferred_phone_encrypted)
-                        <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs space-y-1">
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1">
                             <span class="text-slate-400 block text-[11px] font-semibold">Telephone / SMS:</span>
-                            <a href="tel:{{ $listing->contact->preferred_phone_encrypted }}" class="font-mono text-rose-400 hover:underline font-bold text-xs block">
+                            <a href="tel:{{ $listing->contact->preferred_phone_encrypted }}" class="font-mono text-rose-600 hover:underline font-bold text-xs block">
                                 {{ $listing->contact->preferred_phone_encrypted }}
                             </a>
                         </div>
@@ -261,44 +261,44 @@
 
                     <!-- External Handle (e.g. Signal, Telegram) -->
                     @if($listing->contact?->external_handle_encrypted)
-                        <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs space-y-1">
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1">
                             <span class="text-slate-400 block text-[11px] font-semibold">External Messenger Handle:</span>
-                            <span class="font-mono text-purple-300 font-bold text-xs block select-all">{{ $listing->contact->external_handle_encrypted }}</span>
+                            <span class="font-mono text-purple-700 font-bold text-xs block select-all">{{ $listing->contact->external_handle_encrypted }}</span>
                         </div>
                     @endif
 
                     <!-- Contact Instructions -->
                     @if($listing->contact?->contact_instructions)
-                        <div class="p-3 bg-slate-950/60 border border-slate-800/80 rounded-xl text-xs text-slate-300">
-                            <strong class="text-white block mb-0.5">Advertiser's Instructions:</strong>
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600">
+                            <strong class="text-slate-900 block mb-0.5">Advertiser's Instructions:</strong>
                             {{ $listing->contact->contact_instructions }}
                         </div>
                     @endif
                 </div>
 
                 <!-- Location & Anti-Triangulation Card -->
-                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-3">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl space-y-3">
+                    <h3 class="text-xs font-bold text-slate-600 uppercase tracking-wider">
                         Location & Privacy Protection
                     </h3>
                     <p class="text-xs text-slate-400 leading-relaxed">
                         Location: <strong>{{ $listing->city?->name }}, {{ $listing->state?->code }}</strong>
                         @if($listing->location?->neighborhood)
-                            <span class="block text-slate-300 mt-1">Area: {{ $listing->location->neighborhood }}</span>
+                            <span class="block text-slate-600 mt-1">Area: {{ $listing->location->neighborhood }}</span>
                         @endif
                     </p>
-                    <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-[11px] text-slate-400 flex items-start space-x-2">
-                        <svg class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-400 flex items-start space-x-2">
+                        <svg class="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                         <span>GPS coordinates are fuzzed by 300–800m to prevent residential stalking.</span>
                     </div>
                 </div>
 
                 <!-- Trust & Safety Card & Report Link -->
-                <div class="bg-rose-950/20 border border-rose-900/40 rounded-3xl p-6 shadow-xl space-y-3">
-                    <h3 class="text-xs font-bold text-rose-400 uppercase tracking-wider">
+                <div class="bg-rose-50 border border-rose-200 rounded-3xl p-6 shadow-xl space-y-3">
+                    <h3 class="text-xs font-bold text-rose-600 uppercase tracking-wider">
                         Safety First
                     </h3>
-                    <ul class="text-[11px] text-rose-200/90 space-y-1.5 list-disc pl-4 leading-relaxed">
+                    <ul class="text-[11px] text-rose-600/90 space-y-1.5 list-disc pl-4 leading-relaxed">
                         <li>Always meet in public locations for first dates.</li>
                         <li>Never wire funds, gift cards, or crypto transfers.</li>
                         <li>Commercial sexual services and prostitution are illegal and prohibited.</li>
@@ -307,7 +307,7 @@
                         <button
                             type="button"
                             @click="$dispatch('open-modal', 'report-modal')"
-                            class="text-xs text-rose-400 hover:text-rose-300 font-semibold flex items-center gap-1"
+                            class="text-xs text-rose-600 hover:text-rose-600 font-semibold flex items-center gap-1"
                         >
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                             <span>Report Listing Violations</span>
@@ -319,9 +319,9 @@
 
         <!-- Similar Listings Section -->
         @if(isset($similarListings) && $similarListings->isNotEmpty())
-            <div class="pt-10 border-t border-slate-800 space-y-6">
+            <div class="pt-10 border-t border-slate-200 space-y-6">
                 <div>
-                    <h2 class="text-xl font-bold text-white tracking-tight">Similar Listings in {{ $listing->city?->name ?? 'this Area' }}</h2>
+                    <h2 class="text-xl font-bold text-slate-900 tracking-tight">Similar Listings in {{ $listing->city?->name ?? 'this Area' }}</h2>
                     <p class="text-xs text-slate-400 mt-1">Explore other personal classifieds matching this category.</p>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -342,7 +342,7 @@
             <div class="relative max-w-4xl max-h-[90vh]">
                 <button
                     @click="lightboxOpen = false"
-                    class="absolute -top-10 right-0 text-white hover:text-rose-400 text-sm font-semibold flex items-center gap-1"
+                    class="absolute -top-10 right-0 text-white hover:text-rose-600 text-sm font-semibold flex items-center gap-1"
                 >
                     <span>Close</span> &times;
                 </button>
@@ -384,22 +384,22 @@
                 />
 
                 <div>
-                    <label for="reply-message" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                        Message Details <span class="text-rose-400">*</span>
+                    <label for="reply-message" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+                        Message Details <span class="text-rose-600">*</span>
                     </label>
                     <textarea
                         id="reply-message"
                         name="message"
                         rows="5"
                         required
-                        class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500"
                         placeholder="Introduce yourself and mention what interested you in their listing..."
                     >{{ old('message') }}</textarea>
                 </div>
 
-                <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-400 space-y-1">
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-400 space-y-1">
                     <p><strong>Privacy Shield:</strong> Your message is encrypted with AES-256 before storage. The advertiser never sees your personal data until you choose to reply directly.</p>
-                    <p class="text-rose-300">Solicitations for commercial sex, financial wire requests, and harassment are strictly prohibited.</p>
+                    <p class="text-rose-600">Solicitations for commercial sex, financial wire requests, and harassment are strictly prohibited.</p>
                 </div>
 
                 <div class="pt-2 flex justify-end gap-3">
@@ -421,14 +421,14 @@
                 <input type="text" name="report_hp" style="display:none;" tabindex="-1" autocomplete="off">
 
                 <div>
-                    <label for="report-reason" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                        Violation Category <span class="text-rose-400">*</span>
+                    <label for="report-reason" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+                        Violation Category <span class="text-rose-600">*</span>
                     </label>
                     <select
                         id="report-reason"
                         name="report_reason"
                         required
-                        class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:ring-2 focus:ring-rose-500"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:ring-2 focus:ring-rose-500"
                     >
                         <option value="">Select Primary Violation Reason</option>
                         <option value="underage_minor">Underage or Minor-Related Content (Immediate Escalation)</option>
@@ -441,15 +441,15 @@
                 </div>
 
                 <div>
-                    <label for="report-details" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                        Explanation & Context <span class="text-rose-400">*</span>
+                    <label for="report-details" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+                        Explanation & Context <span class="text-rose-600">*</span>
                     </label>
                     <textarea
                         id="report-details"
                         name="report_details"
                         rows="4"
                         required
-                        class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500"
                         placeholder="Please describe why this listing violates community standards..."
                     >{{ old('report_details') }}</textarea>
                 </div>
@@ -470,7 +470,7 @@
                     />
                 </div>
 
-                <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-300">
+                <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-700">
                     <strong>Notice:</strong> Reports concerning minors or human trafficking are prioritized 24/7 and referred to law enforcement and NCMEC.
                 </div>
 

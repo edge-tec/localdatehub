@@ -8,7 +8,7 @@
 <nav aria-label="Breadcrumb" class="py-3 px-4 sm:px-0">
     <ol class="flex items-center space-x-2 text-xs text-slate-400">
         <li class="flex items-center">
-            <a href="{{ route('home') }}" class="hover:text-rose-400 transition-colors">Home</a>
+            <a href="{{ route('home') }}" class="hover:text-rose-600 transition-colors">Home</a>
         </li>
         @foreach($list as $idx => $crumb)
             <li class="flex items-center truncate">
@@ -16,9 +16,9 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
                 @if($loop->last || empty($crumb['url']))
-                    <span class="font-medium text-slate-200 truncate" aria-current="page">{{ $crumb['name'] ?? $crumb['title'] ?? '' }}</span>
+                    <span class="font-medium text-slate-800 truncate" aria-current="page">{{ $crumb['name'] ?? $crumb['title'] ?? '' }}</span>
                 @else
-                    <a href="{{ $crumb['url'] }}" class="hover:text-rose-400 transition-colors">{{ $crumb['name'] ?? $crumb['title'] ?? '' }}</a>
+                    <a href="{{ $crumb['url'] }}" class="hover:text-rose-600 transition-colors">{{ $crumb['name'] ?? $crumb['title'] ?? '' }}</a>
                 @endif
             </li>
         @endforeach

@@ -3,8 +3,8 @@
     'description' => 'Try broadening your search filters or check back soon.',
 ])
 
-<div class="bg-slate-900/60 border border-slate-800 rounded-3xl p-10 sm:p-14 text-center space-y-4 max-w-lg mx-auto">
-    <div class="w-14 h-14 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-500 mx-auto shadow-inner">
+<div class="bg-white border border-slate-200 rounded-3xl p-10 sm:p-14 text-center space-y-4 max-w-lg mx-auto">
+    <div class="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 mx-auto shadow-inner">
         {{ $icon ?? '' }}
         @if(!isset($icon))
             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -14,7 +14,7 @@
     </div>
 
     <div>
-        <h3 class="text-base sm:text-lg font-bold text-white">{{ $title }}</h3>
+        <h3 class="text-base sm:text-lg font-bold text-slate-900">{{ $title }}</h3>
         <p class="text-xs sm:text-sm text-slate-400 mt-1 max-w-sm mx-auto leading-relaxed">
             {{ $description }}
         </p>
