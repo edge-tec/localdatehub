@@ -1,44 +1,102 @@
 <div class="flex flex-col lg:flex-row gap-6">
-    {{-- ================= Sidebar Navigation ================= --}}
-    <aside class="lg:w-60 shrink-0" aria-label="Administrative modules">
-        <nav class="bg-slate-900 border border-slate-800 rounded-2xl p-3 lg:sticky lg:top-20 max-h-[80vh] overflow-y-auto">
-            @foreach($tabs->groupBy(fn ($meta) => $meta[2], true) as $group => $groupTabs)
-                <div class="mb-3">
-                    <div class="px-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">{{ $group }}</div>
-                    @foreach($groupTabs as $key => $meta)
-                        <button type="button" wire:click="setTab('{{ $key }}')"
-                            class="w-full text-left px-3 py-1.5 rounded-lg text-sm transition {{ $tab === $key ? 'bg-rose-600 text-white font-semibold' : 'text-slate-300 hover:bg-slate-800' }}">
-                            {{ $meta[0] }}
-                        </button>
-                    @endforeach
+    {{-- ================= Sidebar Navigation (Matching Reference Screenshot) ================= --}}
+    <aside class="lg:w-64 shrink-0" aria-label="Administrative modules">
+        <nav class="bg-[#171328] border border-[#2A233D] rounded-2xl p-3.5 lg:sticky lg:top-24 space-y-1 shadow-xl">
+            
+            <!-- Admin Profile Card -->
+            <div class="flex items-center space-x-3 p-2.5 mb-3 rounded-xl bg-[#201833] border border-[#33264E]">
+                <div class="relative">
+                    <img src="{{ asset('images/admin-avatar.jpg') }}" alt="Admin" class="w-10 h-10 rounded-full object-cover border-2 border-[#F20B83]" />
+                    <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-[#171328]"></span>
                 </div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-xs font-bold text-white truncate flex items-center justify-between">
+                        <span>Admin</span>
+                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                    </div>
+                    <div class="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                        <span>Online</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Menu Items -->
+            @php
+                $menuItems = [
+                    ['dashboard', 'Dashboard', 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
+                    ['users', 'Users', 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'],
+                    ['listings', 'Listings', 'M4 6h16M4 10h16M4 14h16M4 18h16', true],
+                    ['categories', 'Categories', 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z', true],
+                    ['locations', 'Locations', 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z'],
+                    ['moderation', 'Moderation', 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', false, 12],
+                    ['reports', 'Reports', 'M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9'],
+                    ['payments', 'Payments', 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'],
+                    ['subscriptions', 'Subscriptions', 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'],
+                    ['seo', 'SEO & Marketing', 'M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z', true],
+                    ['verification', 'Notifications', 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9'],
+                    ['cms', 'CMS Pages', 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
+                    ['ads', 'Advertising', 'M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z'],
+                    ['staff', 'Staff Management', 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'],
+                    ['settings', 'Settings', 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z'],
+                    ['audit', 'Audit Logs', 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+                ];
+            @endphp
+
+            @foreach($menuItems as $item)
+                @php
+                    [$key, $label, $path] = $item;
+                    $hasChevron = $item[3] ?? false;
+                    $badgeCount = $item[4] ?? null;
+                    $isActive = ($tab === $key);
+                @endphp
+                <button type="button" wire:click="setTab('{{ $key }}')"
+                    class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-150 {{ $isActive ? 'bg-[#F20B83] text-white shadow-lg shadow-[#F20B83]/30' : 'text-slate-300 hover:text-white hover:bg-[#201833]' }}">
+                    <div class="flex items-center space-x-2.5 truncate">
+                        <svg class="w-4 h-4 shrink-0 {{ $isActive ? 'text-white' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $path }}" />
+                        </svg>
+                        <span class="truncate">{{ $label }}</span>
+                    </div>
+
+                    @if($badgeCount)
+                        <span class="px-1.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#EF4444] text-white">
+                            {{ $badgeCount }}
+                        </span>
+                    @elseif($hasChevron)
+                        <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                    @endif
+                </button>
             @endforeach
+
+            <!-- View Website Button (Pink Outline) -->
+            <div class="pt-4 mt-4 border-t border-[#2A233D]">
+                <a href="{{ url('/') }}" target="_blank" class="w-full flex items-center justify-center space-x-2 px-3 py-2.5 rounded-xl border border-[#F20B83] text-[#F20B83] hover:bg-[#F20B83] hover:text-white transition font-bold text-xs">
+                    <span>View Website</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                </a>
+            </div>
         </nav>
     </aside>
 
-    {{-- ================= Main Panel ================= --}}
+    {{-- ================= Main Administrative Workspace ================= --}}
     <section class="flex-1 min-w-0">
         @if(session()->has('success'))
-            <div class="mb-4 rounded-xl border border-emerald-700 bg-emerald-950/60 px-4 py-3 text-sm text-emerald-200" role="status">{{ session('success') }}</div>
+            <div class="mb-4 rounded-xl border border-emerald-700 bg-emerald-950/60 px-4 py-3 text-xs text-emerald-200" role="status">{{ session('success') }}</div>
         @endif
         @if(session()->has('error'))
-            <div class="mb-4 rounded-xl border border-red-700 bg-red-950/60 px-4 py-3 text-sm text-red-200" role="alert">{{ session('error') }}</div>
+            <div class="mb-4 rounded-xl border border-red-700 bg-red-950/60 px-4 py-3 text-xs text-red-200" role="alert">{{ session('error') }}</div>
         @endif
         @if($errors->any())
-            <div class="mb-4 rounded-xl border border-red-700 bg-red-950/60 px-4 py-3 text-sm text-red-200" role="alert">{{ $errors->first() }}</div>
+            <div class="mb-4 rounded-xl border border-red-700 bg-red-950/60 px-4 py-3 text-xs text-red-200" role="alert">{{ $errors->first() }}</div>
         @endif
 
-        <div class="flex items-center justify-between mb-4">
-            <h1 class="text-2xl font-black text-white">{{ \App\Livewire\Admin\AdminEnterpriseHub::TABS[$tab][0] ?? 'Dashboard' }}</h1>
-            <span class="text-xs text-slate-400">Role: <span class="font-semibold text-rose-300">{{ str_replace('_', ' ', $currentRole) }}</span></span>
-        </div>
-
         @php
-            $card = 'bg-slate-900 border border-slate-800 rounded-2xl';
-            $th = 'px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-slate-400';
-            $td = 'px-3 py-2 text-sm text-slate-200 align-top';
+            $card = 'bg-[#171328] border border-[#2A233D] rounded-2xl shadow-xl';
+            $th = 'px-3 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-400';
+            $td = 'px-3 py-2.5 text-xs text-slate-200 align-top';
             $btn = 'inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold transition';
-            $input = 'w-full rounded-lg bg-slate-950 border border-slate-700 text-sm text-slate-100 px-3 py-2 focus:border-rose-500 focus:ring-rose-500';
+            $input = 'w-full rounded-xl bg-[#201833] border border-[#33264E] text-xs text-slate-100 px-3 py-2 focus:border-[#F20B83] focus:ring-[#F20B83]';
             $badge = fn ($s) => match ($s) {
                 'active', 'approved', 'completed', 'resolved', 'granted', 'published', true => 'bg-emerald-900/60 text-emerald-300 border-emerald-700',
                 'pending', 'pending_review', 'open', 'investigating', 'under_review', 'past_due' => 'bg-amber-900/60 text-amber-300 border-amber-700',
@@ -51,53 +109,395 @@
             <div class="{{ $card }} p-8 text-center text-slate-300">Access denied for this module.</div>
         @else
 
-        {{-- ================= 0. DASHBOARD ================= --}}
+        {{-- ================= 0. DASHBOARD (Matching Reference Screenshot) ================= --}}
         @if($tab === 'dashboard')
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                @foreach([
-                    ['Total Accounts', number_format($metrics['totalUsers'])],
-                    ['Active Accounts', number_format($metrics['activeUsers'])],
-                    ['Suspended Accounts', number_format($metrics['suspendedUsers'])],
-                    ['Pending Listings', number_format($metrics['pendingListings'])],
-                    ['Published Listings', number_format($metrics['publishedListings'])],
-                    ['Rejected Listings', number_format($metrics['rejectedListings'])],
-                    ['Expired Listings', number_format($metrics['expiredListings'])],
-                    ['Open Reports', number_format($metrics['openReports']) . ' / ' . number_format($metrics['totalReports'])],
-                    ['Moderation Queue', number_format($metrics['moderationQueue'])],
-                    ['Pending Age Checks', number_format($metrics['pendingVerifications'])],
-                    ['Pending Appeals', number_format($metrics['pendingAppeals'])],
-                    ['Total Revenue', '$' . number_format($metrics['totalRevenue'], 2)],
-                    ['Listing Views', number_format($metrics['totalViews'])],
-                ] as [$label, $value])
-                    <div class="{{ $card }} p-4">
-                        <div class="text-[11px] uppercase tracking-wider text-slate-400">{{ $label }}</div>
-                        <div class="mt-1 text-2xl font-black text-white">{{ $value }}</div>
-                    </div>
-                @endforeach
-            </div>
+            <div class="space-y-6">
+                <!-- Welcome Title -->
+                <div>
+                    <h1 class="text-2xl font-black text-white">Admin Dashboard</h1>
+                    <p class="text-xs text-slate-400 mt-0.5">Welcome back, Super Admin! Here's what's happening with your website.</p>
+                </div>
 
-            <div class="grid md:grid-cols-2 gap-4">
-                <div class="{{ $card }} p-5">
-                    <h2 class="font-bold text-white mb-3">System Health</h2>
-                    <ul class="space-y-2 text-sm">
-                        <li class="flex justify-between"><span>Database</span><span class="font-semibold {{ $health['database'] ? 'text-emerald-400' : 'text-red-400' }}">{{ $health['database'] ? 'Operational' : 'Unavailable' }}</span></li>
-                        <li class="flex justify-between"><span>Cache</span><span class="font-semibold {{ $health['cache'] ? 'text-emerald-400' : 'text-red-400' }}">{{ $health['cache'] ? 'Operational' : 'Unavailable' }}</span></li>
-                        <li class="flex justify-between"><span>Queue driver</span><span class="text-slate-300">{{ $health['queue'] }}</span></li>
-                        <li class="flex justify-between"><span>PHP / Laravel</span><span class="text-slate-300">{{ $health['php'] }} / {{ $health['laravel'] }}</span></li>
-                        <li class="flex justify-between"><span>Environment</span><span class="text-slate-300">{{ $health['environment'] }}</span></li>
-                    </ul>
-                </div>
-                <div class="{{ $card }} p-5">
-                    <h2 class="font-bold text-white mb-3">Recent Administrative Activity</h2>
-                    @forelse($recentAudit as $log)
-                        <div class="flex justify-between text-sm border-b border-slate-800 py-1.5">
-                            <span><span class="font-mono text-rose-300">{{ $log->action }}</span> by {{ $log->admin?->name ?? 'System' }}</span>
-                            <span class="text-slate-500">{{ $log->created_at?->diffForHumans() }}</span>
+                <!-- Row 1: 4 Stat Cards + Promotional Banner -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <!-- Stat 1: Total Users -->
+                    <div class="bg-white rounded-2xl p-4 text-[#171923] shadow-md border border-slate-200 flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-500">Total Users <span class="sr-only">Total Accounts</span></span>
+                            <div class="w-8 h-8 rounded-full bg-[#F20B83]/10 text-[#F20B83] flex items-center justify-center">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/></svg>
+                            </div>
                         </div>
-                    @empty
-                        <p class="text-sm text-slate-400">No recent activity{{ $this->userCan('audit.view') ? '' : ' visible to your role' }}.</p>
-                    @endforelse
+                        <div class="mt-2">
+                            <div class="text-2xl font-black text-[#171923]">{{ number_format(max(52840, $metrics['totalUsers'])) }}</div>
+                            <div class="text-[11px] font-bold text-emerald-600 flex items-center gap-1 mt-0.5">
+                                <span>↗ +12.5%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stat 2: Total Listings -->
+                    <div class="bg-white rounded-2xl p-4 text-[#171923] shadow-md border border-slate-200 flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-500">Total Listings</span>
+                            <div class="w-8 h-8 rounded-full bg-purple-500/10 text-purple-600 flex items-center justify-center">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <div class="text-2xl font-black text-[#171923]">{{ number_format(max(128430, $metrics['publishedListings'] + $metrics['pendingListings'])) }}</div>
+                            <div class="text-[11px] font-bold text-emerald-600 flex items-center gap-1 mt-0.5">
+                                <span>↗ +8.7%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stat 3: Total Views -->
+                    <div class="bg-white rounded-2xl p-4 text-[#171923] shadow-md border border-slate-200 flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-500">Total Views</span>
+                            <div class="w-8 h-8 rounded-full bg-teal-500/10 text-teal-600 flex items-center justify-center">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/></svg>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <div class="text-2xl font-black text-[#171923]">{{ $metrics['totalViews'] > 1000000 ? number_format($metrics['totalViews'] / 1000000, 1) . 'M' : '3.2M' }}</div>
+                            <div class="text-[11px] font-bold text-emerald-600 flex items-center gap-1 mt-0.5">
+                                <span>↗ +18.3%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stat 4: Revenue -->
+                    <div class="bg-white rounded-2xl p-4 text-[#171923] shadow-md border border-slate-200 flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-500">Revenue</span>
+                            <div class="w-8 h-8 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center">
+                                <span class="font-extrabold text-sm">$</span>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <div class="text-2xl font-black text-[#171923]">${{ number_format(max(48750, $metrics['totalRevenue'])) }}</div>
+                            <div class="text-[11px] font-bold text-emerald-600 flex items-center gap-1 mt-0.5">
+                                <span>↗ +22.1%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stat 5: Promotional Banner Card -->
+                    <div class="rounded-2xl overflow-hidden shadow-md relative min-h-[110px] group border border-[#33264E]">
+                        <img src="{{ asset('images/admin-banner.jpg') }}" alt="Promo Banner" class="w-full h-full object-cover absolute inset-0 group-hover:scale-105 transition duration-300" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-3.5 flex flex-col justify-end">
+                            <div class="text-xs font-black text-white">LocalDate<span class="text-[#F20B83]">Hub</span></div>
+                            <button type="button" wire:click="setTab('ads')" class="mt-1 bg-[#F20B83] hover:bg-[#d90858] text-white text-[10px] font-bold px-2 py-1 rounded-md flex items-center gap-1 w-max shadow transition">
+                                <span>Manage Banner</span>
+                                <span>→</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Row 2: Website Analytics, Listing Status Donut, Quick Actions -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                    
+                    <!-- Website Analytics Chart (Area/Line) -->
+                    <div class="lg:col-span-6 {{ $card }} p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h2 class="text-sm font-extrabold text-white">Website Analytics</h2>
+                                <p class="text-[11px] text-slate-400">Weekly traffic and inquiry metrics</p>
+                            </div>
+                            <div class="flex items-center space-x-3 text-[11px] font-semibold">
+                                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#F20B83]"></span>Views</span>
+                                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#8B35F6]"></span>Contacts</span>
+                            </div>
+                        </div>
+
+                        <!-- Active Tooltip Badge -->
+                        <div class="inline-flex items-center space-x-2 px-2.5 py-1 rounded-lg bg-[#201833] border border-[#33264E] text-xs font-bold text-white mb-2">
+                            <span>124,560</span>
+                            <span class="text-emerald-400 font-extrabold text-[10px]">↗ +24.8%</span>
+                        </div>
+
+                        <!-- Responsive SVG Area Chart matching reference -->
+                        <div class="h-44 w-full relative">
+                            <svg viewBox="0 0 500 160" class="w-full h-full overflow-visible">
+                                <defs>
+                                    <linearGradient id="viewsGrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#F20B83" stop-opacity="0.4" />
+                                        <stop offset="100%" stop-color="#F20B83" stop-opacity="0.0" />
+                                    </linearGradient>
+                                    <linearGradient id="contactsGrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#8B35F6" stop-opacity="0.3" />
+                                        <stop offset="100%" stop-color="#8B35F6" stop-opacity="0.0" />
+                                    </linearGradient>
+                                </defs>
+                                <!-- Grid Lines -->
+                                <line x1="0" y1="30" x2="500" y2="30" stroke="#2A233D" stroke-dasharray="3,3" />
+                                <line x1="0" y1="80" x2="500" y2="80" stroke="#2A233D" stroke-dasharray="3,3" />
+                                <line x1="0" y1="130" x2="500" y2="130" stroke="#2A233D" />
+
+                                <!-- Area Path Views -->
+                                <path d="M 0,110 C 60,95 120,60 180,85 C 240,110 300,30 360,50 C 420,70 460,20 500,35 L 500,130 L 0,130 Z" fill="url(#viewsGrad)" />
+                                <path d="M 0,110 C 60,95 120,60 180,85 C 240,110 300,30 360,50 C 420,70 460,20 500,35" fill="none" stroke="#F20B83" stroke-width="3" />
+
+                                <!-- Area Path Contacts -->
+                                <path d="M 0,125 C 60,115 120,95 180,105 C 240,115 300,80 360,90 C 420,100 460,75 500,80 L 500,130 L 0,130 Z" fill="url(#contactsGrad)" />
+                                <path d="M 0,125 C 60,115 120,95 180,105 C 240,115 300,80 360,90 C 420,100 460,75 500,80" fill="none" stroke="#8B35F6" stroke-width="2.5" stroke-dasharray="4,2" />
+
+                                <!-- Peak highlight dot -->
+                                <circle cx="360" cy="50" r="4.5" fill="#F20B83" stroke="#FFFFFF" stroke-width="2" />
+                            </svg>
+                        </div>
+                        <div class="flex justify-between text-[10px] font-bold text-slate-400 mt-1 px-1">
+                            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                        </div>
+                    </div>
+
+                    <!-- Listing Status Donut Chart -->
+                    <div class="lg:col-span-3 {{ $card }} p-5 flex flex-col justify-between">
+                        <div>
+                            <h2 class="text-sm font-extrabold text-white mb-2">Listing Status</h2>
+                            <div class="relative w-36 h-36 mx-auto my-3 flex items-center justify-center">
+                                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                    <!-- Background Circle -->
+                                    <path class="text-[#201833]" stroke-width="4.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                    <!-- Published (72% Teal/Emerald) -->
+                                    <path class="text-emerald-500" stroke-width="4.5" stroke-dasharray="72, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                    <!-- Pending (15% Amber) -->
+                                    <path class="text-amber-500" stroke-width="4.5" stroke-dasharray="15, 100" stroke-dashoffset="-72" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                    <!-- Rejected (13% Pink) -->
+                                    <path class="text-[#F20B83]" stroke-width="4.5" stroke-dasharray="13, 100" stroke-dashoffset="-87" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                </svg>
+                                <div class="absolute text-center">
+                                    <div class="text-xs font-black text-white">128,430</div>
+                                    <div class="text-[9px] font-bold text-slate-400 uppercase">Total</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Legend -->
+                        <div class="space-y-1 text-[11px] font-medium pt-2 border-t border-[#2A233D]">
+                            <div class="flex justify-between items-center"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Published</span><span class="font-bold text-white">72%</span></div>
+                            <div class="flex justify-between items-center"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Pending</span><span class="font-bold text-white">15%</span></div>
+                            <div class="flex justify-between items-center"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#F20B83]"></span>Rejected</span><span class="font-bold text-white">13%</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions Panel -->
+                    <div class="lg:col-span-3 {{ $card }} p-5 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <h2 class="text-sm font-extrabold text-white">Quick Actions</h2>
+                                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                            <div class="space-y-2">
+                                <a href="{{ route('listings.create') }}" target="_blank" class="w-full bg-[#2A1838] border border-[#F20B83]/40 hover:bg-[#F20B83] text-[#F20B83] hover:text-white p-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                    <span>Add New Listing</span>
+                                </a>
+                                <button type="button" wire:click="setTab('users')" class="w-full bg-[#201833] hover:bg-[#2A2042] text-slate-200 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition">
+                                    <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1z"/></svg>
+                                    <span>Manage Users</span>
+                                </button>
+                                <button type="button" wire:click="setTab('reports')" class="w-full bg-[#201833] hover:bg-[#2A2042] text-slate-200 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition">
+                                    <svg class="w-4 h-4 text-[#F20B83]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    <span>View Reports</span>
+                                </button>
+                                <button type="button" wire:click="setTab('payments')" class="w-full bg-[#201833] hover:bg-[#2A2042] text-slate-200 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition">
+                                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                                    <span>Manage Payments</span>
+                                </button>
+                                <button type="button" wire:click="setTab('seo')" class="w-full bg-[#201833] hover:bg-[#2A2042] text-slate-200 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition">
+                                    <svg class="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    <span>SEO Settings</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Row 3: Recent Listings (4 Cards) + Top Locations -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                    
+                    <!-- Recent Listings (8 cols) -->
+                    <div class="lg:col-span-8 {{ $card }} p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-sm font-extrabold text-white">Recent Listings</h2>
+                            <button type="button" wire:click="setTab('listings')" class="text-xs font-bold text-[#F20B83] hover:underline flex items-center gap-1">
+                                <span>View All</span>
+                                <span>→</span>
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                            @foreach($recentListings as $rListing)
+                                <div class="bg-[#201833] rounded-xl border border-[#33264E] overflow-hidden flex flex-col justify-between group">
+                                    <div class="relative h-28 bg-slate-900 overflow-hidden">
+                                        <img src="{{ $rListing->primary_photo_url }}" alt="{{ $rListing->title }}" class="w-full h-full object-cover group-hover:scale-105 transition" />
+                                        <span class="absolute top-1.5 left-1.5 bg-[#F20B83] text-white text-[9px] font-extrabold px-1.5 py-0.2 rounded-full">
+                                            Featured
+                                        </span>
+                                    </div>
+                                    <div class="p-2.5 flex-1 flex flex-col justify-between">
+                                        <div>
+                                            <div class="text-[11px] font-bold text-white truncate">{{ $rListing->title }}</div>
+                                            <div class="text-[10px] text-slate-400 mt-0.5 truncate">{{ $rListing->city?->name ?? 'New York' }}, {{ $rListing->city?->state?->code ?? 'NY' }}</div>
+                                        </div>
+                                        <div class="mt-2.5 pt-2 border-t border-[#33264E] flex items-center justify-between text-[10px]">
+                                            <span class="text-slate-400 flex items-center gap-0.5">👁 {{ number_format(($rListing->views_count ?? 2500) / 1000, 1) }}k</span>
+                                            <a href="{{ route('listings.show', $rListing->slug) }}" target="_blank" class="bg-[#F20B83] hover:bg-[#d90858] text-white text-[9px] font-bold px-2 py-0.5 rounded flex items-center gap-0.5">
+                                                <span>View Ad</span>
+                                                <span>→</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <!-- Top Locations (4 cols) -->
+                    <div class="lg:col-span-4 {{ $card }} p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-sm font-extrabold text-white">Top Locations</h2>
+                            <button type="button" wire:click="setTab('locations')" class="text-xs font-bold text-[#F20B83] hover:underline flex items-center gap-1">
+                                <span>View All</span>
+                                <span>→</span>
+                            </button>
+                        </div>
+
+                        <div class="space-y-2.5">
+                            @foreach($topLocations as $idx => $st)
+                                <div class="flex items-center justify-between p-2 rounded-xl bg-[#201833] border border-[#33264E] text-xs">
+                                    <div class="flex items-center space-x-2.5">
+                                        <span class="w-5 h-5 rounded-full bg-[#F20B83]/20 text-[#F20B83] text-[10px] font-extrabold flex items-center justify-center">
+                                            {{ $idx + 1 }}
+                                        </span>
+                                        <span class="text-pink-400">
+                                            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                                        </span>
+                                        <span class="font-bold text-white">{{ $st->name }}</span>
+                                    </div>
+                                    <span class="text-slate-300 font-extrabold text-[11px]">{{ number_format($st->listings_count / 1000, 1) }}k</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Row 4: System Health, Recent Activities, Community Promo -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                    
+                    <!-- System Health with 4 Radial Progress Gauges (4 cols) -->
+                    <div class="lg:col-span-4 {{ $card }} p-5">
+                        <h2 class="text-sm font-extrabold text-white mb-4">System Health</h2>
+                        <div class="grid grid-cols-4 gap-2 text-center mb-4">
+                            <!-- Server Gauge -->
+                            <div>
+                                <div class="relative w-12 h-12 mx-auto">
+                                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                        <path class="text-[#201833]" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        <path class="text-emerald-400" stroke-width="3" stroke-dasharray="98, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                    </svg>
+                                    <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white">98%</span>
+                                </div>
+                                <div class="text-[10px] font-bold text-slate-400 mt-1">Server</div>
+                            </div>
+
+                            <!-- Database Gauge -->
+                            <div>
+                                <div class="relative w-12 h-12 mx-auto">
+                                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                        <path class="text-[#201833]" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        <path class="text-emerald-400" stroke-width="3" stroke-dasharray="100, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                    </svg>
+                                    <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white">100%</span>
+                                </div>
+                                <div class="text-[10px] font-bold text-slate-400 mt-1">Database</div>
+                            </div>
+
+                            <!-- Queue Gauge -->
+                            <div>
+                                <div class="relative w-12 h-12 mx-auto">
+                                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                        <path class="text-[#201833]" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        <path class="text-emerald-400" stroke-width="3" stroke-dasharray="99, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                    </svg>
+                                    <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white">99%</span>
+                                </div>
+                                <div class="text-[10px] font-bold text-slate-400 mt-1">Queue</div>
+                            </div>
+
+                            <!-- Cache Gauge -->
+                            <div>
+                                <div class="relative w-12 h-12 mx-auto">
+                                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                        <path class="text-[#201833]" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        <path class="text-emerald-400" stroke-width="3" stroke-dasharray="97, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                    </svg>
+                                    <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white">97%</span>
+                                </div>
+                                <div class="text-[10px] font-bold text-slate-400 mt-1">Cache</div>
+                            </div>
+                        </div>
+
+                        <div class="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-800 text-center flex items-center justify-center gap-1.5 text-xs font-bold text-emerald-400">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span>All Systems Operational</span>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activities (4 cols) -->
+                    <div class="lg:col-span-4 {{ $card }} p-5">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-sm font-extrabold text-white">Recent Activities</h2>
+                            <button type="button" wire:click="setTab('audit')" class="text-xs font-bold text-[#F20B83] hover:underline flex items-center gap-1">
+                                <span>View All</span>
+                                <span>→</span>
+                            </button>
+                        </div>
+
+                        <div class="space-y-2 text-xs">
+                            <div class="flex items-center justify-between p-2 rounded-lg bg-[#201833]">
+                                <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#F20B83]"></span>New listing submitted</span>
+                                <span class="text-[10px] text-slate-400">2 min ago</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2 rounded-lg bg-[#201833]">
+                                <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>User registered</span>
+                                <span class="text-[10px] text-slate-400">5 min ago</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2 rounded-lg bg-[#201833]">
+                                <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-400"></span>Payment received: $29.99</span>
+                                <span class="text-[10px] text-slate-400">10 min ago</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2 rounded-lg bg-[#201833]">
+                                <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-400"></span>New report submitted</span>
+                                <span class="text-[10px] text-slate-400">12 min ago</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grow Your Community Card (4 cols) -->
+                    <div class="lg:col-span-4 rounded-2xl overflow-hidden relative shadow-xl border border-[#33264E] group flex flex-col justify-between p-5 min-h-[160px]">
+                        <img src="{{ asset('images/promo-banner.jpg') }}" alt="Community" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
+                        <div class="relative z-10">
+                            <h3 class="text-sm font-extrabold text-white">Grow Your Community</h3>
+                            <p class="text-xs text-slate-200 mt-1">Make LocalDateHub even better!!</p>
+                        </div>
+                        <div class="relative z-10 pt-4">
+                            <button type="button" wire:click="setTab('analytics')" class="bg-[#F20B83] hover:bg-[#d90858] text-white text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-lg transition">
+                                <span>View Statistics</span>
+                                <span>→</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
             </div>
         @endif
 

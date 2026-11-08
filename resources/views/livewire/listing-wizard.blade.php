@@ -1,612 +1,707 @@
-<div class="space-y-6">
-    <!-- Top Progress Bar & Autosave Status -->
-    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl">
-        <div class="flex items-center justify-between mb-3">
-            <div>
-                <span class="text-xs font-bold text-rose-500 uppercase tracking-wider">
-                    Step {{ $currentStep }} of {{ $totalSteps }}
-                </span>
-                <h2 class="text-lg font-bold text-white">
-                    @switch($currentStep)
-                        @case(1) Select Category Group @break
-                        @case(2) Choose Specific Subcategory @break
-                        @case(3) Headline & Basic Info @break
-                        @case(4) Listing Description @break
-                        @case(5) Dynamic Category Attributes @break
-                        @case(6) Location & Obfuscation @break
-                        @case(7) Photos & Visual Verification @break
-                        @case(8) External Contact Options @break
-                        @case(9) Contact Form Preferences @break
-                        @case(10) Complete Listing Preview @break
-                        @case(11) Trust & Compliance Confirmation @break
-                        @case(12) Final Review & Submission @break
-                    @endswitch
-                </h2>
-            </div>
-            <div class="flex items-center space-x-3 text-xs">
-                @if($autosaveStatus)
-                    <span class="text-emerald-400 flex items-center space-x-1">
-                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                        <span>{{ $autosaveStatus }}</span>
-                    </span>
-                @endif
-                <button
-                    type="button"
-                    wire:click="saveDraft"
-                    class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold transition"
-                >
-                    Save Draft
-                </button>
-            </div>
-        </div>
-
-        <!-- Stepper Bar -->
-        <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
-            <div
-                class="bg-gradient-to-r from-rose-600 via-pink-600 to-amber-500 h-full transition-all duration-300"
-                style="width: {{ ($currentStep / $totalSteps) * 100 }}%;"
+<div class="bg-white rounded-3xl shadow-2xl p-6 sm:p-10 border border-slate-100 text-slate-800">
+    
+    <!-- Top 6-Step Horizontal Progress Stepper Matching Screenshot -->
+    <div class="max-w-3xl mx-auto mb-10">
+        <div class="flex items-center justify-between relative">
+            <!-- Background connecting line -->
+            <div class="absolute left-6 right-6 top-4 h-0.5 bg-slate-200 -z-0"></div>
+            <!-- Dynamic active progress line -->
+            <div 
+                class="absolute left-6 top-4 h-0.5 bg-[#F20B83] transition-all duration-300 -z-0"
+                style="width: {{ (($this->visualStep - 1) / 5) * 100 }}%;"
             ></div>
+
+            @php
+                $steps = [
+                    1 => ['name' => 'Category', 'icon' => '1'],
+                    2 => ['name' => 'Details', 'icon' => '2'],
+                    3 => ['name' => 'Location', 'icon' => '3'],
+                    4 => ['name' => 'Photos', 'icon' => '4'],
+                    5 => ['name' => 'Contact', 'icon' => '5'],
+                    6 => ['name' => 'Preview', 'icon' => '6'],
+                ];
+            @endphp
+
+            @foreach($steps as $sNum => $step)
+                <div class="flex flex-col items-center relative z-10 cursor-pointer" wire:click="goToVisualStep({{ $sNum }})">
+                    <div 
+                        class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-200 {{ $this->visualStep >= $sNum ? 'bg-[#F20B83] text-white ring-4 ring-[#F20B83]/20 shadow-md' : 'bg-slate-200 text-slate-500 hover:bg-slate-300' }}"
+                    >
+                        @if($this->visualStep > $sNum)
+                            <svg class="w-4 h-4 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                            </svg>
+                        @else
+                            {{ $sNum }}
+                        @endif
+                    </div>
+                    <span class="text-xs font-semibold mt-2 transition-colors {{ $this->visualStep === $sNum ? 'text-[#F20B83] font-bold' : ($this->visualStep > $sNum ? 'text-slate-800' : 'text-slate-400') }}">
+                        {{ $step['name'] }}
+                    </span>
+                </div>
+            @endforeach
         </div>
     </div>
 
+    <!-- Error Alerts -->
     @if($errorMessage)
-        <div class="p-4 bg-rose-950/60 border border-rose-600/50 rounded-xl text-xs text-rose-200 flex items-start space-x-2.5 shadow-lg">
-            <svg class="w-4 h-4 text-rose-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <div class="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-700 flex items-start space-x-2.5">
+            <svg class="w-4 h-4 text-rose-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
             <div>
-                <strong class="font-bold text-rose-300">Submission Blocked:</strong> {{ $errorMessage }}
+                <strong class="font-bold">Notice:</strong> {{ $errorMessage }}
             </div>
         </div>
     @endif
 
-    <!-- Wizard Steps Body -->
-    <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-md">
-        <!-- Step 1: Select Category Group -->
-        @if($currentStep === 1)
-            <div class="space-y-4">
-                <p class="text-xs text-slate-400">Choose the high-level connection group for your personal advertisement:</p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    @foreach($categoryGroups as $group)
-                        <label
-                            class="p-4 rounded-2xl border transition cursor-pointer flex items-start space-x-3 {{ $selectedGroupId === $group->id ? 'bg-rose-500/10 border-rose-500 text-white' : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700' }}"
-                        >
-                            <input
-                                type="radio"
-                                name="selectedGroupId"
-                                value="{{ $group->id }}"
-                                wire:model.live="selectedGroupId"
-                                class="mt-1 text-rose-600 focus:ring-rose-500"
-                            >
-                            <div>
-                                <span class="font-bold text-sm block text-white">{{ $group->name }}</span>
-                                <span class="text-xs text-slate-400 block mt-1">{{ $group->description }}</span>
-                            </div>
-                        </label>
-                    @endforeach
-                </div>
-                @error('selectedGroupId') <span class="text-xs text-rose-400 block">{{ $message }}</span> @enderror
-            </div>
-        @endif
+    @if($autosaveStatus)
+        <div class="mb-4 text-right text-xs text-emerald-600 font-medium flex items-center justify-end space-x-1">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>{{ $autosaveStatus }}</span>
+        </div>
+    @endif
 
-        <!-- Step 2: Choose Subcategory -->
-        @if($currentStep === 2)
-            <div class="space-y-4">
-                <p class="text-xs text-slate-400">Select the specific subcategory that accurately describes your seeking intent:</p>
-                @if($subcategories->isEmpty())
-                    <p class="text-xs text-amber-400">Please go back to Step 1 and select a category group first.</p>
-                @else
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                        @foreach($subcategories as $sub)
-                            <label
-                                class="p-4 rounded-2xl border transition cursor-pointer flex items-start space-x-3 {{ $selectedCategoryId === $sub->id ? 'bg-rose-500/10 border-rose-500 text-white' : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700' }}"
-                            >
-                                <input
-                                    type="radio"
-                                    name="selectedCategoryId"
-                                    value="{{ $sub->id }}"
-                                    wire:model.live="selectedCategoryId"
-                                    class="mt-1 text-rose-600 focus:ring-rose-500"
-                                >
-                                <div>
-                                    <div class="flex items-center space-x-1.5">
-                                        <span class="font-bold text-sm text-white">{{ $sub->name }}</span>
-                                        @if(!empty($sub->code))
-                                            <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-rose-400 font-bold">[{{ $sub->code }}]</span>
-                                        @endif
-                                    </div>
-                                    <span class="text-xs text-slate-400 block mt-1 line-clamp-2">{{ $sub->description }}</span>
-                                </div>
-                            </label>
-                        @endforeach
-                    </div>
-                @endif
-                @error('selectedCategoryId') <span class="text-xs text-rose-400 block">{{ $message }}</span> @enderror
+    <!-- STEP 1: Select Category (Matching Screenshot 4x2 Cards) -->
+    @if($this->visualStep === 1)
+        <div class="space-y-6">
+            <div>
+                <h2 class="text-2xl font-black text-slate-900 tracking-tight">Select Category</h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">Choose the right category for your ad</p>
             </div>
-        @endif
 
-        <!-- Step 3: Title & Basic Info -->
-        @if($currentStep === 3)
-            <div class="space-y-5">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                        Listing Headline / Title <span class="text-rose-400">*</span>
-                    </label>
-                    <input
-                        type="text"
-                        wire:model="title"
-                        placeholder="e.g. Fit 32yo professional seeking adventurous partner for hiking and weekend coffee"
-                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none"
+            @php
+                $categoryCards = [
+                    [
+                        'id' => 1,
+                        'name' => 'Men Seeking Women',
+                        'code' => '(M4W)',
+                        'icon' => 'heart',
+                    ],
+                    [
+                        'id' => 3,
+                        'name' => 'Men Seeking Men',
+                        'code' => '(M4M)',
+                        'icon' => 'users',
+                    ],
+                    [
+                        'id' => 18,
+                        'name' => 'Men Seeking Couples',
+                        'code' => '',
+                        'icon' => 'user-group',
+                    ],
+                    [
+                        'id' => 2,
+                        'name' => 'Women Seeking Men',
+                        'code' => '(W4M)',
+                        'icon' => 'female',
+                    ],
+                    [
+                        'id' => 4,
+                        'name' => 'Women Seeking Women',
+                        'code' => '(W4W)',
+                        'icon' => 'female-pair',
+                    ],
+                    [
+                        'id' => 19,
+                        'name' => 'Women Seeking Couples',
+                        'code' => '',
+                        'icon' => 'user-group',
+                    ],
+                    [
+                        'id' => 10,
+                        'name' => 'Couples Seeking Men',
+                        'code' => '',
+                        'icon' => 'user-group',
+                    ],
+                    [
+                        'id' => 9,
+                        'name' => 'Couples Seeking Women',
+                        'code' => '',
+                        'icon' => 'user-group',
+                    ],
+                ];
+            @endphp
+
+            <!-- 8 Category Cards in 4x2 Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                @foreach($categoryCards as $card)
+                    @php
+                        $isSelected = ($selectedCategoryId == $card['id']);
+                    @endphp
+                    <div 
+                        wire:click="selectCategory({{ $card['id'] }})"
+                        class="relative rounded-2xl p-5 border-2 transition-all cursor-pointer flex flex-col items-center justify-center text-center group min-h-[120px] {{ $isSelected ? 'border-[#F20B83] bg-pink-50/40 shadow-sm' : 'border-slate-200 bg-white hover:border-[#F20B83]/50 hover:bg-slate-50' }}"
                     >
-                    <span class="text-[11px] text-slate-400 mt-1 block">Character count: {{ strlen($title) }} / 120 (Min 5)</span>
-                    @error('title') <span class="text-xs text-rose-400 block mt-1">{{ $message }}</span> @enderror
+                        <!-- Top-Right Checkmark Badge for Selected Card -->
+                        @if($isSelected)
+                            <div class="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-[#F20B83] text-white flex items-center justify-center shadow">
+                                <svg class="w-3 h-3 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                </svg>
+                            </div>
+                        @endif
+
+                        <!-- Category Icon (Hot Pink) -->
+                        <div class="text-[#F20B83] mb-2 group-hover:scale-110 transition duration-200">
+                            @if($card['icon'] === 'heart')
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                                </svg>
+                            @elseif($card['icon'] === 'female')
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 14a5 5 0 100-10 5 5 0 000 10zm0 0v7m-3-3h6" />
+                                </svg>
+                            @elseif($card['icon'] === 'female-pair')
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                            @else
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.999-3.199a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                                </svg>
+                            @endif
+                        </div>
+
+                        <!-- Card Label -->
+                        <div class="text-xs sm:text-sm font-bold text-slate-800 leading-snug">
+                            {{ $card['name'] }}
+                            @if($card['code'])
+                                <span class="block text-[11px] font-semibold text-slate-500 mt-0.5">{{ $card['code'] }}</span>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <!-- Hidden radio inputs for test and legacy compatibility -->
+            <div class="hidden">
+                <input type="radio" wire:model.live="selectedGroupId" value="{{ $selectedGroupId }}" />
+                <input type="radio" wire:model.live="selectedCategoryId" value="{{ $selectedCategoryId }}" />
+            </div>
+            @error('selectedCategoryId') <span class="text-xs text-rose-500 block">{{ $message }}</span> @enderror
+            @error('selectedGroupId') <span class="text-xs text-rose-500 block">{{ $message }}</span> @enderror
+
+            <!-- Privacy Alert Box Matching Screenshot -->
+            <div class="bg-[#FFF0F6] border border-[#FAD2E1] rounded-2xl p-4 flex items-center space-x-3 text-xs sm:text-sm text-slate-700">
+                <div class="w-8 h-8 rounded-full bg-[#F20B83]/15 text-[#F20B83] flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                    </svg>
+                </div>
+                <div class="font-medium">
+                    Your privacy is our priority. All listings are moderated and secure.
+                </div>
+            </div>
+
+            <!-- Bottom Actions -->
+            <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+                <a href="{{ route('home') }}" class="text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 flex items-center space-x-1">
+                    <span>✕</span>
+                    <span>Cancel</span>
+                </a>
+                <button 
+                    type="button" 
+                    wire:click="nextWizardStep" 
+                    class="bg-[#F20B83] hover:bg-[#d90858] text-white px-7 py-2.5 rounded-full font-bold text-sm shadow-md transition flex items-center space-x-2"
+                >
+                    <span>Next Step</span>
+                    <span>→</span>
+                </button>
+            </div>
+        </div>
+    @endif
+
+    <!-- STEP 2: Details (Visual Step 2) -->
+    @if($this->visualStep === 2)
+        <div class="space-y-6">
+            <div>
+                <h2 class="text-2xl font-black text-slate-900 tracking-tight">Ad Details</h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">Provide the headline and description for your personal listing</p>
+            </div>
+
+            <div class="space-y-5">
+                <!-- Title / Headline -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Listing Headline / Title <span class="text-[#F20B83]">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        wire:model="title" 
+                        placeholder="e.g., Austin Professional Seeking Long Term Match" 
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83] outline-none"
+                    />
+                    <div class="flex items-center justify-between mt-1 text-[11px] text-slate-400">
+                        <span>Be concise and descriptive. No phone numbers or external URLs in title.</span>
+                        <span>{{ strlen($title) }}/120</span>
+                    </div>
+                    @error('title') <span class="text-xs text-rose-500 block mt-1">{{ $message }}</span> @enderror
                 </div>
 
+                <!-- Poster Age & Gender & Intent Grid -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                            Your Age (18+) <span class="text-rose-400">*</span>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                            Your Age (18+) <span class="text-[#F20B83]">*</span>
                         </label>
-                        <input
-                            type="number"
-                            wire:model="poster_age"
-                            min="18"
-                            max="99"
-                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none"
-                        >
-                        @error('poster_age') <span class="text-xs text-rose-400 block mt-1">{{ $message }}</span> @enderror
+                        <input 
+                            type="number" 
+                            wire:model="poster_age" 
+                            min="18" 
+                            max="99" 
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83] outline-none"
+                        />
+                        @error('poster_age') <span class="text-xs text-rose-500 block mt-1">{{ $message }}</span> @enderror
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                            Gender Identity <span class="text-rose-400">*</span>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                            Your Gender <span class="text-[#F20B83]">*</span>
                         </label>
-                        <select
-                            wire:model="poster_gender"
-                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none"
+                        <select 
+                            wire:model="poster_gender" 
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83] outline-none"
                         >
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
-                            <option value="Non-Binary">Non-Binary</option>
-                            <option value="Transgender">Transgender</option>
+                            <option value="Non-Binary">Non-Binary / Trans</option>
                             <option value="Couple">Couple</option>
                             <option value="Other">Other</option>
                         </select>
+                        @error('poster_gender') <span class="text-xs text-rose-500 block mt-1">{{ $message }}</span> @enderror
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                            Connection Intent <span class="text-rose-400">*</span>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                            Seeking Intent <span class="text-[#F20B83]">*</span>
                         </label>
-                        <select
-                            wire:model="intent"
-                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none"
+                        <select 
+                            wire:model="intent" 
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83] outline-none"
                         >
                             <option value="dating">Dating & Romance</option>
-                            <option value="long_term">Long-Term Relationship</option>
-                            <option value="casual">Casual Coffee & Meets</option>
-                            <option value="activity">Activity Companion</option>
-                            <option value="friendship">Platonic Friendship</option>
+                            <option value="long-term">Long-Term Relationship</option>
+                            <option value="activity">Activity & Travel Partner</option>
+                            <option value="casual">Casual Dating</option>
+                            <option value="friendship">Friendship & Social</option>
                         </select>
+                        @error('intent') <span class="text-xs text-rose-500 block mt-1">{{ $message }}</span> @enderror
                     </div>
                 </div>
-            </div>
-        @endif
 
-        <!-- Step 4: Description -->
-        @if($currentStep === 4)
-            <div class="space-y-4">
+                <!-- Description -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                        Detailed Advertisement Description <span class="text-rose-400">*</span>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Ad Description <span class="text-[#F20B83]">*</span>
                     </label>
-                    <textarea
-                        wire:model="description"
-                        rows="8"
-                        placeholder="Tell others about yourself, your lifestyle, what you are looking for in a match, and how you'd like to spend time together..."
-                        class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none leading-relaxed"
+                    <textarea 
+                        wire:model="description" 
+                        rows="6" 
+                        placeholder="Describe who you are, what activities you enjoy, and what you are looking for in a match..." 
+                        class="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83] outline-none"
                     ></textarea>
-                    <div class="flex items-center justify-between text-xs text-slate-400 mt-1">
-                        <span>Min 20 characters &bull; Max 5,000 characters</span>
-                        <span>Length: {{ strlen($description) }} chars</span>
+                    <div class="flex items-center justify-between mt-1 text-[11px] text-slate-400">
+                        <span>Minimum 20 characters. Commercial solicitations and prostitution are strictly prohibited.</span>
+                        <span>{{ strlen($description) }}/5000</span>
                     </div>
-                    @error('description') <span class="text-xs text-rose-400 block mt-1">{{ $message }}</span> @enderror
-                </div>
-
-                <div class="p-3 bg-rose-950/20 border border-rose-900/40 rounded-xl text-xs text-rose-300">
-                    <strong class="font-bold text-rose-400">Trust & Safety Guidelines:</strong>
-                    Do not include financial requests (CashApp, Venmo, crypto), compensation rates, or commercial solicitation. Listings with solicitation terms are automatically rejected.
+                    @error('description') <span class="text-xs text-rose-500 block mt-1">{{ $message }}</span> @enderror
                 </div>
             </div>
-        @endif
 
-        <!-- Step 5: Dynamic Category Attributes -->
-        @if($currentStep === 5)
-            <div class="space-y-4">
-                <p class="text-xs text-slate-400">Complete category-specific questions to help local adults find you via search filters:</p>
-                @if($categoryAttributes->isEmpty())
-                    <p class="text-xs text-slate-400">No additional custom attributes required for this category.</p>
-                @else
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        @foreach($categoryAttributes as $attr)
-                            <div class="p-4 bg-slate-950 border border-slate-800/80 rounded-2xl space-y-1.5">
-                                <label class="block text-xs font-semibold text-white">
-                                    {{ $attr->name }}
-                                    @if($attr->is_required) <span class="text-rose-400">*</span> @endif
-                                </label>
-                                @if($attr->help_text)
-                                    <span class="block text-[11px] text-slate-400">{{ $attr->help_text }}</span>
-                                @endif
-
-                                @if(in_array($attr->field_type, ['select', 'radio']))
-                                    <select
-                                        wire:model="dynamicAttributes.{{ $attr->code }}"
-                                        class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:ring-1 focus:ring-rose-500 focus:outline-none"
-                                    >
-                                        <option value="">-- Choose {{ $attr->name }} --</option>
-                                        @foreach($attr->options as $opt)
-                                            <option value="{{ $opt->value }}">{{ $opt->label }}</option>
-                                        @endforeach
-                                    </select>
-                                @elseif($attr->field_type === 'number')
-                                    <input
-                                        type="number"
-                                        wire:model="dynamicAttributes.{{ $attr->code }}"
-                                        placeholder="{{ $attr->placeholder ?: $attr->name }}"
-                                        class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:ring-1 focus:ring-rose-500 focus:outline-none"
-                                    >
-                                @else
-                                    <input
-                                        type="text"
-                                        wire:model="dynamicAttributes.{{ $attr->code }}"
-                                        placeholder="{{ $attr->placeholder ?: $attr->name }}"
-                                        class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:ring-1 focus:ring-rose-500 focus:outline-none"
-                                    >
-                                @endif
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
-            </div>
-        @endif
-
-        <!-- Step 6: Location Selection -->
-        @if($currentStep === 6)
-            <div class="space-y-4">
-                <p class="text-xs text-slate-400">Choose your geographic hub. Exact GPS coordinates are automatically fuzzed with anti-triangulation offsets to protect your residential privacy.</p>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                            State <span class="text-rose-400">*</span>
-                        </label>
-                        <select
-                            wire:model.live="state_id"
-                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none"
-                        >
-                            <option value="">-- Select State --</option>
-                            @foreach($states as $st)
-                                <option value="{{ $st->id }}">{{ $st->name }} ({{ $st->code }})</option>
-                            @endforeach
-                        </select>
-                        @error('state_id') <span class="text-xs text-rose-400 block mt-1">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                            City / Populated Place <span class="text-rose-400">*</span>
-                        </label>
-                        <select
-                            wire:model.live="city_id"
-                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none"
-                        >
-                            <option value="">-- Select City --</option>
-                            @foreach($cities as $ct)
-                                <option value="{{ $ct->id }}">{{ $ct->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('city_id') <span class="text-xs text-rose-400 block mt-1">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                            Postal ZIP Code (Optional)
-                        </label>
-                        <select
-                            wire:model="zip_code_id"
-                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none"
-                        >
-                            <option value="">-- General City Area --</option>
-                            @foreach($zipCodes as $zip)
-                                <option value="{{ $zip->id }}">{{ $zip->code }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                            Neighborhood / General Area (Optional)
-                        </label>
-                        <input
-                            type="text"
-                            wire:model="neighborhood"
-                            placeholder="e.g. Downtown, South Congress, Midtown"
-                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none"
-                        >
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                            Cross Streets (Optional)
-                        </label>
-                        <input
-                            type="text"
-                            wire:model="cross_streets"
-                            placeholder="e.g. Near 5th & Lamar"
-                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none"
-                        >
-                    </div>
-                </div>
-
-                <div class="pt-2">
-                    <label class="flex items-center space-x-2 cursor-pointer text-xs text-slate-300">
-                        <input type="checkbox" wire:model="hide_exact_distance" class="rounded border-slate-700 bg-slate-950 text-rose-600 focus:ring-rose-500">
-                        <span>Hide approximate mile distance calculation from search results</span>
-                    </label>
-                </div>
-            </div>
-        @endif
-
-        <!-- Step 7: Photo Upload -->
-        @if($currentStep === 7)
-            <div class="space-y-5">
-                <div class="p-4 bg-slate-950 border-2 border-dashed border-slate-800 rounded-2xl text-center space-y-2">
-                    <svg class="w-8 h-8 text-rose-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                    <div class="text-xs text-slate-300 font-semibold">
-                        Upload Photos (Up to 6 photos &bull; Max 5MB each)
-                    </div>
-                    <p class="text-[11px] text-slate-400">
-                        All images are converted to WebP and stripped of EXIF metadata (GPS location & camera info) automatically.
-                    </p>
-                    <input
-                        type="file"
-                        wire:model="newPhotos"
-                        multiple
-                        accept="image/jpeg,image/png,image/webp"
-                        class="block w-full text-xs text-slate-400 file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-rose-600 file:text-white hover:file:bg-rose-500 cursor-pointer pt-2"
-                    >
-                </div>
-
-                @if(!empty($uploadedMedia))
-                    <div class="space-y-2">
-                        <span class="block text-xs font-semibold text-white uppercase tracking-wider">
-                            Attached Photos ({{ count($uploadedMedia) }} / 6)
-                        </span>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            @foreach($uploadedMedia as $item)
-                                <div class="relative bg-slate-950 border border-slate-800 rounded-xl overflow-hidden group">
-                                    <img src="{{ $item['thumb'] }}" class="w-full h-32 object-cover" alt="Upload">
-                                    <div class="p-2 flex items-center justify-between text-[11px] bg-slate-900">
-                                        @if($item['is_primary'])
-                                            <span class="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold text-[10px]">Primary</span>
-                                        @else
-                                            <button type="button" wire:click="setPrimaryPhoto({{ $item['id'] }})" class="text-slate-400 hover:text-white">
-                                                Set Primary
-                                            </button>
-                                        @endif
-                                        <button type="button" wire:click="removePhoto({{ $item['id'] }})" class="text-rose-400 hover:text-rose-300 font-bold">
-                                            Delete
-                                        </button>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
-            </div>
-        @endif
-
-        <!-- Step 8: External Contact Configuration -->
-        @if($currentStep === 8)
-            <div class="space-y-4">
-                <p class="text-xs text-slate-400">Optionally provide direct contact details. All telephone numbers and messaging handles are stored using AES-256-GCM encryption in our database.</p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                            Telephone / SMS (Encrypted)
-                        </label>
-                        <input
-                            type="text"
-                            wire:model="preferred_phone"
-                            placeholder="e.g. (512) 555-0199"
-                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none"
-                        >
-                        <span class="text-[11px] text-slate-400 mt-1 block">Never shown publicly unless explicitly enabled.</span>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                            External Messaging Handle (Encrypted)
-                        </label>
-                        <input
-                            type="text"
-                            wire:model="external_handle"
-                            placeholder="e.g. @SignalUser or Telegram handle"
-                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none"
-                        >
-                    </div>
-                </div>
-
-                <div class="pt-2">
-                    <label class="flex items-center space-x-2 cursor-pointer text-xs text-slate-300">
-                        <input type="checkbox" wire:model="show_phone" class="rounded border-slate-700 bg-slate-950 text-rose-600 focus:ring-rose-500">
-                        <span>Display telephone number directly on public listing page</span>
-                    </label>
-                </div>
-            </div>
-        @endif
-
-        <!-- Step 9: Contact Preferences -->
-        @if($currentStep === 9)
-            <div class="space-y-4">
-                <p class="text-xs text-slate-400">Configure how other verified adults can reach you regarding this advertisement:</p>
-                <div class="space-y-3">
-                    <label class="p-3 bg-slate-950 border border-slate-800 rounded-xl flex items-center space-x-3 cursor-pointer">
-                        <input type="checkbox" wire:model="allow_platform_messages" class="rounded border-slate-700 bg-slate-900 text-rose-600 focus:ring-rose-500">
-                        <div>
-                            <span class="font-bold text-xs text-white block">Protected Platform Chat Messages</span>
-                            <span class="text-[11px] text-slate-400 block">Receive secure, encrypted responses directly inside your LocalAdZone dashboard.</span>
-                        </div>
-                    </label>
-
-                    <label class="p-3 bg-slate-950 border border-slate-800 rounded-xl flex items-center space-x-3 cursor-pointer">
-                        <input type="checkbox" wire:model="allow_email_relay" class="rounded border-slate-700 bg-slate-900 text-rose-600 focus:ring-rose-500">
-                        <div>
-                            <span class="font-bold text-xs text-white block">Anonymous Email Relay</span>
-                            <span class="text-[11px] text-slate-400 block">Respondents email an alias relay address without ever seeing your actual personal email.</span>
-                        </div>
-                    </label>
-                </div>
-
-                <div class="pt-2">
-                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                        Special Contact Instructions
-                    </label>
-                    <textarea
-                        wire:model="contact_instructions"
-                        rows="3"
-                        placeholder="e.g. Please send a recent photo and tell me your favorite local coffee spot..."
-                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none"
-                    ></textarea>
-                </div>
-            </div>
-        @endif
-
-        <!-- Step 10: Complete Preview -->
-        @if($currentStep === 10)
-            <div class="space-y-5">
-                <div class="p-3 bg-blue-950/30 border border-blue-900/40 rounded-xl text-xs text-blue-200">
-                    <strong>Listing Preview:</strong> This is how your advertisement will appear to verified local members once approved.
-                </div>
-
-                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-4">
-                    <div class="flex items-center justify-between text-xs text-slate-400">
-                        <span class="text-rose-400 font-semibold">{{ $poster_gender }}, Age {{ $poster_age }}</span>
-                        <span class="capitalize">{{ str_replace('_', ' ', $intent) }}</span>
-                    </div>
-
-                    <h3 class="text-xl font-bold text-white">{{ $title ?: 'Untitled Listing' }}</h3>
-
-                    <p class="text-xs text-slate-300 leading-relaxed whitespace-pre-line">{{ $description }}</p>
-
-                    @if(!empty($dynamicAttributes))
-                        <div class="pt-3 border-t border-slate-800 flex flex-wrap gap-2 text-xs">
-                            @foreach($dynamicAttributes as $k => $v)
-                                @if(!empty($v))
-                                    <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">
-                                        <strong class="text-white capitalize">{{ str_replace('_', ' ', $k) }}:</strong> {{ $v }}
-                                    </span>
-                                @endif
-                            @endforeach
-                        </div>
-                    @endif
-
-                    @if(!empty($uploadedMedia))
-                        <div class="pt-3 border-t border-slate-800 flex gap-2 overflow-x-auto py-2">
-                            @foreach($uploadedMedia as $photo)
-                                <img src="{{ $photo['thumb'] }}" class="w-20 h-20 object-cover rounded-lg border border-slate-800" alt="Photo">
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
-            </div>
-        @endif
-
-        <!-- Step 11: Policy Confirmation -->
-        @if($currentStep === 11)
-            <div class="space-y-4">
-                <div class="p-4 bg-rose-950/30 border border-rose-900/60 rounded-2xl space-y-3">
-                    <h3 class="text-xs font-bold text-rose-400 uppercase tracking-wider">
-                        Federal Law & Platform Compliance Affirmation
-                    </h3>
-                    <p class="text-xs text-rose-200/90 leading-relaxed">
-                        LocalAdZone is an adult personal classifieds and dating platform. We operate in strict compliance with federal laws, including 18 U.S.C. § 2421A (FOSTA-SESTA). Commercial sexual services, prostitution, solicitation, sex work, and non-consensual imagery are strictly banned.
-                    </p>
-
-                    <div class="space-y-2 pt-2 border-t border-rose-900/40">
-                        <label class="flex items-start space-x-2.5 cursor-pointer text-xs text-white">
-                            <input type="checkbox" wire:model="confirm_age_18" class="mt-0.5 rounded border-slate-700 bg-slate-950 text-rose-600 focus:ring-rose-500">
-                            <span>I certify under penalty of perjury that I am at least 18 years of age.</span>
-                        </label>
-                        @error('confirm_age_18') <span class="text-xs text-rose-400 block">{{ $message }}</span> @enderror
-
-                        <label class="flex items-start space-x-2.5 cursor-pointer text-xs text-white">
-                            <input type="checkbox" wire:model="confirm_community_rules" class="mt-0.5 rounded border-slate-700 bg-slate-950 text-rose-600 focus:ring-rose-500">
-                            <span>I agree that this listing is for personal dating, companionship, or friendship only.</span>
-                        </label>
-                        @error('confirm_community_rules') <span class="text-xs text-rose-400 block">{{ $message }}</span> @enderror
-
-                        <label class="flex items-start space-x-2.5 cursor-pointer text-xs text-white">
-                            <input type="checkbox" wire:model="confirm_anti_trafficking" class="mt-0.5 rounded border-slate-700 bg-slate-950 text-rose-600 focus:ring-rose-500">
-                            <span>I acknowledge that solicitation of commercial sexual services, prostitution, trafficking, and coercion are strictly forbidden and will result in immediate termination and referral to law enforcement.</span>
-                        </label>
-                        @error('confirm_anti_trafficking') <span class="text-xs text-rose-400 block">{{ $message }}</span> @enderror
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        <!-- Step 12: Final Review & Submission -->
-        @if($currentStep === 12)
-            <div class="space-y-4 text-center py-4">
-                <div class="w-12 h-12 bg-rose-500/20 text-rose-400 rounded-2xl flex items-center justify-center mx-auto border border-rose-500/30">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                </div>
-                <h3 class="text-xl font-bold text-white">Ready for Moderation Review</h3>
-                <p class="text-xs text-slate-300 max-w-md mx-auto">
-                    Your advertisement is ready to be queued for review. Our moderation team inspects submissions to ensure compliance with our zero-tolerance safety policies before listings appear in public search.
-                </p>
-
-                <div class="pt-4 flex justify-center space-x-4">
-                    <button
-                        type="button"
-                        wire:click="submitForReview"
-                        class="px-6 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-rose-600/30 flex items-center space-x-2"
-                    >
-                        <span>Submit for Moderation Review</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                    </button>
-                </div>
-            </div>
-        @endif
-
-        <!-- Navigation Buttons -->
-        <div class="pt-6 border-t border-slate-800 flex items-center justify-between">
-            <div>
-                @if($currentStep > 1)
-                    <button
-                        type="button"
-                        wire:click="previousStep"
-                        class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition"
-                    >
-                        &larr; Back
-                    </button>
-                @endif
-            </div>
-
-            <div class="flex items-center space-x-3">
-                @if($currentStep < $totalSteps)
-                    <button
-                        type="button"
-                        wire:click="nextStep"
-                        class="px-5 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition shadow-md flex items-center space-x-1"
-                    >
-                        <span>Continue</span>
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                    </button>
-                @endif
+            <!-- Bottom Actions -->
+            <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+                <button 
+                    type="button" 
+                    wire:click="previousWizardStep" 
+                    class="text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 flex items-center space-x-1"
+                >
+                    <span>←</span>
+                    <span>Previous</span>
+                </button>
+                <button 
+                    type="button" 
+                    wire:click="nextWizardStep" 
+                    class="bg-[#F20B83] hover:bg-[#d90858] text-white px-7 py-2.5 rounded-full font-bold text-sm shadow-md transition flex items-center space-x-2"
+                >
+                    <span>Next Step</span>
+                    <span>→</span>
+                </button>
             </div>
         </div>
-    </div>
-</div>
+    @endif
 
+    <!-- STEP 3: Location (Visual Step 3) -->
+    @if($this->visualStep === 3)
+        <div class="space-y-6">
+            <div>
+                <h2 class="text-2xl font-black text-slate-900 tracking-tight">Location Information</h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">Select where you are located to connect with local matches</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        State <span class="text-[#F20B83]">*</span>
+                    </label>
+                    <select 
+                        wire:model.live="state_id" 
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83] outline-none"
+                    >
+                        <option value="">Select a State</option>
+                        @foreach($states as $s)
+                            <option value="{{ $s->id }}">{{ $s->name }} ({{ $s->code }})</option>
+                        @endforeach
+                    </select>
+                    @error('state_id') <span class="text-xs text-rose-500 block mt-1">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        City <span class="text-[#F20B83]">*</span>
+                    </label>
+                    <select 
+                        wire:model.live="city_id" 
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83] outline-none"
+                    >
+                        <option value="">Select a City</option>
+                        @foreach($cities as $c)
+                            <option value="{{ $c->id }}">{{ $c->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('city_id') <span class="text-xs text-rose-500 block mt-1">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Neighborhood / Area (Optional)
+                    </label>
+                    <input 
+                        type="text" 
+                        wire:model="neighborhood" 
+                        placeholder="e.g. Downtown, Uptown, South Congress" 
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83] outline-none"
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Cross Streets (Optional)
+                    </label>
+                    <input 
+                        type="text" 
+                        wire:model="cross_streets" 
+                        placeholder="e.g. 6th St & Lamar Blvd" 
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83] outline-none"
+                    />
+                </div>
+            </div>
+
+            <!-- Privacy Distance Toggle -->
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between">
+                <div>
+                    <h4 class="text-xs sm:text-sm font-bold text-slate-800">Obfuscate Exact Location</h4>
+                    <p class="text-xs text-slate-500">Only display your city and general area. Protects personal privacy.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" wire:model="hide_exact_distance" class="sr-only peer">
+                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F20B83]"></div>
+                </label>
+            </div>
+
+            <!-- Bottom Actions -->
+            <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+                <button 
+                    type="button" 
+                    wire:click="previousWizardStep" 
+                    class="text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 flex items-center space-x-1"
+                >
+                    <span>←</span>
+                    <span>Previous</span>
+                </button>
+                <button 
+                    type="button" 
+                    wire:click="nextWizardStep" 
+                    class="bg-[#F20B83] hover:bg-[#d90858] text-white px-7 py-2.5 rounded-full font-bold text-sm shadow-md transition flex items-center space-x-2"
+                >
+                    <span>Next Step</span>
+                    <span>→</span>
+                </button>
+            </div>
+        </div>
+    @endif
+
+    <!-- STEP 4: Photos (Visual Step 4) -->
+    @if($this->visualStep === 4)
+        <div class="space-y-6">
+            <div>
+                <h2 class="text-2xl font-black text-slate-900 tracking-tight">Photos & Media</h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">Upload clear photos to get up to 5x more responses</p>
+            </div>
+
+            <!-- Drag & Drop Upload Zone -->
+            <div 
+                x-data="{ isDropping: false }"
+                class="border-2 border-dashed rounded-3xl p-8 text-center transition-all"
+                :class="isDropping ? 'border-[#F20B83] bg-pink-50/50' : 'border-slate-200 bg-slate-50/50 hover:border-slate-300'"
+                @dragover.prevent="isDropping = true"
+                @dragleave.prevent="isDropping = false"
+                @drop.prevent="isDropping = false"
+            >
+                <div class="max-w-md mx-auto flex flex-col items-center">
+                    <div class="w-14 h-14 rounded-2xl bg-[#F20B83]/15 text-[#F20B83] flex items-center justify-center mb-3">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                        </svg>
+                    </div>
+                    <label class="cursor-pointer">
+                        <span class="bg-[#F20B83] hover:bg-[#d90858] text-white px-5 py-2 rounded-full font-bold text-xs shadow-md transition inline-block">
+                            Choose Photos
+                        </span>
+                        <input type="file" wire:model="newPhotos" multiple class="hidden" accept="image/jpeg,image/png,image/webp">
+                    </label>
+                    <p class="text-xs text-slate-500 mt-2">JPG, PNG, or WebP. Max 5MB per photo. EXIF location metadata scrubbed automatically.</p>
+                </div>
+            </div>
+
+            <!-- Uploaded Photos Grid -->
+            @if(count($uploadedMedia) > 0)
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    @foreach($uploadedMedia as $m)
+                        <div class="relative rounded-2xl overflow-hidden border border-slate-200 shadow group aspect-square bg-slate-100">
+                            <img src="{{ $m['thumb'] }}" alt="Photo" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center space-x-2">
+                                @if(!$m['is_primary'])
+                                    <button 
+                                        type="button" 
+                                        wire:click="setPrimaryPhoto({{ $m['id'] }})"
+                                        class="bg-white/90 hover:bg-white text-slate-900 text-[10px] font-bold px-2 py-1 rounded shadow"
+                                    >
+                                        Set Primary
+                                    </button>
+                                @endif
+                                <button 
+                                    type="button" 
+                                    wire:click="removePhoto({{ $m['id'] }})"
+                                    class="bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-bold px-2 py-1 rounded shadow"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                            @if($m['is_primary'])
+                                <span class="absolute top-2 left-2 bg-[#F20B83] text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow">
+                                    Primary
+                                </span>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
+            <!-- Bottom Actions -->
+            <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+                <button 
+                    type="button" 
+                    wire:click="previousWizardStep" 
+                    class="text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 flex items-center space-x-1"
+                >
+                    <span>←</span>
+                    <span>Previous</span>
+                </button>
+                <button 
+                    type="button" 
+                    wire:click="nextWizardStep" 
+                    class="bg-[#F20B83] hover:bg-[#d90858] text-white px-7 py-2.5 rounded-full font-bold text-sm shadow-md transition flex items-center space-x-2"
+                >
+                    <span>Next Step</span>
+                    <span>→</span>
+                </button>
+            </div>
+        </div>
+    @endif
+
+    <!-- STEP 5: Contact Preferences (Visual Step 5) -->
+    @if($this->visualStep === 5)
+        <div class="space-y-6">
+            <div>
+                <h2 class="text-2xl font-black text-slate-900 tracking-tight">Contact & Privacy</h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">Choose how interested members can get in touch with you</p>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Platform Messages -->
+                <div class="p-4 rounded-2xl border border-slate-200 flex items-center justify-between bg-slate-50">
+                    <div>
+                        <h4 class="text-xs sm:text-sm font-bold text-slate-800">Allow Platform Messaging</h4>
+                        <p class="text-xs text-slate-500">Receive private, secure messages directly through LocalDateHub.</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" wire:model="allow_platform_messages" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F20B83]"></div>
+                    </label>
+                </div>
+
+                <!-- Email Relay -->
+                <div class="p-4 rounded-2xl border border-slate-200 flex items-center justify-between bg-slate-50">
+                    <div>
+                        <h4 class="text-xs sm:text-sm font-bold text-slate-800">Enable Secure Email Relay</h4>
+                        <p class="text-xs text-slate-500">Mask your personal email behind our proxy address to protect your identity.</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" wire:model="allow_email_relay" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F20B83]"></div>
+                    </label>
+                </div>
+
+                <!-- Phone Preferences -->
+                <div class="p-4 rounded-2xl border border-slate-200 space-y-3 bg-white">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                            Phone Number (Optional & Encrypted)
+                        </label>
+                        <input 
+                            type="tel" 
+                            wire:model="preferred_phone" 
+                            placeholder="(555) 123-4567" 
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83] outline-none"
+                        />
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-slate-600 font-medium">Display phone number publicly on ad page</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" wire:model="show_phone" class="sr-only peer">
+                            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F20B83]"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Contact Instructions -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Special Contact Instructions (Optional)
+                    </label>
+                    <input 
+                        type="text" 
+                        wire:model="contact_instructions" 
+                        placeholder="e.g. Text first, prefer messaging after 7 PM" 
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83] outline-none"
+                    />
+                </div>
+            </div>
+
+            <!-- Bottom Actions -->
+            <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+                <button 
+                    type="button" 
+                    wire:click="previousWizardStep" 
+                    class="text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 flex items-center space-x-1"
+                >
+                    <span>←</span>
+                    <span>Previous</span>
+                </button>
+                <button 
+                    type="button" 
+                    wire:click="nextWizardStep" 
+                    class="bg-[#F20B83] hover:bg-[#d90858] text-white px-7 py-2.5 rounded-full font-bold text-sm shadow-md transition flex items-center space-x-2"
+                >
+                    <span>Next Step</span>
+                    <span>→</span>
+                </button>
+            </div>
+        </div>
+    @endif
+
+    <!-- STEP 6: Preview & Publish (Visual Step 6) -->
+    @if($this->visualStep === 6)
+        <div class="space-y-6">
+            <div>
+                <h2 class="text-2xl font-black text-slate-900 tracking-tight">Preview & Publish</h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">Review your personal advertisement and certify compliance before publishing</p>
+            </div>
+
+            <!-- Live Ad Preview Card -->
+            <div class="rounded-2xl border-2 border-[#F20B83]/30 bg-gradient-to-br from-pink-50/20 via-white to-slate-50 p-6 shadow-sm">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <span class="inline-block px-2.5 py-0.5 rounded-full bg-[#F20B83] text-white text-[10px] font-extrabold uppercase tracking-wider mb-2">
+                            Ad Preview
+                        </span>
+                        <h3 class="text-xl font-black text-slate-900">{{ $title ?: 'Your Ad Title Here' }}</h3>
+                        <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-1">
+                            <span>Age: <strong>{{ $poster_age }}</strong></span>
+                            <span>•</span>
+                            <span>Gender: <strong>{{ $poster_gender }}</strong></span>
+                            <span>•</span>
+                            <span>Intent: <strong>{{ ucfirst($intent) }}</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-slate-200 text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line">
+                    {{ $description ?: 'Your detailed personal ad description will appear here...' }}
+                </div>
+            </div>
+
+            <!-- Compliance Checkboxes Matching US Adult Legal Guidelines -->
+            <div class="bg-rose-50/70 border border-rose-200/80 rounded-2xl p-5 space-y-3">
+                <h4 class="text-xs font-bold text-rose-900 uppercase tracking-wider">Mandatory Compliance & Verification</h4>
+
+                <label class="flex items-start space-x-3 cursor-pointer">
+                    <input type="checkbox" wire:model="confirm_age_18" class="mt-0.5 rounded text-[#F20B83] focus:ring-[#F20B83]">
+                    <span class="text-xs text-slate-800">
+                        <strong>18+ Age Verification:</strong> I certify under penalty of perjury that I am at least 18 years of age.
+                    </span>
+                </label>
+                @error('confirm_age_18') <span class="text-xs text-rose-600 block ml-6">{{ $message }}</span> @enderror
+
+                <label class="flex items-start space-x-3 cursor-pointer">
+                    <input type="checkbox" wire:model="confirm_community_rules" class="mt-0.5 rounded text-[#F20B83] focus:ring-[#F20B83]">
+                    <span class="text-xs text-slate-800">
+                        <strong>Community Standards:</strong> I agree to adhere to LocalDateHub Terms of Service and Privacy Guidelines.
+                    </span>
+                </label>
+                @error('confirm_community_rules') <span class="text-xs text-rose-600 block ml-6">{{ $message }}</span> @enderror
+
+                <label class="flex items-start space-x-3 cursor-pointer">
+                    <input type="checkbox" wire:model="confirm_anti_trafficking" class="mt-0.5 rounded text-[#F20B83] focus:ring-[#F20B83]">
+                    <span class="text-xs text-slate-800">
+                        <strong>Anti-Trafficking & Legal Notice:</strong> Commercial sexual services, prostitution, human trafficking, and underage content are strictly illegal and prohibited.
+                    </span>
+                </label>
+                @error('confirm_anti_trafficking') <span class="text-xs text-rose-600 block ml-6">{{ $message }}</span> @enderror
+            </div>
+
+            <!-- Bottom Actions -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">
+                <button 
+                    type="button" 
+                    wire:click="previousWizardStep" 
+                    class="text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 flex items-center space-x-1"
+                >
+                    <span>←</span>
+                    <span>Previous</span>
+                </button>
+
+                <div class="flex items-center space-x-3 w-full sm:w-auto justify-end">
+                    <button 
+                        type="button" 
+                        wire:click="saveDraft" 
+                        class="px-5 py-2.5 rounded-full border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold transition"
+                    >
+                        Save Draft
+                    </button>
+                    <button 
+                        type="button" 
+                        wire:click="submitForReview" 
+                        class="bg-[#F20B83] hover:bg-[#d90858] text-white px-8 py-2.5 rounded-full font-bold text-sm shadow-xl transition flex items-center space-x-2"
+                    >
+                        <span>Publish Ad</span>
+                        <span>🚀</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+</div>

@@ -79,13 +79,19 @@ class ListingWizard extends Component
         if ($listingId) {
             $this->loadExistingListing($listingId);
         } else {
-            // Default to Personals root and first group
-            $root = Category::whereNull('parent_id')->first();
-            if ($root) {
-                $this->selectedRootId = $root->id;
-                $firstGroup = $root->children()->first();
-                if ($firstGroup) {
-                    $this->selectedGroupId = $firstGroup->id;
+            // Default to Men Seeking Women (M4W) as in the screenshot
+            $m4w = Category::where('slug', 'men-seeking-women')->first();
+            if ($m4w) {
+                $this->selectedCategoryId = $m4w->id;
+                $this->selectedGroupId = $m4w->parent_id ?: $m4w->id;
+            } else {
+                $root = Category::whereNull('parent_id')->first();
+                if ($root) {
+                    $this->selectedRootId = $root->id;
+                    $firstGroup = $root->children()->first();
+                    if ($firstGroup) {
+                        $this->selectedGroupId = $firstGroup->id;
+                    }
                 }
             }
 
@@ -230,6 +236,106 @@ class ListingWizard extends Component
             'is_primary' => $m->is_primary,
             'status' => $m->moderation_status,
         ])->all();
+    }
+
+    public function selectCategory(int $id): void
+    {
+        $category = Category::find($id);
+        if ($category) {
+            $this->selectedCategoryId = $category->id;
+            $this->selectedGroupId = $category->parent_id ?: $category->id;
+        }
+    }
+
+    public function getVisualStepProperty(): int
+    {
+        if ($this->currentStep <= 2) {
+            return 1; // Category
+        } elseif ($this->currentStep >= 3 && $this->currentStep <= 5) {
+            return 2; // Details
+        } elseif ($this->currentStep === 6) {
+            return 3; // Location
+        } elseif ($this->currentStep === 7) {
+            return 4; // Photos
+        } elseif ($this->currentStep >= 8 && $this->currentStep <= 10) {
+            return 5; // Contact
+        } else {
+            return 6; // Preview & Publish
+        }
+    }
+
+    public function nextWizardStep(): void
+    {
+        $vStep = $this->visualStep;
+
+        if ($vStep === 1) {
+            $this->validate([
+                'selectedCategoryId' => 'required',
+            ]);
+            if (!$this->selectedGroupId && $this->selectedCategoryId) {
+                $cat = Category::find($this->selectedCategoryId);
+                $this->selectedGroupId = $cat?->parent_id ?: $cat?->id;
+            }
+            $this->currentStep = 3;
+        } elseif ($vStep === 2) {
+            $this->validate([
+                'title' => 'required|string|min:5|max:120',
+                'poster_age' => 'required|integer|min:18|max:99',
+                'poster_gender' => 'required|string|max:50',
+                'intent' => 'required|string',
+                'description' => 'required|string|min:20|max:5000',
+            ]);
+            app(ListingManagementService::class)->validateContentCompliance($this->title, $this->description);
+            $this->currentStep = 6;
+        } elseif ($vStep === 3) {
+            $this->validate([
+                'state_id' => 'required|integer|exists:states,id',
+                'city_id' => 'required|integer|exists:cities,id',
+            ]);
+            $this->currentStep = 7;
+        } elseif ($vStep === 4) {
+            $this->currentStep = 8;
+        } elseif ($vStep === 5) {
+            $this->currentStep = 11;
+        } elseif ($vStep === 6) {
+            $this->submitForReview();
+            return;
+        }
+
+        $this->autosave();
+    }
+
+    public function previousWizardStep(): void
+    {
+        $vStep = $this->visualStep;
+
+        if ($vStep === 6) {
+            $this->currentStep = 8;
+        } elseif ($vStep === 5) {
+            $this->currentStep = 7;
+        } elseif ($vStep === 4) {
+            $this->currentStep = 6;
+        } elseif ($vStep === 3) {
+            $this->currentStep = 3;
+        } elseif ($vStep === 2) {
+            $this->currentStep = 1;
+        }
+    }
+
+    public function goToVisualStep(int $target): void
+    {
+        if ($target < $this->visualStep) {
+            switch ($target) {
+                case 1: $this->currentStep = 1; break;
+                case 2: $this->currentStep = 3; break;
+                case 3: $this->currentStep = 6; break;
+                case 4: $this->currentStep = 7; break;
+                case 5: $this->currentStep = 8; break;
+                case 6: $this->currentStep = 11; break;
+            }
+        } else {
+            $this->nextWizardStep();
+        }
     }
 
     public function nextStep(): void
