@@ -208,6 +208,16 @@ class PromotionService
             // Generate Invoice
             $invoice = $this->invoiceService->createFromTransaction($transaction);
 
+            // Dispatch payment receipt notification
+            if ($user && $amountCents > 0) {
+                app(\App\Modules\Notifications\Services\NotificationService::class)->send(
+                    $user,
+                    new \App\Modules\Notifications\Notifications\PaymentReceiptNotification($transaction, $invoice),
+                    'payment_receipt',
+                    "Receipt for payment {$transaction->reference_id}"
+                );
+            }
+
             return [
                 'transaction' => $transaction,
                 'featured_listing' => $featured,

@@ -5,8 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? config('localdatehub.name', 'LocalDateHub') }} — {{ config('localdatehub.tagline') }}</title>
-    <meta name="description" content="{{ $description ?? 'LocalDateHub is the privacy-first local adult dating, personal classifieds, and safe date spot discovery platform.' }}">
+    <title>{{ $seo->title ?? $title ?? 'LocalAdZone — USA Adult Personal Classifieds' }}</title>
+    <meta name="description" content="{{ $seo->description ?? $description ?? 'LocalAdZone is the privacy-conscious local adult personal classifieds platform across all 50 US states.' }}">
+    <meta name="robots" content="{{ $seo->robots ?? 'index, follow' }}">
+    @if(!empty($seo?->canonicalUrl))
+        <link rel="canonical" href="{{ $seo->canonicalUrl }}">
+    @endif
+
+    <!-- Open Graph & Social Cards -->
+    <meta property="og:title" content="{{ $seo->title ?? $title ?? 'LocalAdZone' }}">
+    <meta property="og:description" content="{{ $seo->description ?? $description ?? 'Adult Personal Classifieds' }}">
+    <meta property="og:url" content="{{ $seo->canonicalUrl ?? url()->current() }}">
+    <meta property="og:type" content="{{ $seo->ogType ?? 'website' }}">
+    <meta property="og:image" content="{{ $seo->ogImage ?? asset('images/og-localadzone.jpg') }}">
+    <meta name="twitter:card" content="summary_large_image">
+
+    @if(!empty($seo?->structuredData))
+        <script type="application/ld+json">
+        {!! json_encode($seo->structuredData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+        </script>
+    @endif
 
     <!-- Design Tokens & Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

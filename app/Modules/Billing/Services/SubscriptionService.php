@@ -115,7 +115,15 @@ class SubscriptionService
             ]);
 
             // Generate Invoice
-            $this->invoiceService->createFromTransaction($txn);
+            $invoice = $this->invoiceService->createFromTransaction($txn);
+
+            if ($user && $amountCents > 0) {
+                app(\App\Modules\Notifications\Services\NotificationService::class)->send(
+                    $user,
+                    new \App\Modules\Notifications\Notifications\PaymentReceiptNotification($txn, $invoice),
+                    'payment_receipt'
+                );
+            }
 
             return $sub;
         });
@@ -194,7 +202,13 @@ class SubscriptionService
                             'reconciled_at' => now(),
                         ]);
 
-                        $this->invoiceService->createFromTransaction($txn);
+                        $invoice = $this->invoiceService->createFromTransaction($txn);
+
+                        app(\App\Modules\Notifications\Services\NotificationService::class)->send(
+                            $user,
+                            new \App\Modules\Notifications\Notifications\PaymentReceiptNotification($txn, $invoice),
+                            'payment_receipt'
+                        );
                     });
                     $processed++;
                 } else {

@@ -96,6 +96,17 @@ class ContactService
         $listing->increment('reply_count');
         $listing->recordAnalyticsEvent('contact_clicks');
 
+        // Queue notification to listing owner
+        if ($listing->user) {
+            $notificationService = app(\App\Modules\Notifications\Services\NotificationService::class);
+            $notificationService->send(
+                $listing->user,
+                new \App\Modules\Notifications\Notifications\ContactMessageReceivedNotification($message),
+                'contact_received',
+                "New inquiry on: {$listing->title}"
+            );
+        }
+
         return $message;
     }
 

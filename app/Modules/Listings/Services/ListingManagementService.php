@@ -193,6 +193,14 @@ class ListingManagementService
                 $user->id
             );
 
+            if ($user) {
+                app(\App\Modules\Notifications\Services\NotificationService::class)->send(
+                    $user,
+                    new \App\Modules\Notifications\Notifications\ListingSubmittedNotification($listing),
+                    'listing_submitted'
+                );
+            }
+
             return $listing;
         });
     }
@@ -226,6 +234,14 @@ class ListingManagementService
                 $moderator?->id
             );
 
+            if ($listing->user) {
+                app(\App\Modules\Notifications\Services\NotificationService::class)->send(
+                    $listing->user,
+                    new \App\Modules\Notifications\Notifications\ListingApprovedNotification($listing),
+                    'listing_approved'
+                );
+            }
+
             return $listing;
         });
     }
@@ -251,6 +267,14 @@ class ListingManagementService
                 $reason,
                 $moderator?->id
             );
+
+            if ($listing->user) {
+                app(\App\Modules\Notifications\Services\NotificationService::class)->send(
+                    $listing->user,
+                    new \App\Modules\Notifications\Notifications\ListingRejectedNotification($listing, $reason),
+                    'listing_rejected'
+                );
+            }
 
             return $listing;
         });
@@ -280,6 +304,14 @@ class ListingManagementService
                 'Renewed by poster for 30 days.',
                 $user->id
             );
+
+            if ($listing->user) {
+                app(\App\Modules\Notifications\Services\NotificationService::class)->send(
+                    $listing->user,
+                    new \App\Modules\Notifications\Notifications\ListingRenewedNotification($listing),
+                    'listing_renewed'
+                );
+            }
 
             return $listing;
         });

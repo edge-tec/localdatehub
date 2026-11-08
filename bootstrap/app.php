@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         \App\Console\Commands\ProcessRenewalsCommand::class,
         \App\Console\Commands\ExpirePromotionsCommand::class,
         \App\Console\Commands\ReconcileTransactionsCommand::class,
+        \App\Console\Commands\NotifyExpiringListingsCommand::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->validateCsrfTokens(except: [

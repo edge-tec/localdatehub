@@ -23,6 +23,7 @@ use App\Http\Controllers\CategoryWebController;
 use App\Http\Controllers\Billing\InvoiceWebController;
 use App\Http\Controllers\Billing\PaymentWebhookController;
 use App\Http\Controllers\DmcaWebController;
+use App\Http\Controllers\SEO\SitemapController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ListingWebController;
@@ -307,3 +308,13 @@ Route::middleware(['auth', 'admin.rbac:moderation.view'])->prefix('admin/moderat
 Route::middleware('auth')->get('/account/invoices/{invoice}', [InvoiceWebController::class, 'show'])->name('account.invoices.show');
 Route::post('/webhooks/payments/{gateway}', [PaymentWebhookController::class, 'handle'])->name('webhooks.payments');
 Route::post('/api/payments/webhook/{gateway}', [PaymentWebhookController::class, 'handle'])->name('api.webhooks.payments');
+
+// SEO, Sitemaps & Robots.txt
+Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('seo.robots');
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
+Route::prefix('sitemaps')->name('sitemaps.')->group(function () {
+    Route::get('/pages.xml', [SitemapController::class, 'pages'])->name('pages');
+    Route::get('/categories.xml', [SitemapController::class, 'categories'])->name('categories');
+    Route::get('/locations.xml', [SitemapController::class, 'locations'])->name('locations');
+    Route::get('/listings.xml', [SitemapController::class, 'listings'])->name('listings');
+});

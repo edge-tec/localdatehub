@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Modules\Listings\Models\Listing;
+use App\Modules\Listings\Services\AnalyticsTrackingService;
 use App\Modules\Listings\Services\ListingManagementService;
+use App\Modules\SEO\Services\SeoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
@@ -45,8 +47,8 @@ class ListingWebController extends Controller
 
         Gate::authorize('view', $listing);
 
-        // Record daily analytics view
-        $listing->recordAnalyticsEvent('views');
+        // Record privacy-conscious daily analytics view
+        app(AnalyticsTrackingService::class)->recordListingView($listing, $request);
 
         // Fetch similar listings in same category or city
         $similarListings = Listing::query()
@@ -65,10 +67,13 @@ class ListingWebController extends Controller
             ? $request->user()->favorites()->where('listing_id', $listing->id)->exists()
             : false;
 
+        $seo = app(SeoService::class)->generateForListing($listing);
+
         return view('listings.show', [
             'listing' => $listing,
             'similarListings' => $similarListings,
             'isFavorited' => $isFavorited,
+            'seo' => $seo,
         ]);
     }
 }
