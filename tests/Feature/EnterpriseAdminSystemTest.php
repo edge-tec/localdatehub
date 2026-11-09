@@ -651,6 +651,19 @@ class EnterpriseAdminSystemTest extends TestCase
         $response = $this->actingAs($this->superAdmin)->get(route('admin.dashboard', ['tab' => 'locations']));
         $response->assertStatus(200);
         $response->assertSee('Locations');
+
+        $responsePayments = $this->actingAs($this->superAdmin)->get(route('admin.dashboard', ['tab' => 'payments']));
+        $responsePayments->assertStatus(200);
+        $responsePayments->assertSee('Payments');
+    }
+
+    public function test_admin_can_switch_to_payments_tab_in_livewire(): void
+    {
+        Livewire::actingAs($this->superAdmin)
+            ->test(AdminEnterpriseHub::class, ['initialTab' => 'dashboard'])
+            ->call('setTab', 'payments')
+            ->assertSet('tab', 'payments')
+            ->assertHasNoErrors();
     }
 
     public function test_dashboard_realtime_filter_helpers_work_smoothly(): void

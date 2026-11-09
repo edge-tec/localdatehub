@@ -2526,7 +2526,7 @@ class AdminEnterpriseHub extends Component
                 'name' => $subscription->user?->name,
                 'email' => $subscription->user?->email,
                 'role' => $subscription->user?->role,
-                'balance_credits' => $subscription->user?->wallet?->balance_credits ?? 0,
+                'balance_credits' => $subscription->user?->wallet?->balance ?? 0,
             ],
             'plan' => [
                 'id' => $subscription->plan?->id,
@@ -3193,7 +3193,7 @@ class AdminEnterpriseHub extends Component
                 'name' => $txn->user?->name ?? 'Guest User',
                 'email' => $txn->user?->email,
                 'status' => $txn->user?->status,
-                'credits' => $txn->user?->wallet?->balance_credits ?? 0,
+                'credits' => $txn->user?->wallet?->balance ?? 0,
             ],
             'plan' => $txn->plan ? [
                 'id' => $txn->plan->id,
@@ -4704,7 +4704,7 @@ class AdminEnterpriseHub extends Component
         $cryptoVolume = (float) CryptoPayment::whereIn('status', ['COMPLETED', 'CONFIRMED', 'completed', 'confirmed'])->sum('fiat_amount');
         $totalGrossRevenue = $fiatRevenue + $cryptoVolume;
         $totalRefunded = (float) (Refund::where('status', 'completed')->sum('amount_cents') / 100);
-        $walletCreditsCirculation = (int) UserWallet::sum('balance_credits');
+        $walletCreditsCirculation = (int) UserWallet::sum('balance');
 
         // Dynamic Gateways for Filter
         $activeGateways = PaymentTransaction::distinct()->pluck('gateway')->filter()->values()->toArray();
