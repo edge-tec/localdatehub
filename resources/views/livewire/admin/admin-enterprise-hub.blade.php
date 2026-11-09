@@ -38,6 +38,18 @@
                 <!-- Profile Dropdown Menu -->
                 <div x-show="adminProfileOpen" @click.away="adminProfileOpen = false" x-cloak
                     class="absolute left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl py-1.5 z-40 text-xs font-semibold">
+                    <div class="px-3 py-2 border-b border-slate-100 bg-slate-50/50">
+                        <div class="font-bold text-slate-900 truncate">{{ auth()->user()?->name ?? 'Administrator' }}</div>
+                        <div class="text-[11px] text-slate-500 font-mono truncate">{{ auth()->user()?->email }}</div>
+                    </div>
+                    <a href="{{ route('account.profile') }}" class="flex items-center gap-2 px-3 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        <span>Edit Profile</span>
+                    </a>
+                    <a href="{{ route('account.security') }}" class="flex items-center gap-2 px-3 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                        <span>Change Password &amp; 2FA</span>
+                    </a>
                     <a href="{{ route('admin.dashboard', ['tab' => 'settings']) }}" wire:click.prevent="setTab('settings')" @click="adminProfileOpen = false"
                         class="flex items-center gap-2 px-3 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition">
                         <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -261,7 +273,7 @@
 
             <!-- View Website Button (Pink Outline) -->
             <div class="pt-4 mt-4 border-t border-slate-200">
-                <a href="{{ url('/') }}" target="_blank" class="w-full flex items-center justify-center space-x-2 px-3 py-2.5 rounded-xl border border-[#F20B65] text-[#F20B65] hover:bg-[#F20B65] hover:text-white transition font-bold text-xs shadow-2xs">
+                <a href="{{ route('home') }}" target="_blank" class="w-full flex items-center justify-center space-x-2 px-3 py-2.5 rounded-xl border border-[#F20B65] text-[#F20B65] hover:bg-[#F20B65] hover:text-white transition font-bold text-xs shadow-2xs">
                     <span>View Website</span>
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                 </a>
