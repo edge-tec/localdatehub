@@ -11,6 +11,7 @@ use App\Modules\Locations\Models\City;
 use App\Modules\Locations\Models\State;
 use App\Modules\Locations\Models\ZipCode;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -290,7 +291,11 @@ class ListingWizard extends Component
         } elseif ($vStep === 3) {
             $this->validate([
                 'state_id' => 'required|integer|exists:states,id',
-                'city_id' => 'required|integer|exists:cities,id',
+                'city_id' => [
+                    'required',
+                    'integer',
+                    Rule::exists('cities', 'id')->where('state_id', $this->state_id),
+                ],
             ]);
             $this->currentStep = 7;
         } elseif ($vStep === 4) {
@@ -393,7 +398,11 @@ class ListingWizard extends Component
         } elseif ($this->currentStep === 6) {
             $this->validate([
                 'state_id' => 'required|integer|exists:states,id',
-                'city_id' => 'required|integer|exists:cities,id',
+                'city_id' => [
+                    'required',
+                    'integer',
+                    Rule::exists('cities', 'id')->where('state_id', $this->state_id),
+                ],
             ]);
         } elseif ($this->currentStep === 11) {
             $this->validate([
@@ -504,7 +513,12 @@ class ListingWizard extends Component
 
         $states = State::orderBy('name')->get();
         $cities = $this->state_id ? City::where('state_id', $this->state_id)->orderBy('name')->get() : collect();
-        $zipCodes = $this->city_id ? ZipCode::where('city_id', $this->city_id)->orderBy('code')->get() : collect();
+        $zipCodes = $this->city_id ? ZipCode::where('city_id', $this->city_id)->orderBy('zip_code')->get() : collect();
+
+        $user = Auth::user();
+        $quotaInfo = $user ? app(\App\Modules\Monetization\Services\PostingQuotaService::class)->getUserQuotaSummary($user) : null;
+        $priceInfo = $user ? app(\App\Modules\Monetization\Services\PostingPricingService::class)->calculatePostingPrice($user, $this->selectedCategoryId ?: $this->selectedGroupId) : null;
+        $walletBalance = $user ? $user->getWalletBalance() : 0;
 
         return view('livewire.listing-wizard', [
             'categoryGroups' => $categoryGroups,
@@ -514,6 +528,9 @@ class ListingWizard extends Component
             'states' => $states,
             'cities' => $cities,
             'zipCodes' => $zipCodes,
+            'quotaInfo' => $quotaInfo,
+            'priceInfo' => $priceInfo,
+            'walletBalance' => $walletBalance,
         ]);
     }
 }

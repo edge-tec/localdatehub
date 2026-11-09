@@ -69,16 +69,16 @@
                 <!-- Header Card -->
                 <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-5 shadow-xl">
                     <div class="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
-                        <div class="flex items-center gap-2">
-                            <span class="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-600 font-bold text-xs border border-rose-500/30">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="px-3 py-1 rounded-full bg-rose-50 text-[#F20B83] font-black text-xs border border-rose-200 shadow-2xs">
                                 {{ $listing->category?->name }}
                             </span>
                             @if($listing->is_featured)
-                                <span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-700 font-bold text-xs border border-amber-500/30 flex items-center gap-1">
+                                <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-900 font-black text-xs border border-amber-200 shadow-2xs flex items-center gap-1">
                                     ★ Featured Spotlight
                                 </span>
                             @endif
-                            <span class="text-slate-600 font-medium">
+                            <span class="text-slate-800 font-bold text-xs">
                                 {{ $listing->city?->name }}, {{ $listing->state?->code }}
                             </span>
                         </div>
@@ -90,7 +90,7 @@
                                 <button
                                     type="submit"
                                     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border transition text-xs font-semibold"
-                                    :class="isFavorited ? 'bg-rose-500/10 border-rose-500/40 text-rose-600' : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-white'"
+                                    :class="isFavorited ? 'bg-[#F20B83]/10 border-[#F20B83]/40 text-[#F20B83]' : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-200'"
                                     title="Save to favorites"
                                 >
                                     <svg class="w-4 h-4" :fill="isFavorited ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,6 +221,38 @@
                         @endif
                     </div>
                 </div>
+
+                @auth
+                    @if(auth()->id() === $listing->user_id || auth()->user()->hasRole('admin'))
+                        <div class="bg-gradient-to-br from-pink-50 to-white border-2 border-[#F20B83]/30 rounded-3xl p-5 shadow-sm space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-black uppercase tracking-wider text-[#F20B83]">Author Controls</span>
+                                @if($listing->activeBoost)
+                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-pink-100 text-[#F20B83]">
+                                        Boosted until {{ $listing->activeBoost->expires_at->format('M d') }}
+                                    </span>
+                                @endif
+                            </div>
+                            <p class="text-xs text-slate-700 font-medium leading-relaxed">
+                                Want 5x more views? Spotlight your ad to the top of search results with instant crypto activation.
+                            </p>
+                            <div class="flex items-center gap-2">
+                                <a 
+                                    href="{{ route('boost.checkout', $listing->id) }}" 
+                                    class="flex-1 py-2.5 px-3 bg-[#F20B83] hover:bg-[#d90858] text-white text-xs font-black rounded-xl text-center shadow-md shadow-[#F20B83]/20 transition"
+                                >
+                                    🚀 Boost This Ad Now
+                                </a>
+                                <a 
+                                    href="{{ route('listings.edit', $listing->id) }}" 
+                                    class="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl transition"
+                                >
+                                    Edit
+                                </a>
+                            </div>
+                        </div>
+                    @endif
+                @endauth
 
                 <!-- Contact Options Card -->
                 <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl space-y-4">

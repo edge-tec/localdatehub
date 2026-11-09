@@ -60,15 +60,27 @@ class DatabaseSearchDriver implements SearchDriverInterface
         if (!empty($filter->stateCode)) {
             $stateCode = $filter->stateCode;
             $query->whereHas('state', function ($q) use ($stateCode) {
-                $q->where('code', $stateCode);
+                $q->where('code', strtoupper($stateCode))
+                  ->orWhere('slug', strtolower($stateCode));
             });
         }
 
-        // 4. City Filter
+        // 4. City Filter (strictly scoped to selected state if provided)
         if (!empty($filter->cityName)) {
             $cityName = $filter->cityName;
-            $query->whereHas('city', function ($q) use ($cityName) {
-                $q->where('name', 'like', "%{$cityName}%");
+            $stateCode = $filter->stateCode;
+            $query->whereHas('city', function ($q) use ($cityName, $stateCode) {
+                $q->where(function ($sub) use ($cityName) {
+                    $sub->where('name', 'like', "%{$cityName}%")
+                        ->orWhere('slug', strtolower(str_replace(' ', '-', $cityName)));
+                });
+
+                if (!empty($stateCode)) {
+                    $q->whereHas('state', function ($st) use ($stateCode) {
+                        $st->where('code', strtoupper($stateCode))
+                           ->orWhere('slug', strtolower($stateCode));
+                    });
+                }
             });
         }
 
@@ -157,6 +169,9 @@ class DatabaseSearchDriver implements SearchDriverInterface
         // Transparent Ranking Rules:
         // Rule 1: Featured listings are positioned with high priority
         $query->orderByDesc('is_featured');
+
+        // Rule 1b: Verified user listings receive priority placement over non-verified listings
+        $query->orderByDesc('is_verified_poster');
 
         // Rule 2: Secondary sort selection
         switch ($filter->sort) {

@@ -134,6 +134,54 @@ class LocationApiController extends Controller
     }
 
     /**
+     * Search cities by name, optionally filtered by state code or slug.
+     */
+    public function searchCities(Request $request): JsonResponse
+    {
+        $query = trim((string) $request->query('q', ''));
+        $stateParam = $request->query('state');
+        $limit = min((int) $request->query('limit', 20), 100);
+
+        $cityQuery = City::with('state')->where('is_active', true);
+
+        if ($stateParam) {
+            $cityQuery->whereHas('state', function ($q) use ($stateParam) {
+                if (is_numeric($stateParam)) {
+                    $q->where('id', (int) $stateParam);
+                } else {
+                    $q->where('code', strtoupper($stateParam))
+                      ->orWhere('slug', strtolower($stateParam));
+                }
+            });
+        }
+
+        if ($query !== '') {
+            $cityQuery->where('name', 'like', "{$query}%");
+        }
+
+        $cities = $cityQuery->orderBy('is_popular', 'desc')
+            ->orderBy('name', 'asc')
+            ->take($limit)
+            ->get();
+
+        return ApiResponse::success([
+            'query' => $query,
+            'state' => $stateParam,
+            'count' => $cities->count(),
+            'cities' => $cities->map(fn ($c) => [
+                'id' => $c->id,
+                'name' => $c->name,
+                'slug' => $c->slug,
+                'state_code' => $c->state?->code,
+                'state_name' => $c->state?->name,
+                'latitude' => $c->latitude,
+                'longitude' => $c->longitude,
+                'is_popular' => (bool) $c->is_popular,
+            ]),
+        ]);
+    }
+
+    /**
      * Radius geographic search for nearby cities.
      */
     public function nearby(Request $request): JsonResponse

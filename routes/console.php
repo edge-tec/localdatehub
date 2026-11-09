@@ -44,3 +44,21 @@ Schedule::command('billing:reconcile-transactions')
     ->withoutOverlapping(30)
     ->runInBackground()
     ->appendOutputTo(storage_path('logs/scheduler-reconciliation.log'));
+
+Schedule::command('boosts:expire')
+    ->everyFiveMinutes()
+    ->withoutOverlapping(5)
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/scheduler-boosts.log'));
+
+Schedule::command('crypto:check-pending')
+    ->everyTenMinutes()
+    ->withoutOverlapping(10)
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/scheduler-crypto.log'));
+
+Schedule::command('crypto:monitor-inhouse')
+    ->everyMinute()
+    ->withoutOverlapping(1)
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/scheduler-inhouse-crypto.log'));

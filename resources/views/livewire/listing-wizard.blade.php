@@ -643,6 +643,88 @@
                 </div>
             </div>
 
+            <!-- Monetization, Quota & Wallet Balance Summary -->
+            @if(isset($quotaInfo) && isset($priceInfo))
+                <div class="bg-gradient-to-r from-slate-50 to-pink-50/30 border border-slate-200 rounded-2xl p-5 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xl">💳</span>
+                            <div>
+                                <h4 class="text-xs font-black uppercase tracking-wider text-slate-900">Posting Quota & Payment Breakdown</h4>
+                                <p class="text-[11px] text-slate-500">Authoritative fee based on your account status and category</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-slate-200/80 text-slate-700 tracking-wider">
+                            {{ ucfirst(str_replace('_', ' ', $quotaInfo['account_type'])) }} Account
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                        <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-2xs">
+                            <span class="text-slate-500 text-[11px] block">Posting Fee:</span>
+                            <span class="text-sm font-black {{ $priceInfo['is_free'] ? 'text-emerald-600' : 'text-[#F20B83]' }}">
+                                {{ $priceInfo['is_free'] ? 'FREE' : $priceInfo['price_credits'] . ' Credits' }}
+                            </span>
+                            <span class="text-[10px] text-slate-400 block truncate">{{ $priceInfo['rule_applied'] }}</span>
+                        </div>
+
+                        <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-2xs">
+                            <span class="text-slate-500 text-[11px] block">Free Quota Remaining:</span>
+                            <span class="text-sm font-black text-slate-900">
+                                {{ $quotaInfo['is_unlimited'] ? 'Unlimited' : $quotaInfo['free_remaining'] . ' Posts' }}
+                            </span>
+                            <span class="text-[10px] text-slate-400 block">This month</span>
+                        </div>
+
+                        <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-2xs">
+                            <span class="text-slate-500 text-[11px] block">Your Wallet Balance:</span>
+                            <span class="text-sm font-black text-slate-900">
+                                {{ number_format($walletBalance) }} Credits
+                            </span>
+                            <span class="text-[10px] text-slate-400 block">Available now</span>
+                        </div>
+
+                        <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-2xs">
+                            <span class="text-slate-500 text-[11px] block">Balance After Post:</span>
+                            @php
+                                $afterBalance = $walletBalance - $priceInfo['price_credits'];
+                            @endphp
+                            <span class="text-sm font-black {{ $afterBalance < 0 ? 'text-rose-600' : 'text-slate-900' }}">
+                                {{ number_format(max(0, $afterBalance)) }} Credits
+                            </span>
+                            <span class="text-[10px] {{ $afterBalance < 0 ? 'text-rose-500 font-bold' : 'text-slate-400' }} block">
+                                {{ $afterBalance < 0 ? 'Shortfall: ' . abs($afterBalance) . ' credits' : 'Sufficient' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Insufficient Credits Warning Alert -->
+                    @if(!$priceInfo['is_free'] && $walletBalance < $priceInfo['price_credits'])
+                        <div class="bg-rose-50 border border-rose-200 p-3.5 rounded-xl flex items-center justify-between gap-3 text-xs text-rose-800">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-base">⚠️</span>
+                                <span>Insufficient credits to publish this listing. Please add credits to your wallet.</span>
+                            </div>
+                            <a 
+                                href="{{ route('account.wallet.index') }}" 
+                                target="_blank"
+                                class="bg-[#F20B83] hover:bg-[#d90858] text-white px-4 py-1.5 rounded-lg font-bold text-xs shrink-0 shadow-xs transition"
+                            >
+                                Add Credits →
+                            </a>
+                        </div>
+                    @endif
+
+                    <!-- Quota Blocked Warning Alert -->
+                    @if(!$quotaInfo['can_post'])
+                        <div class="bg-amber-50 border border-amber-200 p-3.5 rounded-xl flex items-center space-x-2 text-xs text-amber-800">
+                            <span class="text-base">⛔</span>
+                            <span>{{ $quotaInfo['blocked_reason'] }}</span>
+                        </div>
+                    @endif
+                </div>
+            @endif
+
             <!-- Compliance Checkboxes Matching US Adult Legal Guidelines -->
             <div class="bg-rose-50/70 border border-rose-200/80 rounded-2xl p-5 space-y-3">
                 <h4 class="text-xs font-bold text-rose-900 uppercase tracking-wider">Mandatory Compliance & Verification</h4>
@@ -691,14 +773,29 @@
                     >
                         Save Draft
                     </button>
-                    <button 
-                        type="button" 
-                        wire:click="submitForReview" 
-                        class="bg-[#F20B83] hover:bg-[#d90858] text-white px-8 py-2.5 rounded-full font-bold text-sm shadow-xl transition flex items-center space-x-2"
-                    >
-                        <span>Publish Ad</span>
-                        <span>🚀</span>
-                    </button>
+                    @php
+                        $canSubmit = ($quotaInfo['can_post'] ?? true) && (($priceInfo['is_free'] ?? true) || ($walletBalance >= ($priceInfo['price_credits'] ?? 0)));
+                    @endphp
+                    @if($canSubmit)
+                        <button 
+                            type="button" 
+                            wire:click="submitForReview" 
+                            class="bg-[#F20B83] hover:bg-[#d90858] text-white px-8 py-2.5 rounded-full font-bold text-sm shadow-xl transition flex items-center space-x-2"
+                        >
+                            <span>Publish Ad</span>
+                            <span>🚀</span>
+                        </button>
+                    @else
+                        <button 
+                            type="button" 
+                            disabled 
+                            class="bg-slate-300 text-slate-500 cursor-not-allowed px-8 py-2.5 rounded-full font-bold text-sm shadow-none flex items-center space-x-2"
+                            title="Cannot submit: Insufficient balance or posting limit reached"
+                        >
+                            <span>Publish Ad</span>
+                            <span>🔒</span>
+                        </button>
+                    @endif
                 </div>
             </div>
         </div>

@@ -35,7 +35,7 @@ $maxWidthClasses = [
         x-transition:leave="ease-in duration-200"
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
-        class="fixed inset-0 transform transition-all bg-slate-50 backdrop-blur-sm"
+        class="fixed inset-0 transform transition-all bg-slate-900/50 backdrop-blur-xs"
         x-on:click="show = false"
     ></div>
 
@@ -48,7 +48,7 @@ $maxWidthClasses = [
         x-transition:leave="ease-in duration-200"
         x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
         x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-        class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-2xl transform transition-all sm:w-full {{ $maxWidthClasses }} z-10"
+        class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xl transform transition-all sm:w-full {{ $maxWidthClasses }} z-10"
     >
         @if($title)
             <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">

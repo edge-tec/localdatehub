@@ -18,6 +18,26 @@
 </head>
 <body class="min-h-full flex flex-col font-sans selection:bg-[#F20B83] selection:text-white bg-[#F8FAFC] text-slate-900">
 
+    <!-- Administrator Impersonation Active Banner -->
+    @if(session()->has('impersonator_admin_id'))
+        <div class="bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 text-white px-4 py-2.5 text-xs font-semibold shadow-lg sticky top-0 z-[100] border-b border-amber-400/30">
+            <div class="max-w-[1720px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+                <div class="flex items-center gap-2 text-center sm:text-left">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-white text-amber-900 uppercase tracking-wider animate-pulse">
+                        ⚡ Impersonation Active
+                    </span>
+                    <span>
+                        Staff Impersonation: Logged in as <strong class="underline decoration-white/60">{{ auth()->user()->name }}</strong> ({{ strtoupper(str_replace('_', ' ', auth()->user()->role)) }}). Original Administrator: <strong>{{ session('impersonator_admin_name', 'Administrator') }}</strong>.
+                    </span>
+                </div>
+                <a href="{{ route('admin.impersonate.stop') }}" class="inline-flex items-center gap-1.5 px-3 py-1 bg-white hover:bg-amber-50 text-amber-900 font-extrabold rounded-lg text-xs shadow-sm transition shrink-0">
+                    <svg class="w-3.5 h-3.5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+                    <span>Exit &amp; Return to My Admin</span>
+                </a>
+            </div>
+        </div>
+    @endif
+
     <!-- Top Administrative Navigation Bar Matching Pure White Theme -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs" x-data="{ userMenuOpen: false, langOpen: false, notificationsOpen: false }">
         <div class="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8">

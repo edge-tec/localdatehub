@@ -37,18 +37,24 @@ class LocationWebController extends Controller
         }
 
         $categories = $this->categoryService->getActiveCategories();
+        $canonicalUrl = url('/usa/' . ($state->slug ?: strtolower($state->code)));
+        $seoTitle = "{$state->name} ({$state->code}) Adult Personals & Classifieds — LocalDateHub";
+        $seoDescription = "Browse verified local personal classifieds and dating in {$state->name}. Connect with adults in {$state->name}.";
 
         return view('locations.state', [
             'state' => $state,
             'cities' => $state->cities,
             'counties' => $state->counties,
             'categories' => $categories,
+            'canonicalUrl' => $canonicalUrl,
+            'seoTitle' => $seoTitle,
+            'seoDescription' => $seoDescription,
         ]);
     }
 
     /**
      * City Landing Page with optional Category filter and distance radius expansion.
-     * e.g. /locations/TX/austin or /locations/TX/austin/women-seeking-men
+     * e.g. /locations/TX/austin or /locations/TX/austin/women-seeking-men or /usa/texas/austin
      */
     public function showCity(Request $request, string $stateCode, string $citySlug, ?string $categorySlug = null): View
     {
@@ -91,6 +97,15 @@ class LocationWebController extends Controller
 
         $listings = $query->paginate(15)->withQueryString();
 
+        $canonicalUrl = url('/usa/' . ($city->state->slug ?: strtolower($city->state->code)) . '/' . $city->slug);
+        if ($selectedCategory) {
+            $canonicalUrl .= '/' . $selectedCategory->slug;
+        }
+
+        $catName = $selectedCategory ? " {$selectedCategory->name}" : '';
+        $seoTitle = "{$city->name}, {$city->state->code}{$catName} Adult Personals & Local Classifieds — LocalDateHub";
+        $seoDescription = "Discover genuine adult personal classifieds and dating connections in {$city->name}, {$city->state->code}. Connect with local people today.";
+
         return view('locations.city', [
             'city' => $city,
             'state' => $city->state,
@@ -100,6 +115,9 @@ class LocationWebController extends Controller
             'radiusListings' => $radiusListings,
             'radiusMiles' => $radiusMiles,
             'nearbyCities' => $city->nearby_cities ?? collect(),
+            'canonicalUrl' => $canonicalUrl,
+            'seoTitle' => $seoTitle,
+            'seoDescription' => $seoDescription,
         ]);
     }
 }

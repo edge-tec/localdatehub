@@ -7,6 +7,8 @@ use App\Modules\Moderation\DTOs\ReportData;
 use App\Modules\Moderation\Services\ModerationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\ValidationException;
 
 class UserReportWebController extends Controller
 {
@@ -19,6 +21,15 @@ class UserReportWebController extends Controller
      */
     public function submit(Request $request, User $user): RedirectResponse
     {
+        $throttleKey = 'user_report:' . $request->ip();
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            throw ValidationException::withMessages([
+                'details' => "Too many reports submitted recently. Please wait {$seconds} seconds before filing another report.",
+            ]);
+        }
+        RateLimiter::hit($throttleKey, 120);
+
         // Prevent reporting oneself
         if ($request->user() && $request->user()->id === $user->id) {
             return redirect()->back()->with('error', 'You cannot report your own account.');
@@ -33,7 +44,7 @@ class UserReportWebController extends Controller
             reporterId: $request->user()?->id ?: 0,
             reportedUserId: $user->id,
             reason: $validated['reason'],
-            details: $validated['details'],
+            details: strip_tags(trim($validated['details'])),
             listingId: null,
             evidenceUrls: []
         ));

@@ -392,6 +392,40 @@ class EnterpriseAdminSystemTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_inspect_filter_and_investigate_reports(): void
+    {
+        $report = ContentReport::create([
+            'reporter_id' => $this->regularUser->id,
+            'reportable_type' => Listing::class,
+            'reportable_id' => 1,
+            'reason_code' => 'underage_suspected',
+            'details' => 'Advertiser profile claims high school senior year.',
+            'status' => 'open',
+            'risk_level' => 'critical',
+            'is_urgent_takedown' => true,
+        ]);
+
+        Livewire::actingAs($this->complianceOfficer)
+            ->test(AdminEnterpriseHub::class, ['initialTab' => 'reports'])
+            ->assertSee('Reports & Incident Moderation')
+            ->assertSee('Active Incident Queue')
+            ->assertSee('Underage Suspected')
+            ->call('openInspectReportModal', $report->id)
+            ->assertSet('showInspectReportModal', true)
+            ->call('investigateReport', $report->id);
+
+        $this->assertEquals('investigating', $report->fresh()->status);
+
+        // Test filter change
+        Livewire::actingAs($this->complianceOfficer)
+            ->test(AdminEnterpriseHub::class, ['initialTab' => 'reports'])
+            ->set('reportStatusFilter', 'investigating')
+            ->assertSee('Underage Suspected')
+            ->set('reportStatusFilter', 'resolved')
+            ->call('resetReportFilters')
+            ->assertSet('reportStatusFilter', 'all');
+    }
+
     public function test_finance_manager_can_issue_refund_creating_refund_record_and_audit_trail(): void
     {
         $txn = PaymentTransaction::create([
@@ -500,6 +534,43 @@ class EnterpriseAdminSystemTest extends TestCase
         $this->assertDatabaseHas('admin_audit_logs', [
             'admin_user_id' => $this->superAdmin->id,
             'action' => 'setting.update',
+        ]);
+    }
+
+    public function test_super_admin_can_switch_settings_subtabs_and_send_test_email(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+
+        $component = Livewire::actingAs($this->superAdmin)
+            ->test(AdminEnterpriseHub::class, ['initialTab' => 'settings'])
+            ->assertSee('Platform Identity &amp; Contact Metadata', false)
+            ->call('setSettingsSubTab', 'branding')
+            ->assertSee('Visual Assets, Logos &amp; Favicon Manager', false)
+            ->call('setSettingsSubTab', 'smtp')
+            ->assertSee('SMTP Mail Transport &amp; Delivery Server', false)
+            ->call('setSettingsSubTab', 'notifications')
+            ->assertSee('Real-Time Transactional Email Notification Matrix')
+            ->assertSee('Email Verification on Signup')
+            ->assertSee('Instant Email Alert on New Message');
+
+        // Update settings in notifications
+        $component->set('settingValues.mail_welcome_enabled', 'false')
+            ->call('saveSystemSettings')
+            ->assertHasNoErrors();
+
+        $this->assertEquals('false', SystemSetting::where('key', 'mail_welcome_enabled')->value('value'));
+
+        // Test sending test email
+        $component->call('setSettingsSubTab', 'smtp')
+            ->set('testEmailRecipient', 'test-smtp@example.com')
+            ->call('sendTestEmail')
+            ->assertHasNoErrors()
+            ->assertSee('Test email sent successfully');
+
+        $this->assertDatabaseHas('notifications_log', [
+            'recipient_target' => 'test-smtp@example.com',
+            'notification_type' => 'system.smtp_test',
+            'status' => 'sent',
         ]);
     }
 

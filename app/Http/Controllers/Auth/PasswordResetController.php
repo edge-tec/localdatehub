@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
@@ -28,6 +29,15 @@ class PasswordResetController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $throttleKey = 'password_reset:' . $request->ip();
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            throw ValidationException::withMessages([
+                'email' => "Too many password reset requests. Please wait {$seconds} seconds before trying again.",
+            ]);
+        }
+        RateLimiter::hit($throttleKey, 60);
+
         $request->validate([
             'email' => ['required', 'email'],
         ]);
@@ -57,6 +67,15 @@ class PasswordResetController extends Controller
      */
     public function update(Request $request): RedirectResponse
     {
+        $throttleKey = 'password_update:' . $request->ip();
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            throw ValidationException::withMessages([
+                'email' => "Too many password update requests. Please wait {$seconds} seconds before trying again.",
+            ]);
+        }
+        RateLimiter::hit($throttleKey, 60);
+
         $request->validate([
             'token' => ['required'],
             'email' => ['required', 'email'],

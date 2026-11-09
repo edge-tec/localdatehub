@@ -2,13 +2,15 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <!-- Hero Header -->
         <div class="text-center max-w-3xl mx-auto mb-10">
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-600 border border-rose-500/20 mb-3">
-                USA Geographic Directory
-            </span>
-            <h1 class="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-rose-50 via-pink-50 to-purple-50/60 border border-rose-200 text-[#F20B83] text-xs font-black shadow-xs mb-4">
+                <svg class="w-3.5 h-3.5 text-[#F20B83]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span>USA Geographic Directory</span>
+                <span class="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-white text-[#F20B83] border border-rose-200">National</span>
+            </div>
+            <h1 class="text-3xl sm:text-5xl font-black text-slate-950 tracking-tight">
                 Browse Adult Personal Connections by Location
             </h1>
-            <p class="text-base text-slate-400 mt-3">
+            <p class="text-base text-slate-700 font-semibold mt-3">
                 Discover genuine adult personal classifieds across all 50 US States, Washington DC, and metropolitan regions.
             </p>
 
@@ -55,24 +57,62 @@
         </div>
 
         <!-- States Grid -->
-        <div>
-            <h2 class="text-xl font-bold text-slate-900 mb-6">All 50 US States & District of Columbia</h2>
+        @php
+            $territoryCodes = ['AS', 'GU', 'MP', 'PR', 'VI'];
+            $mainStates = $states->reject(fn($s) => in_array($s->code, $territoryCodes));
+            $territories = $states->filter(fn($s) => in_array($s->code, $territoryCodes));
+        @endphp
+
+        <div class="mb-12">
+            <div class="flex items-center justify-between mb-6 flex-wrap gap-2">
+                <h2 class="text-xl font-black text-slate-950">All 50 US States & District of Columbia</h2>
+                <span class="text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 px-3 py-1 rounded-full">
+                    {{ $mainStates->count() }} States & DC
+                </span>
+            </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                @foreach($states as $st)
+                @foreach($mainStates as $st)
                     <a href="{{ route('locations.state', ['stateCode' => $st->code]) }}"
-                        class="group p-4 rounded-xl bg-white border border-slate-200 hover:border-rose-500/50 hover:bg-slate-850 transition flex flex-col justify-between shadow-sm">
+                        class="group p-4 rounded-xl bg-white border border-slate-200 hover:border-[#F20B83] hover:bg-rose-50/50 transition-all duration-150 flex flex-col justify-between shadow-xs hover:shadow-md">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs font-bold text-rose-600 group-hover:text-rose-600 font-mono">{{ $st->code }}</span>
-                            <span class="text-[11px] text-slate-500">{{ $st->cities_count }} cities</span>
+                            <span class="text-xs font-black text-[#F20B83] font-mono">{{ $st->code }}</span>
+                            <span class="text-[11px] font-bold text-slate-700">{{ $st->cities_count }} cities</span>
                         </div>
-                        <div class="text-sm font-semibold text-slate-800 group-hover:text-white truncate">
+                        <div class="text-sm font-black text-slate-900 group-hover:text-[#F20B83] truncate transition">
                             {{ $st->name }}
                         </div>
                     </a>
                 @endforeach
             </div>
         </div>
+
+        @if($territories->isNotEmpty())
+            <!-- US Territories Grid -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                    <h3 class="text-lg font-black text-slate-900">U.S. Territories & Commonwealths</h3>
+                    <span class="text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full">
+                        {{ $territories->count() }} Territories
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                    @foreach($territories as $st)
+                        <a href="{{ route('locations.state', ['stateCode' => $st->code]) }}"
+                            class="group p-4 rounded-xl bg-white border border-slate-200 hover:border-[#F20B83] hover:bg-rose-50/50 transition-all duration-150 flex flex-col justify-between shadow-xs hover:shadow-md">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-black text-[#F20B83] font-mono">{{ $st->code }}</span>
+                                <span class="text-[11px] font-bold text-slate-700">{{ $st->cities_count }} cities</span>
+                            </div>
+                            <div class="text-sm font-black text-slate-900 group-hover:text-[#F20B83] truncate transition">
+                                {{ $st->name }}
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        @endif
     </div>
 </x-layouts.app>
 

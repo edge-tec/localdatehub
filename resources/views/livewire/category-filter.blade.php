@@ -6,7 +6,7 @@
                 <button
                     type="button"
                     wire:click="selectGroup({{ $group['id'] }})"
-                    class="px-3.5 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-200 border flex items-center space-x-1.5 {{ $selectedGroupId === $group['id'] ? 'bg-rose-500/20 text-rose-600 border-rose-500/50 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-200 hover:text-white' }}"
+                    class="px-3.5 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-200 border flex items-center space-x-1.5 {{ $selectedGroupId === $group['id'] ? 'bg-[#F20B83]/10 text-[#F20B83] border-[#F20B83]/30 font-bold shadow-xs' : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:text-slate-900 hover:bg-slate-50' }}"
                 >
                     <span>{{ $group['name'] }}</span>
                     @if($group['subcategories_count'] > 0)
@@ -30,10 +30,10 @@
                     <button
                         type="button"
                         wire:click="selectSubcategory({{ $sub['id'] }})"
-                        class="px-3 py-1 rounded-md text-xs font-medium transition-all {{ $selectedSubcategoryId === $sub['id'] ? 'bg-rose-600 text-white shadow' : 'bg-white text-slate-600 hover:bg-slate-100 hover:text-white' }}"
+                        class="px-3 py-1 rounded-md text-xs font-medium transition-all {{ $selectedSubcategoryId === $sub['id'] ? 'bg-[#F20B83] text-white font-bold shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 hover:text-slate-900' }}"
                     >
                         @if(!empty($sub['code']))
-                            <span class="font-bold text-rose-600 mr-1">[{{ $sub['code'] }}]</span>
+                            <span class="font-bold text-[#F20B83] mr-1">[{{ $sub['code'] }}]</span>
                         @endif
                         {{ $sub['name'] }}
                     </button>

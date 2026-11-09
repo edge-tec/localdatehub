@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\ModerationListingController;
 use App\Http\Controllers\Admin\ModerationMessagesController;
 use App\Http\Controllers\ListingContactWebController;
 use App\Http\Controllers\Api\CategoryApiController;
+use App\Http\Controllers\Api\ListingApiController;
 use App\Http\Controllers\Api\LocationApiController;
 use App\Http\Controllers\Api\SearchApiController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -48,21 +49,19 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/search', [SearchWebController::class, 'index'])->name('search.index');
 
 // Public Information & Trust Pages
-Route::get('/about', [PublicPageController::class, 'about'])->name('pages.about');
+Route::get('/about', [PublicPageController::class, 'about'])->name('about');
+Route::get('/about-us', [PublicPageController::class, 'about'])->name('pages.about');
 Route::get('/safety', [PublicPageController::class, 'safety'])->name('pages.safety');
-Route::get('/contact', [PublicPageController::class, 'contact'])->name('pages.contact');
+Route::get('/contact', [PublicPageController::class, 'contact'])->name('contact');
+Route::get('/contact-us', [PublicPageController::class, 'contact'])->name('pages.contact');
 Route::post('/contact', [PublicPageController::class, 'submitContact'])
     ->middleware('throttle:10,1')
     ->name('pages.contact.submit');
-Route::get('/privacy', [PublicPageController::class, 'privacy'])->name('pages.privacy');
-Route::get('/terms', [PublicPageController::class, 'terms'])->name('pages.terms');
+Route::get('/privacy', [PublicPageController::class, 'privacy'])->name('privacy');
+Route::get('/privacy-policy', [PublicPageController::class, 'privacy'])->name('pages.privacy');
+Route::get('/terms', [PublicPageController::class, 'terms'])->name('terms');
+Route::get('/terms-of-service', [PublicPageController::class, 'terms'])->name('pages.terms');
 Route::get('/pricing', [PublicPageController::class, 'pricing'])->name('pages.pricing');
-
-// Convenient route name aliases
-Route::get('/about-us', [PublicPageController::class, 'about'])->name('about');
-Route::get('/contact-us', [PublicPageController::class, 'contact'])->name('contact');
-Route::get('/privacy-policy', [PublicPageController::class, 'privacy'])->name('privacy');
-Route::get('/terms-of-service', [PublicPageController::class, 'terms'])->name('terms');
 
 // DMCA Notice & Takedown Portal
 Route::get('/dmca', [DmcaWebController::class, 'show'])->name('dmca.show');
@@ -195,14 +194,30 @@ Route::prefix('locations')->name('locations.')->group(function () {
     Route::get('/{stateCode}/{citySlug}/{categorySlug}', [LocationWebController::class, 'showCity'])->name('city.category');
 });
 
+// USA SEO-Friendly Location URLs (/usa/texas/houston)
+Route::prefix('usa')->name('usa.')->group(function () {
+    Route::get('/', [LocationWebController::class, 'index'])->name('index');
+    Route::get('/{stateCode}', [LocationWebController::class, 'showState'])->name('state');
+    Route::get('/{stateCode}/{citySlug}', [LocationWebController::class, 'showCity'])->name('city');
+    Route::get('/{stateCode}/{citySlug}/{categorySlug}', [LocationWebController::class, 'showCity'])->name('city.category');
+});
+
 // Location API Endpoints
 Route::prefix('api/locations')->name('api.locations.')->group(function () {
     Route::get('/states', [LocationApiController::class, 'indexStates'])->name('states');
     Route::get('/states/{stateCode}/cities', [LocationApiController::class, 'stateCities'])->name('state.cities');
+    Route::get('/cities/search', [LocationApiController::class, 'searchCities'])->name('cities.search');
     Route::get('/cities/{cityId}', [LocationApiController::class, 'cityDetails'])->name('city.details');
     Route::get('/zip/{zip}', [LocationApiController::class, 'lookupZip'])->name('zip');
     Route::get('/autocomplete', [LocationApiController::class, 'autocomplete'])->name('autocomplete');
     Route::get('/nearby', [LocationApiController::class, 'nearby'])->name('nearby');
+});
+
+// Listing API Endpoints
+Route::prefix('api/listings')->name('api.listings.')->group(function () {
+    Route::get('/location/{state}/{city}', [ListingApiController::class, 'locationListings'])->name('location');
+    Route::get('/search', [ListingApiController::class, 'search'])->name('search');
+    Route::post('/', [ListingApiController::class, 'store'])->middleware('auth')->name('store');
 });
 
 // Search API Endpoints
@@ -211,6 +226,8 @@ Route::prefix('api/search')->name('api.search.')->group(function () {
 });
 
 // Central Enterprise Administration Hub
+Route::middleware(['auth'])->get('/admin/impersonate/stop', [AdminDashboardController::class, 'stopImpersonation'])->name('admin.impersonate.stop');
+
 Route::middleware(['auth', 'admin.rbac'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('index');
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
@@ -327,4 +344,92 @@ Route::prefix('sitemaps')->name('sitemaps.')->group(function () {
     Route::get('/categories.xml', [SitemapController::class, 'categories'])->name('categories');
     Route::get('/locations.xml', [SitemapController::class, 'locations'])->name('locations');
     Route::get('/listings.xml', [SitemapController::class, 'listings'])->name('listings');
+});
+
+// =========================================================================
+// Enterprise Cryptocurrency Payment Gateway & Automatic Post Boost System
+// =========================================================================
+
+// 1. Webhooks (CSRF-exempt via bootstrap/app.php)
+Route::prefix('webhooks/crypto')->name('webhooks.crypto.')->group(function () {
+    Route::post('/nowpayments', [\App\Http\Controllers\Payments\CryptoWebhookController::class, 'handleNowPayments'])->name('nowpayments');
+    Route::post('/coinpayments', [\App\Http\Controllers\Payments\CryptoWebhookController::class, 'handleCoinPayments'])->name('coinpayments');
+    Route::post('/coingate', [\App\Http\Controllers\Payments\CryptoWebhookController::class, 'handleCoinGate'])->name('coingate');
+    Route::post('/bitpay', [\App\Http\Controllers\Payments\CryptoWebhookController::class, 'handleBitPay'])->name('bitpay');
+    Route::post('/binance-pay', [\App\Http\Controllers\Payments\CryptoWebhookController::class, 'handleBinancePay'])->name('binance-pay');
+    Route::post('/exodus', [\App\Http\Controllers\Payments\CryptoWebhookController::class, 'handleExodus'])->name('exodus');
+});
+
+// 2. User Post Boost Checkout, Invoices & History
+Route::middleware(['auth', 'active'])->group(function () {
+    Route::get('/listings/{listing}/boost', [\App\Http\Controllers\Payments\BoostCheckoutController::class, 'show'])->name('boost.checkout');
+    Route::post('/listings/{listing}/boost/checkout', [\App\Http\Controllers\Payments\BoostCheckoutController::class, 'createPayment'])->name('boost.create');
+    Route::get('/payments/crypto/{orderId}', [\App\Http\Controllers\Payments\BoostCheckoutController::class, 'showInvoice'])->name('boost.invoice');
+    Route::get('/payments/crypto/{orderId}/status', [\App\Http\Controllers\Payments\BoostCheckoutController::class, 'checkStatus'])->name('boost.status');
+    Route::get('/account/payments', [\App\Http\Controllers\Payments\BoostCheckoutController::class, 'userHistory'])->name('account.payments.index');
+
+    // Credit Wallet & Packages
+    Route::get('/account/wallet', [\App\Http\Controllers\Account\UserWalletController::class, 'index'])->name('account.wallet.index');
+    Route::get('/account/wallet/checkout/{package}', [\App\Http\Controllers\Account\UserWalletController::class, 'checkout'])->name('account.wallet.checkout');
+    Route::post('/account/wallet/checkout/{package}', [\App\Http\Controllers\Account\UserWalletController::class, 'storePayment'])->name('account.wallet.payment');
+    Route::get('/account/wallet/invoice/{payment}', [\App\Http\Controllers\Account\UserWalletController::class, 'invoice'])->name('account.wallet.invoice');
+    Route::get('/account/wallet/invoice/{payment}/status', [\App\Http\Controllers\Account\UserWalletController::class, 'status'])->name('account.wallet.status');
+
+    // Identity Verification
+    Route::get('/account/verification', [\App\Http\Controllers\Account\AccountVerificationController::class, 'show'])->name('account.verification.show');
+    Route::post('/account/verification', [\App\Http\Controllers\Account\AccountVerificationController::class, 'store'])->name('account.verification.store');
+});
+
+// 3. Admin Payment Gateway, Boost Plan & Transaction Management
+Route::middleware(['auth', 'admin.rbac'])->prefix('admin/crypto')->name('admin.crypto.')->group(function () {
+    // Gateways
+    Route::get('/gateways', [\App\Http\Controllers\Admin\AdminCryptoPaymentController::class, 'indexGateways'])->name('gateways.index');
+    Route::get('/gateways/{gateway}/edit', [\App\Http\Controllers\Admin\AdminCryptoPaymentController::class, 'editGateway'])->name('gateways.edit');
+    Route::put('/gateways/{gateway}', [\App\Http\Controllers\Admin\AdminCryptoPaymentController::class, 'updateGateway'])->name('gateways.update');
+    Route::post('/gateways/{gateway}/test', [\App\Http\Controllers\Admin\AdminCryptoPaymentController::class, 'testGateway'])->name('gateways.test');
+
+    // Boost Plans
+    Route::get('/plans', [\App\Http\Controllers\Admin\AdminCryptoPaymentController::class, 'indexPlans'])->name('plans.index');
+    Route::post('/plans', [\App\Http\Controllers\Admin\AdminCryptoPaymentController::class, 'storePlan'])->name('plans.store');
+    Route::put('/plans/{plan}', [\App\Http\Controllers\Admin\AdminCryptoPaymentController::class, 'updatePlan'])->name('plans.update');
+    Route::delete('/plans/{plan}', [\App\Http\Controllers\Admin\AdminCryptoPaymentController::class, 'destroyPlan'])->name('plans.destroy');
+
+    // Payments
+    Route::get('/payments', [\App\Http\Controllers\Admin\AdminCryptoPaymentController::class, 'indexPayments'])->name('payments.index');
+    Route::get('/payments/{payment}', [\App\Http\Controllers\Admin\AdminCryptoPaymentController::class, 'showPayment'])->name('payments.show');
+    Route::post('/payments/{payment}/sync', [\App\Http\Controllers\Admin\AdminCryptoPaymentController::class, 'syncPayment'])->name('payments.sync');
+});
+
+// 4. Admin Posting Monetization, Wallet & Verification Management
+Route::middleware(['auth', 'admin.rbac'])->group(function () {
+    // Posting Policies & Monetization Control
+    Route::prefix('admin/monetization')->name('admin.monetization.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\AdminPostingMonetizationController::class, 'index'])->name('index');
+        Route::put('/settings', [\App\Http\Controllers\Admin\AdminPostingMonetizationController::class, 'updateSettings'])->name('settings.update');
+        Route::put('/limits/{accountType}', [\App\Http\Controllers\Admin\AdminPostingMonetizationController::class, 'updateAccountLimits'])->name('limits.update');
+        Route::post('/pricing', [\App\Http\Controllers\Admin\AdminPostingMonetizationController::class, 'storePricingRule'])->name('pricing.store');
+        Route::delete('/pricing/{rule}', [\App\Http\Controllers\Admin\AdminPostingMonetizationController::class, 'deletePricingRule'])->name('pricing.delete');
+        Route::post('/overrides', [\App\Http\Controllers\Admin\AdminPostingMonetizationController::class, 'storeUserOverride'])->name('overrides.store');
+        Route::delete('/overrides/{override}', [\App\Http\Controllers\Admin\AdminPostingMonetizationController::class, 'deleteUserOverride'])->name('overrides.delete');
+    });
+
+    // Wallet & Packages Management
+    Route::prefix('admin/wallet')->name('admin.wallet.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\AdminWalletController::class, 'index'])->name('index');
+        Route::post('/packages', [\App\Http\Controllers\Admin\AdminWalletController::class, 'storePackage'])->name('packages.store');
+        Route::put('/packages/{package}', [\App\Http\Controllers\Admin\AdminWalletController::class, 'updatePackage'])->name('packages.update');
+        Route::post('/packages/{package}/toggle', [\App\Http\Controllers\Admin\AdminWalletController::class, 'togglePackage'])->name('packages.toggle');
+        Route::delete('/packages/{package}', [\App\Http\Controllers\Admin\AdminWalletController::class, 'deletePackage'])->name('packages.delete');
+        Route::post('/adjustment', [\App\Http\Controllers\Admin\AdminWalletController::class, 'manualAdjustment'])->name('adjustment');
+    });
+
+    // Identity Verification Queue
+    Route::prefix('admin/verifications')->name('admin.verifications.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\AdminVerificationController::class, 'index'])->name('index');
+        Route::get('/{verification}', [\App\Http\Controllers\Admin\AdminVerificationController::class, 'show'])->name('show');
+        Route::get('/{verification}/document/{type}', [\App\Http\Controllers\Admin\AdminVerificationController::class, 'downloadDocument'])->name('document');
+        Route::post('/{verification}/approve', [\App\Http\Controllers\Admin\AdminVerificationController::class, 'approve'])->name('approve');
+        Route::post('/{verification}/reject', [\App\Http\Controllers\Admin\AdminVerificationController::class, 'reject'])->name('reject');
+        Route::post('/{verification}/suspend', [\App\Http\Controllers\Admin\AdminVerificationController::class, 'suspend'])->name('suspend');
+    });
 });

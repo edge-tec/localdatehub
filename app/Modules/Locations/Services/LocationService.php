@@ -367,7 +367,10 @@ class LocationService
                 return $city;
             })
             ->filter(fn ($c) => $c->distance_miles <= $radiusMiles && $c->distance_miles > 0.1)
-            ->sortBy('distance_miles')
+            ->sortBy([
+                ['is_popular', 'desc'],
+                ['distance_miles', 'asc'],
+            ])
             ->take($limit)
             ->values();
     }
@@ -436,12 +439,19 @@ class LocationService
      */
     public function getStateWithCities(string $stateCode): ?State
     {
-        return State::where('code', strtoupper($stateCode))
-            ->where('is_active', true)
+        return State::where('is_active', true)
+            ->where(function ($q) use ($stateCode) {
+                if (is_numeric($stateCode)) {
+                    $q->where('id', (int) $stateCode);
+                } else {
+                    $q->where('code', strtoupper($stateCode))
+                      ->orWhere('slug', strtolower($stateCode));
+                }
+            })
             ->with([
                 'cities' => fn ($q) => $q->where('is_active', true)
                     ->orderBy('is_popular', 'desc')
-                    ->orderBy('population', 'desc'),
+                    ->orderBy('name', 'asc'),
                 'counties',
             ])
             ->withCount(['cities' => fn ($q) => $q->where('is_active', true)])
@@ -453,7 +463,9 @@ class LocationService
      */
     public function getCityWithDetails(string $stateCode, string $citySlug): ?City
     {
-        $state = State::where('code', strtoupper($stateCode))->first();
+        $state = State::where('code', strtoupper($stateCode))
+            ->orWhere('slug', strtolower($stateCode))
+            ->first();
         if (!$state) {
             return null;
         }

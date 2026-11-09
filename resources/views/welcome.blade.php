@@ -1,13 +1,14 @@
 <x-layouts.app title="LocalDateHub — Your Local Adult Classifieds & Dating Community">
 
     <!-- ======================================================================= -->
-    <!-- 1. HERO SECTION (Dark Burgundy & Black with Search Bar & Trust Badges)   -->
-    <!-- ======================================================================= -->
-    <section class="bg-gradient-to-b from-pink-50/70 via-white to-slate-50 border-b border-slate-200 relative overflow-hidden py-8 sm:py-12 lg:py-16">
-        <!-- Ambient Background Glow -->
-        <div class="absolute top-0 right-1/4 w-96 h-96 bg-[#F20B65]/10 rounded-full blur-3xl pointer-events-none"></div>
+    <!-- 1. HERO SECTION (Clean White with Search Bar & Trust Badges) -->
+    <section class="bg-gradient-to-b from-pink-50/70 via-white to-slate-50 border-b border-slate-200 relative z-30 py-8 sm:py-12 lg:py-16">
+        <!-- Ambient Background Glow (contained so it does not clip floating dropdowns) -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <div class="absolute top-0 right-1/4 w-96 h-96 bg-[#F20B65]/10 rounded-full blur-3xl"></div>
+        </div>
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
                 
                 <!-- Left Column: Attractive Model Photograph -->
@@ -24,9 +25,17 @@
 
                 <!-- Right Column: Brand Heading, Search Bar & Trust Badges -->
                 <div class="lg:col-span-7 text-center lg:text-left">
-                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#F20B65]/10 border border-[#F20B65]/30 text-[#F20B65] text-xs font-bold mb-3">
-                        <span class="w-2 h-2 rounded-full bg-[#F20B65] animate-pulse"></span>
-                        <span>Privacy-First Adult Dating &amp; Personals</span>
+                    <!-- Premium Glassmorphism Eyebrow Badge (Zero Dot, High-End Vector Icon, Fully Responsive) -->
+                    <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-rose-50 via-pink-50 to-purple-50/60 border border-rose-200/90 shadow-xs hover:shadow-md transition-all duration-300 mb-4 group cursor-default">
+                        <span class="w-5 h-5 rounded-full bg-[#F20B65] text-white flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-110 transition-transform">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                        </span>
+                        <span class="text-xs sm:text-xs font-black text-[#F20B65] tracking-tight">Privacy-First Adult Dating &amp; Personals</span>
+                        <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-white text-[#F20B65] border border-rose-200 shadow-2xs">
+                            100% Discreet
+                        </span>
                     </div>
 
                     <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-none">
@@ -85,17 +94,53 @@
                             },
 
                             get filteredCities() {
-                                if (!this.cityInput) {
-                                    return this.cities;
+                                let list = this.cities;
+                                if (this.cityInput && this.cityInput.trim().length > 0) {
+                                    const q = this.cityInput.toLowerCase().trim();
+                                    list = this.cities.filter(c => c.name.toLowerCase().includes(q));
                                 }
-                                const q = this.cityInput.toLowerCase();
-                                return this.cities.filter(c => c.name.toLowerCase().includes(q));
+                                return list.slice(0, 80);
+                            },
+
+                            get totalMatches() {
+                                if (!this.cityInput || !this.cityInput.trim()) return this.cities.length;
+                                const q = this.cityInput.toLowerCase().trim();
+                                return this.cities.filter(c => c.name.toLowerCase().includes(q)).length;
                             },
 
                             selectCity(name) {
                                 this.selectedCity = name;
                                 this.cityInput = name;
                                 this.cityDropdownOpen = false;
+                            },
+
+                            validateCity() {
+                                if (!this.selectedState) {
+                                    this.selectedCity = '';
+                                    this.cityInput = '';
+                                    return;
+                                }
+                                if (!this.cityInput || !this.cityInput.trim()) {
+                                    this.selectedCity = '';
+                                    this.cityInput = '';
+                                    return;
+                                }
+                                const q = this.cityInput.trim().toLowerCase();
+                                const exact = this.cities.find(c => c.name.toLowerCase() === q);
+                                if (exact) {
+                                    this.selectedCity = exact.name;
+                                    this.cityInput = exact.name;
+                                } else {
+                                    const match = this.cities.find(c => c.name.toLowerCase().startsWith(q));
+                                    if (match) {
+                                        this.selectedCity = match.name;
+                                        this.cityInput = match.name;
+                                    } else {
+                                        // City does not belong to selected state - clear to prevent invalid cross-state search
+                                        this.selectedCity = '';
+                                        this.cityInput = '';
+                                    }
+                                }
                             },
 
                             init() {
@@ -109,9 +154,9 @@
                                 }
                             }
                         }"
-                        class="mt-6 sm:mt-8 bg-white rounded-2xl p-2 sm:p-2.5 shadow-2xl border border-white/20"
+                        class="mt-6 sm:mt-8 bg-white rounded-2xl p-2 sm:p-2.5 shadow-2xl border border-white/20 relative z-30"
                     >
-                        <form action="{{ route('search.index') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+                        <form action="{{ route('search.index') }}" method="GET" @submit="validateCity()" class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
                             
                             <!-- Select Category -->
                             <div class="sm:col-span-4 relative flex items-center px-3 py-1.5 sm:border-r border-slate-200">
@@ -147,8 +192,10 @@
 
                             <!-- Select City with Automatic City Suggestion Dropdown -->
                             <div 
-                                class="sm:col-span-3 relative flex items-center px-3 py-1.5"
-                                @click.away="cityDropdownOpen = false"
+                                class="sm:col-span-3 relative flex items-center px-3 py-1.5 cursor-pointer"
+                                @click.outside="cityDropdownOpen = false"
+                                @keydown.escape.window="cityDropdownOpen = false"
+                                @click="if(selectedState) { cityDropdownOpen = !cityDropdownOpen; }"
                             >
                                 <svg class="w-4 h-4 text-slate-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -157,15 +204,17 @@
                                 <!-- Hidden input for form submission -->
                                 <input type="hidden" name="city" :value="selectedCity">
 
-                                <!-- Interactive City Input -->
+                                <!-- Interactive City Input Display -->
                                 <div class="relative w-full">
                                     <input 
                                         type="text" 
                                         x-model="cityInput" 
-                                        @focus="if(selectedState) { cityDropdownOpen = true; }"
+                                        @click.stop="if(selectedState) { cityDropdownOpen = true; }"
                                         @input="selectedCity = cityInput; if(selectedState) { cityDropdownOpen = true; }"
-                                        :placeholder="loadingCities ? 'Loading cities...' : (!selectedState ? 'Select City' : 'Select City in this State...')" 
-                                        class="w-full bg-transparent text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none py-1 pr-4 cursor-pointer truncate"
+                                        :disabled="!selectedState"
+                                        :placeholder="loadingCities ? 'Loading cities...' : (!selectedState ? 'Select State first' : 'Select City in State...')" 
+                                        class="w-full bg-transparent text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none py-1 pr-6 truncate cursor-pointer"
+                                        :class="{ 'cursor-not-allowed opacity-60': !selectedState }"
                                         autocomplete="off"
                                     />
 
@@ -178,73 +227,114 @@
                                             </svg>
                                         </template>
                                         <template x-if="!loadingCities">
-                                            <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" :class="{ 'rotate-180 text-[#F20B65]': cityDropdownOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                             </svg>
                                         </template>
                                     </div>
                                 </div>
 
-                                <!-- Floating City Suggestion Dropdown List -->
+                                <!-- Floating City Suggestion Dropdown List (Responsive Width & Never Clipped) -->
                                 <div 
                                     x-show="cityDropdownOpen" 
                                     x-cloak 
-                                    x-transition:enter="transition ease-out duration-100"
-                                    x-transition:enter-start="opacity-0 translate-y-1"
-                                    x-transition:enter-end="opacity-100 translate-y-0"
-                                    x-transition:leave="transition ease-in duration-75"
-                                    x-transition:leave-start="opacity-100 translate-y-0"
-                                    x-transition:leave-end="opacity-0 translate-y-1"
-                                    class="absolute left-0 right-0 top-full mt-2 bg-white rounded-xl shadow-2xl border border-slate-200 py-1.5 z-50 max-h-60 overflow-y-auto text-left"
+                                    @click.stop
+                                    x-transition:enter="transition ease-out duration-150"
+                                    x-transition:enter-start="opacity-0 translate-y-2 scale-98"
+                                    x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                                    x-transition:leave="transition ease-in duration-100"
+                                    x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                                    x-transition:leave-end="opacity-0 translate-y-2 scale-98"
+                                    class="absolute left-0 right-0 sm:left-auto sm:right-0 top-full mt-2 w-full sm:w-[380px] max-w-[calc(100vw-2rem)] sm:max-w-[420px] bg-white rounded-2xl shadow-2xl border border-slate-200/90 z-50 text-left flex flex-col overflow-hidden"
+                                    style="box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(0, 0, 0, 0.05);"
                                 >
                                     <!-- Prompt if no state selected yet -->
                                     <template x-if="!selectedState">
-                                        <div class="px-3 py-2 text-[11px] text-amber-700 bg-amber-50 rounded-lg mx-1.5 font-medium flex items-center space-x-1.5">
-                                            <span>⚠️</span>
-                                            <span>Please select a state first to see cities.</span>
+                                        <div class="p-4 text-center">
+                                            <div class="text-2xl mb-1">📍</div>
+                                            <div class="text-xs font-bold text-slate-800">Please select a State first</div>
+                                            <div class="text-[11px] text-slate-500 mt-0.5">Cities will automatically load for your chosen state.</div>
                                         </div>
                                     </template>
 
                                     <!-- When state is selected and cities are loaded -->
                                     <template x-if="selectedState && cities.length > 0">
-                                        <div>
-                                            <!-- Option to select all cities -->
-                                            <button 
-                                                type="button" 
-                                                @click="selectCity('')"
-                                                class="w-full text-left px-3 py-1.5 text-xs font-bold text-[#F20B65] hover:bg-pink-50 flex items-center justify-between border-b border-slate-100"
-                                            >
-                                                <span>All Cities in this State</span>
-                                                <span class="text-[10px] text-slate-400 font-normal">Reset</span>
-                                            </button>
-
-                                            <!-- Filtered City List -->
-                                            <template x-for="c in filteredCities" :key="c.id">
-                                                <button 
-                                                    type="button" 
-                                                    @click="selectCity(c.name)"
-                                                    class="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-[#F20B65]/10 hover:text-[#F20B65] font-semibold flex items-center justify-between transition"
-                                                    :class="{ 'bg-pink-50 text-[#F20B65] font-bold': selectedCity === c.name }"
-                                                >
-                                                    <span x-text="c.name"></span>
-                                                    <template x-if="c.is_popular">
-                                                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-pink-100 text-[#F20B65] font-bold">Popular</span>
-                                                    </template>
-                                                </button>
-                                            </template>
-
-                                            <!-- If filtered query has no match -->
-                                            <template x-if="filteredCities.length === 0">
-                                                <div class="px-3 py-2 text-xs text-slate-400 italic">
-                                                    No city matches "<span x-text="cityInput"></span>"
+                                        <div class="flex flex-col">
+                                            <!-- STICKY TOP HEADER: Search bar & All Cities shortcut (Never scrolls away!) -->
+                                            <div class="sticky top-0 bg-white border-b border-slate-100 p-2.5 z-20 space-y-2 bg-gradient-to-b from-white to-slate-50/70">
+                                                <div class="flex items-center justify-between px-1">
+                                                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-700" x-text="cities.length + ' Cities Available'"></span>
+                                                    <button 
+                                                        type="button" 
+                                                        @click="selectCity('')"
+                                                        class="text-[11px] font-bold text-[#F20B65] hover:underline flex items-center gap-1"
+                                                    >
+                                                        <span>All Cities in State</span>
+                                                        <span class="text-slate-400 font-normal">↺</span>
+                                                    </button>
                                                 </div>
-                                            </template>
+
+                                                <!-- Quick Search Box inside dropdown -->
+                                                <div class="relative">
+                                                    <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                                    </svg>
+                                                    <input 
+                                                        type="text" 
+                                                        x-model="cityInput" 
+                                                        placeholder="Type city name to filter..." 
+                                                        class="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-7 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#F20B65] focus:ring-1 focus:ring-[#F20B65] transition"
+                                                        autocomplete="off"
+                                                    />
+                                                    <template x-if="cityInput">
+                                                        <button 
+                                                            type="button" 
+                                                            @click="cityInput = ''; selectedCity = '';" 
+                                                            class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold p-0.5"
+                                                        >
+                                                            &times;
+                                                        </button>
+                                                    </template>
+                                                </div>
+                                            </div>
+
+                                            <!-- SCROLLABLE LIST OF CITIES -->
+                                            <div class="max-h-60 sm:max-h-72 overflow-y-auto divide-y divide-slate-100/80 p-1.5" style="overscroll-behavior: contain; -webkit-overflow-scrolling: touch;">
+                                                <template x-for="c in filteredCities" :key="c.id">
+                                                    <button 
+                                                        type="button" 
+                                                        @click="selectCity(c.name)"
+                                                        class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-pink-50 hover:text-[#F20B65] rounded-xl font-semibold flex items-center justify-between transition-colors"
+                                                        :class="{ 'bg-pink-50/80 text-[#F20B65] font-bold ring-1 ring-[#F20B65]/30': selectedCity === c.name }"
+                                                    >
+                                                        <span x-text="c.name"></span>
+                                                        <template x-if="c.is_popular">
+                                                            <span class="text-[9px] px-2 py-0.5 rounded-full bg-pink-100 text-[#F20B65] font-extrabold uppercase tracking-wide">Popular</span>
+                                                        </template>
+                                                    </button>
+                                                </template>
+
+                                                <!-- If filtered query has no match -->
+                                                <template x-if="filteredCities.length === 0">
+                                                    <div class="px-4 py-6 text-center text-xs text-slate-500 italic">
+                                                        No city matches "<span x-text="cityInput" class="font-bold text-slate-700"></span>"
+                                                    </div>
+                                                </template>
+                                            </div>
+
+                                            <!-- FOOTER: Showing X of Total matches -->
+                                            <div class="px-3 py-1.5 text-[10px] text-slate-500 bg-slate-50 border-t border-slate-100 flex items-center justify-between font-medium">
+                                                <span>Showing <strong x-text="filteredCities.length"></strong> of <strong x-text="totalMatches"></strong></span>
+                                                <template x-if="totalMatches > filteredCities.length">
+                                                    <span class="text-slate-400 italic">Type to narrow list</span>
+                                                </template>
+                                            </div>
                                         </div>
                                     </template>
 
                                     <!-- If no cities exist for this state in DB -->
                                     <template x-if="selectedState && !loadingCities && cities.length === 0">
-                                        <div class="px-3 py-2 text-xs text-slate-400 italic">
+                                        <div class="px-4 py-6 text-center text-xs text-slate-500 italic">
                                             No cities found for this state
                                         </div>
                                     </template>
@@ -312,16 +402,23 @@
     <!-- ======================================================================= -->
     <!-- 2. CATEGORY NAVIGATION ROW (Clean White Cards with Pink Icons)          -->
     <!-- ======================================================================= -->
-    <section class="bg-white border-b border-slate-200 py-6 sm:py-8">
+    <section class="bg-white border-b border-slate-200 py-6 sm:py-8 relative z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between mb-3.5">
                 <span class="text-xs font-bold text-[#737784] uppercase tracking-wider">Explore Personal Classifications</span>
-                <div class="hidden sm:flex items-center space-x-3 text-[11px] font-semibold text-slate-500">
-                    <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>100% 18+ Age Verified</span>
-                    <span>•</span>
-                    <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#F20B65]"></span>Anti-Triangulation Location Fuzzing</span>
-                    <span>•</span>
-                    <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>Automated Photo EXIF Stripping</span>
+                <div class="hidden sm:flex items-center gap-2 text-[11px] font-bold text-slate-700">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
+                        <svg class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                        <span>100% 18+ Age Verified</span>
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs">
+                        <svg class="w-3.5 h-3.5 text-[#F20B65]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                        <span>Anti-Triangulation Location Fuzzing</span>
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-purple-900 border border-purple-200 shadow-2xs">
+                        <svg class="w-3.5 h-3.5 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <span>Automated Photo EXIF Stripping</span>
+                    </span>
                 </div>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2.5 sm:gap-3">

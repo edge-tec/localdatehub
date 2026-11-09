@@ -14,16 +14,29 @@
                     Monitor publication status, renew expiring posts, update details, or create new personal ads.
                 </p>
             </div>
-            <div>
+            <div class="flex items-center gap-2">
+                <a
+                    href="{{ route('account.payments.index') }}"
+                    class="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl text-xs transition flex items-center space-x-1.5"
+                >
+                    <span>₿ Payment History</span>
+                </a>
                 <a
                     href="{{ route('listings.create') }}"
-                    class="px-4 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-rose-600/30 flex items-center space-x-1.5"
+                    class="px-4 py-2.5 bg-[#F20B83] hover:bg-[#d90858] text-white font-bold rounded-xl text-xs transition shadow-md shadow-[#F20B83]/20 flex items-center space-x-1.5"
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     <span>Post New Ad</span>
                 </a>
             </div>
         </div>
+
+        @if(request('boost_success'))
+            <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-bold flex items-center gap-2 shadow-xs">
+                <span class="text-base">🚀</span>
+                <span>Your listing boost has been successfully confirmed and activated! It is now pinned and spotlighted.</span>
+            </div>
+        @endif
 
         @if(session('status'))
             <div class="p-4 bg-emerald-50 border border-emerald-600/40 rounded-xl text-xs text-emerald-700">
@@ -41,31 +54,31 @@
         <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-3">
             <a
                 href="{{ route('account.listings.index') }}"
-                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition {{ empty($currentStatus) ? 'bg-rose-600 text-white shadow' : 'bg-white text-slate-400 hover:text-white' }}"
+                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition border border-slate-200 {{ empty($currentStatus) ? 'bg-[#F20B83] text-white border-[#F20B83] shadow-xs' : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}"
             >
                 All ({{ $counts['all'] }})
             </a>
             <a
                 href="{{ route('account.listings.index', ['status' => 'active']) }}"
-                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition {{ $currentStatus === 'active' ? 'bg-emerald-600 text-white shadow' : 'bg-white text-slate-400 hover:text-white' }}"
+                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition border border-slate-200 {{ $currentStatus === 'active' ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs' : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}"
             >
                 Active ({{ $counts['active'] }})
             </a>
             <a
                 href="{{ route('account.listings.index', ['status' => 'pending_review']) }}"
-                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition {{ $currentStatus === 'pending_review' ? 'bg-amber-600 text-white shadow' : 'bg-white text-slate-400 hover:text-white' }}"
+                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition border border-slate-200 {{ $currentStatus === 'pending_review' ? 'bg-amber-600 text-white border-amber-600 shadow-xs' : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}"
             >
                 Pending Review ({{ $counts['pending'] }})
             </a>
             <a
                 href="{{ route('account.listings.index', ['status' => 'draft']) }}"
-                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition {{ $currentStatus === 'draft' ? 'bg-blue-600 text-white shadow' : 'bg-white text-slate-400 hover:text-white' }}"
+                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition border border-slate-200 {{ $currentStatus === 'draft' ? 'bg-blue-600 text-white border-blue-600 shadow-xs' : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}"
             >
                 Drafts ({{ $counts['draft'] }})
             </a>
             <a
                 href="{{ route('account.listings.index', ['status' => 'rejected']) }}"
-                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition {{ $currentStatus === 'rejected' ? 'bg-rose-700 text-white shadow' : 'bg-white text-slate-400 hover:text-white' }}"
+                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition border border-slate-200 {{ $currentStatus === 'rejected' ? 'bg-rose-700 text-white border-rose-700 shadow-xs' : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}"
             >
                 Rejected ({{ $counts['rejected'] }})
             </a>
@@ -160,6 +173,12 @@
                                         Resume
                                     </button>
                                 </form>
+                            @endif
+
+                            @if($listing->status === 'active')
+                                <a href="{{ route('boost.checkout', $listing->id) }}" class="px-3 py-1.5 bg-[#F20B83] hover:bg-[#d90858] text-white rounded-xl text-xs font-black transition flex items-center gap-1 shadow-xs">
+                                    <span>🚀 Boost</span>
+                                </a>
                             @endif
 
                             <a href="{{ route('listings.edit', $listing->id) }}" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-xl text-xs font-semibold transition">

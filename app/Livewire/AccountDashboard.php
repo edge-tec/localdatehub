@@ -48,11 +48,17 @@ class AccountDashboard extends Component
     // Saved Listings Properties
     public string $savedSearch = '';
 
-    // Contact Messages Properties
+    // Contact Messages Advanced Properties
+    public string $messageFolder = 'inbox'; // inbox, sent
     public string $messageFilter = 'all'; // all, unread, replied, flagged
     public string $messageSearch = '';
+    public ?int $messageListingFilter = null;
     public ?ContactMessage $inspectedMessage = null;
     public bool $showMessageModal = false;
+    public string $replyMessageContent = '';
+    public array $conversationReplies = [];
+    public array $selectedMessages = [];
+    public bool $selectAllMessages = false;
 
     // Analytics Properties
     public string $analyticsTimeframe = '30d'; // 7d, 30d, all
@@ -310,24 +316,138 @@ class AccountDashboard extends Component
 
     public function inspectMessage(int $messageId): void
     {
-        $message = ContactMessage::where('recipient_id', Auth::id())
-            ->with(['listing.city.state'])
+        $message = ContactMessage::where(function ($q) {
+                $q->where('recipient_id', Auth::id())
+                  ->orWhere('sender_id', Auth::id());
+            })
+            ->with(['listing.city.state', 'listing.primaryPhoto', 'sender', 'recipient'])
             ->findOrFail($messageId);
 
-        if (!$message->is_read) {
+        if ($message->recipient_id === Auth::id() && !$message->is_read) {
             $message->is_read = true;
             $message->read_at = now();
             $message->save();
         }
 
         $this->inspectedMessage = $message;
+        $this->loadConversationThread($message);
+        $this->replyMessageContent = '';
         $this->showMessageModal = true;
+    }
+
+    public function loadConversationThread(ContactMessage $message): void
+    {
+        if ($message->listing_id) {
+            $senderId = $message->sender_id;
+            $recipientId = $message->recipient_id;
+
+            $replies = ContactMessage::where('listing_id', $message->listing_id)
+                ->where('id', '!=', $message->id)
+                ->where(function ($q) use ($senderId, $recipientId, $message) {
+                    if ($senderId && $recipientId) {
+                        $q->where(function ($sub) use ($senderId, $recipientId) {
+                            $sub->where('sender_id', $senderId)->where('recipient_id', $recipientId);
+                        })->orWhere(function ($sub) use ($senderId, $recipientId) {
+                            $sub->where('sender_id', $recipientId)->where('recipient_id', $senderId);
+                        });
+                    } elseif (!empty($message->sender_email_encrypted)) {
+                        $q->where('sender_email_encrypted', $message->sender_email_encrypted);
+                    }
+                })
+                ->orderBy('created_at', 'asc')
+                ->get();
+
+            $currentUserId = Auth::id();
+            $currentUserEmail = Auth::user()?->email;
+
+            $this->conversationReplies = $replies->map(fn($r) => [
+                'id' => $r->id,
+                'sender_id' => $r->sender_id,
+                'sender_name' => $r->sender_name,
+                'sender_email' => $r->sender_email_encrypted,
+                'message' => $r->message_encrypted,
+                'created_at_formatted' => $r->created_at ? $r->created_at->format('M d, g:i A') : '',
+                'is_me' => ($r->sender_id === $currentUserId || ($currentUserEmail && $r->sender_email_encrypted === $currentUserEmail)),
+            ])->all();
+        } else {
+            $this->conversationReplies = [];
+        }
+    }
+
+    public function sendDirectReply(): void
+    {
+        $this->validate([
+            'replyMessageContent' => ['required', 'string', 'min:3', 'max:2500'],
+        ]);
+
+        if (!$this->inspectedMessage) {
+            return;
+        }
+
+        try {
+            app(\App\Modules\Contact\Services\ContactService::class)
+                ->validateMessageSafety($this->replyMessageContent);
+        } catch (\Exception $e) {
+            $this->addError('replyMessageContent', $e->getMessage());
+            return;
+        }
+
+        $currentUser = Auth::user();
+        $targetRecipientId = $this->inspectedMessage->recipient_id === $currentUser->id 
+            ? $this->inspectedMessage->sender_id 
+            : $this->inspectedMessage->recipient_id;
+
+        $reply = ContactMessage::create([
+            'listing_id' => $this->inspectedMessage->listing_id,
+            'sender_id' => $currentUser->id,
+            'recipient_id' => $targetRecipientId,
+            'inquiry_type' => 'listing_inquiry',
+            'sender_name' => $currentUser->profile?->display_name ?: $currentUser->name,
+            'sender_email_encrypted' => $currentUser->email,
+            'sender_phone_encrypted' => $currentUser->profile?->phone ?? null,
+            'subject' => 'Re: ' . ltrim(str_replace('Re:', '', $this->inspectedMessage->subject ?? 'Inquiry')),
+            'message_encrypted' => $this->replyMessageContent,
+            'is_read' => false,
+            'is_replied' => true,
+            'is_flagged' => false,
+            'client_ip' => request()->ip(),
+            'user_agent' => substr((string) request()->userAgent(), 0, 255),
+        ]);
+
+        $this->inspectedMessage->is_replied = true;
+        $this->inspectedMessage->save();
+
+        $this->replyMessageContent = '';
+        $this->loadConversationThread($this->inspectedMessage);
+
+        session()->flash('success', 'Your protected reply has been safely delivered.');
+    }
+
+    public function insertQuickReply(string $template): void
+    {
+        $this->replyMessageContent = $template;
+    }
+
+    public function markMessageUnread(int $messageId): void
+    {
+        $message = ContactMessage::where('recipient_id', Auth::id())->findOrFail($messageId);
+        $message->is_read = false;
+        $message->read_at = null;
+        $message->save();
+
+        if ($this->inspectedMessage && $this->inspectedMessage->id === $messageId) {
+            $this->closeMessageModal();
+        }
+
+        session()->flash('success', 'Inquiry marked as unread.');
     }
 
     public function closeMessageModal(): void
     {
         $this->showMessageModal = false;
         $this->inspectedMessage = null;
+        $this->conversationReplies = [];
+        $this->replyMessageContent = '';
     }
 
     public function markMessageReplied(int $messageId): void
@@ -358,9 +478,34 @@ class AccountDashboard extends Component
         session()->flash('success', 'Inquiry flagged and forwarded to Trust & Safety moderation.');
     }
 
-    public function deleteMessage(int $messageId): void
+    public function blockSenderFromMessage(int $messageId): void
     {
         $message = ContactMessage::where('recipient_id', Auth::id())->findOrFail($messageId);
+
+        if ($message->sender_id && $message->sender_id !== Auth::id()) {
+            UserBlock::firstOrCreate([
+                'blocker_id' => Auth::id(),
+                'blocked_id' => $message->sender_id,
+            ], [
+                'reason' => 'Blocked via messages inbox',
+                'created_at' => now(),
+            ]);
+            session()->flash('success', 'Sender has been blocked. They will not be able to message you again.');
+        } else {
+            session()->flash('success', 'Inquiry flagged as spam.');
+        }
+
+        $this->flagMessage($messageId, 'spam');
+        $this->closeMessageModal();
+    }
+
+    public function deleteMessage(int $messageId): void
+    {
+        $message = ContactMessage::where(function ($q) {
+            $q->where('recipient_id', Auth::id())
+              ->orWhere('sender_id', Auth::id());
+        })->findOrFail($messageId);
+        
         $message->delete();
 
         if ($this->inspectedMessage && $this->inspectedMessage->id === $messageId) {
@@ -368,6 +513,61 @@ class AccountDashboard extends Component
         }
 
         session()->flash('success', 'Inquiry deleted from inbox.');
+    }
+
+    public function toggleSelectAllMessages(): void
+    {
+        if ($this->selectAllMessages) {
+            $this->selectedMessages = [];
+            $this->selectAllMessages = false;
+        } else {
+            $query = ContactMessage::where('recipient_id', Auth::id());
+            if ($this->messageFilter === 'unread') {
+                $query->where('is_read', false);
+            } elseif ($this->messageFilter === 'replied') {
+                $query->where('is_replied', true);
+            }
+            $this->selectedMessages = $query->pluck('id')->map(fn($id) => (int)$id)->toArray();
+            $this->selectAllMessages = true;
+        }
+    }
+
+    public function bulkMarkRead(): void
+    {
+        if (!empty($this->selectedMessages)) {
+            ContactMessage::where('recipient_id', Auth::id())
+                ->whereIn('id', $this->selectedMessages)
+                ->update(['is_read' => true, 'read_at' => now()]);
+            $this->selectedMessages = [];
+            $this->selectAllMessages = false;
+            session()->flash('success', 'Selected messages marked as read.');
+        }
+    }
+
+    public function bulkMarkUnread(): void
+    {
+        if (!empty($this->selectedMessages)) {
+            ContactMessage::where('recipient_id', Auth::id())
+                ->whereIn('id', $this->selectedMessages)
+                ->update(['is_read' => false, 'read_at' => null]);
+            $this->selectedMessages = [];
+            $this->selectAllMessages = false;
+            session()->flash('success', 'Selected messages marked as unread.');
+        }
+    }
+
+    public function bulkDeleteMessages(): void
+    {
+        if (!empty($this->selectedMessages)) {
+            ContactMessage::where(function ($q) {
+                $q->where('recipient_id', Auth::id())
+                  ->orWhere('sender_id', Auth::id());
+            })->whereIn('id', $this->selectedMessages)->delete();
+            
+            $this->selectedMessages = [];
+            $this->selectAllMessages = false;
+            session()->flash('success', 'Selected messages deleted.');
+        }
     }
 
     /*
@@ -787,16 +987,26 @@ class AccountDashboard extends Component
         $savedListings = $savedQuery->paginate(8, ['*'], 'savedPage');
 
         // Contact Messages Query
-        $messagesQuery = ContactMessage::where('recipient_id', $userId)
-            ->with(['listing.city.state'])
-            ->latest();
+        if ($this->messageFolder === 'sent') {
+            $messagesQuery = ContactMessage::where('sender_id', $userId)
+                ->with(['listing.city.state', 'recipient'])
+                ->latest();
+        } else {
+            $messagesQuery = ContactMessage::where('recipient_id', $userId)
+                ->with(['listing.city.state', 'sender'])
+                ->latest();
 
-        if ($this->messageFilter === 'unread') {
-            $messagesQuery->where('is_read', false);
-        } elseif ($this->messageFilter === 'replied') {
-            $messagesQuery->where('is_replied', true);
-        } elseif ($this->messageFilter === 'flagged') {
-            $messagesQuery->where('is_flagged', true);
+            if ($this->messageFilter === 'unread') {
+                $messagesQuery->where('is_read', false);
+            } elseif ($this->messageFilter === 'replied') {
+                $messagesQuery->where('is_replied', true);
+            } elseif ($this->messageFilter === 'flagged') {
+                $messagesQuery->where('is_flagged', true);
+            }
+        }
+
+        if (!empty($this->messageListingFilter)) {
+            $messagesQuery->where('listing_id', $this->messageListingFilter);
         }
 
         if (!empty($this->messageSearch)) {
@@ -806,6 +1016,13 @@ class AccountDashboard extends Component
             });
         }
         $messages = $messagesQuery->paginate(10, ['*'], 'messagesPage');
+
+        $totalInboxCount = ContactMessage::where('recipient_id', $userId)->count();
+        $totalSentCount = ContactMessage::where('sender_id', $userId)->count();
+        $totalUnreadCount = ContactMessage::where('recipient_id', $userId)->where('is_read', false)->count();
+        $totalRepliedCount = ContactMessage::where('recipient_id', $userId)->where('is_replied', true)->count();
+        $totalFlaggedCount = ContactMessage::where('recipient_id', $userId)->where('is_flagged', true)->count();
+        $userListingsForMessages = Listing::where('user_id', $userId)->orderBy('title')->get(['id', 'title']);
 
         // Analytics Data
         $analyticsListings = Listing::where('user_id', $userId)
@@ -856,6 +1073,12 @@ class AccountDashboard extends Component
             'myListings' => $myListings,
             'savedListings' => $savedListings,
             'messages' => $messages,
+            'totalInboxCount' => $totalInboxCount,
+            'totalSentCount' => $totalSentCount,
+            'totalUnreadCount' => $totalUnreadCount,
+            'totalRepliedCount' => $totalRepliedCount,
+            'totalFlaggedCount' => $totalFlaggedCount,
+            'userListingsForMessages' => $userListingsForMessages,
             'analyticsListings' => $analyticsListings,
             'activePromotions' => $activePromotions,
             'pricingPlans' => $pricingPlans,

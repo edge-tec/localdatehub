@@ -27,6 +27,18 @@ class SandboxGateway implements PaymentGatewayInterface
     public function createCharge(array $params): ChargeResult
     {
         $amountCents = (int) ($params['amount_cents'] ?? 0);
+
+        if (app()->environment('production')) {
+            return new ChargeResult(
+                success: false,
+                referenceId: $params['reference_id'] ?? null,
+                amountCents: $amountCents,
+                currency: $params['currency'] ?? 'USD',
+                errorMessage: 'Sandbox simulation payment gateway is strictly disabled in production.',
+                rawPayload: ['production_sandbox_blocked' => true]
+            );
+        }
+
         $cardToken = $params['payment_token'] ?? $params['token'] ?? 'tok_sandbox_default';
         $cardLastFour = $params['card_last_four'] ?? substr($cardToken, -4) ?: '4242';
         $cardBrand = $params['card_brand'] ?? 'Visa';
@@ -75,6 +87,16 @@ class SandboxGateway implements PaymentGatewayInterface
 
     public function createSubscription(array $params): SubscriptionResult
     {
+        if (app()->environment('production')) {
+            return new SubscriptionResult(
+                success: false,
+                subscriptionId: null,
+                status: 'rejected',
+                errorMessage: 'Sandbox simulation payment gateway is strictly disabled in production.',
+                rawPayload: ['production_sandbox_blocked' => true]
+            );
+        }
+
         $planId = $params['plan_id'] ?? 'default_plan';
         $subId = 'sbx_sub_' . Str::lower(Str::random(16));
 

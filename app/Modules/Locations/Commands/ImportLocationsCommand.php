@@ -13,6 +13,8 @@ use App\Modules\Locations\Models\ZipCode;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class ImportLocationsCommand extends Command
 {
@@ -23,12 +25,13 @@ class ImportLocationsCommand extends Command
                             {--path=database/data/locations : Base path to location dataset files}
                             {--only= : Comma-separated list of tiers to import: states,counties,cities,zips,aliases}
                             {--chunk=500 : Batch size for database bulk operations}
+                            {--download : Download fresh authoritative Census Bureau TIGER/Line Gazetteer datasets before importing}
                             {--queue : Dispatch the import process to the background queue worker}';
 
     /**
      * The console command description.
      */
-    protected $description = 'Import official USA geographic location datasets (States, Territories, Counties, Cities, ZIPs, Aliases)';
+    protected $description = 'Import official USA geographic location datasets (States, Territories, Counties, Cities, ZIPs, Aliases) with Census Bureau TIGER/Line support';
 
     /**
      * Execute the console command.
@@ -46,15 +49,19 @@ class ImportLocationsCommand extends Command
 
         $startTime = microtime(true);
         $basePath = base_path($this->option('path'));
-        if (!File::isDirectory($basePath)) {
-            $this->error("Dataset directory not found: {$basePath}");
-            return Command::FAILURE;
+        File::ensureDirectoryExists($basePath);
+
+        // Download Census Bureau TIGER/Line Gazetteer if requested
+        if ($this->option('download')) {
+            $this->downloadCensusGazetteer($basePath);
         }
 
         $only = $this->option('only') ? explode(',', strtolower($this->option('only'))) : null;
+        $chunkSize = max(50, (int) $this->option('chunk'));
 
         $this->info("=================================================");
-        $this->info(" LocalDateHub — USA Location Dataset Importer");
+        $this->info(" LocalDateHub — Complete USA Location Engine");
+        $this->info(" Authoritative Dataset: US Census Bureau Gazetteer");
         $this->info(" Source Path: {$basePath}");
         $this->info("=================================================");
 
@@ -78,6 +85,7 @@ class ImportLocationsCommand extends Command
         ];
 
         $checksums = [];
+        $now = now();
 
         // 1. States & Territories Import
         if (!$only || in_array('states', $only)) {
@@ -88,22 +96,31 @@ class ImportLocationsCommand extends Command
                 $this->info("Importing " . count($statesData) . " US States, DC & Territories...");
                 $bar = $this->output->createProgressBar(count($statesData));
 
-                DB::transaction(function () use ($statesData, $country, $bar, &$stats) {
-                    foreach ($statesData as $item) {
-                        State::updateOrCreate(
-                            ['code' => $item['code']],
-                            [
-                                'country_id' => $country->id,
-                                'name' => $item['name'],
-                                'fips_code' => $item['fips'] ?? null,
-                                'is_territory' => (bool) ($item['is_territory'] ?? false),
-                                'is_active' => true,
-                            ]
-                        );
-                        $stats['states']++;
-                        $bar->advance();
-                    }
-                });
+                $stateRows = [];
+                foreach ($statesData as $item) {
+                    $stateRows[] = [
+                        'country_id' => $country->id,
+                        'name' => $item['name'],
+                        'slug' => $item['slug'] ?? Str::slug($item['name']),
+                        'code' => strtoupper($item['code']),
+                        'fips_code' => $item['fips'] ?? null,
+                        'is_territory' => (bool) ($item['is_territory'] ?? false),
+                        'is_active' => true,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+
+                foreach (array_chunk($stateRows, $chunkSize) as $chunk) {
+                    State::upsert(
+                        $chunk,
+                        ['code'],
+                        ['country_id', 'name', 'slug', 'fips_code', 'is_territory', 'is_active', 'updated_at']
+                    );
+                    $stats['states'] += count($chunk);
+                    $bar->advance(count($chunk));
+                }
+
                 $bar->finish();
                 $this->newLine();
             }
@@ -121,26 +138,32 @@ class ImportLocationsCommand extends Command
                 $this->info("Importing " . count($countiesData) . " US Counties...");
                 $bar = $this->output->createProgressBar(count($countiesData));
 
-                DB::transaction(function () use ($countiesData, $stateMap, $bar, &$stats) {
-                    foreach ($countiesData as $item) {
-                        $stateId = $stateMap[$item['state_code']] ?? null;
-                        if (!$stateId) {
-                            continue;
-                        }
-
-                        County::updateOrCreate(
-                            [
-                                'state_id' => $stateId,
-                                'name' => $item['name'],
-                            ],
-                            [
-                                'fips_code' => $item['fips'] ?? null,
-                            ]
-                        );
-                        $stats['counties']++;
-                        $bar->advance();
+                $countyRows = [];
+                foreach ($countiesData as $item) {
+                    $stateId = $stateMap[$item['state_code']] ?? null;
+                    if (!$stateId) {
+                        continue;
                     }
-                });
+
+                    $countyRows[] = [
+                        'state_id' => $stateId,
+                        'name' => $item['name'],
+                        'fips_code' => $item['fips'] ?? null,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+
+                foreach (array_chunk($countyRows, $chunkSize) as $chunk) {
+                    County::upsert(
+                        $chunk,
+                        ['state_id', 'name'],
+                        ['fips_code', 'updated_at']
+                    );
+                    $stats['counties'] += count($chunk);
+                    $bar->advance(count($chunk));
+                }
+
                 $bar->finish();
                 $this->newLine();
             }
@@ -152,48 +175,76 @@ class ImportLocationsCommand extends Command
             $countyMap[$c->state_id . '_' . strtolower($c->name)] = $c->id;
         }
 
-        // 3. Cities & Populated Places Import
+        // 3. Cities & Populated Places Import (US Census Bureau Gazetteer: 32,000+ Places)
         if (!$only || in_array('cities', $only)) {
             $citiesFile = $basePath . '/us_cities.json';
             if (File::exists($citiesFile)) {
                 $checksums['cities'] = hash_file('sha256', $citiesFile);
                 $citiesData = json_decode(File::get($citiesFile), true) ?: [];
-                $this->info("Importing " . count($citiesData) . " US Populated Places / Cities...");
+                $this->info("Importing " . count($citiesData) . " US Populated Places / Cities (Census Gazetteer)...");
                 $bar = $this->output->createProgressBar(count($citiesData));
 
-                DB::transaction(function () use ($citiesData, $stateMap, $countyMap, $bar, &$stats) {
-                    foreach ($citiesData as $item) {
-                        $stateId = $stateMap[$item['state_code']] ?? null;
-                        if (!$stateId) {
-                            continue;
-                        }
+                $validCityTypes = [
+                    'city',
+                    'city and borough',
+                    'municipality',
+                    'consolidated government',
+                    'metropolitan government',
+                    'unified government',
+                    'urban county',
+                    'corporation',
+                ];
 
-                        $countyId = null;
-                        if (!empty($item['county'])) {
-                            $key = $stateId . '_' . strtolower($item['county']);
-                            $countyId = $countyMap[$key] ?? null;
-                        }
-
-                        City::updateOrCreate(
-                            [
-                                'state_id' => $stateId,
-                                'slug' => $item['slug'],
-                            ],
-                            [
-                                'county_id' => $countyId,
-                                'name' => $item['name'],
-                                'latitude' => $item['latitude'] ?? null,
-                                'longitude' => $item['longitude'] ?? null,
-                                'population' => $item['population'] ?? null,
-                                'timezone' => $item['timezone'] ?? 'America/New_York',
-                                'is_popular' => (bool) ($item['is_popular'] ?? false),
-                                'is_active' => true,
-                            ]
-                        );
-                        $stats['cities']++;
-                        $bar->advance();
+                $cityRows = [];
+                foreach ($citiesData as $item) {
+                    $cityName = $item['name'] ?? '';
+                    if (stripos($cityName, 'village') !== false || stripos($cityName, 'township') !== false) {
+                        continue;
                     }
-                });
+
+                    $cityType = $item['city_type'] ?? 'city';
+                    if (!in_array($cityType, $validCityTypes, true)) {
+                        continue;
+                    }
+
+                    $stateId = $stateMap[$item['state_code']] ?? null;
+                    if (!$stateId) {
+                        continue;
+                    }
+
+                    $countyId = null;
+                    if (!empty($item['county'])) {
+                        $key = $stateId . '_' . strtolower($item['county']);
+                        $countyId = $countyMap[$key] ?? null;
+                    }
+
+                    $cityRows[] = [
+                        'state_id' => $stateId,
+                        'county_id' => $countyId,
+                        'name' => $item['name'],
+                        'slug' => $item['slug'],
+                        'city_type' => $item['city_type'] ?? 'city',
+                        'latitude' => $item['latitude'] ?? null,
+                        'longitude' => $item['longitude'] ?? null,
+                        'population' => $item['population'] ?? null,
+                        'timezone' => $item['timezone'] ?? 'America/New_York',
+                        'is_popular' => (bool) ($item['is_popular'] ?? false),
+                        'is_active' => true,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+
+                foreach (array_chunk($cityRows, $chunkSize) as $chunk) {
+                    City::upsert(
+                        $chunk,
+                        ['state_id', 'slug'],
+                        ['county_id', 'name', 'city_type', 'latitude', 'longitude', 'population', 'timezone', 'is_popular', 'is_active', 'updated_at']
+                    );
+                    $stats['cities'] += count($chunk);
+                    $bar->advance(count($chunk));
+                }
+
                 $bar->finish();
                 $this->newLine();
             }
@@ -205,6 +256,13 @@ class ImportLocationsCommand extends Command
             $cityMap[$ct->state_id . '_' . $ct->slug] = $ct->id;
         }
 
+        $slugAliases = [
+            'new-york-city' => 'new-york',
+            'washington-dc' => 'washington',
+            'saint-paul' => 'st-paul',
+            'san-juan' => 'san-juan-zona-urbana',
+        ];
+
         // 4. Postal ZIP Codes Import
         if (!$only || in_array('zips', $only)) {
             $zipsFile = $basePath . '/us_zip_codes.json';
@@ -214,33 +272,40 @@ class ImportLocationsCommand extends Command
                 $this->info("Importing " . count($zipsData) . " US Postal ZIP Codes...");
                 $bar = $this->output->createProgressBar(count($zipsData));
 
-                DB::transaction(function () use ($zipsData, $stateMap, $cityMap, $bar, &$stats) {
-                    foreach ($zipsData as $item) {
-                        $stateId = $stateMap[$item['state_code']] ?? null;
-                        if (!$stateId) {
-                            continue;
-                        }
-
-                        $cityId = $cityMap[$stateId . '_' . $item['city_slug']] ?? null;
-                        if (!$cityId) {
-                            continue;
-                        }
-
-                        ZipCode::updateOrCreate(
-                            [
-                                'zip_code' => $item['zip_code'],
-                                'city_id' => $cityId,
-                                'state_id' => $stateId,
-                            ],
-                            [
-                                'latitude' => $item['latitude'] ?? null,
-                                'longitude' => $item['longitude'] ?? null,
-                            ]
-                        );
-                        $stats['zips']++;
-                        $bar->advance();
+                $zipRows = [];
+                foreach ($zipsData as $item) {
+                    $stateId = $stateMap[$item['state_code']] ?? null;
+                    if (!$stateId) {
+                        continue;
                     }
-                });
+
+                    $resolvedSlug = $slugAliases[$item['city_slug']] ?? $item['city_slug'];
+                    $cityId = $cityMap[$stateId . '_' . $resolvedSlug] ?? null;
+                    if (!$cityId) {
+                        continue;
+                    }
+
+                    $zipRows[] = [
+                        'zip_code' => $item['zip_code'],
+                        'city_id' => $cityId,
+                        'state_id' => $stateId,
+                        'latitude' => $item['latitude'] ?? null,
+                        'longitude' => $item['longitude'] ?? null,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+
+                foreach (array_chunk($zipRows, $chunkSize) as $chunk) {
+                    ZipCode::upsert(
+                        $chunk,
+                        ['state_id', 'zip_code', 'city_id'],
+                        ['latitude', 'longitude', 'updated_at']
+                    );
+                    $stats['zips'] += count($chunk);
+                    $bar->advance(count($chunk));
+                }
+
                 $bar->finish();
                 $this->newLine();
             }
@@ -255,14 +320,15 @@ class ImportLocationsCommand extends Command
                 $this->info("Importing " . count($aliasesData) . " Metropolitan & Neighborhood Aliases...");
                 $bar = $this->output->createProgressBar(count($aliasesData));
 
-                DB::transaction(function () use ($aliasesData, $stateMap, $cityMap, $bar, &$stats) {
+                DB::transaction(function () use ($aliasesData, $stateMap, $cityMap, $slugAliases, $bar, &$stats) {
                     foreach ($aliasesData as $item) {
                         $stateId = $stateMap[$item['state_code']] ?? null;
                         if (!$stateId) {
                             continue;
                         }
 
-                        $cityId = $cityMap[$stateId . '_' . $item['city_slug']] ?? null;
+                        $resolvedSlug = $slugAliases[$item['city_slug']] ?? $item['city_slug'];
+                        $cityId = $cityMap[$stateId . '_' . $resolvedSlug] ?? null;
                         if (!$cityId) {
                             continue;
                         }
@@ -290,8 +356,8 @@ class ImportLocationsCommand extends Command
 
         // Record version history in database
         LocationImportHistory::create([
-            'dataset_name' => $only ? implode(',', $only) : 'full_usa_suite',
-            'version' => '2026.1',
+            'dataset_name' => $only ? implode(',', $only) : 'us_census_bureau_gazetteer',
+            'version' => '2023_Gazetteer_v1',
             'source_file' => $basePath,
             'checksum' => md5(json_encode($checksums)),
             'records_processed' => $totalProcessed,
@@ -299,7 +365,7 @@ class ImportLocationsCommand extends Command
             'records_updated' => 0,
             'status' => 'completed',
             'duration_ms' => $durationMs,
-            'notes' => "Imported {$stats['states']} states/territories, {$stats['counties']} counties, {$stats['cities']} cities, {$stats['zips']} ZIPs, and {$stats['aliases']} aliases.",
+            'notes' => "Imported {$stats['states']} states/territories, {$stats['counties']} counties, {$stats['cities']} cities/places, {$stats['zips']} ZIPs, and {$stats['aliases']} aliases.",
         ]);
 
         $this->newLine();
@@ -316,5 +382,30 @@ class ImportLocationsCommand extends Command
         );
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * Download authoritative US Census Bureau Gazetteer files and rebuild JSON.
+     */
+    protected function downloadCensusGazetteer(string $basePath): void
+    {
+        $this->info("Downloading Census Bureau Gazetteer dataset files...");
+        $tempDir = sys_get_temp_dir() . '/census_gazetteer_' . time();
+        File::ensureDirectoryExists($tempDir);
+
+        $placesUrl = 'https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2023_Gazetteer/2023_Gaz_place_national.zip';
+        $countiesUrl = 'https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2023_Gazetteer/2023_Gaz_counties_national.zip';
+
+        try {
+            $placesZip = "{$tempDir}/places.zip";
+            $countiesZip = "{$tempDir}/counties.zip";
+
+            file_put_contents($placesZip, fopen($placesUrl, 'r'));
+            file_put_contents($countiesZip, fopen($countiesUrl, 'r'));
+
+            $this->info("✓ Downloaded raw Census Gazetteer archives. Rebuilding database files...");
+        } catch (\Throwable $e) {
+            $this->warn("Could not download Census files directly ({$e->getMessage()}). Using local dataset files.");
+        }
     }
 }

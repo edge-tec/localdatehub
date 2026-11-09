@@ -1,7 +1,7 @@
 @php
     $navCategories = \App\Modules\Categories\Models\Category::where('is_active', true)->whereNull('parent_id')->take(8)->get();
     $navStates = \App\Modules\Locations\Models\State::where('is_active', true)->orWhere('status', 'active')->orderBy('name')->take(12)->get();
-    $navCities = \App\Modules\Locations\Models\City::with('state')->where('is_major', true)->take(10)->get();
+    $navCities = \App\Modules\Locations\Models\City::with('state')->where('is_popular', true)->take(10)->get();
 @endphp
 
 <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs" x-data="{ mobileMenuOpen: false, browseOpen: false, statesOpen: false, citiesOpen: false }">

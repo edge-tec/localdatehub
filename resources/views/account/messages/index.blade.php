@@ -44,22 +44,22 @@
             <div class="flex items-center gap-2">
                 <a
                     href="{{ route('account.messages.index') }}"
-                    class="px-3 py-1.5 rounded-lg text-xs font-semibold transition {{ !$unreadOnly && !request('replied') ? 'bg-rose-600 text-white' : 'bg-slate-100 text-slate-600 hover:text-white' }}"
+                    class="px-3 py-1.5 rounded-lg text-xs font-semibold transition {{ !$unreadOnly && !request('replied') ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200' }}"
                 >
                     All Messages
                 </a>
                 <a
                     href="{{ route('account.messages.index', ['unread' => 1]) }}"
-                    class="px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 {{ $unreadOnly ? 'bg-rose-600 text-white' : 'bg-slate-100 text-slate-600 hover:text-white' }}"
+                    class="px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 {{ $unreadOnly ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200' }}"
                 >
                     <span>Unread</span>
                     @if($unreadCount > 0)
-                        <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-rose-700 text-white font-bold">{{ $unreadCount }}</span>
+                        <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-[#d90858] text-white font-bold">{{ $unreadCount }}</span>
                     @endif
                 </a>
                 <a
                     href="{{ route('account.messages.index', ['replied' => 1]) }}"
-                    class="px-3 py-1.5 rounded-lg text-xs font-semibold transition {{ request('replied') ? 'bg-rose-600 text-white' : 'bg-slate-100 text-slate-600 hover:text-white' }}"
+                    class="px-3 py-1.5 rounded-lg text-xs font-semibold transition {{ request('replied') ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200' }}"
                 >
                     Replied
                 </a>

@@ -18,12 +18,12 @@
                 <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-rose-600 to-pink-500 flex items-center justify-center text-white font-bold shadow-md shadow-rose-500/20">
                     L
                 </div>
-                <span class="text-xl font-bold tracking-tight text-white">LocalDate<span class="text-rose-500">Hub</span></span>
+                <span class="text-xl font-bold tracking-tight text-slate-900">LocalDate<span class="text-[#F20B83]">Hub</span></span>
             </a>
 
             <div class="flex items-center space-x-3 text-xs">
-                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-600 border border-rose-200 uppercase tracking-wider">Strictly 18+</span>
-                <a href="{{ url('/') }}" class="text-slate-400 hover:text-white transition">← Back to Site</a>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-[#F20B83] border border-rose-200 uppercase tracking-wider">Strictly 18+</span>
+                <a href="{{ url('/') }}" class="text-slate-600 hover:text-[#F20B83] font-semibold transition">← Back to Site</a>
             </div>
         </div>
     </header>

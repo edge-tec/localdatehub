@@ -19,6 +19,12 @@ class DatabaseSeeder extends Seeder
             SystemSettingSeeder::class,
             TrustAndSafetySeeder::class,
             DemoListingSeeder::class,
+            TrafficTelemetrySeeder::class,
+            EnterpriseContentAndOperationsSeeder::class,
+            ContentReportSeeder::class,
+            PostingMonetizationSeeder::class,
+            CryptoPaymentSeeder::class,
+            InHouseCryptoGatewaySeeder::class,
         ]);
     }
 }

@@ -1,40 +1,37 @@
-<x-layouts.app title="{{ $city->name }}, {{ $state->code }} Adult Personal Classifieds — Local Dating">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<x-layouts.app :title="$seoTitle" :description="$seoDescription" :canonicalUrl="$canonicalUrl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <!-- Breadcrumbs -->
-        <nav class="flex items-center space-x-2 text-xs text-slate-400 mb-6">
-            <a href="{{ route('home') }}" class="hover:text-slate-900 transition">Home</a>
-            <span>/</span>
-            <a href="{{ route('locations.index') }}" class="hover:text-slate-900 transition">Locations</a>
-            <span>/</span>
-            <a href="{{ route('locations.state', ['stateCode' => $state->code]) }}" class="hover:text-slate-900 transition">{{ $state->name }}</a>
-            <span>/</span>
-            <span class="text-slate-800 font-semibold">{{ $city->name }}</span>
-        </nav>
+        <x-breadcrumbs :items="[
+            ['label' => 'Home', 'url' => route('home')],
+            ['label' => 'USA Directory', 'url' => route('locations.index')],
+            ['label' => $state->name, 'url' => route('locations.state', ['stateCode' => $state->code])],
+            ['label' => $city->name]
+        ]" />
 
         <!-- City Hero Section -->
-        <div class="bg-gradient-to-r from-white via-white to-slate-50 border border-slate-200 rounded-2xl p-6 sm:p-10 mb-8 shadow-xl">
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-xl">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div>
                     <div class="flex flex-wrap items-center gap-2.5 mb-2">
-                        <span class="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-rose-500/10 text-rose-600 border border-rose-500/20">
+                        <span class="px-2.5 py-0.5 rounded text-xs font-mono font-black bg-rose-50 text-[#F20B83] border border-rose-200">
                             {{ $state->code }}
                         </span>
                         @if($city->county)
-                            <span class="text-xs text-slate-400 font-medium">
+                            <span class="text-xs text-slate-700 font-bold">
                                 {{ $city->county->name }}
                             </span>
                         @endif
                         @if($city->timezone)
-                            <span class="text-[11px] text-slate-500">
+                            <span class="text-xs text-slate-700 font-semibold">
                                 • {{ $city->timezone }}
                             </span>
                         @endif
                     </div>
 
-                    <h1 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
+                    <h1 class="text-3xl sm:text-5xl font-black text-slate-950 tracking-tight">
                         {{ $city->name }}, {{ $state->code }}
                     </h1>
-                    <p class="text-sm text-slate-400 mt-2 max-w-2xl">
+                    <p class="text-sm font-semibold text-slate-700 mt-2 max-w-2xl">
                         Discover genuine adult personal classifieds, casual encounters, and dating connections in {{ $city->name }}. Strictly 18+ adult community.
                     </p>
 
@@ -167,11 +164,11 @@
                         <div class="space-y-2">
                             @foreach($nearbyCities as $near)
                                 <a href="{{ route('locations.city', ['stateCode' => $near->state->code, 'citySlug' => $near->slug]) }}"
-                                    class="group p-2.5 rounded-lg bg-slate-50 border border-slate-200 hover:border-rose-500/40 hover:bg-slate-850 flex items-center justify-between text-xs transition">
-                                    <span class="font-medium text-slate-600 group-hover:text-white truncate">
+                                    class="group p-2.5 rounded-lg bg-slate-50 border border-slate-200 hover:border-[#F20B83]/40 hover:bg-pink-50/60 flex items-center justify-between text-xs transition">
+                                    <span class="font-medium text-slate-700 group-hover:text-[#F20B83] truncate transition">
                                         {{ $near->name }}, {{ $near->state->code }}
                                     </span>
-                                    <span class="text-[11px] font-mono text-rose-600/90 shrink-0 ml-2">
+                                    <span class="text-[11px] font-mono text-[#F20B83] font-bold shrink-0 ml-2">
                                         {{ $near->distance_miles }} mi
                                     </span>
                                 </a>

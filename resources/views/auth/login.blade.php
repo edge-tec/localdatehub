@@ -104,9 +104,9 @@
 
                 <!-- Top Headline & Subtitle -->
                 <div class="relative z-10 space-y-3">
-                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#F20B83]/10 border border-[#F20B83]/30 text-[#F20B83] text-xs font-extrabold uppercase tracking-wider">
-                        <span>★</span>
-                        <span>Premium Adult Connections</span>
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-rose-50 via-pink-50 to-purple-50/60 border border-rose-200/90 text-[#F20B83] text-xs font-black shadow-xs">
+                        <span class="w-4 h-4 rounded-full bg-[#F20B83] text-white flex items-center justify-center text-[10px] font-black">★</span>
+                        <span class="tracking-wide uppercase text-[11px]">Premium Adult Connections</span>
                     </div>
 
                     <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight">

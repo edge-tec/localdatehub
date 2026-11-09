@@ -87,6 +87,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(UserConsent::class);
     }
 
+    public function suspensions(): HasMany
+    {
+        return $this->hasMany(\App\Modules\Moderation\Models\UserSuspension::class);
+    }
+
     public function listings(): HasMany
     {
         return $this->hasMany(Listing::class);
@@ -135,6 +140,63 @@ class User extends Authenticatable implements MustVerifyEmail
     public function blockedBy(): HasMany
     {
         return $this->hasMany(UserBlock::class, 'blocked_id');
+    }
+
+    public function cryptoPayments(): HasMany
+    {
+        return $this->hasMany(\App\Modules\Payments\Crypto\Models\CryptoPayment::class);
+    }
+
+    public function wallet(): HasOne
+    {
+        return $this->hasOne(\App\Modules\Monetization\Models\UserWallet::class);
+    }
+
+    public function walletTransactions(): HasMany
+    {
+        return $this->hasMany(\App\Modules\Monetization\Models\WalletTransaction::class);
+    }
+
+    public function postingOverride(): HasOne
+    {
+        return $this->hasOne(\App\Modules\Monetization\Models\UserPostingOverride::class);
+    }
+
+    public function verifications(): HasMany
+    {
+        return $this->hasMany(\App\Modules\Verification\Models\IdentityVerification::class);
+    }
+
+    public function latestVerification(): HasOne
+    {
+        return $this->hasOne(\App\Modules\Verification\Models\IdentityVerification::class)->latestOfMany();
+    }
+
+    public function getWalletBalance(): int
+    {
+        return (int) ($this->wallet()->value('balance') ?? 0);
+    }
+
+    public function getAccountType(): string
+    {
+        if ($this->role === 'business') {
+            return 'business';
+        }
+        if ($this->subscriptions()->where('status', 'active')->where('ends_at', '>', now())->exists()) {
+            return 'premium';
+        }
+        if ($this->is_identity_verified) {
+            return 'verified';
+        }
+        if ($this->created_at && $this->created_at->gt(now()->subDays(14))) {
+            return 'new_account';
+        }
+        return 'regular';
+    }
+
+    public function listingBoosts(): HasMany
+    {
+        return $this->hasMany(\App\Modules\Payments\Crypto\Models\ListingBoost::class);
     }
 
     // Scopes & Helpers

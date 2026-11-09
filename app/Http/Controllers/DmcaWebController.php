@@ -6,6 +6,8 @@ use App\Modules\Moderation\Models\PolicyVersion;
 use App\Modules\Moderation\Services\ComplianceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class DmcaWebController extends Controller
@@ -31,6 +33,15 @@ class DmcaWebController extends Controller
      */
     public function submit(Request $request): RedirectResponse
     {
+        $throttleKey = 'dmca_submit:' . $request->ip();
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            throw ValidationException::withMessages([
+                'copyrighted_work' => "Too many DMCA notices filed recently. Please wait {$seconds} seconds before trying again.",
+            ]);
+        }
+        RateLimiter::hit($throttleKey, 180);
+
         $validated = $request->validate([
             'claimant_name' => ['required', 'string', 'max:120'],
             'claimant_email' => ['required', 'email', 'max:120'],
@@ -43,6 +54,11 @@ class DmcaWebController extends Controller
             'perjury_attested' => ['accepted'],
             'digital_signature' => ['required', 'string', 'min:3', 'max:120'],
         ]);
+
+        $validated['claimant_name'] = strip_tags(trim($validated['claimant_name']));
+        $validated['organization'] = $validated['organization'] ? strip_tags(trim($validated['organization'])) : null;
+        $validated['copyrighted_work'] = strip_tags(trim($validated['copyrighted_work']));
+        $validated['digital_signature'] = strip_tags(trim($validated['digital_signature']));
 
         $dmca = $this->complianceService->fileDmcaRequest($validated);
 

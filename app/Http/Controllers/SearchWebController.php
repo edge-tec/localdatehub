@@ -23,7 +23,7 @@ class SearchWebController extends Controller
         $filter = $request->toDTO();
         $listings = $this->searchService->searchListings($filter, 15);
         $categories = $this->categoryService->getActiveCategories();
-        $states = State::where('is_supported', true)->orderBy('name')->get();
+        $states = State::where('is_active', true)->orderBy('name')->get();
         $categoryCounts = $this->searchService->getCategoryCounts($filter);
         $activeDriver = $this->searchService->getActiveDriverName();
 

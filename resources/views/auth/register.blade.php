@@ -3,11 +3,9 @@
         <div class="mb-6 text-center">
             <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Create Your Account</h1>
             <p class="text-sm text-slate-500 mt-1">Join LocalDateHub — Adult Personal Classifieds</p>
-            <div class="mt-3 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-pink-50 text-[#F20B83] border border-pink-200">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                Strictly 18+ Adult Community Only
+            <div class="mt-3 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-rose-50 via-pink-50 to-purple-50/60 text-[#F20B83] border border-rose-200 text-xs font-black shadow-xs">
+                <span class="w-4 h-4 rounded-full bg-[#F20B83] text-white flex items-center justify-center text-[9px] font-black">18+</span>
+                <span>Strictly 18+ Adult Community Only</span>
             </div>
         </div>
 
@@ -77,12 +75,38 @@
                 @enderror
             </div>
 
-            <!-- Location: State and City -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- Location: State and City with Autocomplete -->
+            <div 
+                class="grid grid-cols-1 sm:grid-cols-2 gap-3"
+                x-data="{
+                    selectedState: '{{ old('state_code', '') }}',
+                    cities: [],
+                    async onStateChange(event) {
+                        const st = event.target.value;
+                        this.selectedState = st;
+                        this.cities = [];
+                        if (!st) return;
+                        try {
+                            const res = await fetch(`/api/locations/states/${st.toLowerCase()}/cities`);
+                            const json = await res.json();
+                            if (json.success && json.data && json.data.cities) {
+                                this.cities = json.data.cities;
+                            }
+                        } catch(e) {}
+                    },
+                    init() {
+                        if (this.selectedState) {
+                            this.onStateChange({ target: { value: this.selectedState } });
+                        }
+                    }
+                }"
+            >
                 <div>
                     <label for="state_code" class="block text-xs font-bold text-slate-700 mb-1">State</label>
                     <select id="state_code" name="state_code" required
-                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-900 focus:bg-white focus:outline-none focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83]">
+                        x-model="selectedState"
+                        @change="onStateChange($event)"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-900 focus:bg-white focus:outline-none focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83] cursor-pointer">
                         <option value="">Select State</option>
                         @foreach($states ?? [] as $state)
                             <option value="{{ $state->code }}" @selected(old('state_code') === $state->code)>
@@ -98,8 +122,15 @@
                 <div>
                     <label for="city" class="block text-xs font-bold text-slate-700 mb-1">City</label>
                     <input id="city" type="text" name="city" value="{{ old('city') }}" required
+                        list="register-cities-list"
                         class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83]"
-                        placeholder="e.g. Austin">
+                        :placeholder="!selectedState ? 'e.g. Austin' : 'Select or type city in ' + selectedState"
+                        autocomplete="off">
+                    <datalist id="register-cities-list">
+                        <template x-for="c in cities" :key="c.id">
+                            <option :value="c.name"></option>
+                        </template>
+                    </datalist>
                     @error('city')
                         <p class="text-xs text-rose-500 font-medium mt-1">{{ $message }}</p>
                     @enderror

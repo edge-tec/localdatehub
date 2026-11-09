@@ -134,29 +134,164 @@
                             />
                         </div>
 
-                        <!-- Location: State -->
-                        <div>
-                            <label for="state" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
-                                US State
-                            </label>
-                            <select id="state" name="state" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:ring-2 focus:ring-rose-500">
-                                <option value="">Any State</option>
-                                @foreach($states as $st)
-                                    <option value="{{ $st->code }}" {{ $filter->stateCode === $st->code ? 'selected' : '' }}>
-                                        {{ $st->name }} ({{ $st->code }})
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                        <!-- Location: State & Cascading City Dropdown -->
+                        <div x-data="{
+                            selectedState: '{{ $filter->stateCode ?? '' }}',
+                            selectedCity: '{{ $filter->cityName ?? '' }}',
+                            cityInput: '{{ $filter->cityName ?? '' }}',
+                            cities: [],
+                            cityDropdownOpen: false,
+                            loadingCities: false,
+                            async onStateChange(event) {
+                                const st = event.target.value;
+                                this.selectedState = st;
+                                this.selectedCity = '';
+                                this.cityInput = '';
+                                this.cities = [];
+                                this.cityDropdownOpen = false;
+                                if (!st) return;
+                                this.loadingCities = true;
+                                try {
+                                    const res = await fetch(`/api/locations/states/${st.toLowerCase()}/cities`);
+                                    const json = await res.json();
+                                    if (json.success && json.data && json.data.cities) {
+                                        this.cities = json.data.cities;
+                                    }
+                                } catch(e) {}
+                                this.loadingCities = false;
+                            },
+                            get filteredCities() {
+                                let list = this.cities;
+                                if (this.cityInput && this.cityInput.trim().length > 0) {
+                                    const q = this.cityInput.toLowerCase().trim();
+                                    list = this.cities.filter(c => c.name.toLowerCase().includes(q));
+                                }
+                                return list.slice(0, 60);
+                            },
+                            selectCity(name) {
+                                this.selectedCity = name;
+                                this.cityInput = name;
+                                this.cityDropdownOpen = false;
+                            },
+                            validateCity() {
+                                if (!this.selectedState) {
+                                    this.selectedCity = '';
+                                    this.cityInput = '';
+                                    return;
+                                }
+                                if (!this.cityInput || !this.cityInput.trim()) {
+                                    this.selectedCity = '';
+                                    this.cityInput = '';
+                                    return;
+                                }
+                                const q = this.cityInput.trim().toLowerCase();
+                                const exact = this.cities.find(c => c.name.toLowerCase() === q);
+                                if (exact) {
+                                    this.selectedCity = exact.name;
+                                    this.cityInput = exact.name;
+                                } else {
+                                    const match = this.cities.find(c => c.name.toLowerCase().startsWith(q));
+                                    if (match) {
+                                        this.selectedCity = match.name;
+                                        this.cityInput = match.name;
+                                    } else {
+                                        this.selectedCity = '';
+                                        this.cityInput = '';
+                                    }
+                                }
+                            },
+                            init() {
+                                if (this.selectedState) {
+                                    this.onStateChange({ target: { value: this.selectedState } }).then(() => {
+                                        if ('{{ $filter->cityName ?? '' }}') {
+                                            this.selectedCity = '{{ $filter->cityName ?? '' }}';
+                                            this.cityInput = '{{ $filter->cityName ?? '' }}';
+                                        }
+                                    });
+                                }
+                            }
+                        }" class="space-y-4">
+                            <div>
+                                <label for="state" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                                    US State
+                                </label>
+                                <select 
+                                    id="state" 
+                                    name="state" 
+                                    x-model="selectedState" 
+                                    @change="onStateChange($event)"
+                                    class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-[#F20B83]/20 focus:border-[#F20B83] cursor-pointer"
+                                >
+                                    <option value="">Any State</option>
+                                    @foreach($states as $st)
+                                        <option value="{{ $st->code }}" {{ $filter->stateCode === $st->code ? 'selected' : '' }}>
+                                            {{ $st->name }} ({{ $st->code }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                        <!-- Location: City -->
-                        <div>
-                            <x-input
-                                name="city"
-                                label="City Name"
-                                placeholder="e.g. Austin, Seattle, Miami"
-                                :value="$filter->cityName"
-                            />
+                            <!-- Location: City with dynamic suggestions -->
+                            <div class="relative" @click.outside="cityDropdownOpen = false">
+                                <label for="city-input" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 flex items-center justify-between">
+                                    <span>City Name</span>
+                                    <span x-show="loadingCities" class="text-[10px] text-[#F20B83] font-normal animate-pulse">Loading cities...</span>
+                                </label>
+
+                                <input type="hidden" name="city" :value="selectedCity">
+
+                                <div class="relative">
+                                    <input
+                                        id="city-input"
+                                        type="text"
+                                        x-model="cityInput"
+                                        @click="if(selectedState) { cityDropdownOpen = true; }"
+                                        @input="selectedCity = cityInput; if(selectedState) { cityDropdownOpen = true; }"
+                                        :disabled="!selectedState"
+                                        :placeholder="!selectedState ? 'Select a State first' : (loadingCities ? 'Loading cities...' : 'Search city in ' + selectedState + '...')"
+                                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:border-[#F20B83] focus:ring-2 focus:ring-[#F20B83]/20 focus:outline-none transition"
+                                        :class="{ 'opacity-60 cursor-not-allowed': !selectedState }"
+                                        autocomplete="off"
+                                    />
+                                    <template x-if="cityInput">
+                                        <button 
+                                            type="button" 
+                                            @click="cityInput = ''; selectedCity = '';" 
+                                            class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold"
+                                        >
+                                            &times;
+                                        </button>
+                                    </template>
+                                </div>
+
+                                <!-- Dropdown List -->
+                                <div 
+                                    x-show="cityDropdownOpen && selectedState && cities.length > 0" 
+                                    x-cloak
+                                    class="absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-50 max-h-56 overflow-y-auto divide-y divide-slate-100 text-left p-1"
+                                >
+                                    <div class="p-1.5 flex items-center justify-between border-b border-slate-100 text-[10px] text-slate-500 font-bold bg-slate-50/70">
+                                        <span x-text="cities.length + ' Cities in ' + selectedState"></span>
+                                        <button type="button" @click="selectCity('')" class="text-[#F20B83] hover:underline">All Cities</button>
+                                    </div>
+                                    <template x-for="c in filteredCities" :key="c.id">
+                                        <button 
+                                            type="button" 
+                                            @click="selectCity(c.name)" 
+                                            class="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-pink-50 hover:text-[#F20B83] rounded-lg flex items-center justify-between transition-colors"
+                                            :class="{ 'bg-pink-50 text-[#F20B83] font-bold': selectedCity === c.name }"
+                                        >
+                                            <span x-text="c.name"></span>
+                                            <template x-if="c.is_popular">
+                                                <span class="text-[9px] px-1.5 py-0.5 bg-pink-100 text-[#F20B83] rounded font-bold uppercase">Popular</span>
+                                            </template>
+                                        </button>
+                                    </template>
+                                    <template x-if="filteredCities.length === 0">
+                                        <div class="p-3 text-center text-xs text-slate-400 italic">No matching city in this state</div>
+                                    </template>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Location: ZIP Code -->

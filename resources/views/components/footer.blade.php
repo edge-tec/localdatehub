@@ -17,9 +17,9 @@
                 <p class="text-xs text-slate-600 leading-relaxed">
                     A premium, privacy-first local adult classifieds and dating connections platform across all 50 US states. Connecting real adults safely and discreetly.
                 </p>
-                <div class="inline-flex items-center space-x-2 text-xs text-[#F20B65] font-semibold bg-[#F20B65]/10 px-2.5 py-1 rounded-full">
-                    <span class="w-2 h-2 rounded-full bg-[#F20B65] animate-pulse"></span>
-                    <span>18+ Strictly Enforced • FOSTA-SESTA Compliant</span>
+                <div class="inline-flex items-center gap-2 text-xs text-[#F20B65] font-black bg-rose-50 border border-rose-200 px-3 py-1 rounded-full shadow-2xs">
+                    <svg class="w-3.5 h-3.5 text-[#F20B65] shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    <span>18+ Strictly Enforced | FOSTA-SESTA Compliant</span>
                 </div>
             </div>
 

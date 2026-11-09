@@ -24,8 +24,15 @@ return Application::configure(basePath: dirname(__DIR__))
         \App\Console\Commands\ExpirePromotionsCommand::class,
         \App\Console\Commands\ReconcileTransactionsCommand::class,
         \App\Console\Commands\NotifyExpiringListingsCommand::class,
+        \App\Console\Commands\ExpireListingBoostsCommand::class,
+        \App\Console\Commands\CheckPendingCryptoPaymentsCommand::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->web(append: [
+            \App\Http\Middleware\SecurityHeadersMiddleware::class,
+            \App\Http\Middleware\TrackPlatformTraffic::class,
+        ]);
+
         $middleware->validateCsrfTokens(except: [
             'webhooks/*',
             'api/*',

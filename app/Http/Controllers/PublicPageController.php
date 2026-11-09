@@ -6,6 +6,8 @@ use App\Modules\Billing\Models\PricingPlan;
 use App\Modules\Contact\Models\ContactMessage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class PublicPageController extends Controller
@@ -39,6 +41,15 @@ class PublicPageController extends Controller
      */
     public function submitContact(Request $request): RedirectResponse
     {
+        $throttleKey = 'contact_submit:' . $request->ip();
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            throw ValidationException::withMessages([
+                'message' => "Too many contact inquiries sent. Please wait {$seconds} seconds before trying again.",
+            ]);
+        }
+        RateLimiter::hit($throttleKey, 120);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:100'],
             'email' => ['required', 'email', 'max:150'],
@@ -51,11 +62,11 @@ class PublicPageController extends Controller
         ContactMessage::create([
             'sender_id' => $request->user()?->id,
             'inquiry_type' => $validated['inquiry_type'],
-            'sender_name' => $validated['name'],
-            'sender_email_encrypted' => $validated['email'],
-            'sender_phone_encrypted' => $validated['phone'] ?? null,
-            'subject' => $validated['subject'],
-            'message_encrypted' => $validated['message'],
+            'sender_name' => strip_tags(trim($validated['name'])),
+            'sender_email_encrypted' => trim($validated['email']),
+            'sender_phone_encrypted' => $validated['phone'] ? strip_tags(trim($validated['phone'])) : null,
+            'subject' => strip_tags(trim($validated['subject'])),
+            'message_encrypted' => strip_tags(trim($validated['message'])),
             'client_ip' => $request->ip(),
             'user_agent' => substr((string) $request->userAgent(), 0, 255),
         ]);

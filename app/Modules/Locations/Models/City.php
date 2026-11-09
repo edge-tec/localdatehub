@@ -18,6 +18,7 @@ class City extends Model
         'county_id',
         'name',
         'slug',
+        'city_type',
         'latitude',
         'longitude',
         'population',
@@ -62,13 +63,33 @@ class City extends Model
         return $this->hasMany(Listing::class);
     }
 
+    public const VALID_CITY_TYPES = [
+        'city',
+        'city and borough',
+        'municipality',
+        'consolidated government',
+        'metropolitan government',
+        'unified government',
+        'urban county',
+        'corporation',
+    ];
+
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where('is_active', true);
+        return $query->where('is_active', true)
+            ->where(function ($q) {
+                $q->whereIn('city_type', self::VALID_CITY_TYPES)
+                  ->orWhereNull('city_type');
+            });
+    }
+
+    public function scopeOnlyCities(Builder $query): Builder
+    {
+        return $this->scopeActive($query);
     }
 
     public function scopePopular(Builder $query): Builder
     {
-        return $query->where('is_popular', true);
+        return $this->scopeActive($query)->where('is_popular', true);
     }
 }

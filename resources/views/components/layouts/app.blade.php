@@ -7,6 +7,13 @@
 
     <title>{{ $title ?? config('localdatehub.name', 'LocalDateHub') }} — {{ config('localdatehub.tagline') }}</title>
     <meta name="description" content="{{ $description ?? 'LocalDateHub is the privacy-first local adult dating, personal classifieds, and safe date spot discovery platform.' }}">
+    <link rel="canonical" href="{{ $canonicalUrl ?? url()->current() }}">
+
+    <!-- OpenGraph / Social Metadata -->
+    <meta property="og:title" content="{{ $title ?? config('localdatehub.name', 'LocalDateHub') }}">
+    <meta property="og:description" content="{{ $description ?? 'LocalDateHub is the privacy-first local adult dating, personal classifieds, and safe date spot discovery platform.' }}">
+    <meta property="og:url" content="{{ $canonicalUrl ?? url()->current() }}">
+    <meta property="og:type" content="website">
 
     <!-- Design Tokens & Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,6 +24,26 @@
     @livewireStyles
 </head>
 <body class="min-h-full flex flex-col font-sans selection:bg-[#F20B65] selection:text-white bg-[#F8FAFC] text-slate-800">
+    <!-- Administrator Impersonation Active Banner -->
+    @if(session()->has('impersonator_admin_id'))
+        <div class="bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 text-white px-4 py-2.5 text-xs font-semibold shadow-lg sticky top-0 z-[100] border-b border-amber-400/30">
+            <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+                <div class="flex items-center gap-2 text-center sm:text-left">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-white text-amber-900 uppercase tracking-wider animate-pulse">
+                        ⚡ Impersonation Active
+                    </span>
+                    <span>
+                        You are browsing as <strong class="underline decoration-white/60">{{ auth()->user()->name }}</strong> ({{ auth()->user()->email }}). Original Administrator: <strong>{{ session('impersonator_admin_name', 'Administrator') }}</strong>.
+                    </span>
+                </div>
+                <a href="{{ route('admin.impersonate.stop') }}" class="inline-flex items-center gap-1.5 px-3 py-1 bg-white hover:bg-amber-50 text-amber-900 font-extrabold rounded-lg text-xs shadow-sm transition shrink-0">
+                    <svg class="w-3.5 h-3.5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+                    <span>Exit &amp; Return to Admin</span>
+                </a>
+            </div>
+        </div>
+    @endif
+
     <!-- 18+ Adult Safety Notice Banner -->
     <x-safety-banner />
 

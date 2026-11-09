@@ -73,7 +73,13 @@ class SearchService
 
         if (!empty($filter->cityName)) {
             $cityName = $filter->cityName;
-            $query->whereHas('city', fn ($q) => $q->where('name', 'like', "%{$cityName}%"));
+            $stateCode = $filter->stateCode;
+            $query->whereHas('city', function ($q) use ($cityName, $stateCode) {
+                $q->where('name', 'like', "%{$cityName}%");
+                if (!empty($stateCode)) {
+                    $q->whereHas('state', fn ($st) => $st->where('code', $stateCode));
+                }
+            });
         }
 
         $counts = $query->selectRaw('category_id, count(*) as count')

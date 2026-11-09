@@ -89,8 +89,8 @@ class ListingManagementService
                     ->first();
             }
 
-            $title = !empty($data['title']) ? trim($data['title']) : 'Untitled Draft';
-            $description = !empty($data['description']) ? trim($data['description']) : '';
+            $title = !empty($data['title']) ? strip_tags(trim($data['title'])) : 'Untitled Draft';
+            $description = !empty($data['description']) ? strip_tags(trim($data['description'])) : '';
             $categoryId = !empty($data['category_id']) ? (int) $data['category_id'] : 1;
             $stateId = !empty($data['state_id']) ? (int) $data['state_id'] : 1;
             $cityId = !empty($data['city_id']) ? (int) $data['city_id'] : 1;
@@ -180,25 +180,70 @@ class ListingManagementService
                 $this->categoryService->validateListingAttributes($listing->category, $attributesData);
             }
 
-            // 5. Update Status to pending_review
+            // 5. Account Posting Quota & Limits Enforcement
+            $quotaService = app(\App\Modules\Monetization\Services\PostingQuotaService::class);
+            $quotaService->assertCanPost($user);
+
+            // 6. Authoritative Pricing Calculation & Wallet Debit
+            $pricingService = app(\App\Modules\Monetization\Services\PostingPricingService::class);
+            $priceInfo = $pricingService->calculatePostingPrice($user, $listing->category_id);
+
+            $walletService = app(\App\Modules\Monetization\Services\UserWalletService::class);
+            $walletTx = $walletService->debit(
+                $user,
+                $priceInfo['price_credits'],
+                \App\Modules\Monetization\Models\WalletTransaction::TYPE_POST_CREATION_DEBIT,
+                "Listing publication fee for '{$listing->title}' ({$priceInfo['rule_applied']})",
+                $listing->id,
+                $user->id,
+                "listing_post_{$listing->id}_" . now()->timestamp
+            );
+
+            // 7. Determine Approval Policy (Automatic vs Manual Review)
+            $approvalService = app(\App\Modules\Monetization\Services\ListingApprovalService::class);
+            $initialStatus = $approvalService->determineInitialStatus($listing, $user);
+
             $previousStatus = $listing->status;
-            $listing->status = Listing::STATUS_PENDING_REVIEW;
+            $listing->status = $initialStatus;
             $listing->rejection_reason = null;
             $listing->content_hash = $listing->computeContentHash();
+
+            // Set verified poster badge if user is identity verified
+            if ($user->is_identity_verified) {
+                $listing->is_verified_poster = true;
+            }
+
+            if ($initialStatus === Listing::STATUS_ACTIVE) {
+                $listing->published_at = $listing->published_at ?: now();
+                $listing->expires_at = now()->addDays(30);
+            }
+
             $listing->save();
 
+            $statusNote = $initialStatus === Listing::STATUS_ACTIVE
+                ? "Listing automatically approved and published (Fee: {$priceInfo['price_credits']} credits)."
+                : "Listing submitted for manual moderation review (Fee: {$priceInfo['price_credits']} credits).";
+
             $listing->recordStatusChange(
-                Listing::STATUS_PENDING_REVIEW,
-                "Listing submitted by poster for moderation review (previous status: {$previousStatus}).",
+                $initialStatus,
+                $statusNote,
                 $user->id
             );
 
             if ($user) {
-                app(\App\Modules\Notifications\Services\NotificationService::class)->send(
-                    $user,
-                    new \App\Modules\Notifications\Notifications\ListingSubmittedNotification($listing),
-                    'listing_submitted'
-                );
+                if ($initialStatus === Listing::STATUS_ACTIVE) {
+                    app(\App\Modules\Notifications\Services\NotificationService::class)->send(
+                        $user,
+                        new \App\Modules\Notifications\Notifications\ListingApprovedNotification($listing),
+                        'listing_approved'
+                    );
+                } else {
+                    app(\App\Modules\Notifications\Services\NotificationService::class)->send(
+                        $user,
+                        new \App\Modules\Notifications\Notifications\ListingSubmittedNotification($listing),
+                        'listing_submitted'
+                    );
+                }
             }
 
             return $listing;
@@ -427,10 +472,10 @@ class ListingManagementService
     protected function updateListingFields(Listing $listing, array $data): void
     {
         if (isset($data['title'])) {
-            $listing->title = trim($data['title']);
+            $listing->title = strip_tags(trim($data['title']));
         }
         if (isset($data['description'])) {
-            $listing->description = trim($data['description']);
+            $listing->description = strip_tags(trim($data['description']));
         }
         if (isset($data['poster_age'])) {
             $listing->poster_age = (int) $data['poster_age'];

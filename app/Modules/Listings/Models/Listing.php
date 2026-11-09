@@ -172,6 +172,23 @@ class Listing extends Model
         return $this->hasMany(ContactMessage::class);
     }
 
+    public function boosts(): HasMany
+    {
+        return $this->hasMany(\App\Modules\Payments\Crypto\Models\ListingBoost::class);
+    }
+
+    public function activeBoost(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Modules\Payments\Crypto\Models\ListingBoost::class)
+            ->where('status', 'active')
+            ->where('expires_at', '>', now());
+    }
+
+    public function cryptoPayments(): HasMany
+    {
+        return $this->hasMany(\App\Modules\Payments\Crypto\Models\CryptoPayment::class);
+    }
+
     // Status Helpers
     public function isActive(): bool
     {

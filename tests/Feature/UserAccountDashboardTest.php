@@ -380,6 +380,117 @@ class UserAccountDashboardTest extends TestCase
         $this->assertSoftDeleted('contact_messages', ['id' => $message->id]);
     }
 
+    public function test_advanced_messaging_inbox_sent_direct_reply_and_bulk_actions(): void
+    {
+        $myListing = Listing::create([
+            'user_id' => $this->user->id,
+            'category_id' => $this->category->id,
+            'state_id' => $this->city->state_id,
+            'city_id' => $this->city->id,
+            'title' => 'Advanced Messaging Listing',
+            'slug' => 'adv-msg-listing-' . uniqid(),
+            'description' => 'Target ad for testing advanced messaging.',
+            'content_hash' => hash('sha256', 'advmsg' . uniqid()),
+            'poster_age' => 28,
+            'poster_gender' => 'Female',
+            'intent' => 'dating',
+            'status' => Listing::STATUS_ACTIVE,
+        ]);
+
+        $inboxMsg1 = ContactMessage::create([
+            'listing_id' => $myListing->id,
+            'recipient_id' => $this->user->id,
+            'sender_id' => $this->otherUser->id,
+            'inquiry_type' => 'listing_inquiry',
+            'sender_name' => 'Alice Buyer',
+            'sender_email_encrypted' => 'alice@example.com',
+            'subject' => 'Is this still open?',
+            'message_encrypted' => 'Hello, I saw your ad and wanted to reach out.',
+            'is_read' => false,
+            'is_replied' => false,
+            'is_flagged' => false,
+        ]);
+
+        $inboxMsg2 = ContactMessage::create([
+            'listing_id' => $myListing->id,
+            'recipient_id' => $this->user->id,
+            'sender_id' => null,
+            'inquiry_type' => 'listing_inquiry',
+            'sender_name' => 'Bob Inquirer',
+            'sender_email_encrypted' => 'bob@example.com',
+            'subject' => 'Quick query',
+            'message_encrypted' => 'Are you free tomorrow?',
+            'is_read' => false,
+            'is_replied' => false,
+            'is_flagged' => false,
+        ]);
+
+        // Test Livewire component with folder toggling, direct reply, quick reply template, and bulk actions
+        Livewire::actingAs($this->user)
+            ->test(AccountDashboard::class, ['initialTab' => 'messages'])
+            ->assertSee('Alice Buyer')
+            ->assertSee('Bob Inquirer')
+            ->call('inspectMessage', $inboxMsg1->id)
+            ->assertSet('showMessageModal', true)
+            ->call('insertQuickReply', 'Hi, thanks for reaching out! Yes, this listing is still active and available.')
+            ->assertSet('replyMessageContent', 'Hi, thanks for reaching out! Yes, this listing is still active and available.')
+            ->call('sendDirectReply')
+            ->assertHasNoErrors()
+            // Verify reply created
+            ->assertSet('replyMessageContent', '')
+            // Test mark unread
+            ->call('markMessageUnread', $inboxMsg1->id);
+
+        $inboxMsg1->refresh();
+        $this->assertFalse($inboxMsg1->is_read);
+
+        // Verify direct reply was stored in contact_messages
+        $this->assertDatabaseHas('contact_messages', [
+            'listing_id' => $myListing->id,
+            'sender_id' => $this->user->id,
+            'recipient_id' => $this->otherUser->id,
+            'is_replied' => true,
+        ]);
+
+        // Test bulk actions
+        Livewire::actingAs($this->user)
+            ->test(AccountDashboard::class, ['initialTab' => 'messages'])
+            ->set('selectedMessages', [$inboxMsg1->id, $inboxMsg2->id])
+            ->call('bulkMarkRead');
+
+        $inboxMsg1->refresh();
+        $inboxMsg2->refresh();
+        $this->assertTrue($inboxMsg1->is_read);
+        $this->assertTrue($inboxMsg2->is_read);
+
+        // Bulk mark unread
+        Livewire::actingAs($this->user)
+            ->test(AccountDashboard::class, ['initialTab' => 'messages'])
+            ->set('selectedMessages', [$inboxMsg1->id, $inboxMsg2->id])
+            ->call('bulkMarkUnread');
+
+        $inboxMsg1->refresh();
+        $inboxMsg2->refresh();
+        $this->assertFalse($inboxMsg1->is_read);
+        $this->assertFalse($inboxMsg2->is_read);
+
+        // Test folder toggle to 'sent'
+        Livewire::actingAs($this->user)
+            ->test(AccountDashboard::class, ['initialTab' => 'messages'])
+            ->set('messageFolder', 'sent')
+            ->assertSee('Taylor User'); // recipient user name in sent folder
+
+        // Test block sender
+        Livewire::actingAs($this->user)
+            ->test(AccountDashboard::class, ['initialTab' => 'messages'])
+            ->call('blockSenderFromMessage', $inboxMsg1->id);
+
+        $this->assertDatabaseHas('user_blocks', [
+            'blocker_id' => $this->user->id,
+            'blocked_id' => $this->otherUser->id,
+        ]);
+    }
+
     public function test_dashboard_renders_listing_views_and_analytics_breakdown(): void
     {
         Listing::create([

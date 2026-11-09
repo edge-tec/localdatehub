@@ -124,7 +124,7 @@ class DependentLocationSelector extends Component
             $query->where('name', 'like', "%{$c}%");
         }
 
-        return $query->orderBy('is_popular', 'desc')->orderBy('population', 'desc')->get();
+        return $query->orderBy('is_popular', 'desc')->orderBy('name', 'asc')->get();
     }
 
     public function render(): View

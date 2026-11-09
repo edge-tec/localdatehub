@@ -15,7 +15,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
@@ -41,6 +43,16 @@ class RegisteredUserController extends Controller
         if (!empty($request->input('website_hp'))) {
             return redirect()->route('home');
         }
+
+        // Anti-abuse rate limiting (max 5 registration attempts per minute per IP)
+        $throttleKey = 'register:' . $request->ip();
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            throw ValidationException::withMessages([
+                'email' => "Too many registration attempts. Please wait {$seconds} seconds before trying again.",
+            ]);
+        }
+        RateLimiter::hit($throttleKey, 60);
 
         $minAge = config('localdatehub.safety.min_age', 18);
 
@@ -152,6 +164,8 @@ class RegisteredUserController extends Controller
 
             return $user;
         });
+
+        RateLimiter::clear($throttleKey);
 
         event(new Registered($user));
 
