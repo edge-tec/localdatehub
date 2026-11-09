@@ -53,22 +53,36 @@
         </div>
 
         <!-- Quick Actions & Stats -->
-        <div class="flex items-center gap-3 shrink-0 flex-wrap sm:flex-nowrap">
+        <div class="flex items-center gap-2.5 shrink-0 flex-wrap sm:flex-nowrap">
             <a
                 href="{{ route('listings.create') }}"
-                class="px-5 py-2.5 text-white font-black rounded-xl text-xs transition shadow-md hover:shadow-lg flex items-center gap-2"
+                class="px-4 py-2.5 text-white font-black rounded-xl text-xs transition shadow-md hover:shadow-lg flex items-center gap-2"
                 style="background: linear-gradient(135deg, #F20B65 0%, #D90858 100%) !important; color: #ffffff !important;"
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                <span>Post Personal Ad</span>
+                <span>Post Ad</span>
             </a>
             <button
                 wire:click="openPromoteModal"
-                class="px-4 py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-900 border-2 border-purple-300 font-black rounded-xl text-xs transition flex items-center gap-1.5 shadow-xs hover:shadow-md"
+                class="px-3.5 py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-900 border-2 border-purple-300 font-black rounded-xl text-xs transition flex items-center gap-1.5 shadow-xs hover:shadow-md"
             >
                 <svg class="w-4 h-4 text-purple-700" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                <span>Promote Ads</span>
+                <span>Boost</span>
             </button>
+            <!-- Account Logout Form Button -->
+            <form method="POST" action="{{ route('logout') }}" class="inline-block">
+                @csrf
+                <button
+                    type="submit"
+                    class="px-3.5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 hover:text-rose-900 border border-rose-200 font-black rounded-xl text-xs transition flex items-center gap-1.5 shadow-2xs hover:shadow-xs cursor-pointer"
+                    title="Sign Out of Your Account"
+                >
+                    <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span>Logout</span>
+                </button>
+            </form>
         </div>
     </div>
 
