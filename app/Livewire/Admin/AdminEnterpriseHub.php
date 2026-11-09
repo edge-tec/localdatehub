@@ -4066,7 +4066,7 @@ class AdminEnterpriseHub extends Component
 
         // 4. Revenue & Revenue Growth
         $fiatRevenue = (float) (PaymentTransaction::where('status', 'completed')->sum('amount_cents') / 100);
-        $cryptoRevenue = (float) CryptoPayment::where('status', 'confirmed')->sum('amount_usd');
+        $cryptoRevenue = (float) CryptoPayment::whereIn('status', [CryptoPayment::STATUS_COMPLETED, 'completed', 'confirmed'])->sum('fiat_amount');
         $totalRevenue = $fiatRevenue + $cryptoRevenue;
         $revenueGrowth = 22.1;
 
