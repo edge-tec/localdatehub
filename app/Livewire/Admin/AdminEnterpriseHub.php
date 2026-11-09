@@ -3825,7 +3825,64 @@ class AdminEnterpriseHub extends Component
 
     public function loadSettings(): void
     {
-        $this->settingValues = SystemSetting::orderBy('key')->pluck('value', 'key')->map(fn ($v) => (string) $v)->all();
+        $defaults = [
+            'site_name' => 'LocalDateHub',
+            'tagline' => 'Safe & Private Local Adult Personal Classifieds',
+            'support_email' => 'support@localdatehub.com',
+            'support_phone' => '+1 (800) 555-DATE',
+            'copyright_text' => '© 2026 LocalDateHub. All rights reserved. 18+ Adults Only.',
+            'support_telegram' => '@LocalDateHubSupport',
+            'site_logo_url' => '/images/logo.png',
+            'site_logo_dark_url' => '/images/logo-white.png',
+            'site_mobile_logo_url' => '/images/logo-mobile.png',
+            'site_favicon_url' => '/favicon.ico',
+            'primary_brand_color' => '#F20B65',
+            'mail_mailer' => 'smtp',
+            'mail_host' => 'smtp.mailgun.org',
+            'mail_port' => '587',
+            'mail_username' => 'postmaster@mg.localdatehub.com',
+            'mail_password' => '',
+            'mail_encryption' => 'tls',
+            'mail_from_address' => 'notifications@localdatehub.com',
+            'mail_from_name' => 'LocalDateHub Notifications',
+            'mail_account_verification_enabled' => 'true',
+            'mail_welcome_enabled' => 'true',
+            'mail_account_approved_enabled' => 'true',
+            'mail_account_verified_enabled' => 'true',
+            'mail_listing_approved_enabled' => 'true',
+            'mail_listing_rejected_enabled' => 'true',
+            'mail_crypto_invoice_enabled' => 'true',
+            'mail_crypto_confirmed_enabled' => 'true',
+            'mail_balance_added_enabled' => 'true',
+            'mail_low_balance_alert_enabled' => 'true',
+            'low_balance_alert_threshold' => '5',
+            'mail_new_message_alert_enabled' => 'true',
+            'mail_message_throttle_minutes' => '5',
+            'min_age_requirement' => '18',
+            'anti_trafficking_enforcement' => 'true',
+            'location_fuzzing_enabled' => 'true',
+            'photo_exif_strip_enabled' => 'true',
+            'mandatory_age_verification_to_post' => 'true',
+            'custodian_of_records_notice' => '18 U.S.C. 2257 Record-Keeping Compliance Notice Active. Records kept at Compliance Dept.',
+            'free_listings_enabled' => 'true',
+            'max_photos_per_listing' => '6',
+            'listing_active_days' => '30',
+            'max_free_listings_per_user' => '3',
+            'default_search_radius_miles' => '25',
+            'distance_unit' => 'miles',
+            'max_search_results' => '100',
+            'maintenance_mode_enabled' => 'false',
+            'maintenance_announcement_message' => 'LocalDateHub is undergoing scheduled infrastructure maintenance. We will be back online shortly.',
+            'payment_gateway_mode' => 'test',
+            'payment_gateway_provider' => 'stripe',
+            'admin_2fa_required' => 'true',
+            'admin_session_timeout_minutes' => '30',
+            'max_login_attempts' => '5',
+        ];
+
+        $dbSettings = SystemSetting::orderBy('key')->pluck('value', 'key')->map(fn ($v) => (string) $v)->all();
+        $this->settingValues = array_merge($defaults, $dbSettings);
+
         if (empty($this->testEmailRecipient)) {
             $this->testEmailRecipient = Auth::user()?->email ?? 'admin@localdatehub.com';
         }
