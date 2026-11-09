@@ -156,8 +156,22 @@
                                     const json = await res.json();
                                     if (json.success && json.data && json.data.cities) {
                                         this.cities = json.data.cities;
+                                    } else {
+                                        const fb = await fetch('/data/us-cities.json');
+                                        const fbMap = await fb.json();
+                                        if (fbMap && fbMap[st.toLowerCase()]) {
+                                            this.cities = fbMap[st.toLowerCase()];
+                                        }
                                     }
-                                } catch(e) {}
+                                } catch(e) {
+                                    try {
+                                        const fb = await fetch('/data/us-cities.json');
+                                        const fbMap = await fb.json();
+                                        if (fbMap && fbMap[st.toLowerCase()]) {
+                                            this.cities = fbMap[st.toLowerCase()];
+                                        }
+                                    } catch(err) {}
+                                }
                                 this.loadingCities = false;
                             },
                             get filteredCities() {
