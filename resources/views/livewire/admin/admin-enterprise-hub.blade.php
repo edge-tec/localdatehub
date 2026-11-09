@@ -6613,27 +6613,69 @@
 
         {{-- ================= 20. SYSTEM SETTINGS & REAL-TIME EMAIL SUITE ================= --}}
         @if($tab === 'settings')
-            <!-- Enterprise Settings Sub-Navigation Ribbon (Multi-Row Responsive Wrap & Fail-Safe Dual Engine) -->
-            <div class="flex flex-wrap items-center gap-2 mb-6 border-b border-slate-200 pb-3">
-                @foreach([
-                    ['general', '🏢', 'General & Platform'],
-                    ['branding', '🎨', 'Logo & Favicon'],
-                    ['smtp', '✉️', 'SMTP & Mail Server'],
-                    ['notifications', '🔔', 'Email Event Triggers', 'Live'],
-                    ['safety', '🛡️', 'Safety & 2257 Legal'],
-                    ['monetization', '💰', 'Monetization & Limits'],
-                    ['locations', '📍', 'Search & Locations'],
-                    ['security', '🔒', 'Security & Maintenance'],
-                ] as $sTab)
+            <!-- Enterprise Settings Sub-Navigation Ribbon (Ultra-Modern SVG Icons, Micro-Interactions & Responsive Flow) -->
+            <div class="flex flex-wrap items-center gap-2.5 mb-6 border-b border-slate-200/80 pb-3.5">
+                @php
+                    $settingsTabsMeta = [
+                        [
+                            'id' => 'general',
+                            'label' => 'General & Platform',
+                            'icon' => '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>',
+                        ],
+                        [
+                            'id' => 'branding',
+                            'label' => 'Logo & Favicon',
+                            'icon' => '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>',
+                        ],
+                        [
+                            'id' => 'smtp',
+                            'label' => 'SMTP & Mail Server',
+                            'icon' => '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>',
+                        ],
+                        [
+                            'id' => 'notifications',
+                            'label' => 'Email Event Triggers',
+                            'badge' => 'Live',
+                            'icon' => '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>',
+                        ],
+                        [
+                            'id' => 'safety',
+                            'label' => 'Safety & 2257 Legal',
+                            'icon' => '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>',
+                        ],
+                        [
+                            'id' => 'monetization',
+                            'label' => 'Monetization & Limits',
+                            'icon' => '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+                        ],
+                        [
+                            'id' => 'locations',
+                            'label' => 'Search & Locations',
+                            'icon' => '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>',
+                        ],
+                        [
+                            'id' => 'security',
+                            'label' => 'Security & Maintenance',
+                            'icon' => '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>',
+                        ],
+                    ];
+                @endphp
+
+                @foreach($settingsTabsMeta as $sTab)
                     <a
-                        href="{{ route('admin.dashboard', ['tab' => 'settings', 'subtab' => $sTab[0]]) }}"
-                        wire:click.prevent="setSettingsSubTab('{{ $sTab[0] }}')"
-                        class="px-3.5 py-2 rounded-xl text-xs font-black transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer select-none {{ $settingsSubTab === $sTab[0] ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}"
+                        href="{{ route('admin.dashboard', ['tab' => 'settings', 'subtab' => $sTab['id']]) }}"
+                        wire:click.prevent="setSettingsSubTab('{{ $sTab['id'] }}')"
+                        class="group px-3.5 py-2.5 rounded-xl text-xs font-black transition-all duration-200 whitespace-nowrap flex items-center gap-2 cursor-pointer select-none {{ $settingsSubTab === $sTab['id'] ? 'bg-gradient-to-r from-[#F20B83] to-[#D00972] text-white shadow-md shadow-[#F20B83]/20 ring-2 ring-[#F20B83]/20' : 'bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-950 border border-slate-200/90 hover:border-slate-300 shadow-2xs' }}"
                     >
-                        <span>{{ $sTab[1] }}</span>
-                        <span>{{ $sTab[2] }}</span>
-                        @if(isset($sTab[3]))
-                            <span class="px-1.5 py-0.2 rounded-full text-[10px] {{ $settingsSubTab === $sTab[0] ? 'bg-white/30 text-white' : 'bg-pink-100 text-pink-900 font-extrabold' }}">{{ $sTab[3] }}</span>
+                        <span class="{{ $settingsSubTab === $sTab['id'] ? 'text-white' : 'text-slate-500 group-hover:text-[#F20B83] transition' }}">
+                            {!! $sTab['icon'] !!}
+                        </span>
+                        <span>{{ $sTab['label'] }}</span>
+                        @if(isset($sTab['badge']))
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-black {{ $settingsSubTab === $sTab['id'] ? 'bg-white/25 text-white' : 'bg-pink-100 text-[#F20B83]' }}">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1 animate-pulse"></span>
+                                {{ $sTab['badge'] }}
+                            </span>
                         @endif
                     </a>
                 @endforeach
@@ -6643,50 +6685,67 @@
 
                 {{-- ================= SUB-TAB 1: GENERAL & PLATFORM ================= --}}
                 @if($settingsSubTab === 'general')
-                    <div class="{{ $card }} p-6 space-y-5">
-                        <div class="border-b border-slate-200 pb-3">
-                            <h3 class="text-base font-black text-slate-950 flex items-center gap-2">
-                                <span>🏢 Platform Identity &amp; Contact Metadata</span>
-                            </h3>
-                            <p class="text-xs text-slate-500 font-medium">Core platform branding declarations displayed across public footers, contact pages, and metadata.</p>
+                    <div class="{{ $card }} p-6 space-y-6">
+                        <div class="flex items-center gap-3.5 pb-4 border-b border-slate-100">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#F20B83]/15 to-[#F20B83]/5 border border-[#F20B83]/20 flex items-center justify-center text-[#F20B83] shadow-xs shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-black text-slate-900 tracking-tight">Platform Identity &amp; Contact Metadata</h3>
+                                <p class="text-xs text-slate-500 font-medium mt-0.5">Core platform branding declarations displayed across public footers, contact pages, and metadata.</p>
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-black text-slate-800 uppercase mb-1">Platform Name</label>
+                                <label class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                    <span>Platform Name</span>
+                                    <span class="text-[#F20B83]">*</span>
+                                </label>
                                 <input type="text" wire:model="settingValues.site_name" class="{{ $input }} text-xs font-bold" placeholder="e.g. LocalDateHub">
-                                <span class="text-[11px] text-slate-500">Global site brand name used across header, emails, and title tags.</span>
+                                <span class="text-[11px] text-slate-500 mt-1 block">Global site brand name used across header, emails, and title tags.</span>
                             </div>
                             <div>
-                                <label class="block text-xs font-black text-slate-800 uppercase mb-1">Platform Tagline</label>
+                                <label class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                    <span>Platform Tagline</span>
+                                </label>
                                 <input type="text" wire:model="settingValues.tagline" class="{{ $input }} text-xs font-bold" placeholder="e.g. Safe &amp; Private Local Adult Personal Classifieds">
-                                <span class="text-[11px] text-slate-500">Displayed beneath logo and in search engine descriptions.</span>
+                                <span class="text-[11px] text-slate-500 mt-1 block">Displayed beneath logo and in search engine descriptions.</span>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-black text-slate-800 uppercase mb-1">Customer Support Email</label>
-                                <input type="email" wire:model="settingValues.support_email" class="{{ $input }} text-xs font-bold" placeholder="support@localdatehub.com">
-                                <span class="text-[11px] text-slate-500">Public destination for user inquiries and contact forms.</span>
+                                <label class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                    <span>Customer Support Email</span>
+                                    <span class="text-[#F20B83]">*</span>
+                                </label>
+                                <input type="email" wire:model="settingValues.support_email" class="{{ $input }} text-xs font-bold font-mono" placeholder="support@localdatehub.com">
+                                <span class="text-[11px] text-slate-500 mt-1 block">Public destination for user inquiries and contact forms.</span>
                             </div>
                             <div>
-                                <label class="block text-xs font-black text-slate-800 uppercase mb-1">Support Telephone / Hotline</label>
-                                <input type="text" wire:model="settingValues.support_phone" class="{{ $input }} text-xs font-bold" placeholder="+1 (800) 555-DATE">
-                                <span class="text-[11px] text-slate-500">Optional customer care phone or SMS helpline.</span>
+                                <label class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                    <span>Support Telephone / Hotline</span>
+                                </label>
+                                <input type="text" wire:model="settingValues.support_phone" class="{{ $input }} text-xs font-bold font-mono" placeholder="+1 (800) 555-DATE">
+                                <span class="text-[11px] text-slate-500 mt-1 block">Optional customer care phone or SMS helpline.</span>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-black text-slate-800 uppercase mb-1">Telegram Support Channel / Handle</label>
+                                <label class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                    <span>Telegram Support Channel / Handle</span>
+                                </label>
                                 <input type="text" wire:model="settingValues.support_telegram" class="{{ $input }} text-xs font-bold" placeholder="@LocalDateHubSupport">
-                                <span class="text-[11px] text-slate-500">Direct encrypted support link for members and advertisers.</span>
+                                <span class="text-[11px] text-slate-500 mt-1 block">Direct encrypted support link for members and advertisers.</span>
                             </div>
                             <div>
-                                <label class="block text-xs font-black text-slate-800 uppercase mb-1">Footer Legal &amp; Copyright Declaration</label>
+                                <label class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                    <span>Footer Legal &amp; Copyright Declaration</span>
+                                </label>
                                 <input type="text" wire:model="settingValues.copyright_text" class="{{ $input }} text-xs font-bold" placeholder="© 2026 LocalDateHub. All rights reserved. 18+ Adults Only.">
-                                <span class="text-[11px] text-slate-500">Copyright string rendered at bottom of every public page.</span>
+                                <span class="text-[11px] text-slate-500 mt-1 block">Copyright string rendered at bottom of every public page.</span>
                             </div>
                         </div>
                     </div>
@@ -6695,11 +6754,14 @@
                 {{-- ================= SUB-TAB 2: BRANDING, LOGO & FAVICON ================= --}}
                 @if($settingsSubTab === 'branding')
                     <div class="{{ $card }} p-6 space-y-6">
-                        <div class="border-b border-slate-200 pb-3">
-                            <h3 class="text-base font-black text-slate-950 flex items-center gap-2">
-                                <span>🎨 Visual Assets, Logos &amp; Favicon Manager</span>
-                            </h3>
-                            <p class="text-xs text-slate-500 font-medium">Configure primary brand emblems, header logos, mobile logos, browser tab favicon, and theme color.</p>
+                        <div class="flex items-center gap-3.5 pb-4 border-b border-slate-100">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/15 to-indigo-500/5 border border-indigo-500/20 flex items-center justify-center text-indigo-600 shadow-xs shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-black text-slate-900 tracking-tight">Visual Assets, Logos &amp; Favicon Manager</h3>
+                                <p class="text-xs text-slate-500 font-medium mt-0.5">Configure primary brand emblems, header logos, mobile logos, browser tab favicon, and theme color.</p>
+                            </div>
                         </div>
 
                         <!-- Live Visual Preview Showcase -->
@@ -6785,15 +6847,19 @@
                 @if($settingsSubTab === 'smtp')
                     <div class="space-y-6">
                         <div class="{{ $card }} p-6 space-y-5">
-                            <div class="border-b border-slate-200 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                                <div>
-                                    <h3 class="text-base font-black text-slate-950 flex items-center gap-2">
-                                        <span>✉️ SMTP Mail Transport &amp; Delivery Server</span>
-                                    </h3>
-                                    <p class="text-xs text-slate-500 font-medium">Configure outbound transactional SMTP credentials for high-deliverability email alerts.</p>
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 pb-4 border-b border-slate-100">
+                                <div class="flex items-center gap-3.5">
+                                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/15 to-purple-500/5 border border-purple-500/20 flex items-center justify-center text-purple-600 shadow-xs shrink-0">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-base font-black text-slate-900 tracking-tight">SMTP Mail Transport &amp; Delivery Server</h3>
+                                        <p class="text-xs text-slate-500 font-medium mt-0.5">Configure outbound transactional SMTP credentials for high-deliverability email alerts.</p>
+                                    </div>
                                 </div>
-                                <span class="px-2.5 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-900 border border-emerald-300">
-                                    ● TLS Handshake Ready
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black bg-emerald-50 text-emerald-800 border border-emerald-300 self-start sm:self-auto shadow-2xs">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <span>TLS Handshake Ready</span>
                                 </span>
                             </div>
 
@@ -6907,16 +6973,20 @@
                 {{-- ================= SUB-TAB 4: REAL-TIME EMAIL EVENT TRIGGERS ================= --}}
                 @if($settingsSubTab === 'notifications')
                     <div class="space-y-5">
-                        <div class="{{ $card }} p-5">
-                            <div class="border-b border-slate-200 pb-3 flex items-center justify-between">
-                                <div>
-                                    <h3 class="text-base font-black text-slate-950 flex items-center gap-2">
-                                        <span>🔔 Real-Time Transactional Email Notification Matrix</span>
-                                    </h3>
-                                    <p class="text-xs text-slate-500 font-medium">Toggle instant automated email dispatches for user onboarding, classified moderation, payments, wallet balance, and chat alerts.</p>
+                        <div class="{{ $card }} p-6">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 pb-2">
+                                <div class="flex items-center gap-3.5">
+                                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/15 to-blue-500/5 border border-blue-500/20 flex items-center justify-center text-blue-600 shadow-xs shrink-0">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-base font-black text-slate-900 tracking-tight">Real-Time Transactional Email Notification Matrix</h3>
+                                        <p class="text-xs text-slate-500 font-medium mt-0.5">Toggle instant automated email dispatches for user onboarding, classified moderation, payments, wallet balance, and chat alerts.</p>
+                                    </div>
                                 </div>
-                                <span class="px-2.5 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-900 border border-emerald-300">
-                                    All 17 Triggers Operational
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black bg-blue-50 text-blue-700 border border-blue-200 self-start sm:self-auto shadow-2xs">
+                                    <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                                    <span>All 17 Triggers Operational</span>
                                 </span>
                             </div>
                         </div>
@@ -7218,16 +7288,20 @@
 
                 {{-- ================= SUB-TAB 5: SAFETY & 2257 COMPLIANCE ================= --}}
                 @if($settingsSubTab === 'safety')
-                    <div class="{{ $card }} p-6 space-y-5">
-                        <div class="border-b border-slate-200 pb-3 flex items-center justify-between">
-                            <div>
-                                <h3 class="text-base font-black text-slate-950 flex items-center gap-2">
-                                    <span>🛡️ Trust, Safety &amp; Federal 2257 / FOSTA Compliance</span>
-                                </h3>
-                                <p class="text-xs text-slate-500 font-medium">Protect platform legal immunity, enforce strict adult verification, and prevent non-consensual exploitation.</p>
+                    <div class="{{ $card }} p-6 space-y-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 pb-4 border-b border-slate-100">
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/15 to-emerald-500/5 border border-emerald-500/20 flex items-center justify-center text-emerald-600 shadow-xs shrink-0">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-base font-black text-slate-900 tracking-tight">Trust, Safety &amp; Federal 2257 / FOSTA Compliance</h3>
+                                    <p class="text-xs text-slate-500 font-medium mt-0.5">Protect platform legal immunity, enforce strict adult verification, and prevent non-consensual exploitation.</p>
+                                </div>
                             </div>
-                            <span class="px-2.5 py-1 rounded-full text-xs font-black bg-rose-100 text-rose-900 border border-rose-300">
-                                US Legal Grade
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black bg-rose-50 text-rose-700 border border-rose-200 self-start sm:self-auto shadow-2xs">
+                                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                                <span>US Legal Grade</span>
                             </span>
                         </div>
 
@@ -7288,40 +7362,51 @@
 
                 {{-- ================= SUB-TAB 6: MONETIZATION & LIMITS ================= --}}
                 @if($settingsSubTab === 'monetization')
-                    <div class="{{ $card }} p-6 space-y-5">
-                        <div class="border-b border-slate-200 pb-3">
-                            <h3 class="text-base font-black text-slate-950 flex items-center gap-2">
-                                <span>💰 Monetization, Credit Costs &amp; Posting Limits</span>
-                            </h3>
-                            <p class="text-xs text-slate-500 font-medium">Configure free vs paid listing thresholds, photo allowances, and active duration limits.</p>
+                    <div class="{{ $card }} p-6 space-y-6">
+                        <div class="flex items-center gap-3.5 pb-4 border-b border-slate-100">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/15 to-amber-500/5 border border-amber-500/20 flex items-center justify-center text-amber-600 shadow-xs shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-black text-slate-900 tracking-tight">Monetization, Credit Costs &amp; Posting Limits</h3>
+                                <p class="text-xs text-slate-500 font-medium mt-0.5">Configure free vs paid listing thresholds, photo allowances, and active duration limits.</p>
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-black text-slate-800 uppercase mb-1">Allow Free Standard Listings</label>
+                                <label class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                    <span>Allow Free Standard Listings</span>
+                                </label>
                                 <select wire:model="settingValues.free_listings_enabled" class="{{ $input }} text-xs font-bold text-slate-900">
                                     <option value="true">Yes (Allow free basic classifieds)</option>
                                     <option value="false">No (Require paid credits for all postings)</option>
                                 </select>
-                                <span class="text-[11px] text-slate-500">When disabled, every ad submission deducts posting credits.</span>
+                                <span class="text-[11px] text-slate-500 mt-1 block">When disabled, every ad submission deducts posting credits.</span>
                             </div>
                             <div>
-                                <label class="block text-xs font-black text-slate-800 uppercase mb-1">Maximum Free Listings Per Member</label>
+                                <label class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                    <span>Maximum Free Listings Per Member</span>
+                                </label>
                                 <input type="number" min="0" wire:model="settingValues.max_free_listings_per_user" class="{{ $input }} text-xs font-bold" placeholder="3">
-                                <span class="text-[11px] text-slate-500">Max concurrent active free ads allowed without VIP package.</span>
+                                <span class="text-[11px] text-slate-500 mt-1 block">Max concurrent active free ads allowed without VIP package.</span>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-black text-slate-800 uppercase mb-1">Max Photos Allowed Per Listing</label>
+                                <label class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                    <span>Max Photos Allowed Per Listing</span>
+                                </label>
                                 <input type="number" min="1" max="30" wire:model="settingValues.max_photos_per_listing" class="{{ $input }} text-xs font-bold" placeholder="6">
-                                <span class="text-[11px] text-slate-500">Upper limit on gallery photo uploads per ad.</span>
+                                <span class="text-[11px] text-slate-500 mt-1 block">Upper limit on gallery photo uploads per ad.</span>
                             </div>
                             <div>
-                                <label class="block text-xs font-black text-slate-800 uppercase mb-1">Listing Active Duration (Days)</label>
+                                <label class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                    <span>Listing Active Duration (Days)</span>
+                                </label>
                                 <input type="number" min="1" max="365" wire:model="settingValues.listing_active_days" class="{{ $input }} text-xs font-bold" placeholder="30">
-                                <span class="text-[11px] text-slate-500">Number of days before ad automatically expires and needs renewal.</span>
+                                <span class="text-[11px] text-slate-500 mt-1 block">Number of days before ad automatically expires and needs renewal.</span>
                             </div>
                         </div>
                     </div>
@@ -7329,17 +7414,22 @@
 
                 {{-- ================= SUB-TAB 7: SEARCH & LOCATIONS ================= --}}
                 @if($settingsSubTab === 'locations')
-                    <div class="{{ $card }} p-6 space-y-5">
-                        <div class="border-b border-slate-200 pb-3">
-                            <h3 class="text-base font-black text-slate-950 flex items-center gap-2">
-                                <span>📍 Geographic Search, Radius &amp; Mapping</span>
-                            </h3>
-                            <p class="text-xs text-slate-500 font-medium">Fine-tune geo-distance radius, measurement units, and search result sizing.</p>
+                    <div class="{{ $card }} p-6 space-y-6">
+                        <div class="flex items-center gap-3.5 pb-4 border-b border-slate-100">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500/15 to-teal-500/5 border border-teal-500/20 flex items-center justify-center text-teal-600 shadow-xs shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-black text-slate-900 tracking-tight">Geographic Search, Radius &amp; Mapping</h3>
+                                <p class="text-xs text-slate-500 font-medium mt-0.5">Fine-tune geo-distance radius, measurement units, and search result sizing.</p>
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <label class="block text-xs font-black text-slate-800 uppercase mb-1">Default Search Radius</label>
+                                <label class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                    <span>Default Search Radius</span>
+                                </label>
                                 <select wire:model="settingValues.default_search_radius_miles" class="{{ $input }} text-xs font-bold text-slate-900">
                                     <option value="10">10 Miles (Immediate Metro)</option>
                                     <option value="25">25 Miles (Standard County)</option>
@@ -7348,14 +7438,18 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-black text-slate-800 uppercase mb-1">Distance Measurement Unit</label>
+                                <label class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                    <span>Distance Measurement Unit</span>
+                                </label>
                                 <select wire:model="settingValues.distance_unit" class="{{ $input }} text-xs font-bold text-slate-900">
                                     <option value="miles">Miles (USA Standard)</option>
                                     <option value="km">Kilometers (Metric)</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-black text-slate-800 uppercase mb-1">Max Search Results Per Page</label>
+                                <label class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                    <span>Max Search Results Per Page</span>
+                                </label>
                                 <input type="number" min="10" max="250" wire:model="settingValues.max_search_results" class="{{ $input }} text-xs font-bold" placeholder="100">
                             </div>
                         </div>
@@ -7377,13 +7471,22 @@
 
                 {{-- ================= SUB-TAB 8: SECURITY & MAINTENANCE ================= --}}
                 @if($settingsSubTab === 'security')
-                    <div class="{{ $card }} p-6 space-y-5">
-                        <div class="border-b border-slate-200 pb-3 flex items-center justify-between">
-                            <div>
-                                <h3 class="text-base font-black text-slate-950 flex items-center gap-2">
-                                    <span>🔒 Administrative Security &amp; Maintenance Mode</span>
-                                </h3>
-                                <p class="text-xs text-slate-500 font-medium">Session guardrails, staff 2FA enforcement, brute-force protection, and emergency maintenance controls.</p>
+                    <div class="{{ $card }} p-6 space-y-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 pb-4 border-b border-slate-100">
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/15 to-amber-500/5 border border-amber-500/20 flex items-center justify-center text-amber-600 shadow-xs shrink-0">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-base font-black text-slate-900 tracking-tight">Administrative Security &amp; Maintenance Mode</h3>
+                                    <p class="text-xs text-slate-500 font-medium mt-0.5">Session guardrails, staff 2FA enforcement, brute-force protection, and emergency maintenance controls.</p>
+                                </div>
+                            </div>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black bg-amber-50 text-amber-800 border border-amber-200 self-start sm:self-auto shadow-2xs">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                <span>Super Admin Guarded</span>
+                            </span>
+                        </div>
                             </div>
                             <span class="px-2.5 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-900 border border-amber-300">
                                 🔒 Super Admin Restricted
