@@ -53,56 +53,56 @@
         </div>
 
         <!-- Quick Actions, Wallet Balance & Controls -->
-        <div class="flex items-center gap-2.5 shrink-0 flex-wrap sm:flex-nowrap">
+        <div class="flex items-center gap-3 shrink-0 flex-wrap sm:flex-nowrap">
             <!-- Prominent Credit Balance & Load Balance Card -->
-            <div class="flex items-center gap-2 bg-gradient-to-r from-emerald-50 via-teal-50 to-pink-50/50 border-2 border-emerald-300/80 rounded-2xl px-3.5 py-1.5 shadow-xs">
-                <div class="flex items-center gap-2">
-                    <span class="w-7 h-7 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black shadow-2xs shrink-0">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                        </svg>
+            <div class="flex items-center gap-2.5 bg-white border-2 border-emerald-400 rounded-2xl px-3.5 py-2 shadow-xs">
+                <span class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-black shadow-2xs shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                </span>
+                <div class="leading-tight mr-1">
+                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-500 block">Balance</span>
+                    <span class="text-sm sm:text-base font-black text-slate-900 leading-none">
+                        {{ number_format(Auth::user()?->getWalletBalance() ?? 0) }} <span class="text-xs text-emerald-600 font-bold">Credits</span>
                     </span>
-                    <div class="leading-tight">
-                        <span class="text-[10px] font-black uppercase tracking-wider text-emerald-800 block">Balance</span>
-                        <div class="flex items-baseline gap-1">
-                            <span class="text-base font-black text-slate-900 leading-none">
-                                {{ number_format(Auth::user()?->getWalletBalance() ?? 0) }}
-                            </span>
-                            <span class="text-[11px] font-black text-emerald-700">Credits</span>
-                        </div>
-                    </div>
                 </div>
-                <div class="h-6 w-px bg-emerald-200 mx-1"></div>
+                <div class="h-6 w-px bg-slate-200"></div>
                 <a
                     href="{{ route('account.wallet.index') }}#packages-section"
-                    class="px-3 py-1.5 rounded-xl text-xs font-black text-white bg-gradient-to-r from-[#F20B65] to-rose-600 hover:from-[#d90858] hover:to-rose-700 shadow-xs hover:shadow-md transition flex items-center gap-1 shrink-0"
+                    class="px-3.5 py-1.5 rounded-xl text-xs font-black text-white transition flex items-center gap-1 shrink-0 shadow-sm hover:opacity-95"
+                    style="background-color: #F20B65 !important; color: #ffffff !important;"
                 >
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                    <span>Load Balance</span>
+                    <span class="text-white font-bold" style="color: #ffffff !important;">Load Balance</span>
                 </a>
             </div>
 
+            <!-- Post Ad Button -->
             <a
                 href="{{ route('listings.create') }}"
-                class="px-4 py-2.5 text-white font-black rounded-xl text-xs transition shadow-md hover:shadow-lg flex items-center gap-2"
-                style="background: linear-gradient(135deg, #F20B65 0%, #D90858 100%) !important; color: #ffffff !important;"
+                class="px-4 py-2.5 rounded-2xl text-xs font-black transition shadow-sm hover:opacity-95 flex items-center gap-1.5"
+                style="background-color: #F20B65 !important; color: #ffffff !important;"
             >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                <span>Post Ad</span>
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                <span class="text-white font-bold" style="color: #ffffff !important;">+ Post Ad</span>
             </a>
+
+            <!-- Boost Button -->
             <button
                 wire:click="openPromoteModal"
-                class="px-3.5 py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-900 border-2 border-purple-300 font-black rounded-xl text-xs transition flex items-center gap-1.5 shadow-xs hover:shadow-md"
+                class="px-3.5 py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-300 font-black rounded-2xl text-xs transition flex items-center gap-1.5 shadow-2xs hover:shadow-xs cursor-pointer"
             >
-                <svg class="w-4 h-4 text-purple-700" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                <svg class="w-3.5 h-3.5 text-purple-600" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                 <span>Boost</span>
             </button>
-            <!-- Account Logout Form Button -->
+
+            <!-- Logout Button -->
             <form method="POST" action="{{ route('logout') }}" class="inline-block">
                 @csrf
                 <button
                     type="submit"
-                    class="px-3.5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 hover:text-rose-900 border border-rose-200 font-black rounded-xl text-xs transition flex items-center gap-1.5 shadow-2xs hover:shadow-xs cursor-pointer"
+                    class="px-3.5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 hover:text-rose-900 border border-rose-200 font-black rounded-2xl text-xs transition flex items-center gap-1.5 shadow-2xs hover:shadow-xs cursor-pointer"
                     title="Sign Out of Your Account"
                 >
                     <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
