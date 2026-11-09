@@ -24,9 +24,17 @@
                 <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#F20B65] via-pink-500 to-purple-600"></div>
                 
                 <div class="max-w-3xl space-y-4">
-                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-pink-50 border border-pink-200 text-[#F20B65] text-xs font-black shadow-2xs">
-                        <span class="w-2 h-2 rounded-full animate-ping" style="background-color: #F20B65 !important;"></span>
-                        <span>24/7 Dedicated Support &amp; Inquiries</span>
+                    <!-- High-End SaaS Header Pill (Zero Dot / No Ping / Pure Modern Vector Badge) -->
+                    <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-rose-50 via-pink-50 to-purple-50/60 border border-rose-200/90 shadow-2xs group cursor-default">
+                        <span class="w-5 h-5 rounded-full bg-[#F20B65] text-white flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-110 transition-transform">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                        </span>
+                        <span class="text-xs font-black text-[#F20B65] tracking-tight">24/7 Dedicated Support &amp; Inquiries</span>
+                        <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-white text-[#F20B65] border border-rose-200 shadow-2xs">
+                            Always Online
+                        </span>
                     </div>
 
                     <h1 class="text-2xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight">
@@ -37,16 +45,25 @@
                         Have questions about your account, need assistance with your classifieds, or wish to report a safety concern? Our USA-based operations and Trust &amp; Safety team are standing by to assist.
                     </p>
 
-                    <!-- Key Service Metrics Pill Row -->
-                    <div class="flex flex-wrap items-center gap-3 pt-2 text-xs font-bold">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-800 border border-slate-200 shadow-2xs">
-                            <span class="text-rose-600">⚡</span> &lt; 1 Hour Safety Response
+                    <!-- Key Service Metrics Pill Row with Modern Vector Icons -->
+                    <div class="flex flex-wrap items-center gap-2.5 pt-2 text-xs font-bold">
+                        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 text-slate-800 border border-slate-200/90 shadow-2xs">
+                            <span class="w-5 h-5 rounded-lg bg-rose-100 text-[#F20B65] flex items-center justify-center shrink-0">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            </span>
+                            <span>&lt; 1 Hour Safety Response</span>
                         </span>
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-800 border border-slate-200 shadow-2xs">
-                            <span class="text-emerald-600">🔒</span> AES-256 Field Encrypted
+                        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 text-slate-800 border border-slate-200/90 shadow-2xs">
+                            <span class="w-5 h-5 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            </span>
+                            <span>AES-256 Field Encrypted</span>
                         </span>
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-800 border border-slate-200 shadow-2xs">
-                            <span class="text-blue-600">🇺🇸</span> 100% US Operations Team
+                        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 text-slate-800 border border-slate-200/90 shadow-2xs">
+                            <span class="w-5 h-5 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </span>
+                            <span>100% US Operations Team</span>
                         </span>
                     </div>
                 </div>
@@ -144,7 +161,10 @@
                         </p>
                         <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 font-medium space-y-1">
                             <p class="text-slate-900 font-bold flex items-center gap-1.5">
-                                <span>🛡️</span> Zero Marketing Spam Policy
+                                <span class="w-4 h-4 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                                    <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                </span>
+                                <span>Zero Marketing Spam Policy</span>
                             </p>
                             <p>Your email and phone are used strictly for resolving this specific inquiry and will never be shared.</p>
                         </div>
@@ -157,13 +177,23 @@
                             Looking for quick answers? You may find immediate assistance here:
                         </p>
                         <div class="space-y-2 pt-1 text-xs font-bold">
-                            <a href="{{ route('pages.pricing') }}" class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 hover:border-pink-300 hover:text-[#F20B65] transition shadow-2xs">
-                                <span>💎 Upgrade &amp; Pricing Details</span>
-                                <span>&rarr;</span>
+                            <a href="{{ route('pages.pricing') }}" class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 hover:border-pink-300 hover:text-[#F20B65] transition shadow-2xs group">
+                                <span class="flex items-center gap-2">
+                                    <span class="w-6 h-6 rounded-lg bg-pink-100 text-[#F20B65] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    </span>
+                                    <span>Upgrade &amp; Pricing Details</span>
+                                </span>
+                                <span class="text-slate-400 group-hover:text-[#F20B65] group-hover:translate-x-0.5 transition-all">&rarr;</span>
                             </a>
-                            <a href="{{ route('pages.about') }}" class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 hover:border-pink-300 hover:text-[#F20B65] transition shadow-2xs">
-                                <span>📜 Community Safety Standards</span>
-                                <span>&rarr;</span>
+                            <a href="{{ route('pages.about') }}" class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 hover:border-pink-300 hover:text-[#F20B65] transition shadow-2xs group">
+                                <span class="flex items-center gap-2">
+                                    <span class="w-6 h-6 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    </span>
+                                    <span>Community Safety Standards</span>
+                                </span>
+                                <span class="text-slate-400 group-hover:text-[#F20B65] group-hover:translate-x-0.5 transition-all">&rarr;</span>
                             </a>
                         </div>
                     </div>
@@ -262,11 +292,13 @@
                                     <div
                                         @click="selectedTopic = 'general_support'"
                                         :class="selectedTopic === 'general_support' ? 'border-[#F20B65] bg-pink-50/70 shadow-sm ring-2 ring-pink-500/20' : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70'"
-                                        class="p-3.5 rounded-2xl border-2 cursor-pointer transition-all flex items-start justify-between gap-3 select-none group"
+                                        class="p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start justify-between gap-3 select-none group"
                                     >
                                         <div class="flex items-start gap-3">
-                                            <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 font-black text-base shadow-2xs border border-blue-200">
-                                                💬
+                                            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-200 shadow-2xs group-hover:scale-105 transition-transform">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                                </svg>
                                             </div>
                                             <div>
                                                 <strong class="text-xs font-black text-slate-900 block group-hover:text-slate-950">General Support</strong>
@@ -286,11 +318,13 @@
                                     <div
                                         @click="selectedTopic = 'safety_report'"
                                         :class="selectedTopic === 'safety_report' ? 'border-[#F20B65] bg-pink-50/70 shadow-sm ring-2 ring-pink-500/20' : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70'"
-                                        class="p-3.5 rounded-2xl border-2 cursor-pointer transition-all flex items-start justify-between gap-3 select-none group"
+                                        class="p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start justify-between gap-3 select-none group"
                                     >
                                         <div class="flex items-start gap-3">
-                                            <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 font-black text-base shadow-2xs border border-rose-200">
-                                                🚨
+                                            <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 border border-rose-200 shadow-2xs group-hover:scale-105 transition-transform">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                </svg>
                                             </div>
                                             <div>
                                                 <strong class="text-xs font-black text-slate-900 block flex items-center gap-1.5">
@@ -313,11 +347,13 @@
                                     <div
                                         @click="selectedTopic = 'billing'"
                                         :class="selectedTopic === 'billing' ? 'border-[#F20B65] bg-pink-50/70 shadow-sm ring-2 ring-pink-500/20' : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70'"
-                                        class="p-3.5 rounded-2xl border-2 cursor-pointer transition-all flex items-start justify-between gap-3 select-none group"
+                                        class="p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start justify-between gap-3 select-none group"
                                     >
                                         <div class="flex items-start gap-3">
-                                            <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 font-black text-base shadow-2xs border border-amber-200">
-                                                💳
+                                            <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-200 shadow-2xs group-hover:scale-105 transition-transform">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                                </svg>
                                             </div>
                                             <div>
                                                 <strong class="text-xs font-black text-slate-900 block group-hover:text-slate-950">Billing &amp; Boosts</strong>
@@ -337,11 +373,13 @@
                                     <div
                                         @click="selectedTopic = 'partnership'"
                                         :class="selectedTopic === 'partnership' ? 'border-[#F20B65] bg-pink-50/70 shadow-sm ring-2 ring-pink-500/20' : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70'"
-                                        class="p-3.5 rounded-2xl border-2 cursor-pointer transition-all flex items-start justify-between gap-3 select-none group"
+                                        class="p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start justify-between gap-3 select-none group"
                                     >
                                         <div class="flex items-start gap-3">
-                                            <div class="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 font-black text-base shadow-2xs border border-purple-200">
-                                                🤝
+                                            <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-200 shadow-2xs group-hover:scale-105 transition-transform">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                </svg>
                                             </div>
                                             <div>
                                                 <strong class="text-xs font-black text-slate-900 block group-hover:text-slate-950">Partnership &amp; Press</strong>
