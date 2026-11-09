@@ -46,18 +46,12 @@
                 </ul>
             </div>
 
-            <!-- Company & Status Column -->
+            <!-- Company Column -->
             <div>
-                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 mb-3">About & Systems</h4>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 mb-3">About & Company</h4>
                 <ul class="space-y-2 text-xs">
                     <li><a href="{{ route('pages.about') }}" class="hover:text-[#F20B65] transition">About LocalDateHub</a></li>
                     <li><a href="{{ route('pages.pricing') }}" class="hover:text-[#F20B65] transition">Pricing & Upgrades</a></li>
-                    <li class="pt-2">
-                        <div class="flex items-center space-x-2">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                            <span class="text-slate-700 font-semibold text-xs">All Systems Operational</span>
-                        </div>
-                    </li>
                 </ul>
             </div>
         </div>
