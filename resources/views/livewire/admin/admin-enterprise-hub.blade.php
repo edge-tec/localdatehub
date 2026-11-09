@@ -7437,8 +7437,25 @@
                         <span class="text-xs font-bold text-slate-700">All changes persist directly to production database with full audit trail logging.</span>
                     </div>
 
-                    <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
-                        <button type="submit" wire:loading.attr="disabled" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#F20B83] hover:bg-[#D00972] disabled:opacity-50 text-white text-xs font-black transition shadow-xs flex items-center justify-center gap-2">
+                    <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end">
+                        @if(session()->has('success'))
+                            <span class="text-xs font-black text-emerald-800 bg-emerald-50 px-3.5 py-2 rounded-xl border border-emerald-300 flex items-center gap-1.5 shadow-xs">
+                                <span>✓</span>
+                                <span>{{ session('success') }}</span>
+                            </span>
+                        @endif
+                        @if(session()->has('error'))
+                            <span class="text-xs font-black text-rose-800 bg-rose-50 px-3.5 py-2 rounded-xl border border-rose-300 flex items-center gap-1.5 shadow-xs">
+                                <span>⚠️</span>
+                                <span>{{ session('error') }}</span>
+                            </span>
+                        @endif
+                        <button 
+                            type="submit" 
+                            wire:click.prevent="saveSystemSettings" 
+                            wire:loading.attr="disabled" 
+                            class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#F20B83] hover:bg-[#D00972] disabled:opacity-50 text-white text-xs font-black transition shadow-xs flex items-center justify-center gap-2 cursor-pointer select-none"
+                        >
                             <span wire:loading.remove wire:target="saveSystemSettings">Save Configuration Suite</span>
                             <span wire:loading wire:target="saveSystemSettings" class="flex items-center gap-2">
                                 <svg class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>

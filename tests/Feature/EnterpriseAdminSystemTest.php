@@ -619,6 +619,35 @@ class EnterpriseAdminSystemTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_save_general_platform_identity_settings(): void
+    {
+        Livewire::actingAs($this->superAdmin)
+            ->test(AdminEnterpriseHub::class, ['initialTab' => 'settings'])
+            ->set('settingsSubTab', 'general')
+            ->set('settingValues.site_name', 'LocalDateHub Global')
+            ->set('settingValues.tagline', 'Real-time Premium Dating')
+            ->set('settingValues.support_email', 'help@localdatehub.com')
+            ->set('settingValues.support_phone', '+1 555 123 4567')
+            ->set('settingValues.copyright_text', '© 2026 LocalDateHub Global. All rights reserved.')
+            ->set('settingValues.support_telegram', '@LocalDateHubOfficial')
+            ->call('saveSystemSettings')
+            ->assertHasNoErrors()
+            ->assertStatus(200);
+
+        $this->assertDatabaseHas('system_settings', [
+            'key' => 'site_name',
+            'value' => 'LocalDateHub Global',
+        ]);
+        $this->assertDatabaseHas('system_settings', [
+            'key' => 'tagline',
+            'value' => 'Real-time Premium Dating',
+        ]);
+        $this->assertDatabaseHas('system_settings', [
+            'key' => 'support_email',
+            'value' => 'help@localdatehub.com',
+        ]);
+    }
+
     public function test_admin_can_inspect_audit_log_details(): void
     {
         $log = AdminAuditLog::create([
