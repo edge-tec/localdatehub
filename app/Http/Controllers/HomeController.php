@@ -72,11 +72,15 @@ class HomeController extends Controller
 
         if (Schema::hasTable('cities')) {
             $popularCities = City::with('state')
-                ->where('is_major', true)
+                ->where('is_popular', true)
                 ->orWhere('population', '>', 500000)
                 ->orderBy('name')
                 ->take(12)
                 ->get();
+
+            if ($popularCities->isEmpty()) {
+                $popularCities = City::with('state')->take(12)->get();
+            }
 
             $stats['citiesCount'] = City::count();
         }
