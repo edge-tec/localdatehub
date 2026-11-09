@@ -450,11 +450,18 @@ class LocationService
             })
             ->with([
                 'cities' => fn ($q) => $q->where('is_active', true)
+                    ->where(function ($sub) {
+                        $sub->whereNull('city_type')
+                            ->orWhere('city_type', 'city');
+                    })
                     ->orderBy('is_popular', 'desc')
                     ->orderBy('name', 'asc'),
                 'counties',
             ])
-            ->withCount(['cities' => fn ($q) => $q->where('is_active', true)])
+            ->withCount(['cities' => fn ($q) => $q->where('is_active', true)->where(function ($sub) {
+                $sub->whereNull('city_type')
+                    ->orWhere('city_type', 'city');
+            })])
             ->first();
     }
 

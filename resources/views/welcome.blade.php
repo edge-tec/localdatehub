@@ -85,9 +85,28 @@
                                         this.cities = json.data.cities;
                                         this.cache[stateCode] = json.data.cities;
                                         this.cityDropdownOpen = true;
+                                    } else {
+                                        // Fallback to static static city database if API endpoint response fails
+                                        const fallbackRes = await fetch('/data/us-cities.json');
+                                        const fallbackMap = await fallbackRes.json();
+                                        if (fallbackMap && fallbackMap[stateCode.toLowerCase()]) {
+                                            this.cities = fallbackMap[stateCode.toLowerCase()];
+                                            this.cache[stateCode] = this.cities;
+                                            this.cityDropdownOpen = true;
+                                        }
                                     }
                                 } catch (e) {
-                                    console.error('Failed to load cities for state', stateCode, e);
+                                    try {
+                                        const fallbackRes = await fetch('/data/us-cities.json');
+                                        const fallbackMap = await fallbackRes.json();
+                                        if (fallbackMap && fallbackMap[stateCode.toLowerCase()]) {
+                                            this.cities = fallbackMap[stateCode.toLowerCase()];
+                                            this.cache[stateCode] = this.cities;
+                                            this.cityDropdownOpen = true;
+                                        }
+                                    } catch (err) {
+                                        console.error('Failed to load cities for state', stateCode, e, err);
+                                    }
                                 } finally {
                                     this.loadingCities = false;
                                 }
