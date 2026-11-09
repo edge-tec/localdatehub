@@ -3983,6 +3983,7 @@ class AdminEnterpriseHub extends Component
                 'mail.mailers.smtp.encryption' => ($enc === 'none' || empty($enc)) ? null : $enc,
                 'mail.mailers.smtp.username' => empty($this->settingValues['mail_username']) ? null : $this->settingValues['mail_username'],
                 'mail.mailers.smtp.password' => empty($this->settingValues['mail_password']) ? null : $this->settingValues['mail_password'],
+                'mail.mailers.smtp.verify_peer' => false,
                 'mail.from.address' => $this->settingValues['mail_from_address'] ?? config('mail.from.address'),
                 'mail.from.name' => $this->settingValues['mail_from_name'] ?? config('mail.from.name'),
             ]);
@@ -4060,6 +4061,7 @@ class AdminEnterpriseHub extends Component
                 'mail.mailers.smtp.username' => empty($username) ? null : $username,
                 'mail.mailers.smtp.password' => empty($password) ? null : $password,
                 'mail.mailers.smtp.timeout' => 15,
+                'mail.mailers.smtp.verify_peer' => false,
                 'mail.from.address' => $fromEmail,
                 'mail.from.name' => $fromName,
             ]);

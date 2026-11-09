@@ -41,6 +41,7 @@ class AppServiceProvider extends ServiceProvider
                         'mail.mailers.smtp.encryption' => ($enc === 'none' || empty($enc)) ? null : $enc,
                         'mail.mailers.smtp.username' => $mailSettings->get('mail_username'),
                         'mail.mailers.smtp.password' => $mailSettings->get('mail_password'),
+                        'mail.mailers.smtp.verify_peer' => false,
                         'mail.from.address' => $mailSettings->get('mail_from_address', config('mail.from.address')),
                         'mail.from.name' => $mailSettings->get('mail_from_name', config('mail.from.name')),
                     ]);
