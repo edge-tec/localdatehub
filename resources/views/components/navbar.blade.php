@@ -1,6 +1,6 @@
 @php
     $navCategories = \App\Modules\Categories\Models\Category::where('is_active', true)->whereNull('parent_id')->take(8)->get();
-    $navStates = \App\Modules\Locations\Models\State::where('is_active', true)->orWhere('status', 'active')->orderBy('name')->take(12)->get();
+    $navStates = \App\Modules\Locations\Models\State::where('is_active', true)->orderBy('name')->take(12)->get();
     $navCities = \App\Modules\Locations\Models\City::with('state')->where('is_popular', true)->take(10)->get();
 @endphp
 
