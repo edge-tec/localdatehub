@@ -3893,6 +3893,12 @@ class AdminEnterpriseHub extends Component
             'admin_2fa_required' => 'true',
             'admin_session_timeout_minutes' => '30',
             'max_login_attempts' => '5',
+            'google_client_id' => '',
+            'google_client_secret' => '',
+            'google_oauth_enabled' => 'true',
+            'facebook_client_id' => '',
+            'facebook_client_secret' => '',
+            'facebook_oauth_enabled' => 'false',
         ];
 
         $dbSettings = SystemSetting::orderBy('key')->pluck('value', 'key')->map(fn ($v) => (string) $v)->all();
