@@ -52,8 +52,36 @@
             </div>
         </div>
 
-        <!-- Quick Actions & Stats -->
+        <!-- Quick Actions, Wallet Balance & Controls -->
         <div class="flex items-center gap-2.5 shrink-0 flex-wrap sm:flex-nowrap">
+            <!-- Prominent Credit Balance & Load Balance Card -->
+            <div class="flex items-center gap-2 bg-gradient-to-r from-emerald-50 via-teal-50 to-pink-50/50 border-2 border-emerald-300/80 rounded-2xl px-3.5 py-1.5 shadow-xs">
+                <div class="flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black shadow-2xs shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                    </span>
+                    <div class="leading-tight">
+                        <span class="text-[10px] font-black uppercase tracking-wider text-emerald-800 block">Balance</span>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-base font-black text-slate-900 leading-none">
+                                {{ number_format(Auth::user()?->getWalletBalance() ?? 0) }}
+                            </span>
+                            <span class="text-[11px] font-black text-emerald-700">Credits</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="h-6 w-px bg-emerald-200 mx-1"></div>
+                <a
+                    href="{{ route('account.wallet.index') }}#packages-section"
+                    class="px-3 py-1.5 rounded-xl text-xs font-black text-white bg-gradient-to-r from-[#F20B65] to-rose-600 hover:from-[#d90858] hover:to-rose-700 shadow-xs hover:shadow-md transition flex items-center gap-1 shrink-0"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    <span>Load Balance</span>
+                </a>
+            </div>
+
             <a
                 href="{{ route('listings.create') }}"
                 class="px-4 py-2.5 text-white font-black rounded-xl text-xs transition shadow-md hover:shadow-lg flex items-center gap-2"
@@ -100,6 +128,19 @@
 
     <!-- Main Navigation Tabs Bar (100% High-Contrast, ALL OPTIONS 100% VISIBLE & FAIL-SAFE DUAL ENGINE) -->
     <div class="bg-white border border-slate-200 rounded-3xl p-3 sm:p-4 shadow-sm flex flex-wrap items-center gap-2 sm:gap-2.5 text-xs font-bold">
+        <!-- 1. PRIORITY CREDIT WALLET & LOAD BALANCE TAB (Always visible at the beginning) -->
+        <a
+            href="{{ route('account.wallet.index') }}"
+            class="px-4 py-2.5 rounded-2xl transition flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black shrink-0 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+        >
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+            <span>Credit Wallet:</span>
+            <span class="px-2 py-0.5 rounded-full text-xs font-black bg-white/20 text-white backdrop-blur-xs border border-white/30">
+                {{ number_format(auth()->user()?->getWalletBalance() ?? 0) }} Credits
+            </span>
+            <span class="ml-1 text-[11px] underline opacity-90">+ Add Funds</span>
+        </a>
+
         <a
             href="{{ route('account.dashboard', ['tab' => 'overview']) }}"
             wire:click.prevent="setTab('overview')"
