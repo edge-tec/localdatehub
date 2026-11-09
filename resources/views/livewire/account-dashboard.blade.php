@@ -128,19 +128,6 @@
 
     <!-- Main Navigation Tabs Bar (100% High-Contrast, ALL OPTIONS 100% VISIBLE & FAIL-SAFE DUAL ENGINE) -->
     <div class="bg-white border border-slate-200 rounded-3xl p-3 sm:p-4 shadow-sm flex flex-wrap items-center gap-2 sm:gap-2.5 text-xs font-bold">
-        <!-- 1. PRIORITY CREDIT WALLET & LOAD BALANCE TAB (Always visible at the beginning) -->
-        <a
-            href="{{ route('account.wallet.index') }}"
-            class="px-4 py-2.5 rounded-2xl transition flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black shrink-0 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-        >
-            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-            <span>Credit Wallet:</span>
-            <span class="px-2 py-0.5 rounded-full text-xs font-black bg-white/20 text-white backdrop-blur-xs border border-white/30">
-                {{ number_format(auth()->user()?->getWalletBalance() ?? 0) }} Credits
-            </span>
-            <span class="ml-1 text-[11px] underline opacity-90">+ Add Funds</span>
-        </a>
-
         <a
             href="{{ route('account.dashboard', ['tab' => 'overview']) }}"
             wire:click.prevent="setTab('overview')"
