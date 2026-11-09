@@ -652,4 +652,21 @@ class EnterpriseAdminSystemTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Locations');
     }
+
+    public function test_dashboard_realtime_filter_helpers_work_smoothly(): void
+    {
+        Livewire::actingAs($this->superAdmin)
+            ->test(AdminEnterpriseHub::class, ['initialTab' => 'dashboard'])
+            ->call('setUserStatusFilter', 'active')
+            ->assertSet('tab', 'users')
+            ->assertSet('userStatusFilter', 'active')
+            ->call('setListingStatusFilter', 'rejected')
+            ->assertSet('tab', 'listings')
+            ->assertSet('listingStatusFilter', 'rejected')
+            ->call('setListingCategoryFilter', 1)
+            ->assertSet('tab', 'listings')
+            ->assertSet('listingCategoryFilter', 1)
+            ->call('setDashboardLocationMode', 'states')
+            ->assertSet('dashboardLocationMode', 'states');
+    }
 }

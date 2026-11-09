@@ -479,6 +479,27 @@ class AdminEnterpriseHub extends Component
         session()->forget(['error', 'errors', 'success']);
     }
 
+    public function setListingStatusFilter(string $status): void
+    {
+        $this->tab = 'listings';
+        $this->listingStatusFilter = $status;
+        $this->resetPage();
+    }
+
+    public function setListingCategoryFilter(?int $categoryId): void
+    {
+        $this->tab = 'listings';
+        $this->listingCategoryFilter = $categoryId;
+        $this->resetPage();
+    }
+
+    public function setUserStatusFilter(string $status): void
+    {
+        $this->tab = 'users';
+        $this->userStatusFilter = $status;
+        $this->resetPage();
+    }
+
     public function clearErrors(): void
     {
         $this->resetValidation();

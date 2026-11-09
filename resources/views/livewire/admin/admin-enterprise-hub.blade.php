@@ -330,89 +330,124 @@
                 <!-- Welcome Title & Live Traffic Badge -->
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
-                        <h1 class="text-2xl font-black text-slate-900">Admin Dashboard</h1>
+                        <h1 class="text-2xl font-black text-slate-900 tracking-tight">Admin Dashboard</h1>
                         <p class="text-xs text-slate-500 mt-0.5">Welcome back, Super Admin! Real-time live platform telemetry and visitor tracking.</p>
                     </div>
-                    <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800 shadow-xs w-max">
-                        <span class="relative flex h-2.5 w-2.5">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                        </span>
-                        <span>{{ $metrics['activeVisitorsNow'] }} Visitors Online Now · Auto-updating (10s)</span>
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800 shadow-xs w-max">
+                            <span class="relative flex h-2.5 w-2.5">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                            </span>
+                            <span>{{ $metrics['activeVisitorsNow'] }} Visitors Online Now · Auto-updating (10s)</span>
+                        </div>
+                        <button type="button" wire:click="$refresh" class="p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition" title="Refresh Telemetry Now">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Row 1: 4 Stat Cards + Promotional Banner (100% Real Database Metrics) -->
+                <!-- Row 1: 4 Stat Cards + Promotional Banner (100% Real Database Metrics & Clickable Modules) -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                     <!-- Stat 1: Total Users -->
-                    <div class="bg-white rounded-2xl p-4 text-[#171923] shadow-xs border border-slate-200 flex flex-col justify-between">
+                    <div class="bg-white rounded-2xl p-4 text-[#171923] shadow-xs border border-slate-200 hover:border-[#F20B65] hover:shadow-md transition flex flex-col justify-between group">
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-slate-500">Total Users <span class="sr-only">Total Accounts</span></span>
-                            <div class="w-8 h-8 rounded-full bg-[#F20B83]/10 text-[#F20B83] flex items-center justify-center">
+                            <a href="{{ route('admin.dashboard', ['tab' => 'users']) }}" wire:click.prevent="setTab('users')" class="text-xs font-bold text-slate-500 group-hover:text-[#F20B65] transition flex items-center gap-1">
+                                <span>Total Users <span class="sr-only">Total Accounts</span></span>
+                                <span class="opacity-0 group-hover:opacity-100 transition text-[10px]">→</span>
+                            </a>
+                            <div class="w-8 h-8 rounded-full bg-[#F20B65]/10 text-[#F20B65] flex items-center justify-center">
                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/></svg>
                             </div>
                         </div>
                         <div class="mt-2">
-                            <div class="text-2xl font-black text-[#171923]">{{ number_format($metrics['totalUsers']) }}</div>
+                            <a href="{{ route('admin.dashboard', ['tab' => 'users']) }}" wire:click.prevent="setTab('users')" class="text-2xl font-black text-[#171923] hover:text-[#F20B65] transition block">
+                                {{ number_format($metrics['totalUsers']) }}
+                            </a>
                             <div class="text-[11px] font-bold text-emerald-600 flex items-center gap-1 mt-0.5">
                                 <span>↗ +{{ $metrics['userGrowth'] }}% this week</span>
                             </div>
-                            <div class="text-[10px] text-slate-400 font-semibold mt-1">
-                                {{ number_format($metrics['activeUsers']) }} active · {{ number_format($metrics['suspendedUsers']) }} suspended
+                            <div class="text-[10px] text-slate-400 font-semibold mt-1 flex items-center gap-1.5">
+                                <button type="button" wire:click="setUserStatusFilter('active')" class="hover:text-emerald-700 hover:underline cursor-pointer">
+                                    {{ number_format($metrics['activeUsers']) }} active
+                                </button>
+                                <span>·</span>
+                                <button type="button" wire:click="setUserStatusFilter('suspended')" class="hover:text-rose-600 hover:underline cursor-pointer">
+                                    {{ number_format($metrics['suspendedUsers']) }} suspended
+                                </button>
                             </div>
                         </div>
                     </div>
 
                     <!-- Stat 2: Total Listings -->
-                    <div class="bg-white rounded-2xl p-4 text-[#171923] shadow-xs border border-slate-200 flex flex-col justify-between">
+                    <div class="bg-white rounded-2xl p-4 text-[#171923] shadow-xs border border-slate-200 hover:border-purple-500 hover:shadow-md transition flex flex-col justify-between group">
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-slate-500">Total Listings</span>
+                            <a href="{{ route('admin.dashboard', ['tab' => 'listings']) }}" wire:click.prevent="setTab('listings')" class="text-xs font-bold text-slate-500 group-hover:text-purple-600 transition flex items-center gap-1">
+                                <span>Total Listings</span>
+                                <span class="opacity-0 group-hover:opacity-100 transition text-[10px]">→</span>
+                            </a>
                             <div class="w-8 h-8 rounded-full bg-purple-500/10 text-purple-600 flex items-center justify-center">
                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
                             </div>
                         </div>
                         <div class="mt-2">
-                            <div class="text-2xl font-black text-[#171923]">{{ number_format($metrics['totalListings']) }}</div>
+                            <a href="{{ route('admin.dashboard', ['tab' => 'listings']) }}" wire:click.prevent="setTab('listings')" class="text-2xl font-black text-[#171923] hover:text-purple-600 transition block">
+                                {{ number_format($metrics['totalListings']) }}
+                            </a>
                             <div class="text-[11px] font-bold text-emerald-600 flex items-center gap-1 mt-0.5">
                                 <span>↗ +{{ $metrics['listingGrowth'] }}% this week</span>
                             </div>
-                            <div class="text-[10px] text-slate-400 font-semibold mt-1">
-                                {{ number_format($metrics['publishedListings']) }} active · {{ number_format($metrics['pendingListings']) }} pending
+                            <div class="text-[10px] text-slate-400 font-semibold mt-1 flex items-center gap-1.5">
+                                <button type="button" wire:click="setListingStatusFilter('active')" class="hover:text-emerald-700 hover:underline cursor-pointer">
+                                    {{ number_format($metrics['publishedListings']) }} active
+                                </button>
+                                <span>·</span>
+                                <button type="button" wire:click="setTab('moderation')" class="hover:text-amber-700 hover:underline cursor-pointer">
+                                    {{ number_format($metrics['pendingListings']) }} pending
+                                </button>
                             </div>
                         </div>
                     </div>
 
                     <!-- Stat 3: Total Views & Real-Time Traffic -->
-                    <div class="bg-white rounded-2xl p-4 text-[#171923] shadow-xs border border-slate-200 flex flex-col justify-between">
+                    <div class="bg-white rounded-2xl p-4 text-[#171923] shadow-xs border border-slate-200 hover:border-teal-500 hover:shadow-md transition flex flex-col justify-between group">
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-slate-500">Total Views</span>
+                            <a href="{{ route('admin.dashboard', ['tab' => 'analytics']) }}" wire:click.prevent="setTab('analytics')" class="text-xs font-bold text-slate-500 group-hover:text-teal-600 transition flex items-center gap-1">
+                                <span>Total Views</span>
+                                <span class="opacity-0 group-hover:opacity-100 transition text-[10px]">→</span>
+                            </a>
                             <div class="w-8 h-8 rounded-full bg-teal-500/10 text-teal-600 flex items-center justify-center">
                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/></svg>
                             </div>
                         </div>
                         <div class="mt-2">
-                            <div class="text-2xl font-black text-[#171923]">
+                            <a href="{{ route('admin.dashboard', ['tab' => 'analytics']) }}" wire:click.prevent="setTab('analytics')" class="text-2xl font-black text-[#171923] hover:text-teal-600 transition block">
                                 {{ $metrics['totalViews'] >= 1000000 ? number_format($metrics['totalViews'] / 1000000, 1) . 'M' : ($metrics['totalViews'] >= 1000 ? number_format($metrics['totalViews'] / 1000, 1) . 'k' : number_format($metrics['totalViews'])) }}
-                            </div>
+                            </a>
                             <div class="text-[11px] font-bold text-emerald-600 flex items-center gap-1 mt-0.5">
                                 <span>↗ +{{ $metrics['viewsGrowth'] }}% traffic</span>
                             </div>
-                            <div class="text-[10px] text-teal-600 font-semibold mt-1">
+                            <a href="{{ route('admin.dashboard', ['tab' => 'analytics']) }}" wire:click.prevent="setTab('analytics')" class="text-[10px] text-teal-600 hover:underline font-semibold mt-1 block">
                                 {{ number_format($metrics['todayViews']) }} page views today
-                            </div>
+                            </a>
                         </div>
                     </div>
 
                     <!-- Stat 4: Revenue (Fiat + Web3 Crypto) -->
-                    <div class="bg-white rounded-2xl p-4 text-[#171923] shadow-xs border border-slate-200 flex flex-col justify-between">
+                    <div class="bg-white rounded-2xl p-4 text-[#171923] shadow-xs border border-slate-200 hover:border-amber-500 hover:shadow-md transition flex flex-col justify-between group">
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-slate-500">Revenue</span>
+                            <a href="{{ route('admin.dashboard', ['tab' => 'payments']) }}" wire:click.prevent="setTab('payments')" class="text-xs font-bold text-slate-500 group-hover:text-amber-600 transition flex items-center gap-1">
+                                <span>Revenue</span>
+                                <span class="opacity-0 group-hover:opacity-100 transition text-[10px]">→</span>
+                            </a>
                             <div class="w-8 h-8 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center">
                                 <span class="font-extrabold text-sm">$</span>
                             </div>
                         </div>
                         <div class="mt-2">
-                            <div class="text-2xl font-black text-[#171923]">${{ number_format($metrics['totalRevenue'], 2) }}</div>
+                            <a href="{{ route('admin.dashboard', ['tab' => 'payments']) }}" wire:click.prevent="setTab('payments')" class="text-2xl font-black text-[#171923] hover:text-amber-600 transition block">
+                                ${{ number_format($metrics['totalRevenue'], 2) }}
+                            </a>
                             <div class="text-[11px] font-bold text-emerald-600 flex items-center gap-1 mt-0.5">
                                 <span>↗ +{{ $metrics['revenueGrowth'] }}% growth</span>
                             </div>
@@ -426,11 +461,12 @@
                     <div class="rounded-2xl overflow-hidden shadow-xs relative min-h-[110px] group border border-slate-200">
                         <img src="{{ asset('images/admin-banner.jpg') }}" alt="Promo Banner" class="w-full h-full object-cover absolute inset-0 group-hover:scale-105 transition duration-300" />
                         <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-3.5 flex flex-col justify-end">
-                            <div class="text-xs font-black text-white">LocalDate<span class="text-[#F20B83]">Hub</span></div>
-                            <button type="button" wire:click="setTab('ads')" class="mt-1 bg-[#F20B83] hover:bg-[#d90858] text-white text-[10px] font-bold px-2 py-1 rounded-md flex items-center gap-1 w-max shadow transition">
+                            <div class="text-xs font-black text-white">LocalDate<span class="text-[#F20B65]">Hub</span></div>
+                            <a href="{{ route('admin.dashboard', ['tab' => 'ads']) }}" wire:click.prevent="setTab('ads')"
+                                class="mt-1 bg-[#F20B65] hover:bg-[#d90858] text-white text-[10px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1 w-max shadow transition cursor-pointer">
                                 <span>Manage Banner</span>
                                 <span>→</span>
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -446,8 +482,12 @@
                                 <p class="text-[11px] text-slate-500">Weekly traffic and inquiry metrics</p>
                             </div>
                             <div class="flex items-center space-x-3 text-[11px] font-semibold text-slate-600">
-                                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#F20B83]"></span>Views ({{ number_format($chart['totalWeeklyViews']) }})</span>
+                                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#F20B65]"></span>Views ({{ number_format($chart['totalWeeklyViews']) }})</span>
                                 <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#8B35F6]"></span>Contacts ({{ number_format($chart['totalWeeklyContacts']) }})</span>
+                                <a href="{{ route('admin.dashboard', ['tab' => 'analytics']) }}" wire:click.prevent="setTab('analytics')" class="text-[11px] font-bold text-[#F20B65] hover:underline flex items-center gap-0.5 ml-2">
+                                    <span>Full Report</span>
+                                    <span>→</span>
+                                </a>
                             </div>
                         </div>
 
@@ -462,8 +502,8 @@
                             <svg viewBox="0 0 500 160" class="w-full h-full overflow-visible">
                                 <defs>
                                     <linearGradient id="viewsGrad" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stop-color="#F20B83" stop-opacity="0.3" />
-                                        <stop offset="100%" stop-color="#F20B83" stop-opacity="0.0" />
+                                        <stop offset="0%" stop-color="#F20B65" stop-opacity="0.3" />
+                                        <stop offset="100%" stop-color="#F20B65" stop-opacity="0.0" />
                                     </linearGradient>
                                     <linearGradient id="contactsGrad" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="0%" stop-color="#8B35F6" stop-opacity="0.2" />
@@ -477,14 +517,14 @@
 
                                 <!-- Area Path Views -->
                                 <path d="{{ $chart['viewsAreaD'] }}" fill="url(#viewsGrad)" />
-                                <path d="{{ $chart['viewsLineD'] }}" fill="none" stroke="#F20B83" stroke-width="3" />
+                                <path d="{{ $chart['viewsLineD'] }}" fill="none" stroke="#F20B65" stroke-width="3" />
 
                                 <!-- Area Path Contacts -->
                                 <path d="{{ $chart['contactsAreaD'] }}" fill="url(#contactsGrad)" />
                                 <path d="{{ $chart['contactsLineD'] }}" fill="none" stroke="#8B35F6" stroke-width="2.5" stroke-dasharray="4,2" />
 
                                 <!-- Peak highlight dot -->
-                                <circle cx="{{ $chart['peakX'] }}" cy="{{ $chart['peakY'] }}" r="4.5" fill="#F20B83" stroke="#FFFFFF" stroke-width="2" />
+                                <circle cx="{{ $chart['peakX'] }}" cy="{{ $chart['peakY'] }}" r="4.5" fill="#F20B65" stroke="#FFFFFF" stroke-width="2" />
                             </svg>
                         </div>
                         <div class="flex justify-between text-[10px] font-bold text-slate-500 mt-1 px-1">
@@ -494,10 +534,15 @@
                         </div>
                     </div>
 
-                    <!-- Listing Status Donut Chart (Dynamic Database Calculation) -->
+                    <!-- Listing Status Donut Chart (Dynamic Database Calculation & Interactive Filters) -->
                     <div class="lg:col-span-3 {{ $card }} p-5 flex flex-col justify-between">
                         <div>
-                            <h2 class="text-sm font-extrabold text-slate-900 mb-2">Listing Status</h2>
+                            <div class="flex items-center justify-between mb-2">
+                                <h2 class="text-sm font-extrabold text-slate-900">Listing Status</h2>
+                                <a href="{{ route('admin.dashboard', ['tab' => 'listings']) }}" wire:click.prevent="setTab('listings')" class="text-[10px] font-bold text-[#F20B65] hover:underline">
+                                    All Ads →
+                                </a>
+                            </div>
                             <div class="relative w-36 h-36 mx-auto my-3 flex items-center justify-center">
                                 <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                                     <!-- Background Circle -->
@@ -507,60 +552,69 @@
                                     <!-- Pending (Amber) -->
                                     <path class="text-amber-500 transition-all duration-500" stroke-width="4.5" stroke-dasharray="{{ $statusCounts['penPct'] }}, 100" stroke-dashoffset="-{{ $statusCounts['pubPct'] }}" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                     <!-- Rejected (Pink) -->
-                                    <path class="text-[#F20B83] transition-all duration-500" stroke-width="4.5" stroke-dasharray="{{ $statusCounts['rejPct'] }}, 100" stroke-dashoffset="-{{ ($statusCounts['pubPct'] + $statusCounts['penPct']) }}" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                    <path class="text-[#F20B65] transition-all duration-500" stroke-width="4.5" stroke-dasharray="{{ $statusCounts['rejPct'] }}, 100" stroke-dashoffset="-{{ ($statusCounts['pubPct'] + $statusCounts['penPct']) }}" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                 </svg>
-                                <div class="absolute text-center">
-                                    <div class="text-xs font-black text-slate-900">{{ number_format($statusCounts['total']) }}</div>
-                                    <div class="text-[9px] font-bold text-slate-400 uppercase">Total</div>
-                                </div>
+                                <a href="{{ route('admin.dashboard', ['tab' => 'listings']) }}" wire:click.prevent="setListingStatusFilter('all')" class="absolute text-center group cursor-pointer" title="View All Listings">
+                                    <div class="text-xs font-black text-slate-900 group-hover:text-[#F20B65] transition">{{ number_format($statusCounts['total']) }}</div>
+                                    <div class="text-[9px] font-bold text-slate-400 group-hover:text-[#F20B65] transition uppercase">Total</div>
+                                </a>
                             </div>
                         </div>
 
-                        <!-- Legend with Real Counts -->
+                        <!-- Legend with Interactive Filter Clicking -->
                         <div class="space-y-1 text-[11px] font-medium pt-2 border-t border-slate-200">
-                            <div class="flex justify-between items-center">
-                                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Published</span>
-                                <span class="font-bold text-slate-900">{{ $statusCounts['pubPct'] }}% ({{ number_format($statusCounts['published']) }})</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Pending</span>
-                                <span class="font-bold text-slate-900">{{ $statusCounts['penPct'] }}% ({{ number_format($statusCounts['pending']) }})</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#F20B83]"></span>Rejected</span>
-                                <span class="font-bold text-slate-900">{{ $statusCounts['rejPct'] }}% ({{ number_format($statusCounts['rejected']) }})</span>
-                            </div>
+                            <a href="{{ route('admin.dashboard', ['tab' => 'listings']) }}" wire:click.prevent="setListingStatusFilter('active')"
+                                class="flex justify-between items-center p-1.5 rounded-lg hover:bg-slate-50 transition cursor-pointer group">
+                                <span class="flex items-center gap-1.5 text-slate-700 group-hover:text-emerald-700 font-semibold"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Published</span>
+                                <span class="font-bold text-slate-900 group-hover:text-emerald-700">{{ $statusCounts['pubPct'] }}% ({{ number_format($statusCounts['published']) }})</span>
+                            </a>
+                            <a href="{{ route('admin.dashboard', ['tab' => 'moderation']) }}" wire:click.prevent="setTab('moderation')"
+                                class="flex justify-between items-center p-1.5 rounded-lg hover:bg-slate-50 transition cursor-pointer group">
+                                <span class="flex items-center gap-1.5 text-slate-700 group-hover:text-amber-700 font-semibold"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Pending</span>
+                                <span class="font-bold text-slate-900 group-hover:text-amber-700">{{ $statusCounts['penPct'] }}% ({{ number_format($statusCounts['pending']) }})</span>
+                            </a>
+                            <a href="{{ route('admin.dashboard', ['tab' => 'listings']) }}" wire:click.prevent="setListingStatusFilter('rejected')"
+                                class="flex justify-between items-center p-1.5 rounded-lg hover:bg-slate-50 transition cursor-pointer group">
+                                <span class="flex items-center gap-1.5 text-slate-700 group-hover:text-rose-700 font-semibold"><span class="w-2 h-2 rounded-full bg-[#F20B65]"></span>Rejected</span>
+                                <span class="font-bold text-slate-900 group-hover:text-rose-700">{{ $statusCounts['rejPct'] }}% ({{ number_format($statusCounts['rejected']) }})</span>
+                            </a>
                         </div>
                     </div>
 
-                    <!-- Quick Actions Panel (100% Functional Routing) -->
-                    <div class="lg:col-span-3 {{ $card }} p-5 flex flex-col justify-between">
+                    <!-- Quick Actions Panel (100% Functional Routing & Working Accordion) -->
+                    <div class="lg:col-span-3 {{ $card }} p-5 flex flex-col justify-between" x-data="{ quickOpen: true }">
                         <div>
-                            <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center justify-between mb-3 cursor-pointer" @click="quickOpen = !quickOpen">
                                 <h2 class="text-sm font-extrabold text-slate-900">Quick Actions</h2>
-                                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                <button type="button" class="text-slate-400 hover:text-slate-700 transition" :class="{ 'rotate-180': !quickOpen }">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                </button>
                             </div>
-                            <div class="space-y-2">
-                                <a href="{{ route('listings.create') }}" target="_blank" class="w-full bg-pink-50 border border-pink-200 hover:bg-[#F20B83] text-[#F20B83] hover:text-white p-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition">
+                            <div class="space-y-2" x-show="quickOpen" x-collapse>
+                                <a href="{{ route('listings.create') }}" target="_blank" class="w-full bg-pink-50 border border-pink-200 hover:bg-[#F20B65] text-[#F20B65] hover:text-white p-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition shadow-xs">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                     <span>Add New Listing</span>
                                 </a>
-                                <button type="button" wire:click="setTab('users')" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition border border-slate-200">
+                                <a href="{{ route('admin.dashboard', ['tab' => 'users']) }}" wire:click.prevent="setTab('users')"
+                                    class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition border border-slate-200 cursor-pointer">
                                     <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1z"/></svg>
                                     <span>Manage Users</span>
-                                </button>
-                                <button type="button" wire:click="setTab('reports')" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition border border-slate-200">
-                                    <svg class="w-4 h-4 text-[#F20B83]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                </a>
+                                <a href="{{ route('admin.dashboard', ['tab' => 'reports']) }}" wire:click.prevent="setTab('reports')"
+                                    class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition border border-slate-200 cursor-pointer">
+                                    <svg class="w-4 h-4 text-[#F20B65]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                     <span>View Reports</span>
-                                </button>
-                                <button type="button" wire:click="setTab('payments')" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition border border-slate-200">
+                                </a>
+                                <a href="{{ route('admin.dashboard', ['tab' => 'payments']) }}" wire:click.prevent="setTab('payments')"
+                                    class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition border border-slate-200 cursor-pointer">
                                     <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
                                     <span>Manage Payments</span>
-                                </button>
-                                <button type="button" wire:click="setTab('seo')" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition border border-slate-200">
+                                </a>
+                                <a href="{{ route('admin.dashboard', ['tab' => 'seo']) }}" wire:click.prevent="setTab('seo')"
+                                    class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition border border-slate-200 cursor-pointer">
                                     <svg class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                     <span>SEO Settings</span>
-                                </button>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -577,39 +631,51 @@
                                 <h2 class="text-sm font-extrabold text-slate-900">Recent Listings</h2>
                                 <p class="text-[11px] text-slate-500">Latest active classified advertisements</p>
                             </div>
-                            <button type="button" wire:click="setTab('listings')" class="text-xs font-bold text-[#F20B83] hover:underline flex items-center gap-1">
+                            <a href="{{ route('admin.dashboard', ['tab' => 'listings']) }}" wire:click.prevent="setTab('listings')"
+                                class="text-xs font-bold text-[#F20B65] hover:underline flex items-center gap-1 cursor-pointer">
                                 <span>View All Listings</span>
                                 <span>→</span>
-                            </button>
+                            </a>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                             @forelse($recentListings as $rListing)
-                                <div class="bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col justify-between group shadow-xs">
+                                <div class="bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col justify-between group shadow-xs hover:border-[#F20B65] hover:shadow-md transition">
                                     <div class="relative h-28 bg-slate-100 overflow-hidden">
                                         @if($rListing->primary_photo_url)
-                                            <img src="{{ $rListing->primary_photo_url }}" alt="{{ $rListing->title }}" class="w-full h-full object-cover group-hover:scale-105 transition" />
+                                            <a href="{{ route('listings.show', $rListing->slug) }}" target="_blank" class="block w-full h-full">
+                                                <img src="{{ $rListing->primary_photo_url }}" alt="{{ $rListing->title }}" class="w-full h-full object-cover group-hover:scale-105 transition" />
+                                            </a>
                                         @else
-                                            <div class="w-full h-full flex flex-col items-center justify-center bg-slate-100 text-slate-400">
+                                            <a href="{{ route('listings.show', $rListing->slug) }}" target="_blank" class="w-full h-full flex flex-col items-center justify-center bg-slate-100 text-slate-400">
                                                 <svg class="w-8 h-8 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                                 <span class="text-[9px] font-bold text-slate-400 mt-1">LocalDateHub</span>
-                                            </div>
+                                            </a>
                                         @endif
-                                        <span class="absolute top-1.5 left-1.5 bg-[#F20B83] text-white text-[9px] font-extrabold px-1.5 py-0.2 rounded-full shadow-xs">
+                                        <button type="button" wire:click="setListingCategoryFilter({{ $rListing->category_id ?? 0 }})"
+                                            class="absolute top-1.5 left-1.5 bg-[#F20B65] hover:bg-[#d90858] text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full shadow-xs cursor-pointer transition"
+                                            title="Filter listings by {{ $rListing->category?->name }}">
                                             {{ $rListing->category?->name ?? 'Featured' }}
-                                        </span>
+                                        </button>
                                     </div>
                                     <div class="p-2.5 flex-1 flex flex-col justify-between">
                                         <div>
-                                            <div class="text-[11px] font-bold text-slate-900 truncate" title="{{ $rListing->title }}">{{ $rListing->title }}</div>
+                                            <a href="{{ route('listings.show', $rListing->slug) }}" target="_blank" class="text-[11px] font-bold text-slate-900 hover:text-[#F20B65] transition truncate block" title="{{ $rListing->title }}">
+                                                {{ $rListing->title }}
+                                            </a>
                                             <div class="text-[10px] text-slate-500 mt-0.5 truncate">{{ $rListing->city?->name ?? 'City' }}, {{ $rListing->city?->state?->code ?? 'US' }}</div>
                                         </div>
                                         <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
                                             <span class="text-slate-500 flex items-center gap-0.5 font-medium">👁 {{ number_format($rListing->view_count ?? 0) }}</span>
-                                            <a href="{{ route('listings.show', $rListing->slug) }}" target="_blank" class="bg-[#F20B83] hover:bg-[#d90858] text-white text-[9px] font-bold px-2 py-0.5 rounded flex items-center gap-0.5">
-                                                <span>View Ad</span>
-                                                <span>→</span>
-                                            </a>
+                                            <div class="flex items-center gap-1">
+                                                <button type="button" wire:click="openViewListingModal({{ $rListing->id }})" class="bg-slate-100 hover:bg-slate-200 text-slate-800 text-[9px] font-bold px-1.5 py-0.5 rounded transition" title="Moderate/Inspect ad">
+                                                    Manage
+                                                </button>
+                                                <a href="{{ route('listings.show', $rListing->slug) }}" target="_blank" class="bg-[#F20B65] hover:bg-[#d90858] text-white text-[9px] font-bold px-2 py-0.5 rounded flex items-center gap-0.5 shadow-2xs">
+                                                    <span>View Ad</span>
+                                                    <span>→</span>
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -630,10 +696,10 @@
                                     <p class="text-[10px] text-slate-500">Real-time visitor origins</p>
                                 </div>
                                 <div class="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
-                                    <button type="button" wire:click="setDashboardLocationMode('countries')" class="px-2 py-0.5 rounded text-[10px] font-bold transition {{ $dashboardLocationMode === 'countries' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900' }}">
+                                    <button type="button" wire:click="setDashboardLocationMode('countries')" class="px-2.5 py-1 rounded-md text-[10px] font-bold transition {{ $dashboardLocationMode === 'countries' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900' }}">
                                         🌍 Countries
                                     </button>
-                                    <button type="button" wire:click="setDashboardLocationMode('states')" class="px-2 py-0.5 rounded text-[10px] font-bold transition {{ $dashboardLocationMode === 'states' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900' }}">
+                                    <button type="button" wire:click="setDashboardLocationMode('states')" class="px-2.5 py-1 rounded-md text-[10px] font-bold transition {{ $dashboardLocationMode === 'states' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900' }}">
                                         📍 States
                                     </button>
                                 </div>
@@ -643,9 +709,9 @@
                                 <!-- Real-Time Country Tracking -->
                                 <div class="space-y-2">
                                     @forelse($topCountries as $idx => $c)
-                                        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                                        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200 text-xs hover:bg-slate-100 transition">
                                             <div class="flex items-center space-x-2.5 truncate">
-                                                <span class="w-5 h-5 rounded-full bg-pink-100 text-[#F20B83] text-[10px] font-extrabold flex items-center justify-center shrink-0">
+                                                <span class="w-5 h-5 rounded-full bg-pink-100 text-[#F20B65] text-[10px] font-extrabold flex items-center justify-center shrink-0">
                                                     {{ $idx + 1 }}
                                                 </span>
                                                 <span class="text-base shrink-0">{{ \App\Models\PlatformTrafficLog::countryCodeToFlag($c->country_code) }}</span>
@@ -664,18 +730,19 @@
                                 <!-- State Listings Distribution -->
                                 <div class="space-y-2">
                                     @forelse($topLocations as $idx => $st)
-                                        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                                        <a href="{{ route('admin.dashboard', ['tab' => 'locations']) }}" wire:click.prevent="setTab('locations')"
+                                            class="flex items-center justify-between p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs transition cursor-pointer group">
                                             <div class="flex items-center space-x-2.5 truncate">
-                                                <span class="w-5 h-5 rounded-full bg-pink-100 text-[#F20B83] text-[10px] font-extrabold flex items-center justify-center shrink-0">
+                                                <span class="w-5 h-5 rounded-full bg-pink-100 text-[#F20B65] text-[10px] font-extrabold flex items-center justify-center shrink-0">
                                                     {{ $idx + 1 }}
                                                 </span>
-                                                <span class="text-[#F20B83] shrink-0">
+                                                <span class="text-[#F20B65] shrink-0">
                                                     <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
                                                 </span>
-                                                <span class="font-bold text-slate-900 truncate">{{ $st->name }}</span>
+                                                <span class="font-bold text-slate-900 group-hover:text-[#F20B65] transition truncate">{{ $st->name }}</span>
                                             </div>
                                             <span class="text-slate-700 font-black text-[11px] shrink-0">{{ number_format($st->listings_count) }} {{ \Illuminate\Support\Str::plural('ad', $st->listings_count) }}</span>
-                                        </div>
+                                        </a>
                                     @empty
                                         <div class="text-center py-6 text-xs text-slate-400">No state location data available.</div>
                                     @endforelse
@@ -684,10 +751,11 @@
                         </div>
 
                         <div class="pt-3 mt-2 border-t border-slate-100 flex justify-end">
-                            <button type="button" wire:click="setTab('locations')" class="text-xs font-bold text-[#F20B83] hover:underline flex items-center gap-1">
+                            <a href="{{ route('admin.dashboard', ['tab' => 'locations']) }}" wire:click.prevent="setTab('locations')"
+                                class="text-xs font-bold text-[#F20B65] hover:underline flex items-center gap-1 cursor-pointer">
                                 <span>Manage All Locations</span>
                                 <span>→</span>
-                            </button>
+                            </a>
                         </div>
                     </div>
 
@@ -697,92 +765,106 @@
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
                     
                     <!-- Live Real-Time Visitor Stream (4 cols) -->
-                    <div class="lg:col-span-4 {{ $card }} p-5">
-                        <div class="flex items-center justify-between mb-3">
-                            <div>
-                                <h2 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
-                                    <span class="relative flex h-2 w-2">
-                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                                    </span>
-                                    <span>Live Visitor Stream</span>
-                                </h2>
-                                <p class="text-[10px] text-slate-500">Incoming requests real-time telemetry</p>
+                    <div class="lg:col-span-4 {{ $card }} p-5 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <div>
+                                    <h2 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+                                        <span class="relative flex h-2 w-2">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                        </span>
+                                        <span>Live Visitor Stream</span>
+                                    </h2>
+                                    <p class="text-[10px] text-slate-500">Incoming requests real-time telemetry</p>
+                                </div>
+                                <span class="text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">LIVE</span>
                             </div>
-                            <span class="text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">LIVE</span>
+
+                            <div class="space-y-2 text-xs">
+                                @forelse($liveVisitors as $lv)
+                                    <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100 text-slate-700 hover:bg-slate-100 transition">
+                                        <div class="flex items-center gap-2 truncate">
+                                            <span class="text-sm">{{ \App\Models\PlatformTrafficLog::countryCodeToFlag($lv->country_code) }}</span>
+                                            <span class="font-bold text-slate-900 truncate max-w-[130px]" title="{{ $lv->path }}">{{ $lv->path }}</span>
+                                            <span class="text-[9px] text-slate-400 font-semibold">{{ $lv->device_type }} · {{ $lv->browser }}</span>
+                                        </div>
+                                        <div class="text-right shrink-0">
+                                            <span class="text-[9px] text-slate-500 font-bold block">{{ $lv->created_at->diffForHumans(short: true) }}</span>
+                                            @if($lv->response_time_ms)
+                                                <span class="text-[8px] font-mono text-emerald-600 font-black">⚡{{ $lv->response_time_ms }}ms</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="text-center py-6 text-xs text-slate-400">Listening for live incoming requests...</div>
+                                @endforelse
+                            </div>
                         </div>
 
-                        <div class="space-y-2 text-xs">
-                            @forelse($liveVisitors as $lv)
-                                <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100 text-slate-700">
-                                    <div class="flex items-center gap-2 truncate">
-                                        <span class="text-sm">{{ \App\Models\PlatformTrafficLog::countryCodeToFlag($lv->country_code) }}</span>
-                                        <span class="font-bold text-slate-900 truncate max-w-[130px]" title="{{ $lv->path }}">{{ $lv->path }}</span>
-                                        <span class="text-[9px] text-slate-400 font-semibold">{{ $lv->device_type }} · {{ $lv->browser }}</span>
-                                    </div>
-                                    <div class="text-right shrink-0">
-                                        <span class="text-[9px] text-slate-500 font-bold block">{{ $lv->created_at->diffForHumans(short: true) }}</span>
-                                        @if($lv->response_time_ms)
-                                            <span class="text-[8px] font-mono text-emerald-600 font-black">⚡{{ $lv->response_time_ms }}ms</span>
-                                        @endif
-                                    </div>
-                                </div>
-                            @empty
-                                <div class="text-center py-6 text-xs text-slate-400">Listening for live incoming requests...</div>
-                            @endforelse
+                        <div class="pt-3 mt-2 border-t border-slate-100 flex justify-end">
+                            <a href="{{ route('admin.dashboard', ['tab' => 'analytics']) }}" wire:click.prevent="setTab('analytics')" class="text-xs font-bold text-[#F20B65] hover:underline flex items-center gap-1 cursor-pointer">
+                                <span>Full Traffic Logs</span>
+                                <span>→</span>
+                            </a>
                         </div>
                     </div>
 
                     <!-- System Health with 4 Radial Progress Gauges (4 cols) -->
-                    <div class="lg:col-span-4 {{ $card }} p-5">
-                        <h2 class="text-sm font-extrabold text-slate-900 mb-4">System Health</h2>
-                        <div class="grid grid-cols-4 gap-2 text-center mb-4">
-                            <!-- Server Gauge -->
-                            <div>
-                                <div class="relative w-12 h-12 mx-auto">
-                                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                                        <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                        <path class="text-emerald-500" stroke-width="3" stroke-dasharray="98, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                    </svg>
-                                    <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">98%</span>
-                                </div>
-                                <div class="text-[10px] font-bold text-slate-500 mt-1">Server</div>
+                    <div class="lg:col-span-4 {{ $card }} p-5 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-sm font-extrabold text-slate-900">System Health</h2>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">Optimal</span>
                             </div>
-
-                            <!-- Database Gauge -->
-                            <div>
-                                <div class="relative w-12 h-12 mx-auto">
-                                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                                        <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                        <path class="text-emerald-500" stroke-width="3" stroke-dasharray="100, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                    </svg>
-                                    <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">100%</span>
+                            <div class="grid grid-cols-4 gap-2 text-center mb-4">
+                                <!-- Server Gauge -->
+                                <div>
+                                    <div class="relative w-12 h-12 mx-auto">
+                                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                            <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                            <path class="text-emerald-500" stroke-width="3" stroke-dasharray="98, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        </svg>
+                                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">98%</span>
+                                    </div>
+                                    <div class="text-[10px] font-bold text-slate-500 mt-1">Server</div>
                                 </div>
-                                <div class="text-[10px] font-bold text-slate-500 mt-1">Database</div>
-                            </div>
 
-                            <!-- Queue Gauge -->
-                            <div>
-                                <div class="relative w-12 h-12 mx-auto">
-                                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                                        <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                        <path class="text-emerald-500" stroke-width="3" stroke-dasharray="99, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                    </svg>
-                                    <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">99%</span>
+                                <!-- Database Gauge -->
+                                <div>
+                                    <div class="relative w-12 h-12 mx-auto">
+                                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                            <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                            <path class="text-emerald-500" stroke-width="3" stroke-dasharray="100, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        </svg>
+                                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">100%</span>
+                                    </div>
+                                    <div class="text-[10px] font-bold text-slate-500 mt-1">Database</div>
                                 </div>
-                                <div class="text-[10px] font-bold text-slate-500 mt-1">Queue</div>
-                            </div>
 
-                            <!-- Cache Gauge -->
-                            <div>
-                                <div class="relative w-12 h-12 mx-auto">
-                                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                                        <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                        <path class="text-emerald-500" stroke-width="3" stroke-dasharray="97, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                    </svg>
-                                    <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">97%</span>
+                                <!-- Queue Gauge -->
+                                <div>
+                                    <div class="relative w-12 h-12 mx-auto">
+                                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                            <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                            <path class="text-emerald-500" stroke-width="3" stroke-dasharray="99, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        </svg>
+                                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">99%</span>
+                                    </div>
+                                    <div class="text-[10px] font-bold text-slate-500 mt-1">Queue</div>
                                 </div>
-                                <div class="text-[10px] font-bold text-slate-500 mt-1">Cache</div>
+
+                                <!-- Cache Gauge -->
+                                <div>
+                                    <div class="relative w-12 h-12 mx-auto">
+                                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                            <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                            <path class="text-emerald-500" stroke-width="3" stroke-dasharray="97, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        </svg>
+                                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">97%</span>
+                                    </div>
+                                    <div class="text-[10px] font-bold text-slate-500 mt-1">Cache</div>
+                                </div>
                             </div>
                         </div>
 
@@ -793,30 +875,41 @@
                     </div>
 
                     <!-- Recent Real Audit Activities (4 cols) -->
-                    <div class="lg:col-span-4 {{ $card }} p-5">
-                        <div class="flex items-center justify-between mb-3">
-                            <h2 class="text-sm font-extrabold text-slate-900">Recent Audit Trail</h2>
-                            <button type="button" wire:click="setTab('audit')" class="text-xs font-bold text-[#F20B83] hover:underline flex items-center gap-1">
-                                <span>View Logs</span>
-                                <span>→</span>
-                            </button>
+                    <div class="lg:col-span-4 {{ $card }} p-5 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <h2 class="text-sm font-extrabold text-slate-900">Recent Audit Trail</h2>
+                                <a href="{{ route('admin.dashboard', ['tab' => 'audit']) }}" wire:click.prevent="setTab('audit')"
+                                    class="text-xs font-bold text-[#F20B65] hover:underline flex items-center gap-1 cursor-pointer">
+                                    <span>View Logs</span>
+                                    <span>→</span>
+                                </a>
+                            </div>
+
+                            <div class="space-y-2 text-xs">
+                                @forelse($recentAudit as $log)
+                                    <div wire:click="inspectAuditLog({{ $log->id }})"
+                                        class="flex items-center justify-between p-2 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-100 text-slate-700 cursor-pointer transition group">
+                                        <div class="flex items-center gap-2 truncate">
+                                            <span class="w-2 h-2 rounded-full bg-[#F20B65] shrink-0"></span>
+                                            <div class="truncate">
+                                                <span class="font-bold text-slate-900 group-hover:text-[#F20B65] transition">{{ $log->admin?->name ?? 'System' }}</span>
+                                                <span class="text-[11px] text-slate-600 block truncate">{{ $log->action }}</span>
+                                            </div>
+                                        </div>
+                                        <span class="text-[10px] text-slate-400 font-bold shrink-0">{{ $log->created_at->diffForHumans(short: true) }}</span>
+                                    </div>
+                                @empty
+                                    <div class="text-center py-6 text-xs text-slate-400">No recent administrative audit events.</div>
+                                @endforelse
+                            </div>
                         </div>
 
-                        <div class="space-y-2 text-xs">
-                            @forelse($recentAudit as $log)
-                                <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100 text-slate-700">
-                                    <div class="flex items-center gap-2 truncate">
-                                        <span class="w-2 h-2 rounded-full bg-[#F20B83] shrink-0"></span>
-                                        <div class="truncate">
-                                            <span class="font-bold text-slate-900">{{ $log->admin?->name ?? 'System' }}</span>
-                                            <span class="text-[11px] text-slate-600 block truncate">{{ $log->action }}</span>
-                                        </div>
-                                    </div>
-                                    <span class="text-[10px] text-slate-400 font-bold shrink-0">{{ $log->created_at->diffForHumans(short: true) }}</span>
-                                </div>
-                            @empty
-                                <div class="text-center py-6 text-xs text-slate-400">No recent administrative audit events.</div>
-                            @endforelse
+                        <div class="pt-3 mt-2 border-t border-slate-100 flex justify-end">
+                            <a href="{{ route('admin.dashboard', ['tab' => 'audit']) }}" wire:click.prevent="setTab('audit')" class="text-xs font-bold text-[#F20B65] hover:underline flex items-center gap-1 cursor-pointer">
+                                <span>Security Audit Logs</span>
+                                <span>→</span>
+                            </a>
                         </div>
                     </div>
 
