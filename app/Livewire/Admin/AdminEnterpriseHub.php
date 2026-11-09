@@ -420,6 +420,7 @@ class AdminEnterpriseHub extends Component
 
     // System settings
     public array $settingValues = [];
+    #[Url(as: 'subtab')]
     public string $settingsSubTab = 'general'; // 'general', 'branding', 'smtp', 'notifications', 'safety', 'monetization', 'locations', 'security'
     public string $testEmailRecipient = '';
     public ?string $smtpTestSuccessMessage = null;
@@ -440,6 +441,11 @@ class AdminEnterpriseHub extends Component
 
         $requested = request()->query('tab', $initialTab ?: 'dashboard');
         $this->tab = $this->canAccessTab($requested) ? $requested : 'dashboard';
+
+        $requestedSubTab = request()->query('subtab');
+        if ($requestedSubTab && in_array($requestedSubTab, ['general', 'branding', 'smtp', 'notifications', 'safety', 'monetization', 'locations', 'security'], true)) {
+            $this->settingsSubTab = $requestedSubTab;
+        }
 
         $this->resetPlanForm();
         $this->resetCmsForm();

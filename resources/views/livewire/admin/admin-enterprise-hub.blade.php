@@ -6601,49 +6601,30 @@
 
         {{-- ================= 20. SYSTEM SETTINGS & REAL-TIME EMAIL SUITE ================= --}}
         @if($tab === 'settings')
-            <!-- Enterprise Settings Sub-Navigation Ribbon (Multi-Row Responsive Wrap - 100% Zero Cropping) -->
+            <!-- Enterprise Settings Sub-Navigation Ribbon (Multi-Row Responsive Wrap & Fail-Safe Dual Engine) -->
             <div class="flex flex-wrap items-center gap-2 mb-6 border-b border-slate-200 pb-3">
-                <button type="button" wire:click="setSettingsSubTab('general')"
-                    class="px-3.5 py-2 rounded-xl text-xs font-black transition whitespace-nowrap flex items-center gap-1.5 {{ $settingsSubTab === 'general' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
-                    <span>🏢</span>
-                    <span>General &amp; Platform</span>
-                </button>
-                <button type="button" wire:click="setSettingsSubTab('branding')"
-                    class="px-3.5 py-2 rounded-xl text-xs font-black transition whitespace-nowrap flex items-center gap-1.5 {{ $settingsSubTab === 'branding' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
-                    <span>🎨</span>
-                    <span>Logo &amp; Favicon</span>
-                </button>
-                <button type="button" wire:click="setSettingsSubTab('smtp')"
-                    class="px-3.5 py-2 rounded-xl text-xs font-black transition whitespace-nowrap flex items-center gap-1.5 {{ $settingsSubTab === 'smtp' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
-                    <span>✉️</span>
-                    <span>SMTP &amp; Mail Server</span>
-                </button>
-                <button type="button" wire:click="setSettingsSubTab('notifications')"
-                    class="px-3.5 py-2 rounded-xl text-xs font-black transition whitespace-nowrap flex items-center gap-1.5 {{ $settingsSubTab === 'notifications' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
-                    <span>🔔</span>
-                    <span>Email Event Triggers</span>
-                    <span class="px-1.5 py-0.2 rounded-full text-[10px] {{ $settingsSubTab === 'notifications' ? 'bg-white/30 text-white' : 'bg-pink-100 text-pink-900 font-extrabold' }}">Live</span>
-                </button>
-                <button type="button" wire:click="setSettingsSubTab('safety')"
-                    class="px-3.5 py-2 rounded-xl text-xs font-black transition whitespace-nowrap flex items-center gap-1.5 {{ $settingsSubTab === 'safety' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
-                    <span>🛡️</span>
-                    <span>Safety &amp; 2257 Legal</span>
-                </button>
-                <button type="button" wire:click="setSettingsSubTab('monetization')"
-                    class="px-3.5 py-2 rounded-xl text-xs font-black transition whitespace-nowrap flex items-center gap-1.5 {{ $settingsSubTab === 'monetization' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
-                    <span>💰</span>
-                    <span>Monetization &amp; Limits</span>
-                </button>
-                <button type="button" wire:click="setSettingsSubTab('locations')"
-                    class="px-3.5 py-2 rounded-xl text-xs font-black transition whitespace-nowrap flex items-center gap-1.5 {{ $settingsSubTab === 'locations' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
-                    <span>📍</span>
-                    <span>Search &amp; Locations</span>
-                </button>
-                <button type="button" wire:click="setSettingsSubTab('security')"
-                    class="px-3.5 py-2 rounded-xl text-xs font-black transition whitespace-nowrap flex items-center gap-1.5 {{ $settingsSubTab === 'security' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
-                    <span>🔒</span>
-                    <span>Security &amp; Maintenance</span>
-                </button>
+                @foreach([
+                    ['general', '🏢', 'General & Platform'],
+                    ['branding', '🎨', 'Logo & Favicon'],
+                    ['smtp', '✉️', 'SMTP & Mail Server'],
+                    ['notifications', '🔔', 'Email Event Triggers', 'Live'],
+                    ['safety', '🛡️', 'Safety & 2257 Legal'],
+                    ['monetization', '💰', 'Monetization & Limits'],
+                    ['locations', '📍', 'Search & Locations'],
+                    ['security', '🔒', 'Security & Maintenance'],
+                ] as $sTab)
+                    <a
+                        href="{{ route('admin.dashboard', ['tab' => 'settings', 'subtab' => $sTab[0]]) }}"
+                        wire:click.prevent="setSettingsSubTab('{{ $sTab[0] }}')"
+                        class="px-3.5 py-2 rounded-xl text-xs font-black transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer select-none {{ $settingsSubTab === $sTab[0] ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}"
+                    >
+                        <span>{{ $sTab[1] }}</span>
+                        <span>{{ $sTab[2] }}</span>
+                        @if(isset($sTab[3]))
+                            <span class="px-1.5 py-0.2 rounded-full text-[10px] {{ $settingsSubTab === $sTab[0] ? 'bg-white/30 text-white' : 'bg-pink-100 text-pink-900 font-extrabold' }}">{{ $sTab[3] }}</span>
+                        @endif
+                    </a>
+                @endforeach
             </div>
 
             <form wire:submit="saveSystemSettings" class="space-y-6">

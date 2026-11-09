@@ -84,20 +84,22 @@
         </x-alert>
     @endif
 
-    <!-- Main Navigation Tabs Bar (100% High-Contrast, ALL OPTIONS 100% VISIBLE - ZERO CROPPING) -->
+    <!-- Main Navigation Tabs Bar (100% High-Contrast, ALL OPTIONS 100% VISIBLE & FAIL-SAFE DUAL ENGINE) -->
     <div class="bg-white border border-slate-200 rounded-3xl p-3 sm:p-4 shadow-sm flex flex-wrap items-center gap-2 sm:gap-2.5 text-xs font-bold">
-        <button
-            wire:click="setTab('overview')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 {{ $tab === 'overview' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
+        <a
+            href="{{ route('account.dashboard', ['tab' => 'overview']) }}"
+            wire:click.prevent="setTab('overview')"
+            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'overview' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
             @if($tab === 'overview') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
         >
             <svg class="w-4 h-4" @if($tab === 'overview') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
             <span>Overview</span>
-        </button>
+        </a>
 
-        <button
-            wire:click="setTab('listings')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 {{ in_array($tab, ['listings', 'active', 'pending', 'rejected', 'expired', 'suspended']) ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
+        <a
+            href="{{ route('account.dashboard', ['tab' => 'listings']) }}"
+            wire:click.prevent="setTab('listings')"
+            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ in_array($tab, ['listings', 'active', 'pending', 'rejected', 'expired', 'suspended']) ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
             @if(in_array($tab, ['listings', 'active', 'pending', 'rejected', 'expired', 'suspended'])) style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
         >
             <svg class="w-4 h-4" @if(in_array($tab, ['listings', 'active', 'pending', 'rejected', 'expired', 'suspended'])) style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
@@ -105,11 +107,12 @@
             <span class="px-2 py-0.5 rounded-full text-[11px] font-black" @if(in_array($tab, ['listings', 'active', 'pending', 'rejected', 'expired', 'suspended'])) style="background-color: #fce7f3 !important; color: #F20B65 !important;" @else class="bg-slate-200 text-slate-800" @endif>
                 {{ $totalListings }}
             </span>
-        </button>
+        </a>
 
-        <button
-            wire:click="setTab('saved')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 {{ $tab === 'saved' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
+        <a
+            href="{{ route('account.dashboard', ['tab' => 'saved']) }}"
+            wire:click.prevent="setTab('saved')"
+            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'saved' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
             @if($tab === 'saved') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
         >
             <svg class="w-4 h-4" @if($tab === 'saved') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
@@ -117,11 +120,12 @@
             <span class="px-2 py-0.5 rounded-full text-[11px] font-black" @if($tab === 'saved') style="background-color: #fce7f3 !important; color: #F20B65 !important;" @else class="bg-slate-200 text-slate-800" @endif>
                 {{ $savedListingsCount }}
             </span>
-        </button>
+        </a>
 
-        <button
-            wire:click="setTab('messages')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 {{ $tab === 'messages' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
+        <a
+            href="{{ route('account.dashboard', ['tab' => 'messages']) }}"
+            wire:click.prevent="setTab('messages')"
+            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'messages' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
             @if($tab === 'messages') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
         >
             <svg class="w-4 h-4" @if($tab === 'messages') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
@@ -131,7 +135,7 @@
                     {{ $unreadInquiriesCount }} new
                 </span>
             @endif
-        </button>
+        </a>
 
         <a
             href="{{ route('account.wallet.index') }}"
@@ -155,81 +159,90 @@
             @endif
         </a>
 
-        <button
-            wire:click="setTab('analytics')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 {{ $tab === 'analytics' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
+        <a
+            href="{{ route('account.dashboard', ['tab' => 'analytics']) }}"
+            wire:click.prevent="setTab('analytics')"
+            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'analytics' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
             @if($tab === 'analytics') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
         >
             <svg class="w-4 h-4" @if($tab === 'analytics') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
             <span>Analytics</span>
-        </button>
+        </a>
 
-        <button
-            wire:click="setTab('promotions')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 {{ $tab === 'promotions' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
+        <a
+            href="{{ route('account.dashboard', ['tab' => 'promotions']) }}"
+            wire:click.prevent="setTab('promotions')"
+            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'promotions' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
             @if($tab === 'promotions') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
         >
             <svg class="w-4 h-4" @if($tab === 'promotions') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
             <span>Promotions</span>
-        </button>
+        </a>
 
-        <button
-            wire:click="setTab('subscription')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 {{ $tab === 'subscription' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
+        <a
+            href="{{ route('account.dashboard', ['tab' => 'subscription']) }}"
+            wire:click.prevent="setTab('subscription')"
+            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'subscription' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
             @if($tab === 'subscription') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
         >
             <svg class="w-4 h-4" @if($tab === 'subscription') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
             <span>Subscription</span>
-        </button>
+        </a>
 
-        <button
-            wire:click="setTab('billing')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 {{ $tab === 'billing' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
+        <a
+            href="{{ route('account.dashboard', ['tab' => 'billing']) }}"
+            wire:click.prevent="setTab('billing')"
+            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'billing' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
             @if($tab === 'billing') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
         >
             <svg class="w-4 h-4" @if($tab === 'billing') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z"/></svg>
             <span>Billing</span>
-        </button>
+        </a>
 
-        <button
-            wire:click="setTab('profile')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 {{ $tab === 'profile' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
+        <a
+            href="{{ route('account.dashboard', ['tab' => 'profile']) }}"
+            wire:click.prevent="setTab('profile')"
+            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'profile' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
             @if($tab === 'profile') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
         >
             <svg class="w-4 h-4" @if($tab === 'profile') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
             <span>Profile</span>
-        </button>
+        </a>
 
-        <button
-            wire:click="setTab('privacy')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 {{ $tab === 'privacy' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
+        <a
+            href="{{ route('account.dashboard', ['tab' => 'privacy']) }}"
+            wire:click.prevent="setTab('privacy')"
+            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'privacy' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
             @if($tab === 'privacy') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
         >
             <svg class="w-4 h-4" @if($tab === 'privacy') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
             <span>Privacy</span>
-        </button>
+        </a>
 
-        <button
-            wire:click="setTab('age_assurance')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 {{ $tab === 'age_assurance' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
+        <a
+            href="{{ route('account.dashboard', ['tab' => 'age_assurance']) }}"
+            wire:click.prevent="setTab('age_assurance')"
+            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'age_assurance' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
             @if($tab === 'age_assurance') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
         >
             <svg class="w-4 h-4" @if($tab === 'age_assurance') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
             <span>18+ Assurance</span>
-        </button>
+        </a>
 
-        <button
-            wire:click="setTab('security')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 {{ $tab === 'security' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
+        <a
+            href="{{ route('account.dashboard', ['tab' => 'security']) }}"
+            wire:click.prevent="setTab('security')"
+            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'security' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
             @if($tab === 'security') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
         >
             <svg class="w-4 h-4" @if($tab === 'security') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
             <span>Security</span>
-        </button>
+        </a>
 
-        <button
-            wire:click="setTab('blocked_users')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 {{ $tab === 'blocked_users' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
+        <a
+            href="{{ route('account.dashboard', ['tab' => 'blocked_users']) }}"
+            wire:click.prevent="setTab('blocked_users')"
+            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'blocked_users' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
             @if($tab === 'blocked_users') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
         >
             <svg class="w-4 h-4" @if($tab === 'blocked_users') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
@@ -237,7 +250,7 @@
             <span class="px-2 py-0.5 rounded-full text-[11px] font-black" @if($tab === 'blocked_users') style="background-color: #fce7f3 !important; color: #F20B65 !important;" @else class="bg-slate-200 text-slate-800" @endif>
                 {{ count($blockedUsers) }}
             </span>
-        </button>
+        </a>
     </div>
 
     <!-- TAB 1: OVERVIEW SECTION -->
