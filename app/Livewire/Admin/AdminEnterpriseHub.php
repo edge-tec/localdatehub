@@ -4456,7 +4456,7 @@ class AdminEnterpriseHub extends Component
                 'rejected' => $rejectedCount,
                 'total_verified_users' => $totalVerifiedUsers,
             ],
-            'assignableUsers' => User::where('is_active', true)->orderBy('name')->limit(50)->get(['id', 'name', 'email']),
+            'assignableUsers' => User::where('account_status', 'active')->orderBy('name')->limit(50)->get(['id', 'name', 'email']),
         ];
     }
 
@@ -4499,7 +4499,7 @@ class AdminEnterpriseHub extends Component
                 'failed' => $totalFailed,
                 'templates_count' => $totalTemplates,
             ],
-            'assignableUsers' => User::where('is_active', true)->orderBy('name')->limit(50)->get(['id', 'name', 'email']),
+            'assignableUsers' => User::where('account_status', 'active')->orderBy('name')->limit(50)->get(['id', 'name', 'email']),
         ];
     }
 
@@ -4672,7 +4672,7 @@ class AdminEnterpriseHub extends Component
         return [
             'subscriptions' => $query->paginate(15, ['*'], 'subscriptionsPage'),
             'allPlans' => PricingPlan::orderBy('plan_type')->orderBy('price_cents')->get(),
-            'assignableUsers' => User::where('is_active', true)->orderBy('name')->limit(50)->get(['id', 'name', 'email']),
+            'assignableUsers' => User::where('account_status', 'active')->orderBy('name')->limit(50)->get(['id', 'name', 'email']),
             'subscriptionStats' => [
                 'mrr' => $mrr,
                 'active_count' => $activeCount,

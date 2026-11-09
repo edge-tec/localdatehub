@@ -655,6 +655,25 @@ class EnterpriseAdminSystemTest extends TestCase
         $responsePayments = $this->actingAs($this->superAdmin)->get(route('admin.dashboard', ['tab' => 'payments']));
         $responsePayments->assertStatus(200);
         $responsePayments->assertSee('Payments');
+
+        $responseSubscriptions = $this->actingAs($this->superAdmin)->get(route('admin.dashboard', ['tab' => 'subscriptions']));
+        $responseSubscriptions->assertStatus(200);
+        $responseSubscriptions->assertSee('Subscriptions');
+
+        $responseVerification = $this->actingAs($this->superAdmin)->get(route('admin.dashboard', ['tab' => 'verification']));
+        $responseVerification->assertStatus(200);
+
+        $responseNotifications = $this->actingAs($this->superAdmin)->get(route('admin.dashboard', ['tab' => 'notifications']));
+        $responseNotifications->assertStatus(200);
+    }
+
+    public function test_admin_can_switch_to_subscriptions_tab_in_livewire(): void
+    {
+        Livewire::actingAs($this->superAdmin)
+            ->test(AdminEnterpriseHub::class, ['initialTab' => 'subscriptions'])
+            ->assertSet('tab', 'subscriptions')
+            ->assertHasNoErrors()
+            ->assertViewHas('assignableUsers');
     }
 
     public function test_admin_can_switch_to_payments_tab_in_livewire(): void
