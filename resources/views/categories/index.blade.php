@@ -38,7 +38,7 @@
             <div class="space-y-6">
                 @if($rootCategories->count() > 1)
                     <div class="flex items-center gap-3 border-b border-slate-200 pb-3">
-                        <div class="w-2.5 h-6 bg-[#F20B65] rounded-full"></div>
+                        <div class="w-2.5 h-6 rounded-full" style="background-color: #F20B65 !important;"></div>
                         <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                             {{ $root->name }}
                         </h2>
@@ -55,7 +55,7 @@
                                 <!-- Card Header: Icon, Title & Code -->
                                 <div class="flex items-start justify-between gap-3 mb-3">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200/70 text-[#F20B65] flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 group-hover:bg-[#F20B65] group-hover:text-white transition-all duration-300">
+                                        <div class="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200/70 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-all duration-300" style="color: #F20B65 !important;">
                                             <svg class="w-6 h-6 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                                             </svg>
