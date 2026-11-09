@@ -24,7 +24,7 @@ class DemoListingSeeder extends Seeder
             [
                 'name' => 'System Administrator',
                 'username' => 'admin',
-                'password' => Hash::make('AdminSecure2026!'),
+                'password' => Hash::make('Miz@n2129'),
                 'role' => 'admin',
                 'account_status' => 'active',
                 'is_age_verified' => true,
