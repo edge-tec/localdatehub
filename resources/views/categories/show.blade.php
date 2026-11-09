@@ -1,4 +1,4 @@
-<x-layouts.app title="{{ $category->seo_metadata['meta_title'] ?? ($category->name . ' Classifieds | LocalAdZone') }}">
+<x-layouts.app title="{{ $category->seo_metadata['meta_title'] ?? ($category->name . ' Classifieds | LocalDateHub') }}">
     <div class="py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <!-- Admin Preview Banner -->
         @if($isPreview)
