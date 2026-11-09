@@ -4089,9 +4089,14 @@ class AdminEnterpriseHub extends Component
             $this->smtpTestSuccessMessage = $msg;
             $this->dispatch('toast', type: 'success', message: "Test email dispatched successfully!");
         } catch (\Throwable $e) {
-            $err = "SMTP Handshake Error: " . $e->getMessage();
+            $rawErr = $e->getMessage();
+            $hint = '';
+            if (str_contains($rawErr, 'Connection timed out')) {
+                $hint = " — TIP: If using Cloudflare, change your 'mail' DNS record from Proxied (Orange Cloud) to 'DNS Only' (Grey Cloud), as Cloudflare blocks SMTP port {$port}. Alternatively, set SMTP Hostname to '127.0.0.1' if the mail server is on this same server.";
+            }
+            $err = $rawErr . $hint;
             $this->smtpTestErrorMessage = $err;
-            $this->dispatch('toast', type: 'warning', message: "SMTP Handshake Error: " . Str::limit($e->getMessage(), 60));
+            $this->dispatch('toast', type: 'warning', message: "SMTP Handshake: " . Str::limit($rawErr, 60));
         }
     }
 
