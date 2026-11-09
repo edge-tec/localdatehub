@@ -58,7 +58,7 @@ return new class extends Migration
             $table->unsignedInteger('display_order')->default(0);
             $table->timestamps();
 
-            $table->index(['category_attribute_id', 'display_order']);
+            $table->index(['category_attribute_id', 'display_order'], 'cat_attr_opts_attr_disp_idx');
         });
     }
 

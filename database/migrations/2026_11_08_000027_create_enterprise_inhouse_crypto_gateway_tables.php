@@ -100,8 +100,8 @@ return new class extends Migration
                 $table->boolean('is_active')->default(true);
                 $table->timestamps();
 
-                $table->index(['tier', 'network_key', 'is_active']);
-                $table->unique(['tier', 'network_key', 'public_receiving_address']);
+                $table->index(['tier', 'network_key', 'is_active'], 'ctw_tier_net_active_idx');
+                $table->unique(['tier', 'network_key', 'public_receiving_address'], 'ctw_tier_net_pubaddr_unique');
             });
         }
 
@@ -205,7 +205,7 @@ return new class extends Migration
                 $table->timestamp('verified_at');
                 $table->timestamps();
 
-                $table->index(['crypto_transaction_id', 'block_number']);
+                $table->index(['crypto_transaction_id', 'block_number'], 'cpc_tx_block_idx');
             });
         }
 
@@ -381,7 +381,7 @@ return new class extends Migration
                 $table->timestamp('calculated_at');
                 $table->timestamps();
 
-                $table->index(['network_key', 'currency_symbol']);
+                $table->index(['network_key', 'currency_symbol'], 'csce_net_curr_idx');
             });
         }
 

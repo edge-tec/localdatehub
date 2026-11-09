@@ -68,7 +68,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
-            $table->index(['category_id', 'account_type', 'is_active']);
+            $table->index(['category_id', 'account_type', 'is_active'], 'ppr_cat_acc_active_idx');
         });
 
         // 5. User Wallets Table
