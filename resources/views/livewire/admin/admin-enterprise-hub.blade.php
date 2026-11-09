@@ -6881,6 +6881,7 @@
                                     <input 
                                         type="email" 
                                         wire:model="testEmailRecipient" 
+                                        wire:keydown.enter.prevent="sendTestEmail"
                                         class="{{ $input }} text-xs font-bold" 
                                         placeholder="Enter recipient email address (e.g. admin@localdatehub.com)"
                                     />

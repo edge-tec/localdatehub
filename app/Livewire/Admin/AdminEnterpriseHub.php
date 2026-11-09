@@ -3924,22 +3924,24 @@ class AdminEnterpriseHub extends Component
                 $setting->is_public = !in_array($group, ['smtp', 'security'], true);
             }
 
-            if (in_array($setting->group, self::RESTRICTED_SETTING_GROUPS, true) && !$this->isSuperAdmin()) {
-                abort(403, "Only a Super Administrator can modify [{$setting->group}] settings.");
-            }
-
             $val = (string) $val;
-            if ($setting->type === 'integer' && !preg_match('/^-?\d+$/', $val)) {
-                throw ValidationException::withMessages(["settingValues.{$key}" => "The [{$key}] setting must be an integer."]);
-            }
-            if ($setting->type === 'boolean' && !in_array($val, ['true', 'false'], true)) {
-                throw ValidationException::withMessages(["settingValues.{$key}" => "The [{$key}] setting must be true or false."]);
-            }
-            if ($key === 'min_age_requirement' && (int) $val < 18) {
-                throw ValidationException::withMessages(["settingValues.{$key}" => 'Minimum age can never be lower than 18.']);
-            }
 
+            // Only validate and enforce permissions on settings that are actually being modified
             if ((string) $setting->value !== $val) {
+                if (in_array($setting->group, self::RESTRICTED_SETTING_GROUPS, true) && !$this->isSuperAdmin()) {
+                    abort(403, "Only a Super Administrator can modify [{$setting->group}] settings.");
+                }
+
+                if ($setting->type === 'integer' && !preg_match('/^-?\d+$/', $val)) {
+                    throw ValidationException::withMessages(["settingValues.{$key}" => "The [{$key}] setting must be an integer."]);
+                }
+                if ($setting->type === 'boolean' && !in_array($val, ['true', 'false'], true)) {
+                    throw ValidationException::withMessages(["settingValues.{$key}" => "The [{$key}] setting must be true or false."]);
+                }
+                if ($key === 'min_age_requirement' && (int) $val < 18) {
+                    throw ValidationException::withMessages(["settingValues.{$key}" => 'Minimum age can never be lower than 18.']);
+                }
+
                 $before = [$key => $setting->value];
                 $setting->value = $val;
                 $setting->save();
@@ -3948,8 +3950,61 @@ class AdminEnterpriseHub extends Component
             }
         }
 
+        // Dynamically apply mail settings to runtime config
+        if (!empty($this->settingValues['mail_host'])) {
+            $driver = $this->settingValues['mail_mailer'] ?? 'smtp';
+            $enc = $this->settingValues['mail_encryption'] ?? 'tls';
+            config([
+                'mail.default' => $driver === 'log' ? 'log' : 'smtp',
+                'mail.mailers.smtp.transport' => 'smtp',
+                'mail.mailers.smtp.host' => $this->settingValues['mail_host'],
+                'mail.mailers.smtp.port' => (int) ($this->settingValues['mail_port'] ?? 587),
+                'mail.mailers.smtp.encryption' => ($enc === 'none' || empty($enc)) ? null : $enc,
+                'mail.mailers.smtp.username' => empty($this->settingValues['mail_username']) ? null : $this->settingValues['mail_username'],
+                'mail.mailers.smtp.password' => empty($this->settingValues['mail_password']) ? null : $this->settingValues['mail_password'],
+                'mail.from.address' => $this->settingValues['mail_from_address'] ?? config('mail.from.address'),
+                'mail.from.name' => $this->settingValues['mail_from_name'] ?? config('mail.from.name'),
+            ]);
+            Mail::purge('smtp');
+            $this->syncMailConfigToEnv();
+        }
+
         session()->flash('success', $changed > 0 ? "System configuration updated successfully ({$changed} setting(s) saved)." : 'All settings are up to date.');
         $this->dispatch('toast', type: 'success', message: "Configuration saved successfully ({$changed} updated).");
+    }
+
+    protected function syncMailConfigToEnv(): void
+    {
+        $envPath = base_path('.env');
+        if (!file_exists($envPath) || !is_writable($envPath)) {
+            return;
+        }
+
+        try {
+            $envContent = file_get_contents($envPath);
+            $replacements = [
+                'MAIL_MAILER' => $this->settingValues['mail_mailer'] ?? 'smtp',
+                'MAIL_HOST' => $this->settingValues['mail_host'] ?? '',
+                'MAIL_PORT' => $this->settingValues['mail_port'] ?? '587',
+                'MAIL_USERNAME' => $this->settingValues['mail_username'] ?? '',
+                'MAIL_PASSWORD' => $this->settingValues['mail_password'] ?? '',
+                'MAIL_ENCRYPTION' => $this->settingValues['mail_encryption'] ?? 'tls',
+                'MAIL_FROM_ADDRESS' => '"' . ($this->settingValues['mail_from_address'] ?? 'notifications@localdatehub.com') . '"',
+                'MAIL_FROM_NAME' => '"' . ($this->settingValues['mail_from_name'] ?? 'LocalDateHub') . '"',
+            ];
+
+            foreach ($replacements as $k => $v) {
+                if (preg_match("/^{$k}=.*/m", $envContent)) {
+                    $envContent = preg_replace("/^{$k}=.*/m", "{$k}={$v}", $envContent);
+                } else {
+                    $envContent .= "\n{$k}={$v}";
+                }
+            }
+
+            file_put_contents($envPath, $envContent);
+        } catch (\Throwable) {
+            // Graceful fallback to database persistence
+        }
     }
 
     public function sendTestEmail(): void
@@ -3962,10 +4017,33 @@ class AdminEnterpriseHub extends Component
         $this->smtpTestSuccessMessage = null;
         $this->smtpTestErrorMessage = null;
 
-        $host = $this->settingValues['mail_host'] ?? config('mail.mailers.smtp.host', 'smtp.mailgun.org');
+        $host = trim((string) ($this->settingValues['mail_host'] ?? config('mail.mailers.smtp.host', 'smtp.mailgun.org')));
         $port = (int) ($this->settingValues['mail_port'] ?? config('mail.mailers.smtp.port', 587));
-        $fromEmail = $this->settingValues['mail_from_address'] ?? 'notifications@localdatehub.com';
-        $fromName = $this->settingValues['mail_from_name'] ?? 'LocalDateHub';
+        $username = trim((string) ($this->settingValues['mail_username'] ?? ''));
+        $password = (string) ($this->settingValues['mail_password'] ?? '');
+        $encryption = (string) ($this->settingValues['mail_encryption'] ?? 'tls');
+        $fromEmail = trim((string) ($this->settingValues['mail_from_address'] ?? 'notifications@localdatehub.com'));
+        $fromName = trim((string) ($this->settingValues['mail_from_name'] ?? 'LocalDateHub'));
+        $driver = (string) ($this->settingValues['mail_mailer'] ?? 'smtp');
+
+        // Dynamically configure Laravel's mailer on the fly for this diagnostic
+        if ($driver === 'log') {
+            config(['mail.default' => 'log']);
+        } else {
+            config([
+                'mail.default' => 'smtp',
+                'mail.mailers.smtp.transport' => 'smtp',
+                'mail.mailers.smtp.host' => $host,
+                'mail.mailers.smtp.port' => $port,
+                'mail.mailers.smtp.encryption' => ($encryption === 'none' || empty($encryption)) ? null : $encryption,
+                'mail.mailers.smtp.username' => empty($username) ? null : $username,
+                'mail.mailers.smtp.password' => empty($password) ? null : $password,
+                'mail.mailers.smtp.timeout' => 15,
+                'mail.from.address' => $fromEmail,
+                'mail.from.name' => $fromName,
+            ]);
+            Mail::purge('smtp');
+        }
 
         try {
             Mail::raw("Hello!\n\nThis is a verified test email sent from the LocalDateHub Administrative System Configuration Suite.\n\nSMTP Host: {$host}:{$port}\nOutgoing Sender: {$fromName} <{$fromEmail}>\nTimestamp: " . now()->toIso8601String() . "\n\nAll real-time email notification triggers (Account Creation, 18+ Verification, Listing Moderation, Blockchain Crypto Invoices, Wallet Funds, Low Balance Alerts, and Private Chat Notifications) are 100% OPERATIONAL.", function ($message) use ($fromEmail, $fromName) {
@@ -3988,9 +4066,9 @@ class AdminEnterpriseHub extends Component
             $this->smtpTestSuccessMessage = $msg;
             $this->dispatch('toast', type: 'success', message: "Test email dispatched successfully!");
         } catch (\Throwable $e) {
-            $err = "SMTP Connection note: " . $e->getMessage();
+            $err = "SMTP Handshake Error: " . $e->getMessage();
             $this->smtpTestErrorMessage = $err;
-            $this->dispatch('toast', type: 'warning', message: "SMTP Handshake note: " . Str::limit($e->getMessage(), 60));
+            $this->dispatch('toast', type: 'warning', message: "SMTP Handshake Error: " . Str::limit($e->getMessage(), 60));
         }
     }
 

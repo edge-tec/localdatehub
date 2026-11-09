@@ -590,6 +590,35 @@ class EnterpriseAdminSystemTest extends TestCase
             ->assertStatus(403);
     }
 
+    public function test_standard_admin_can_successfully_save_smtp_and_general_settings(): void
+    {
+        $adminUser = User::factory()->create([
+            'name' => 'General Admin',
+            'email' => 'admin-settings@example.com',
+            'role' => 'admin',
+            'account_status' => 'active',
+        ]);
+
+        Livewire::actingAs($adminUser)
+            ->test(AdminEnterpriseHub::class, ['initialTab' => 'settings'])
+            ->set('settingValues.mail_host', 'mail.localdatehub.com')
+            ->set('settingValues.mail_port', '587')
+            ->set('settingValues.mail_username', 'no_reply@localdatehub.com')
+            ->set('settingValues.mail_from_address', 'no_reply@localdatehub.com')
+            ->call('saveSystemSettings')
+            ->assertHasNoErrors()
+            ->assertStatus(200);
+
+        $this->assertDatabaseHas('system_settings', [
+            'key' => 'mail_host',
+            'value' => 'mail.localdatehub.com',
+        ]);
+        $this->assertDatabaseHas('system_settings', [
+            'key' => 'mail_port',
+            'value' => '587',
+        ]);
+    }
+
     public function test_admin_can_inspect_audit_log_details(): void
     {
         $log = AdminAuditLog::create([
