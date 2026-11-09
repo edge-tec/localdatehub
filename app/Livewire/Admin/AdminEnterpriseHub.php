@@ -4075,6 +4075,7 @@ class AdminEnterpriseHub extends Component
     public function render(): View
     {
         $data = [
+            'tab' => $this->tab,
             'tabs' => collect(self::TABS)->filter(fn ($meta, $key) => $this->canAccessTab($key)),
             'tabAllowed' => $this->canAccessTab($this->tab),
             'currentRole' => $this->currentUser()?->role,

@@ -701,4 +701,19 @@ class EnterpriseAdminSystemTest extends TestCase
             ->call('setDashboardLocationMode', 'states')
             ->assertSet('dashboardLocationMode', 'states');
     }
+
+    public function test_all_27_admin_enterprise_tabs_render_cleanly_via_livewire_and_http(): void
+    {
+        foreach (array_keys(AdminEnterpriseHub::TABS) as $tabKey) {
+            // Test 1: Livewire mounting & rendering
+            Livewire::actingAs($this->superAdmin)
+                ->test(AdminEnterpriseHub::class, ['initialTab' => $tabKey])
+                ->assertSet('tab', $tabKey)
+                ->assertHasNoErrors();
+
+            // Test 2: Direct HTTP route access
+            $response = $this->actingAs($this->superAdmin)->get(route('admin.dashboard', ['tab' => $tabKey]));
+            $response->assertStatus(200);
+        }
+    }
 }
