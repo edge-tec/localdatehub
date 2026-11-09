@@ -636,4 +636,20 @@ class EnterpriseAdminSystemTest extends TestCase
 
         $this->assertFalse($ad->fresh()->is_active);
     }
+
+    public function test_admin_can_switch_tabs_to_locations_and_access_catalog(): void
+    {
+        Livewire::actingAs($this->superAdmin)
+            ->test(AdminEnterpriseHub::class, ['initialTab' => 'dashboard'])
+            ->call('setTab', 'locations')
+            ->assertSet('tab', 'locations')
+            ->assertSee('City, alias &amp; ZIP manager', false);
+    }
+
+    public function test_admin_dashboard_controller_handles_tab_query_parameter(): void
+    {
+        $response = $this->actingAs($this->superAdmin)->get(route('admin.dashboard', ['tab' => 'locations']));
+        $response->assertStatus(200);
+        $response->assertSee('Locations');
+    }
 }

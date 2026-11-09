@@ -1,10 +1,5 @@
 import './bootstrap';
-import Alpine from 'alpinejs';
 
-window.Alpine = Alpine;
+// Livewire 3 bundles Alpine.js internally and manages its lifecycle.
+// Keeping app.js clean prevents duplicate Alpine initialization conflicts that disable wire:click listeners.
 
-// Only start Alpine if it hasn't already been started by Livewire
-if (!window.__alpineStarted) {
-    window.__alpineStarted = true;
-    Alpine.start();
-}

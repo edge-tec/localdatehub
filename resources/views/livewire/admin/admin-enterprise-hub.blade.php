@@ -1,23 +1,61 @@
 <div class="flex flex-col lg:flex-row gap-6">
     {{-- ================= Sidebar Navigation (Matching Pure White Theme) ================= --}}
-    <aside class="lg:w-64 shrink-0" aria-label="Administrative modules">
+    <aside class="lg:w-64 shrink-0" aria-label="Administrative modules"
+        x-data="{
+            adminProfileOpen: false,
+            expandedMenus: {
+                listings: {{ in_array($tab, ['listings', 'moderation', 'featured']) ? 'true' : 'false' }},
+                categories: {{ in_array($tab, ['categories', 'attributes']) ? 'true' : 'false' }},
+                locations: {{ in_array($tab, ['locations']) ? 'true' : 'false' }},
+                seo: {{ in_array($tab, ['seo', 'cms', 'ads']) ? 'true' : 'false' }}
+            },
+            toggleMenu(name) {
+                this.expandedMenus[name] = !this.expandedMenus[name];
+            }
+        }">
         <nav class="bg-white border border-slate-200 rounded-2xl p-3.5 lg:sticky lg:top-24 space-y-1 shadow-sm">
             
-            <!-- Admin Profile Card -->
-            <div class="flex items-center space-x-3 p-2.5 mb-3 rounded-xl bg-slate-50 border border-slate-200">
-                <div class="relative">
-                    <img src="{{ asset('images/admin-avatar.jpg') }}" alt="Admin" class="w-10 h-10 rounded-full object-cover border-2 border-[#F20B83]" />
-                    <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="text-xs font-bold text-slate-900 truncate flex items-center justify-between">
-                        <span>Admin</span>
-                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+            <!-- Admin Profile Card with Dropdown -->
+            <div class="relative mb-3">
+                <button type="button" @click="adminProfileOpen = !adminProfileOpen"
+                    class="w-full flex items-center space-x-3 p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition text-left cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#F20B65]/30">
+                    <div class="relative shrink-0">
+                        <img src="{{ asset('images/admin-avatar.jpg') }}" alt="{{ auth()->user()?->name ?? 'Admin' }}" class="w-10 h-10 rounded-full object-cover border-2 border-[#F20B65]" />
+                        <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>
                     </div>
-                    <div class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                        <span>Online</span>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-xs font-bold text-slate-900 truncate flex items-center justify-between">
+                            <span class="truncate">{{ auth()->user()?->name ?? 'Admin' }}</span>
+                            <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 transition transform duration-150" :class="{ 'rotate-180': adminProfileOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                        </div>
+                        <div class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            <span>{{ auth()->user() ? strtoupper(str_replace('_', ' ', auth()->user()->role)) : 'Online' }}</span>
+                        </div>
                     </div>
+                </button>
+
+                <!-- Profile Dropdown Menu -->
+                <div x-show="adminProfileOpen" @click.away="adminProfileOpen = false" x-cloak
+                    class="absolute left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl py-1.5 z-40 text-xs font-semibold">
+                    <a href="{{ route('admin.dashboard', ['tab' => 'settings']) }}" wire:click.prevent="setTab('settings')" @click="adminProfileOpen = false"
+                        class="flex items-center gap-2 px-3 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <span>System Settings</span>
+                    </a>
+                    <a href="{{ route('admin.dashboard', ['tab' => 'audit']) }}" wire:click.prevent="setTab('audit')" @click="adminProfileOpen = false"
+                        class="flex items-center gap-2 px-3 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Audit Logs</span>
+                    </a>
+                    <div class="border-t border-slate-100 my-1"></div>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="w-full text-left flex items-center gap-2 px-3 py-2 text-rose-600 hover:bg-rose-50 font-bold transition">
+                            <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+                            <span>Sign Out</span>
+                        </button>
+                    </form>
                 </div>
             </div>
 
@@ -31,55 +69,199 @@
                 $totalModerationBadge = $pendingQueueCount + $pendingAppealsCount;
 
                 $menuItems = [
-                    ['dashboard', 'Dashboard', 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
-                    ['users', 'Users', 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'],
-                    ['listings', 'Listings', 'M4 6h16M4 10h16M4 14h16M4 18h16', true],
-                    ['categories', 'Categories', 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z', true],
-                    ['locations', 'Locations', 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z'],
-                    ['moderation', 'Moderation', 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', false, $totalModerationBadge > 0 ? $totalModerationBadge : null],
-                    ['reports', 'Reports', 'M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9', false, $openReportsCount > 0 ? $openReportsCount : null],
-                    ['payments', 'Payments', 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'],
-                    ['subscriptions', 'Subscriptions', 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'],
-                    ['seo', 'SEO & Marketing', 'M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z', true],
-                    ['verification', 'Age Verification', 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', false, $pendingVerificationBadge > 0 ? $pendingVerificationBadge : null],
-                    ['notifications', 'Notifications', 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9', false, $failedNotificationsBadge > 0 ? $failedNotificationsBadge : null],
-                    ['cms', 'CMS Pages', 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
-                    ['ads', 'Advertising', 'M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z'],
-                    ['staff', 'Staff Management', 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'],
-                    ['settings', 'Settings', 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z'],
-                    ['audit', 'Audit Logs', 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+                    [
+                        'key' => 'dashboard',
+                        'label' => 'Dashboard',
+                        'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
+                    ],
+                    [
+                        'key' => 'users',
+                        'label' => 'Users',
+                        'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z',
+                    ],
+                    [
+                        'key' => 'listings',
+                        'label' => 'Listings',
+                        'icon' => 'M4 6h16M4 10h16M4 14h16M4 18h16',
+                        'has_submenu' => true,
+                        'subitems' => [
+                            ['key' => 'listings', 'label' => 'All Listings'],
+                            ['key' => 'moderation', 'label' => 'Review Queue', 'badge' => $pendingQueueCount > 0 ? $pendingQueueCount : null],
+                            ['key' => 'featured', 'label' => 'Featured Ads'],
+                        ],
+                    ],
+                    [
+                        'key' => 'categories',
+                        'label' => 'Categories',
+                        'icon' => 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z',
+                        'has_submenu' => true,
+                        'subitems' => [
+                            ['key' => 'categories', 'label' => 'All Categories'],
+                            ['key' => 'attributes', 'label' => 'Custom Fields'],
+                        ],
+                    ],
+                    [
+                        'key' => 'locations',
+                        'label' => 'Locations',
+                        'icon' => 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z',
+                        'has_submenu' => true,
+                        'subitems' => [
+                            ['key' => 'locations', 'label' => 'States & Cities'],
+                            ['url' => route('admin.locations.index'), 'label' => 'City & ZIP Manager ↗'],
+                        ],
+                    ],
+                    [
+                        'key' => 'moderation',
+                        'label' => 'Moderation',
+                        'icon' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
+                        'badge' => $totalModerationBadge > 0 ? $totalModerationBadge : null,
+                    ],
+                    [
+                        'key' => 'reports',
+                        'label' => 'Reports',
+                        'icon' => 'M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9',
+                        'badge' => $openReportsCount > 0 ? $openReportsCount : null,
+                    ],
+                    [
+                        'key' => 'payments',
+                        'label' => 'Payments',
+                        'icon' => 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z',
+                    ],
+                    [
+                        'key' => 'subscriptions',
+                        'label' => 'Subscriptions',
+                        'icon' => 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15',
+                    ],
+                    [
+                        'key' => 'seo',
+                        'label' => 'SEO & Marketing',
+                        'icon' => 'M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z',
+                        'has_submenu' => true,
+                        'subitems' => [
+                            ['key' => 'seo', 'label' => 'SEO Meta & Sitemaps'],
+                            ['key' => 'cms', 'label' => 'CMS Legal Pages'],
+                            ['key' => 'ads', 'label' => 'Advertising Slots'],
+                        ],
+                    ],
+                    [
+                        'key' => 'verification',
+                        'label' => 'Age Verification',
+                        'icon' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
+                        'badge' => $pendingVerificationBadge > 0 ? $pendingVerificationBadge : null,
+                    ],
+                    [
+                        'key' => 'notifications',
+                        'label' => 'Notifications',
+                        'icon' => 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9',
+                        'badge' => $failedNotificationsBadge > 0 ? $failedNotificationsBadge : null,
+                    ],
+                    [
+                        'key' => 'cms',
+                        'label' => 'CMS Pages',
+                        'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+                    ],
+                    [
+                        'key' => 'ads',
+                        'label' => 'Advertising',
+                        'icon' => 'M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z',
+                    ],
+                    [
+                        'key' => 'staff',
+                        'label' => 'Staff Management',
+                        'icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
+                    ],
+                    [
+                        'key' => 'settings',
+                        'label' => 'Settings',
+                        'icon' => 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z',
+                    ],
+                    [
+                        'key' => 'audit',
+                        'label' => 'Audit Logs',
+                        'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+                    ],
                 ];
             @endphp
 
             @foreach($menuItems as $item)
                 @php
-                    [$key, $label, $path] = $item;
-                    $hasChevron = $item[3] ?? false;
-                    $badgeCount = $item[4] ?? null;
+                    $key = $item['key'];
+                    $label = $item['label'];
+                    $path = $item['icon'];
+                    $badgeCount = $item['badge'] ?? null;
+                    $hasSubmenu = $item['has_submenu'] ?? false;
+                    $subitems = $item['subitems'] ?? [];
                     $isActive = ($tab === $key);
+                    $isSubActive = false;
+                    if ($hasSubmenu) {
+                        foreach ($subitems as $s) {
+                            if (($s['key'] ?? '') === $tab) {
+                                $isSubActive = true;
+                                break;
+                            }
+                        }
+                    }
+                    $isGroupActive = $isActive || $isSubActive;
                 @endphp
-                <button type="button" wire:click="setTab('{{ $key }}')"
-                    class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-150 {{ $isActive ? 'bg-[#F20B83] text-white shadow-md' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
-                    <div class="flex items-center space-x-2.5 truncate">
-                        <svg class="w-4 h-4 shrink-0 {{ $isActive ? 'text-slate-900' : 'text-slate-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $path }}" />
-                        </svg>
-                        <span class="truncate">{{ $label }}</span>
+
+                <div class="space-y-0.5" wire:key="nav-group-{{ $key }}">
+                    <div class="flex items-center gap-1">
+                        <a href="{{ route('admin.dashboard', ['tab' => $key]) }}"
+                            wire:click.prevent="setTab('{{ $key }}')"
+                            class="flex-1 flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-150 cursor-pointer group {{ $isActive ? 'text-white shadow-md' : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100' }}"
+                            @if($isActive) style="background: linear-gradient(135deg, #F20B65 0%, #D90858 100%) !important; color: #ffffff !important;" @endif>
+                            
+                            <div class="flex items-center space-x-2.5 truncate">
+                                <svg class="w-4 h-4 shrink-0 {{ $isActive ? 'text-white' : 'text-slate-500 group-hover:text-slate-800' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $path }}" />
+                                </svg>
+                                <span class="truncate tracking-tight">{{ $label }}</span>
+                            </div>
+
+                            @if($badgeCount)
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-black {{ $isActive ? 'bg-white text-[#F20B65]' : 'bg-[#EF4444] text-white' }} shadow-xs">
+                                    {{ $badgeCount }}
+                                </span>
+                            @endif
+                        </a>
+
+                        @if($hasSubmenu)
+                            <button type="button" @click="toggleMenu('{{ $key }}')"
+                                class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                                title="Toggle {{ $label }} sub-options">
+                                <svg class="w-3.5 h-3.5 transition transform duration-150" :class="{ 'rotate-180': expandedMenus['{{ $key }}'] }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                            </button>
+                        @endif
                     </div>
 
-                    @if($badgeCount)
-                        <span class="px-1.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#EF4444] text-white">
-                            {{ $badgeCount }}
-                        </span>
-                    @elseif($hasChevron)
-                        <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                    @if($hasSubmenu)
+                        <div x-show="expandedMenus['{{ $key }}']" x-cloak class="pl-8 pr-1 py-1 space-y-1">
+                            @foreach($subitems as $sub)
+                                @php
+                                    $subKey = $sub['key'] ?? null;
+                                    $subUrl = $sub['url'] ?? ($subKey ? route('admin.dashboard', ['tab' => $subKey]) : '#');
+                                    $subBadge = $sub['badge'] ?? null;
+                                    $subIsActive = ($subKey && $tab === $subKey);
+                                @endphp
+                                <a href="{{ $subUrl }}"
+                                    @if($subKey) wire:click.prevent="setTab('{{ $subKey }}')" @endif
+                                    class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition {{ $subIsActive ? 'bg-[#F20B65]/10 text-[#F20B65] font-black' : 'text-slate-600 hover:text-slate-950 hover:bg-slate-50' }}">
+                                    <span>{{ $sub['label'] }}</span>
+                                    @if($subBadge)
+                                        <span class="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-[#EF4444] text-white">
+                                            {{ $subBadge }}
+                                        </span>
+                                    @endif
+                                </a>
+                            @endforeach
+                        </div>
                     @endif
-                </button>
+                </div>
             @endforeach
 
             <!-- View Website Button (Pink Outline) -->
             <div class="pt-4 mt-4 border-t border-slate-200">
-                <a href="{{ url('/') }}" target="_blank" class="w-full flex items-center justify-center space-x-2 px-3 py-2.5 rounded-xl border border-[#F20B83] text-[#F20B83] hover:bg-[#F20B83] hover:text-slate-900 transition font-bold text-xs">
+                <a href="{{ url('/') }}" target="_blank" class="w-full flex items-center justify-center space-x-2 px-3 py-2.5 rounded-xl border border-[#F20B65] text-[#F20B65] hover:bg-[#F20B65] hover:text-white transition font-bold text-xs shadow-2xs">
                     <span>View Website</span>
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                 </a>
