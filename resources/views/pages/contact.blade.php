@@ -1,156 +1,390 @@
 <x-layouts.app title="Contact & Support — LocalDateHub">
-    <div class="py-12 bg-slate-50">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <x-breadcrumbs :items="[
-                ['label' => 'Home', 'url' => route('home')],
-                ['label' => 'Contact Support']
-            ]" />
+    <div class="py-8 sm:py-12 bg-slate-50/70 min-h-screen">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+            
+            <!-- Modern Breadcrumbs Navigation -->
+            <nav class="flex items-center text-xs font-semibold text-slate-500 overflow-x-auto whitespace-nowrap py-1 scrollbar-none" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1.5 sm:space-x-2">
+                    <li class="inline-flex items-center">
+                        <a href="{{ route('home') }}" class="inline-flex items-center gap-1.5 text-slate-700 hover:text-[#F20B65] transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    <li><span class="text-slate-300">/</span></li>
+                    <li>
+                        <span class="text-[#F20B65] font-bold">Contact Support</span>
+                    </li>
+                </ol>
+            </nav>
 
-            <div class="mt-8">
-                <x-badge variant="rose">Help Center & Inquiries</x-badge>
-                <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-3 tracking-tight">
-                    Get in Touch with LocalDateHub
-                </h1>
-                <p class="mt-4 text-lg text-slate-600 leading-relaxed">
-                    Have questions about your account, need assistance with a listing, or wish to report a safety concern? Our USA-based operations team is here to assist.
-                </p>
+            <!-- Hero Section -->
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm relative overflow-hidden">
+                <!-- Top Vibrant Gradient Ribbon -->
+                <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#F20B65] via-pink-500 to-purple-600"></div>
+                
+                <div class="max-w-3xl space-y-4">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-pink-50 border border-pink-200 text-[#F20B65] text-xs font-black shadow-2xs">
+                        <span class="w-2 h-2 rounded-full animate-ping" style="background-color: #F20B65 !important;"></span>
+                        <span>24/7 Dedicated Support &amp; Inquiries</span>
+                    </div>
+
+                    <h1 class="text-2xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+                        Get in Touch with LocalDateHub
+                    </h1>
+
+                    <p class="text-sm sm:text-base text-slate-700 leading-relaxed font-medium">
+                        Have questions about your account, need assistance with your classifieds, or wish to report a safety concern? Our USA-based operations and Trust &amp; Safety team are standing by to assist.
+                    </p>
+
+                    <!-- Key Service Metrics Pill Row -->
+                    <div class="flex flex-wrap items-center gap-3 pt-2 text-xs font-bold">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-800 border border-slate-200 shadow-2xs">
+                            <span class="text-rose-600">⚡</span> &lt; 1 Hour Safety Response
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-800 border border-slate-200 shadow-2xs">
+                            <span class="text-emerald-600">🔒</span> AES-256 Field Encrypted
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-800 border border-slate-200 shadow-2xs">
+                            <span class="text-blue-600">🇺🇸</span> 100% US Operations Team
+                        </span>
+                    </div>
+                </div>
             </div>
 
+            <!-- Success Alert Banner -->
             @if(session('success'))
-                <div class="mt-6">
-                    <x-alert type="success" :dismissible="false">
-                        <strong class="font-semibold">Message Delivered:</strong> {{ session('success') }}
-                    </x-alert>
+                <div class="p-4 sm:p-5 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-950 flex items-start gap-3 shadow-sm">
+                    <svg class="w-6 h-6 text-emerald-600 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    <div class="text-xs sm:text-sm">
+                        <strong class="font-black block text-emerald-900">Inquiry Received Successfully!</strong>
+                        <p class="mt-0.5 font-medium text-emerald-800">{{ session('success') }}</p>
+                    </div>
                 </div>
             @endif
 
-            <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Info Column -->
-                <div class="space-y-6">
-                    <x-card>
-                        <h2 class="text-base font-bold text-slate-900 mb-2">Response Times</h2>
-                        <ul class="space-y-3 text-xs text-slate-600">
-                            <li class="flex items-start gap-2">
-                                <span class="w-2 h-2 rounded-full bg-rose-500 mt-1.5 shrink-0"></span>
-                                <div>
-                                    <strong class="text-slate-900 block">Trust & Safety Reports:</strong>
-                                    Reviewed within 1 hour, 24/7.
-                                </div>
-                            </li>
-                            <li class="flex items-start gap-2">
-                                <span class="w-2 h-2 rounded-full bg-amber-500 mt-1.5 shrink-0"></span>
-                                <div>
-                                    <strong class="text-slate-900 block">Billing & Upgrades:</strong>
-                                    Responded within 4 to 8 hours.
-                                </div>
-                            </li>
-                            <li class="flex items-start gap-2">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shrink-0"></span>
-                                <div>
-                                    <strong class="text-slate-900 block">General Inquiries:</strong>
-                                    Responded within 24 hours.
-                                </div>
-                            </li>
-                        </ul>
-                    </x-card>
+            <!-- Main Layout: 2 Columns (4 Cols Sidebar + 8 Cols Form) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                <!-- LEFT COLUMN (4 COLS): Operational SLAs & Privacy Info -->
+                <div class="lg:col-span-4 space-y-6">
+                    
+                    <!-- 1. Guaranteed Response Times Card -->
+                    <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-5">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <h2 class="text-xs font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                                <svg class="w-4 h-4 text-[#F20B65]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span>Support Response SLAs</span>
+                            </h2>
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                Live Desk
+                            </span>
+                        </div>
 
-                    <x-card>
-                        <h2 class="text-base font-bold text-slate-900 mb-2">Encrypted Records</h2>
-                        <p class="text-xs text-slate-400 leading-relaxed">
-                            All messages and contact information submitted through this form are stored with AES-256 field encryption and purged in compliance with our data retention schedule.
+                        <div class="space-y-4 text-xs">
+                            <!-- SLA 1: Safety & Abuse -->
+                            <div class="p-3.5 rounded-2xl bg-rose-50/70 border border-rose-200 space-y-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-black text-rose-950 flex items-center gap-1.5">
+                                        <span class="w-2 h-2 rounded-full bg-rose-600"></span>
+                                        Trust &amp; Safety Desk
+                                    </span>
+                                    <span class="font-black text-[10px] px-2 py-0.5 rounded-md bg-rose-200/80 text-rose-900">
+                                        &lt; 1 Hour (24/7)
+                                    </span>
+                                </div>
+                                <p class="text-rose-900/80 font-medium text-[11px]">
+                                    Reports concerning minors, harassment, or scam activity take highest priority.
+                                </p>
+                            </div>
+
+                            <!-- SLA 2: Billing & Boosts -->
+                            <div class="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-black text-amber-950 flex items-center gap-1.5">
+                                        <span class="w-2 h-2 rounded-full bg-amber-600"></span>
+                                        Billing &amp; Upgrades
+                                    </span>
+                                    <span class="font-black text-[10px] px-2 py-0.5 rounded-md bg-amber-200/80 text-amber-900">
+                                        4 &ndash; 8 Hours
+                                    </span>
+                                </div>
+                                <p class="text-amber-900/80 font-medium text-[11px]">
+                                    Assistance with crypto deposit confirmations, invoice receipts, and featured boosts.
+                                </p>
+                            </div>
+
+                            <!-- SLA 3: General Inquiries -->
+                            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-black text-slate-900 flex items-center gap-1.5">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                        General Inquiries
+                                    </span>
+                                    <span class="font-black text-[10px] px-2 py-0.5 rounded-md bg-slate-200 text-slate-800">
+                                        &lt; 24 Hours
+                                    </span>
+                                </div>
+                                <p class="text-slate-600 font-medium text-[11px]">
+                                    Profile modifications, city expansion requests, and technical navigation help.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Encrypted Records & Privacy Card -->
+                    <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-3.5">
+                        <div class="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-slate-500 pb-2 border-b border-slate-100">
+                            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                            <span>Encrypted Data Protection</span>
+                        </div>
+                        <p class="text-xs text-slate-700 leading-relaxed font-medium">
+                            All messages and contact details submitted through this form are encrypted with <strong class="text-slate-900 font-black">AES-256</strong> cipher before storage.
                         </p>
-                    </x-card>
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 font-medium space-y-1">
+                            <p class="text-slate-900 font-bold flex items-center gap-1.5">
+                                <span>🛡️</span> Zero Marketing Spam Policy
+                            </p>
+                            <p>Your email and phone are used strictly for resolving this specific inquiry and will never be shared.</p>
+                        </div>
+                    </div>
+
+                    <!-- 3. Self-Service Quick Links -->
+                    <div class="bg-gradient-to-br from-pink-50/50 via-white to-slate-50 border border-pink-200/80 rounded-3xl p-6 shadow-sm space-y-3">
+                        <h3 class="text-xs font-black uppercase tracking-wider text-[#F20B65]">Self-Service Hub</h3>
+                        <p class="text-xs text-slate-700 font-medium">
+                            Looking for quick answers? You may find immediate assistance here:
+                        </p>
+                        <div class="space-y-2 pt-1 text-xs font-bold">
+                            <a href="{{ route('pages.pricing') }}" class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 hover:border-pink-300 hover:text-[#F20B65] transition shadow-2xs">
+                                <span>💎 Upgrade &amp; Pricing Details</span>
+                                <span>&rarr;</span>
+                            </a>
+                            <a href="{{ route('pages.about') }}" class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 hover:border-pink-300 hover:text-[#F20B65] transition shadow-2xs">
+                                <span>📜 Community Safety Standards</span>
+                                <span>&rarr;</span>
+                            </a>
+                        </div>
+                    </div>
+
                 </div>
 
-                <!-- Form Column -->
-                <div class="md:col-span-2">
-                    <x-card>
-                        <form action="{{ route('pages.contact.submit') }}" method="POST" class="space-y-5">
+                <!-- RIGHT COLUMN (8 COLS): Beautiful Advanced Contact Form -->
+                <div class="lg:col-span-8">
+                    <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-9 shadow-sm relative overflow-hidden">
+                        
+                        <!-- Top Accent Line -->
+                        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#F20B65] to-pink-500"></div>
+
+                        <div class="mb-6 pb-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                                <h2 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                                    Send Encrypted Support Ticket
+                                </h2>
+                                <p class="text-xs text-slate-500 font-semibold mt-0.5">
+                                    Fill in the fields below. Required fields are marked with an asterisk (<span class="text-[#F20B65] font-black">*</span>).
+                                </p>
+                            </div>
+                            <span class="text-[11px] font-bold text-slate-600 px-3 py-1 rounded-full bg-slate-100 border border-slate-200">
+                                SSL 256-Bit Encrypted
+                            </span>
+                        </div>
+
+                        <form action="{{ route('pages.contact.submit') }}" method="POST" class="space-y-6">
                             @csrf
 
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <x-input
-                                    name="name"
-                                    label="Your Full Name"
-                                    placeholder="Jane Doe"
-                                    :value="old('name', Auth::user()?->name)"
-                                    required
-                                />
+                            <!-- Full Name & Email Row -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <!-- Your Full Name -->
+                                <div>
+                                    <label for="name" class="block text-xs font-black uppercase tracking-wider text-slate-800 mb-2 flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5 text-[#F20B65]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                        <span>Your Full Name</span>
+                                        <span class="text-[#F20B65] font-black">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="name"
+                                        name="name"
+                                        value="{{ old('name', Auth::user()?->name) }}"
+                                        placeholder="e.g. Marcus Chen"
+                                        required
+                                        class="w-full bg-slate-50/70 border @error('name') border-rose-500 @else border-slate-300 @enderror rounded-2xl px-4 py-3 text-sm text-slate-900 font-bold placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-pink-500/15 focus:border-[#F20B65] transition duration-200 shadow-2xs"
+                                    />
+                                    @error('name')
+                                        <p class="mt-1.5 text-xs text-rose-600 font-bold flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                            {{ $message }}
+                                        </p>
+                                    @enderror
+                                </div>
 
-                                <x-input
-                                    name="email"
-                                    type="email"
-                                    label="Email Address"
-                                    placeholder="jane@example.com"
-                                    :value="old('email', Auth::user()?->email)"
-                                    required
-                                />
+                                <!-- Email Address -->
+                                <div>
+                                    <label for="email" class="block text-xs font-black uppercase tracking-wider text-slate-800 mb-2 flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5 text-[#F20B65]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                        <span>Email Address</span>
+                                        <span class="text-[#F20B65] font-black">*</span>
+                                    </label>
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        name="email"
+                                        value="{{ old('email', Auth::user()?->email) }}"
+                                        placeholder="you@domain.com"
+                                        required
+                                        class="w-full bg-slate-50/70 border @error('email') border-rose-500 @else border-slate-300 @enderror rounded-2xl px-4 py-3 text-sm text-slate-900 font-bold placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-pink-500/15 focus:border-[#F20B65] transition duration-200 shadow-2xs"
+                                    />
+                                    @error('email')
+                                        <p class="mt-1.5 text-xs text-rose-600 font-bold flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                            {{ $message }}
+                                        </p>
+                                    @enderror
+                                </div>
                             </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <x-select
-                                    name="inquiry_type"
-                                    label="Inquiry Topic"
-                                    :options="[
-                                        'general_support' => 'General Account & Listing Support',
-                                        'safety_report' => 'Trust & Safety Violation Report',
-                                        'billing' => 'Billing & Featured Ad Upgrades',
-                                        'partnership' => 'Media & Partnership Inquiries'
-                                    ]"
-                                    :selected="old('inquiry_type', 'general_support')"
-                                    required
-                                />
+                            <!-- Inquiry Topic & Phone Number Row -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <!-- Inquiry Topic Select -->
+                                <div>
+                                    <label for="inquiry_type" class="block text-xs font-black uppercase tracking-wider text-slate-800 mb-2 flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5 text-[#F20B65]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                        <span>Inquiry Topic</span>
+                                        <span class="text-[#F20B65] font-black">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <select
+                                            id="inquiry_type"
+                                            name="inquiry_type"
+                                            required
+                                            class="w-full appearance-none bg-slate-50/70 border @error('inquiry_type') border-rose-500 @else border-slate-300 @enderror rounded-2xl px-4 py-3 text-sm text-slate-900 font-bold focus:bg-white focus:outline-none focus:ring-4 focus:ring-pink-500/15 focus:border-[#F20B65] transition duration-200 shadow-2xs pr-10"
+                                        >
+                                            <option value="general_support" {{ old('inquiry_type') === 'general_support' ? 'selected' : '' }}>
+                                                🔹 General Account &amp; Listing Support
+                                            </option>
+                                            <option value="safety_report" {{ old('inquiry_type') === 'safety_report' ? 'selected' : '' }}>
+                                                🚨 Trust &amp; Safety Violation Report
+                                            </option>
+                                            <option value="billing" {{ old('inquiry_type') === 'billing' ? 'selected' : '' }}>
+                                                💳 Billing &amp; Featured Ad Upgrades
+                                            </option>
+                                            <option value="partnership" {{ old('inquiry_type') === 'partnership' ? 'selected' : '' }}>
+                                                🤝 Media &amp; Partnership Inquiries
+                                            </option>
+                                        </select>
+                                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                        </div>
+                                    </div>
+                                    @error('inquiry_type')
+                                        <p class="mt-1.5 text-xs text-rose-600 font-bold flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                            {{ $message }}
+                                        </p>
+                                    @enderror
+                                </div>
 
-                                <x-input
-                                    name="phone"
-                                    type="tel"
-                                    label="Phone Number (Optional)"
-                                    placeholder="+1 (555) 000-0000"
-                                    :value="old('phone')"
-                                />
+                                <!-- Phone Number (Optional) -->
+                                <div>
+                                    <label for="phone" class="block text-xs font-black uppercase tracking-wider text-slate-800 mb-2 flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                        <span>Phone Number</span>
+                                        <span class="text-slate-400 font-medium text-[11px]">(Optional)</span>
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        id="phone"
+                                        name="phone"
+                                        value="{{ old('phone') }}"
+                                        placeholder="+1 (555) 000-0000"
+                                        class="w-full bg-slate-50/70 border border-slate-300 rounded-2xl px-4 py-3 text-sm text-slate-900 font-bold placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-pink-500/15 focus:border-[#F20B65] transition duration-200 shadow-2xs"
+                                    />
+                                    @error('phone')
+                                        <p class="mt-1.5 text-xs text-rose-600 font-bold">{{ $message }}</p>
+                                    @enderror
+                                </div>
                             </div>
 
-                            <x-input
-                                name="subject"
-                                label="Subject"
-                                placeholder="Brief summary of your inquiry"
-                                :value="old('subject')"
-                                required
-                            />
-
+                            <!-- Subject -->
                             <div>
-                                <label for="message" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
-                                    Message Details <span class="text-rose-600">*</span>
+                                <label for="subject" class="block text-xs font-black uppercase tracking-wider text-slate-800 mb-2 flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 text-[#F20B65]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    <span>Subject</span>
+                                    <span class="text-[#F20B65] font-black">*</span>
                                 </label>
-                                <textarea
-                                    id="message"
-                                    name="message"
-                                    rows="5"
-                                    class="w-full bg-white border @error('message') border-rose-500 @else border-slate-200 @enderror rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition duration-150"
-                                    placeholder="Please provide complete details so we can best assist you..."
+                                <input
+                                    type="text"
+                                    id="subject"
+                                    name="subject"
+                                    value="{{ old('subject') }}"
+                                    placeholder="Brief summary of your question or issue"
                                     required
-                                >{{ old('message') }}</textarea>
-                                @error('message')
-                                    <p class="mt-1.5 text-xs text-rose-600 flex items-center gap-1">
-                                        <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                    class="w-full bg-slate-50/70 border @error('subject') border-rose-500 @else border-slate-300 @enderror rounded-2xl px-4 py-3 text-sm text-slate-900 font-bold placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-pink-500/15 focus:border-[#F20B65] transition duration-200 shadow-2xs"
+                                />
+                                @error('subject')
+                                    <p class="mt-1.5 text-xs text-rose-600 font-bold flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
                                         {{ $message }}
                                     </p>
                                 @enderror
                             </div>
 
+                            <!-- Message Details -->
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <label for="message" class="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5 text-[#F20B65]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                                        <span>Message Details</span>
+                                        <span class="text-[#F20B65] font-black">*</span>
+                                    </label>
+                                    <span class="text-[11px] font-bold text-slate-500">Min 10 characters</span>
+                                </div>
+                                <textarea
+                                    id="message"
+                                    name="message"
+                                    rows="6"
+                                    required
+                                    placeholder="Please provide complete details so our team can investigate and resolve your request rapidly..."
+                                    class="w-full bg-slate-50/70 border @error('message') border-rose-500 @else border-slate-300 @enderror rounded-2xl px-4 py-3.5 text-sm text-slate-900 font-medium placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-pink-500/15 focus:border-[#F20B65] transition duration-200 shadow-2xs leading-relaxed"
+                                >{{ old('message') }}</textarea>
+                                @error('message')
+                                    <p class="mt-1.5 text-xs text-rose-600 font-bold flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                        {{ $message }}
+                                    </p>
+                                @enderror
+                            </div>
+
+                            <!-- Encryption Notice Callout -->
+                            <div class="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200 flex items-start gap-3">
+                                <svg class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                <div class="text-xs text-emerald-950 font-medium">
+                                    <strong class="font-bold text-emerald-900 block">End-to-End Cryptographic Security Active:</strong>
+                                    Your personal information is encrypted in transit and at rest. The support team responds directly via safe relay.
+                                </div>
+                            </div>
+
+                            <!-- Guaranteed 100% Vibrant CTA Button -->
                             <div class="pt-2">
-                                <x-button type="submit" variant="primary" class="w-full py-3 text-base">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                <button
+                                    type="submit"
+                                    class="w-full py-4 px-6 rounded-2xl text-base font-black transition-all flex items-center justify-center space-x-2 group hover:opacity-95 active:scale-[0.99] cursor-pointer shadow-lg"
+                                    style="background: linear-gradient(135deg, #F20B65 0%, #D90858 100%) !important; color: #ffffff !important; box-shadow: 0 10px 25px -4px rgba(242, 11, 101, 0.45) !important;"
+                                >
+                                    <svg class="w-5 h-5 text-white transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                                     </svg>
-                                    Send Encrypted Inquiry
-                                </x-button>
+                                    <span class="text-white font-black tracking-wide">Send Encrypted Inquiry</span>
+                                </button>
                             </div>
                         </form>
-                    </x-card>
+                    </div>
                 </div>
+
             </div>
+
         </div>
     </div>
 </x-layouts.app>
-
