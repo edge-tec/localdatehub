@@ -245,40 +245,145 @@
                                 </div>
                             </div>
 
-                            <!-- Inquiry Topic & Phone Number Row -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                <!-- Inquiry Topic Select -->
-                                <div>
-                                    <label for="inquiry_type" class="block text-xs font-black uppercase tracking-wider text-slate-800 mb-2 flex items-center gap-1.5">
+                            <!-- Interactive Visual Topic Selector (100% Visible Cards - No Hidden Dropdowns) -->
+                            <div x-data="{ selectedTopic: '{{ old('inquiry_type', 'general_support') }}' }" class="space-y-2.5">
+                                <div class="flex items-center justify-between">
+                                    <label class="block text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
                                         <svg class="w-3.5 h-3.5 text-[#F20B65]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                                        <span>Inquiry Topic</span>
+                                        <span>Select Inquiry Topic</span>
                                         <span class="text-[#F20B65] font-black">*</span>
                                     </label>
-                                    <div class="relative">
-                                        <select
-                                            id="inquiry_type"
-                                            name="inquiry_type"
-                                            required
-                                            class="w-full appearance-none bg-slate-50/70 border @error('inquiry_type') border-rose-500 @else border-slate-300 @enderror rounded-2xl px-4 py-3 text-sm text-slate-900 font-bold focus:bg-white focus:outline-none focus:ring-4 focus:ring-pink-500/15 focus:border-[#F20B65] transition duration-200 shadow-2xs pr-10"
+                                    <span class="text-[11px] font-bold text-slate-500">All 4 Topics Visible &bull; Click to Select</span>
+                                </div>
+                                <input type="hidden" name="inquiry_type" :value="selectedTopic" required>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                                    <!-- Option 1: General Support -->
+                                    <div
+                                        @click="selectedTopic = 'general_support'"
+                                        :class="selectedTopic === 'general_support' ? 'border-[#F20B65] bg-pink-50/70 shadow-sm ring-2 ring-pink-500/20' : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70'"
+                                        class="p-3.5 rounded-2xl border-2 cursor-pointer transition-all flex items-start justify-between gap-3 select-none group"
+                                    >
+                                        <div class="flex items-start gap-3">
+                                            <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 font-black text-base shadow-2xs border border-blue-200">
+                                                💬
+                                            </div>
+                                            <div>
+                                                <strong class="text-xs font-black text-slate-900 block group-hover:text-slate-950">General Support</strong>
+                                                <span class="text-[11px] text-slate-600 font-medium block leading-tight mt-0.5">Account help, navigation &amp; listings</span>
+                                            </div>
+                                        </div>
+                                        <div 
+                                            class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors"
+                                            :class="selectedTopic === 'general_support' ? 'border-[#F20B65] bg-[#F20B65] text-white' : 'border-slate-300 bg-white'"
+                                            :style="selectedTopic === 'general_support' ? 'background-color: #F20B65 !important; border-color: #F20B65 !important;' : ''"
                                         >
-                                            <option value="general_support" {{ old('inquiry_type') === 'general_support' ? 'selected' : '' }}>
-                                                🔹 General Account &amp; Listing Support
-                                            </option>
-                                            <option value="safety_report" {{ old('inquiry_type') === 'safety_report' ? 'selected' : '' }}>
-                                                🚨 Trust &amp; Safety Violation Report
-                                            </option>
-                                            <option value="billing" {{ old('inquiry_type') === 'billing' ? 'selected' : '' }}>
-                                                💳 Billing &amp; Featured Ad Upgrades
-                                            </option>
-                                            <option value="partnership" {{ old('inquiry_type') === 'partnership' ? 'selected' : '' }}>
-                                                🤝 Media &amp; Partnership Inquiries
-                                            </option>
-                                        </select>
-                                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                            <svg x-show="selectedTopic === 'general_support'" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                                         </div>
                                     </div>
-                                    @error('inquiry_type')
+
+                                    <!-- Option 2: Safety & Abuse Report -->
+                                    <div
+                                        @click="selectedTopic = 'safety_report'"
+                                        :class="selectedTopic === 'safety_report' ? 'border-[#F20B65] bg-pink-50/70 shadow-sm ring-2 ring-pink-500/20' : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70'"
+                                        class="p-3.5 rounded-2xl border-2 cursor-pointer transition-all flex items-start justify-between gap-3 select-none group"
+                                    >
+                                        <div class="flex items-start gap-3">
+                                            <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 font-black text-base shadow-2xs border border-rose-200">
+                                                🚨
+                                            </div>
+                                            <div>
+                                                <strong class="text-xs font-black text-slate-900 block flex items-center gap-1.5">
+                                                    <span>Safety &amp; Abuse Report</span>
+                                                    <span class="text-[9px] px-1.5 py-0.2 rounded bg-rose-200 text-rose-900 font-black uppercase">Urgent</span>
+                                                </strong>
+                                                <span class="text-[11px] text-slate-600 font-medium block leading-tight mt-0.5">Scams, harassment &amp; violations</span>
+                                            </div>
+                                        </div>
+                                        <div 
+                                            class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors"
+                                            :class="selectedTopic === 'safety_report' ? 'border-[#F20B65] bg-[#F20B65] text-white' : 'border-slate-300 bg-white'"
+                                            :style="selectedTopic === 'safety_report' ? 'background-color: #F20B65 !important; border-color: #F20B65 !important;' : ''"
+                                        >
+                                            <svg x-show="selectedTopic === 'safety_report'" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                        </div>
+                                    </div>
+
+                                    <!-- Option 3: Billing & Boosts -->
+                                    <div
+                                        @click="selectedTopic = 'billing'"
+                                        :class="selectedTopic === 'billing' ? 'border-[#F20B65] bg-pink-50/70 shadow-sm ring-2 ring-pink-500/20' : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70'"
+                                        class="p-3.5 rounded-2xl border-2 cursor-pointer transition-all flex items-start justify-between gap-3 select-none group"
+                                    >
+                                        <div class="flex items-start gap-3">
+                                            <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 font-black text-base shadow-2xs border border-amber-200">
+                                                💳
+                                            </div>
+                                            <div>
+                                                <strong class="text-xs font-black text-slate-900 block group-hover:text-slate-950">Billing &amp; Boosts</strong>
+                                                <span class="text-[11px] text-slate-600 font-medium block leading-tight mt-0.5">Crypto invoices, boosts &amp; wallet</span>
+                                            </div>
+                                        </div>
+                                        <div 
+                                            class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors"
+                                            :class="selectedTopic === 'billing' ? 'border-[#F20B65] bg-[#F20B65] text-white' : 'border-slate-300 bg-white'"
+                                            :style="selectedTopic === 'billing' ? 'background-color: #F20B65 !important; border-color: #F20B65 !important;' : ''"
+                                        >
+                                            <svg x-show="selectedTopic === 'billing'" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                        </div>
+                                    </div>
+
+                                    <!-- Option 4: Partnership & Press -->
+                                    <div
+                                        @click="selectedTopic = 'partnership'"
+                                        :class="selectedTopic === 'partnership' ? 'border-[#F20B65] bg-pink-50/70 shadow-sm ring-2 ring-pink-500/20' : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70'"
+                                        class="p-3.5 rounded-2xl border-2 cursor-pointer transition-all flex items-start justify-between gap-3 select-none group"
+                                    >
+                                        <div class="flex items-start gap-3">
+                                            <div class="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 font-black text-base shadow-2xs border border-purple-200">
+                                                🤝
+                                            </div>
+                                            <div>
+                                                <strong class="text-xs font-black text-slate-900 block group-hover:text-slate-950">Partnership &amp; Press</strong>
+                                                <span class="text-[11px] text-slate-600 font-medium block leading-tight mt-0.5">Media inquiries &amp; business partnerships</span>
+                                            </div>
+                                        </div>
+                                        <div 
+                                            class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors"
+                                            :class="selectedTopic === 'partnership' ? 'border-[#F20B65] bg-[#F20B65] text-white' : 'border-slate-300 bg-white'"
+                                            :style="selectedTopic === 'partnership' ? 'background-color: #F20B65 !important; border-color: #F20B65 !important;' : ''"
+                                        >
+                                            <svg x-show="selectedTopic === 'partnership'" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                @error('inquiry_type')
+                                    <p class="mt-1.5 text-xs text-rose-600 font-bold flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                        {{ $message }}
+                                    </p>
+                                @enderror
+                            </div>
+
+                            <!-- Subject & Phone Row -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <!-- Subject -->
+                                <div>
+                                    <label for="subject" class="block text-xs font-black uppercase tracking-wider text-slate-800 mb-2 flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5 text-[#F20B65]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                        <span>Subject</span>
+                                        <span class="text-[#F20B65] font-black">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="subject"
+                                        name="subject"
+                                        value="{{ old('subject') }}"
+                                        placeholder="Brief summary of your question or issue"
+                                        required
+                                        class="w-full bg-slate-50/70 border @error('subject') border-rose-500 @else border-slate-300 @enderror rounded-2xl px-4 py-3 text-sm text-slate-900 font-bold placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-pink-500/15 focus:border-[#F20B65] transition duration-200 shadow-2xs"
+                                    />
+                                    @error('subject')
                                         <p class="mt-1.5 text-xs text-rose-600 font-bold flex items-center gap-1">
                                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
                                             {{ $message }}
@@ -305,30 +410,6 @@
                                         <p class="mt-1.5 text-xs text-rose-600 font-bold">{{ $message }}</p>
                                     @enderror
                                 </div>
-                            </div>
-
-                            <!-- Subject -->
-                            <div>
-                                <label for="subject" class="block text-xs font-black uppercase tracking-wider text-slate-800 mb-2 flex items-center gap-1.5">
-                                    <svg class="w-3.5 h-3.5 text-[#F20B65]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                    <span>Subject</span>
-                                    <span class="text-[#F20B65] font-black">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    id="subject"
-                                    name="subject"
-                                    value="{{ old('subject') }}"
-                                    placeholder="Brief summary of your question or issue"
-                                    required
-                                    class="w-full bg-slate-50/70 border @error('subject') border-rose-500 @else border-slate-300 @enderror rounded-2xl px-4 py-3 text-sm text-slate-900 font-bold placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-pink-500/15 focus:border-[#F20B65] transition duration-200 shadow-2xs"
-                                />
-                                @error('subject')
-                                    <p class="mt-1.5 text-xs text-rose-600 font-bold flex items-center gap-1">
-                                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-                                        {{ $message }}
-                                    </p>
-                                @enderror
                             </div>
 
                             <!-- Message Details -->
