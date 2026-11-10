@@ -296,8 +296,8 @@ class SitemapService
             $xml .= "    <loc>" . htmlspecialchars($url, ENT_XML1) . "</loc>\n";
 
             foreach ($l->photos->take(5) as $photo) {
-                $imgPath = asset('storage/' . $photo->file_path);
-                $title = htmlspecialchars($photo->caption ?: $l->title, ENT_XML1);
+                $imgPath = $photo->url ?? asset('storage/' . $photo->file_path);
+                $title = htmlspecialchars($photo->original_filename ?: $l->title, ENT_XML1);
                 $xml .= "    <image:image>\n";
                 $xml .= "      <image:loc>" . htmlspecialchars($imgPath, ENT_XML1) . "</image:loc>\n";
                 $xml .= "      <image:title>" . $title . "</image:title>\n";

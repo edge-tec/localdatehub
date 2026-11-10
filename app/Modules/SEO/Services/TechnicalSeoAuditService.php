@@ -77,8 +77,8 @@ class TechnicalSeoAuditService
 
             // Check Photo Alt text
             foreach ($listing->photos as $photo) {
-                if (empty(trim($photo->caption ?? ''))) {
-                    $this->createIssue($urlRecord, $url, 'missing_alt', 'notice', "Listing photo #{$photo->id} is missing alt/caption text.", 'Provide descriptive keyword alt text for image accessibility and Image SEO.');
+                if (empty(trim($photo->original_filename ?? ''))) {
+                    $this->createIssue($urlRecord, $url, 'missing_alt', 'notice', "Listing media #{$photo->id} is missing alt text.", 'Provide descriptive keyword alt text for image accessibility and Image SEO.');
                     $issuesFound++;
                     break;
                 }

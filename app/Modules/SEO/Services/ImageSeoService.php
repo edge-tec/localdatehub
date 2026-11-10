@@ -3,23 +3,19 @@
 namespace App\Modules\SEO\Services;
 
 use App\Modules\Listings\Models\Listing;
-use App\Modules\Listings\Models\ListingPhoto;
+use App\Modules\Listings\Models\ListingMedia;
 use Illuminate\Support\Str;
 
 class ImageSeoService
 {
     /**
-     * Generate an optimized ALT text for a listing photo.
+     * Generate an optimized ALT text for a listing media item.
      */
-    public function generateAltText(ListingPhoto $photo): string
+    public function generateAltText(ListingMedia $photo): string
     {
-        if (! empty(trim($photo->caption ?? ''))) {
-            return trim($photo->caption);
-        }
-
         $listing = $photo->listing;
         if (! $listing) {
-            return 'LocalDateHub Classified Photo';
+            return $photo->original_filename ?: 'LocalDateHub Classified Photo';
         }
 
         $parts = [];
@@ -39,24 +35,23 @@ class ImageSeoService
     }
 
     /**
-     * Auto-fill missing alt captions across all active listing photos.
+     * Auto-optimize missing metadata across all active listing photos.
      */
     public function optimizeMissingPhotoAlts(): int
     {
-        $photos = ListingPhoto::whereNull('caption')
-            ->orWhere('caption', '')
+        $media = ListingMedia::whereNull('original_filename')
+            ->orWhere('original_filename', '')
             ->with(['listing.category', 'listing.city', 'listing.state'])
             ->limit(200)
             ->get();
 
         $updated = 0;
-        foreach ($photos as $photo) {
-            $alt = $this->generateAltText($photo);
-            $photo->update(['caption' => $alt]);
+        foreach ($media as $item) {
+            $alt = $this->generateAltText($item);
+            $item->update(['original_filename' => $alt]);
             $updated++;
         }
 
         return $updated;
     }
 }
-

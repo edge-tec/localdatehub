@@ -118,6 +118,11 @@ class Listing extends Model
             ->orderBy('display_order');
     }
 
+    public function photos(): HasMany
+    {
+        return $this->media();
+    }
+
     public function allMedia(): HasMany
     {
         return $this->hasMany(ListingMedia::class)
