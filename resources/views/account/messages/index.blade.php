@@ -1,7 +1,7 @@
 <x-layouts.app title="Messenger — LocalDateHub">
-    <div class="py-4 sm:py-6 max-w-[1720px] mx-auto px-2 sm:px-4 lg:px-6 space-y-3">
-        <!-- Breadcrumbs Navigation -->
-        <div class="px-2">
+    <div class="py-1 sm:py-4 max-w-[1720px] mx-auto px-1 sm:px-4 lg:px-6 space-y-1 sm:space-y-3">
+        <!-- Breadcrumbs Navigation (Compact on desktop, hidden on tiny mobile to maximize messaging viewport) -->
+        <div class="px-2 hidden sm:block">
             <x-breadcrumbs :items="[
                 ['label' => 'Home', 'url' => route('home')],
                 ['label' => 'My Account', 'url' => route('account.profile')],

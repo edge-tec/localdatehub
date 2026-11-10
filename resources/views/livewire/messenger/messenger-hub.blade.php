@@ -1,5 +1,5 @@
 <div 
-    class="messenger-container w-full min-h-[620px] max-w-[1680px] mx-auto bg-white border border-slate-200/90 rounded-2xl shadow-xl overflow-hidden relative font-sans text-slate-900"
+    class="messenger-container w-full max-w-[1680px] mx-auto bg-white border border-slate-200/90 rounded-xl sm:rounded-2xl shadow-xl overflow-hidden relative font-sans text-slate-900"
     x-data="{
         lightboxUrl: null,
         showEmojiPicker: false,
@@ -15,17 +15,57 @@
         window.addEventListener('scroll-to-bottom', () => scrollToBottom());
     "
 >
-    <!-- Explicit Layout Styles to guarantee 3-Column Messenger Layout regardless of CSS purging -->
+    <!-- Explicit Layout Styles to guarantee Responsive Mobile & Desktop Layout -->
     <style>
         .messenger-container {
             display: flex !important;
             flex-direction: column !important;
-            height: calc(100vh - 125px);
-            min-height: 620px;
+            background-color: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            overflow: hidden !important;
+            position: relative !important;
         }
+
+        /* Mobile View (< 768px): Fit directly in viewport so bottom composer bar is ALWAYS 100% visible */
+        @media (max-width: 767.98px) {
+            .messenger-container {
+                height: calc(100dvh - 110px) !important;
+                height: calc(100vh - 110px) !important;
+                min-height: 0 !important;
+                max-height: calc(100dvh - 100px) !important;
+                border-radius: 0.75rem !important;
+            }
+            .messenger-inbox-col {
+                width: 100% !important;
+                height: 100% !important;
+                min-height: 0 !important;
+                flex-direction: column !important;
+            }
+            .messenger-chat-col {
+                width: 100% !important;
+                height: 100% !important;
+                min-height: 0 !important;
+                flex-direction: column !important;
+                overflow: hidden !important;
+            }
+            .messenger-details-col {
+                width: 100% !important;
+                height: 100% !important;
+                min-height: 0 !important;
+                flex-direction: column !important;
+                overflow-y: auto !important;
+            }
+        }
+
+        /* Desktop View (>= 768px): 3 Columns side-by-side with independent scrolling */
         @media (min-width: 768px) {
             .messenger-container {
                 flex-direction: row !important;
+                height: calc(100dvh - 170px) !important;
+                height: calc(100vh - 170px) !important;
+                min-height: 580px !important;
+                max-height: calc(100vh - 140px) !important;
+                border-radius: 1rem !important;
             }
             .messenger-inbox-col {
                 display: flex !important;
@@ -34,6 +74,7 @@
                 min-width: 340px !important;
                 max-width: 380px !important;
                 height: 100% !important;
+                min-height: 0 !important;
                 flex-shrink: 0 !important;
                 border-right: 1px solid #e2e8f0 !important;
                 background-color: #ffffff !important;
@@ -44,7 +85,9 @@
                 flex: 1 1 0% !important;
                 min-width: 0 !important;
                 height: 100% !important;
+                min-height: 0 !important;
                 background-color: #f8fafc !important;
+                overflow: hidden !important;
             }
             .messenger-details-col {
                 display: flex !important;
@@ -53,29 +96,28 @@
                 min-width: 300px !important;
                 max-width: 350px !important;
                 height: 100% !important;
+                min-height: 0 !important;
                 flex-shrink: 0 !important;
                 border-left: 1px solid #e2e8f0 !important;
                 background-color: #ffffff !important;
                 overflow-y: auto !important;
             }
         }
-        @media (max-width: 767.98px) {
-            .messenger-inbox-col {
-                width: 100% !important;
-                height: 100% !important;
-                flex-direction: column !important;
-            }
-            .messenger-chat-col {
-                width: 100% !important;
-                height: 100% !important;
-                flex-direction: column !important;
-            }
-            .messenger-details-col {
-                width: 100% !important;
-                height: 100% !important;
-                flex-direction: column !important;
-                overflow-y: auto !important;
-            }
+
+        /* Message Timeline & Fixed Docked Composer */
+        .messenger-timeline {
+            flex: 1 1 0% !important;
+            min-height: 0 !important;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+        }
+
+        .messenger-composer-bar {
+            flex-shrink: 0 !important;
+            background-color: #ffffff !important;
+            border-top: 1px solid #e2e8f0 !important;
+            position: relative !important;
+            z-index: 10 !important;
         }
     </style>
 
@@ -371,30 +413,30 @@
 
             <!-- Sticky Listing Context Banner -->
             @if($activeListing)
-                <div class="bg-white border-b border-slate-200/80 px-4 py-2.5 flex items-center justify-between gap-3 shrink-0">
-                    <div class="flex items-center gap-3 min-w-0">
+                <div class="bg-white border-b border-slate-200/80 px-3 py-2 sm:px-4 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-3 shrink-0">
+                    <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
                         @if($activeListing->primaryPhoto)
                             <img 
                                 src="{{ $activeListing->primaryPhoto->url }}" 
                                 alt="{{ $activeListing->title }}" 
-                                class="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200" 
+                                class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl object-cover shrink-0 border border-slate-200" 
                                 style="object-position: center top;"
                             />
                         @else
-                            <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 shrink-0 font-black text-xs">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 shrink-0 font-black text-xs">
                                 Ad
                             </div>
                         @endif
 
                         <div class="min-w-0">
-                            <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Classified Listing</span>
+                            <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-slate-400 block">Classified Listing</span>
                             <a href="{{ route('listings.show', $activeListing->slug) }}" target="_blank" class="text-xs font-bold text-slate-900 hover:text-[#F20B65] transition truncate block">
                                 {{ $activeListing->title }}
                             </a>
-                            <div class="flex items-center gap-2 text-[11px] text-slate-500 font-semibold mt-0.5">
+                            <div class="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] text-slate-500 font-semibold mt-0.5">
                                 <span class="text-[#F20B65] font-black">Free Classified</span>
                                 <span>&bull;</span>
-                                <span>{{ $activeListing->city?->name }}, {{ $activeListing->state?->code }}</span>
+                                <span class="truncate">{{ $activeListing->city?->name }}, {{ $activeListing->state?->code }}</span>
                             </div>
                         </div>
                     </div>
@@ -402,10 +444,10 @@
                     <a 
                         href="{{ route('listings.show', $activeListing->slug) }}" 
                         target="_blank"
-                        class="px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-pink-50 text-[#F20B65] text-xs font-black border border-slate-200 hover:border-pink-200 transition shrink-0 flex items-center gap-1"
+                        class="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-slate-50 hover:bg-pink-50 text-[#F20B65] text-[11px] sm:text-xs font-black border border-slate-200 hover:border-pink-200 transition shrink-0 flex items-center gap-1"
                     >
-                        <span>View Listing</span>
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                        <span>View</span>
+                        <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
                     </a>
                 </div>
             @endif
@@ -413,7 +455,7 @@
             <!-- Message Timeline -->
             <div 
                 id="chat-messages-container" 
-                class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 scroll-smooth"
+                class="messenger-timeline flex-1 p-3 sm:p-6 space-y-3 sm:space-y-4 scroll-smooth"
             >
                 @php
                     $lastDate = null;
@@ -570,7 +612,7 @@
             </div>
 
             <!-- Fixed Bottom Message Composer -->
-            <div class="p-3 sm:p-4 bg-white border-t border-slate-200/80 shrink-0 space-y-2">
+            <div class="messenger-composer-bar p-2.5 sm:p-4 bg-white border-t border-slate-200/80 shrink-0 space-y-2">
                 <!-- Reply Quoting Ribbon -->
                 @if($replyToMessageId)
                     <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200 text-xs">
@@ -595,14 +637,14 @@
                 @endif
 
                 <!-- Main Composer Input Bar -->
-                <form wire:submit.prevent="sendMessage" class="flex items-end gap-2">
+                <form wire:submit.prevent="sendMessage" class="flex items-end gap-1.5 sm:gap-2">
                     <!-- Attachment Trigger -->
                     <label 
-                        class="w-10 h-10 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center cursor-pointer transition shrink-0 border border-slate-200/80"
+                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center cursor-pointer transition shrink-0 border border-slate-200/80"
                         title="Attach Photo or Document"
                     >
                         <input type="file" wire:model="attachment" class="hidden" accept="image/*,.pdf,.doc,.docx" />
-                        <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"/></svg>
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"/></svg>
                     </label>
 
                     <!-- Text Area -->
@@ -610,8 +652,8 @@
                         <textarea 
                             wire:model="messageText"
                             rows="1"
-                            placeholder="Write a message... (Press Enter to send, Shift+Enter for new line)"
-                            class="w-full bg-slate-50 border border-slate-200/90 rounded-2xl px-4 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#F20B65]/20 focus:border-[#F20B65] resize-none max-h-32 transition scrollbar-none"
+                            placeholder="Write a message..."
+                            class="w-full bg-slate-50 border border-slate-200/90 rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#F20B65]/20 focus:border-[#F20B65] resize-none max-h-24 sm:max-h-32 transition scrollbar-none"
                             x-on:keydown.enter.exact.prevent="$wire.sendMessage()"
                         ></textarea>
                     </div>
@@ -621,14 +663,14 @@
                         <button 
                             type="button" 
                             @click="open = !open" 
-                            class="w-10 h-10 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition shrink-0 border border-slate-200/80"
+                            class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition shrink-0 border border-slate-200/80"
                         >
                             😊
                         </button>
                         <div 
                             x-show="open" 
                             @click.away="open = false" 
-                            class="absolute bottom-12 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl p-2 grid grid-cols-4 gap-1.5 z-40"
+                            class="absolute bottom-11 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl p-2 grid grid-cols-4 gap-1.5 z-40"
                         >
                             @foreach(['❤️', '👍', '😊', '🔥', '👋', '☕', '📍', '✨'] as $emoji)
                                 <button 
@@ -646,7 +688,7 @@
                     <!-- Send Button -->
                     <button 
                         type="submit" 
-                        class="w-10 h-10 rounded-xl bg-[#F20B65] hover:bg-[#d90858] text-white flex items-center justify-center transition shrink-0 shadow-md cursor-pointer disabled:opacity-50"
+                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#F20B65] hover:bg-[#d90858] text-white flex items-center justify-center transition shrink-0 shadow-md cursor-pointer disabled:opacity-50"
                         style="background-color: #F20B65 !important; color: #ffffff !important;"
                         title="Send Message"
                     >
