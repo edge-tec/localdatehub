@@ -252,13 +252,14 @@
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3.5">
                             @foreach($displayPhotos as $photo)
                                 <div
-                                    class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 aspect-4/3 relative group cursor-pointer shadow-2xs hover:shadow-md transition-all duration-300"
+                                    class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 aspect-[4/4.5] sm:aspect-[4/4.2] relative group cursor-pointer shadow-2xs hover:shadow-md transition-all duration-300"
                                     @click="activePhotoUrl = '{{ $photo->url }}'; lightboxOpen = true"
                                 >
                                     <img
                                         src="{{ $photo->url }}"
                                         alt="{{ $listing->title }}"
                                         class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                                        style="object-position: center top;"
                                         loading="lazy"
                                     >
                                     <div class="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/20 transition-colors flex items-center justify-center">
@@ -288,6 +289,7 @@
                                 src="{{ $showcaseImg }}"
                                 alt="{{ $listing->title }}"
                                 class="w-full h-[320px] sm:h-[400px] object-cover group-hover:scale-105 transition duration-500"
+                                style="object-position: center top;"
                                 loading="lazy"
                             >
                             <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-5 sm:p-6">

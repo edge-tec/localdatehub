@@ -184,24 +184,9 @@
                     <p class="text-slate-400 text-sm">No active listings currently found in this category.</p>
                 </div>
             @else
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                     @foreach($listings as $listing)
-                        <div class="bg-white border border-slate-200 hover:border-slate-200 rounded-2xl p-5 transition space-y-3">
-                            <div class="flex items-center justify-between text-xs text-slate-400">
-                                <span class="text-rose-600 font-semibold">{{ $listing->city?->name }}, {{ $listing->state?->code }}</span>
-                                <span>{{ $listing->published_at?->diffForHumans() }}</span>
-                            </div>
-                            <h3 class="font-bold text-slate-900 text-base hover:text-rose-600 transition line-clamp-1">
-                                {{ $listing->title }}
-                            </h3>
-                            <p class="text-xs text-slate-600 line-clamp-3 leading-relaxed">
-                                {{ $listing->description }}
-                            </p>
-                            <div class="pt-2 border-t border-slate-200 flex items-center justify-between text-xs text-slate-400">
-                                <span>Age: {{ $listing->poster_age }}</span>
-                                <span class="capitalize">{{ str_replace('_', ' ', $listing->intent) }}</span>
-                            </div>
-                        </div>
+                        <x-listing-card :listing="$listing" />
                     @endforeach
                 </div>
 

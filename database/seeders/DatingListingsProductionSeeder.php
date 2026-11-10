@@ -152,3 +152,4 @@ class DatingListingsProductionSeeder extends Seeder
         $this->command->info("Successfully seeded {$count} dating listings into production database.");
     }
 }
+

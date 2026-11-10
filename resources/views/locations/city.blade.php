@@ -109,8 +109,8 @@
                         @foreach($listings as $ad)
                             <div class="p-5 rounded-xl bg-white border border-slate-200 hover:border-slate-200 transition flex flex-col sm:flex-row gap-4">
                                 @if($ad->primaryPhoto)
-                                    <div class="w-full sm:w-32 h-32 rounded-lg bg-slate-50 overflow-hidden shrink-0 border border-slate-200">
-                                        <img src="{{ Storage::url($ad->primaryPhoto->file_path) }}" alt="{{ $ad->title }}" class="w-full h-full object-cover">
+                                    <div class="w-full sm:w-36 h-36 rounded-lg bg-slate-50 overflow-hidden shrink-0 border border-slate-200">
+                                        <img src="{{ $ad->primaryPhoto->url }}" alt="{{ $ad->title }}" class="w-full h-full object-cover" style="object-position: center top;">
                                     </div>
                                 @endif
                                 <div class="flex-1 flex flex-col justify-between">

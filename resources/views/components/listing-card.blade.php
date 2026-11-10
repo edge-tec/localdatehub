@@ -3,7 +3,7 @@
 <article class="group bg-white border border-slate-200 hover:border-slate-300 rounded-2xl overflow-hidden transition-all duration-200 flex flex-col justify-between shadow-xs hover:shadow-lg hover:-translate-y-0.5">
     <div>
         <!-- Photo Container -->
-        <div class="relative aspect-video bg-slate-50 overflow-hidden">
+        <div class="relative aspect-[4/4.5] sm:aspect-[4/4.2] bg-slate-50 overflow-hidden">
             @php
                 $cardPhoto = $listing->primaryPhoto ?: $listing->allMedia->first();
             @endphp
@@ -13,6 +13,7 @@
                     alt="{{ $listing->title }}"
                     loading="lazy"
                     class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                    style="object-position: center top;"
                 >
                 <!-- Photo Bottom Scrim for Readability -->
                 <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-950/80 via-slate-950/30 to-transparent pointer-events-none"></div>

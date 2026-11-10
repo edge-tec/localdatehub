@@ -606,12 +606,13 @@
                             @forelse($featuredListings as $listing)
                                 <div class="bg-white rounded-xl border border-[#E8E4EC] overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col group">
                                     <!-- Image Thumbnail -->
-                                    <div class="relative h-44 overflow-hidden bg-white">
+                                    <div class="relative h-64 sm:h-72 overflow-hidden bg-slate-100">
                                         <a href="{{ route('listings.show', $listing->slug) }}">
                                             <img 
                                                 src="{{ $listing->primary_photo_url }}" 
                                                 alt="{{ $listing->title }}" 
                                                 class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                                                style="object-position: center top;"
                                             />
                                         </a>
                                         <!-- Featured Badge (Pink Pill) -->
@@ -786,12 +787,13 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 @foreach($latestListings as $listing)
                     <div class="bg-white rounded-xl border border-[#E8E4EC] overflow-hidden shadow-xs hover:shadow-lg transition-all flex flex-col group">
-                        <div class="relative h-40 overflow-hidden bg-white">
+                        <div class="relative h-60 sm:h-64 overflow-hidden bg-slate-100">
                             <a href="{{ route('listings.show', $listing->slug) }}">
                                 <img 
                                     src="{{ $listing->primary_photo_url }}" 
                                     alt="{{ $listing->title }}" 
                                     class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                                    style="object-position: center top;"
                                 />
                             </a>
                             <span class="absolute bottom-2 left-2 bg-black/70 backdrop-blur-xs text-white text-[10px] font-semibold px-2 py-0.5 rounded">
