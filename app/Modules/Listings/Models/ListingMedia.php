@@ -53,8 +53,14 @@ class ListingMedia extends Model
         if (empty($this->file_path)) {
             return asset('images/featured-1.jpg');
         }
-        if (str_starts_with($this->file_path, 'http://') || str_starts_with($this->file_path, 'https://') || str_starts_with($this->file_path, '/')) {
+        if (str_starts_with($this->file_path, 'http://') || str_starts_with($this->file_path, 'https://')) {
             return $this->file_path;
+        }
+        if (str_starts_with($this->file_path, '/')) {
+            return asset(ltrim($this->file_path, '/'));
+        }
+        if (str_starts_with($this->file_path, 'images/')) {
+            return asset($this->file_path);
         }
         return asset('storage/' . $this->file_path);
     }
