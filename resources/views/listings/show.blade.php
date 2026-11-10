@@ -451,15 +451,26 @@
                     </div>
 
                     <!-- Protected Platform Contact Form Trigger (GUARANTEED VISIBLE VIBRANT BUTTON) -->
-                    <button
-                        type="button"
-                        @click="$dispatch('open-modal', 'contact-modal')"
-                        class="w-full py-4 px-5 rounded-2xl text-sm font-black transition-all flex items-center justify-center space-x-2 group hover:opacity-95 active:scale-[0.98] cursor-pointer"
-                        style="background: linear-gradient(135deg, #F20B65 0%, #D90858 100%) !important; color: #ffffff !important; box-shadow: 0 10px 25px -4px rgba(242, 11, 101, 0.45) !important;"
-                    >
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                        <span class="text-white font-black text-sm tracking-wide">Send Protected Message</span>
-                    </button>
+                    @auth
+                        <a
+                            href="{{ route('account.messages.index', ['listing' => $listing->id, 'user' => $listing->user_id]) }}"
+                            class="w-full py-4 px-5 rounded-2xl text-sm font-black transition-all flex items-center justify-center space-x-2 group hover:opacity-95 active:scale-[0.98] cursor-pointer"
+                            style="background: linear-gradient(135deg, #F20B65 0%, #D90858 100%) !important; color: #ffffff !important; box-shadow: 0 10px 25px -4px rgba(242, 11, 101, 0.45) !important;"
+                        >
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                            <span class="text-white font-black text-sm tracking-wide">Chat on Messenger</span>
+                        </a>
+                    @else
+                        <button
+                            type="button"
+                            @click="$dispatch('open-modal', 'contact-modal')"
+                            class="w-full py-4 px-5 rounded-2xl text-sm font-black transition-all flex items-center justify-center space-x-2 group hover:opacity-95 active:scale-[0.98] cursor-pointer"
+                            style="background: linear-gradient(135deg, #F20B65 0%, #D90858 100%) !important; color: #ffffff !important; box-shadow: 0 10px 25px -4px rgba(242, 11, 101, 0.45) !important;"
+                        >
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                            <span class="text-white font-black text-sm tracking-wide">Send Protected Message</span>
+                        </button>
+                    @endauth
 
                     <!-- Public Email OR Encrypted Anonymous Email Relay -->
                     @php
@@ -623,15 +634,26 @@
                     <span class="text-[10px] text-slate-500 font-bold block truncate">{{ $listing->city?->name }}, {{ $listing->state?->code }}</span>
                 </div>
             </div>
-            <button
-                type="button"
-                @click="$dispatch('open-modal', 'contact-modal')"
-                class="py-2.5 px-4 rounded-xl shadow-md shrink-0 flex items-center gap-1.5 font-black text-xs"
-                style="background-color: #F20B65 !important; color: #ffffff !important;"
-            >
-                <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                <span class="text-white">Message</span>
-            </button>
+            @auth
+                <a
+                    href="{{ route('account.messages.index', ['listing' => $listing->id, 'user' => $listing->user_id]) }}"
+                    class="py-2.5 px-4 rounded-xl shadow-md shrink-0 flex items-center gap-1.5 font-black text-xs"
+                    style="background-color: #F20B65 !important; color: #ffffff !important;"
+                >
+                    <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                    <span class="text-white">Messenger</span>
+                </a>
+            @else
+                <button
+                    type="button"
+                    @click="$dispatch('open-modal', 'contact-modal')"
+                    class="py-2.5 px-4 rounded-xl shadow-md shrink-0 flex items-center gap-1.5 font-black text-xs"
+                    style="background-color: #F20B65 !important; color: #ffffff !important;"
+                >
+                    <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                    <span class="text-white">Message</span>
+                </button>
+            @endauth
         </div>
 
         <!-- Lightbox Modal for Photo Gallery -->
