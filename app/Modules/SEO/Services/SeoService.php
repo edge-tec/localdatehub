@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 
 class SeoService
 {
-    protected string $brandName = 'LocalAdZone';
+    protected string $brandName = 'LocalDateHub';
 
     /**
      * Generate metadata for home / index.

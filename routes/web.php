@@ -389,11 +389,15 @@ Route::post('/api/payments/webhook/{gateway}', [PaymentWebhookController::class,
 // SEO, Sitemaps & Robots.txt
 Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('seo.robots');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
+Route::get('/sitemap_index.xml', [SitemapController::class, 'index'])->name('sitemap.index.alias');
 Route::prefix('sitemaps')->name('sitemaps.')->group(function () {
     Route::get('/pages.xml', [SitemapController::class, 'pages'])->name('pages');
     Route::get('/categories.xml', [SitemapController::class, 'categories'])->name('categories');
     Route::get('/locations.xml', [SitemapController::class, 'locations'])->name('locations');
+    Route::get('/states.xml', [SitemapController::class, 'states'])->name('states');
+    Route::get('/cities.xml', [SitemapController::class, 'cities'])->name('cities');
     Route::get('/listings.xml', [SitemapController::class, 'listings'])->name('listings');
+    Route::get('/images.xml', [SitemapController::class, 'images'])->name('images');
 });
 
 // =========================================================================

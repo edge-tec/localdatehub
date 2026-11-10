@@ -28,6 +28,8 @@ return Application::configure(basePath: dirname(__DIR__))
         \App\Console\Commands\CheckPendingCryptoPaymentsCommand::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->append(\App\Http\Middleware\HandleSeoRedirects::class);
+
         $middleware->web(append: [
             \App\Http\Middleware\SecurityHeadersMiddleware::class,
             \App\Http\Middleware\TrackPlatformTraffic::class,

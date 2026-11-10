@@ -442,9 +442,47 @@ class AdminEnterpriseHub extends Component
     public ?array $previewCmsData = null;
 
     // SEO & Marketing Command Center
-    public string $seoSubTab = 'metadata'; // 'metadata', 'sitemaps', 'robots', 'serp', 'marketing', 'trends'
+    public string $seoSubTab = 'metadata'; // 'metadata', 'overview', 'keywords', 'urls', 'sitemaps', 'indexing', 'gsc', 'audit', 'redirects', 'settings', 'serp', 'marketing', 'trends'
+    public string $seoDateRange = 'last_28_days'; // 'today', 'yesterday', 'last_7_days', 'last_28_days', 'last_3_months', 'last_6_months', 'last_12_months', 'custom'
+    public ?string $seoCustomStartDate = null;
+    public ?string $seoCustomEndDate = null;
     public string $seoSearch = '';
     public string $seoRobotsFilter = 'all';
+    public string $seoKeywordSearch = '';
+    public string $seoKeywordIntentFilter = 'all';
+    public string $seoKeywordPriorityFilter = 'all';
+    public string $seoUrlSearch = '';
+    public string $seoUrlTypeFilter = 'all';
+    public string $seoUrlIndexingFilter = 'all';
+    public string $seoIssueSeverityFilter = 'all';
+    public string $seoIssueTypeFilter = 'all';
+    public string $seoRedirectSearch = '';
+    public string $seoRedirectStatusFilter = 'all';
+    public string $seoRobotsTxtContent = '';
+    public array $newKeywordForm = [
+        'keyword' => '',
+        'search_intent' => 'commercial',
+        'search_volume' => 0,
+        'keyword_difficulty' => 30,
+        'cpc' => 1.50,
+        'priority' => 'medium',
+        'target_url' => '',
+        'category_id' => null,
+        'state_id' => null,
+        'city_id' => null,
+    ];
+    public array $newRedirectForm = [
+        'source_path' => '',
+        'target_url' => '',
+        'status_code' => 301,
+        'notes' => '',
+    ];
+    public array $gscForm = [
+        'site_url' => '',
+        'auth_mode' => 'service_account',
+        'client_email' => '',
+        'private_key' => '',
+    ];
     public string $serpPreviewRoute = 'home';
     public string $serpPreviewTitle = 'LocalDateHub — USA Adult Personal Classifieds & Local Dating';
     public string $serpPreviewDescription = 'Browse verified adult personals, singles, and classified listings across all 50 US states. 100% private, safe, and privacy-conscious dating platform.';
@@ -3654,10 +3692,215 @@ class AdminEnterpriseHub extends Component
 
     public function setSeoSubTab(string $subTab): void
     {
-        $this->seoSubTab = in_array($subTab, ['metadata', 'sitemaps', 'robots', 'serp', 'marketing', 'trends'], true)
-            ? $subTab
-            : 'metadata';
+        $allowed = [
+            'overview', 'keywords', 'urls', 'sitemaps', 'indexing',
+            'gsc', 'audit', 'redirects', 'settings', 'metadata', 'serp', 'marketing', 'trends',
+        ];
+        $this->seoSubTab = in_array($subTab, $allowed, true) ? $subTab : 'overview';
         $this->resetPage('seoPage');
+        $this->resetPage('seoKeywordsPage');
+        $this->resetPage('seoUrlsPage');
+        $this->resetPage('seoIssuesPage');
+        $this->resetPage('seoRedirectsPage');
+        $this->resetPage('seoQueuePage');
+    }
+
+    public function setSeoDateRange(string $range): void
+    {
+        $allowed = ['today', 'yesterday', 'last_7_days', 'last_28_days', 'last_3_months', 'last_6_months', 'last_12_months', 'custom'];
+        if (in_array($range, $allowed, true)) {
+            $this->seoDateRange = $range;
+        }
+    }
+
+    public function generateAllSitemaps(): void
+    {
+        $this->authorizePermission('seo.manage');
+        $service = app(\App\Modules\SEO\Services\SitemapService::class);
+        $results = $service->generateAll();
+
+        AdminAuditService::log('seo.sitemaps_generated', null, null, ['count' => count($results)]);
+        session()->flash('success', 'All XML Sitemaps generated and verified successfully.');
+    }
+
+    public function runTechnicalSeoAudit(): void
+    {
+        $this->authorizePermission('seo.manage');
+        $auditService = app(\App\Modules\SEO\Services\TechnicalSeoAuditService::class);
+        $res = $auditService->runFullAudit();
+
+        AdminAuditService::log('seo.audit_executed', null, null, $res);
+        session()->flash('success', "Technical SEO audit complete. Scanned {$res['total_urls']} URLs, found {$res['issues_found']} potential issues. Overall Health: {$res['overall_health_score']}%.");
+    }
+
+    public function processIndexingQueueNow(): void
+    {
+        $this->authorizePermission('seo.manage');
+        $service = app(\App\Modules\SEO\Services\GoogleIndexingService::class);
+        $processed = $service->processPendingQueue(50);
+
+        AdminAuditService::log('seo.queue_processed', null, null, ['processed' => $processed]);
+        session()->flash('success', "Dispatched {$processed} pending indexing notifications through verified channels.");
+    }
+
+    public function syncGoogleSearchConsoleNow(): void
+    {
+        $this->authorizePermission('seo.manage');
+        $service = app(\App\Modules\SEO\Services\GoogleSearchConsoleService::class);
+        $res = $service->syncAnalytics();
+
+        if ($res['success']) {
+            AdminAuditService::log('seo.gsc_synced', null, null, $res);
+            session()->flash('success', $res['message']);
+        } else {
+            session()->flash('error', $res['message']);
+        }
+    }
+
+    public function harvestKeywords(): void
+    {
+        $this->authorizePermission('seo.manage');
+        $service = app(\App\Modules\SEO\Services\KeywordResearchService::class);
+        $count = $service->harvestFromContent();
+
+        AdminAuditService::log('seo.keywords_harvested', null, null, ['count' => $count]);
+        session()->flash('success', "Harvested {$count} high-intent commercial keywords from active listings and locations.");
+    }
+
+    public function saveNewKeyword(): void
+    {
+        $this->authorizePermission('seo.manage');
+        $this->validate([
+            'newKeywordForm.keyword' => ['required', 'string', 'min:2', 'max:190'],
+            'newKeywordForm.search_intent' => ['required', 'string', 'in:informational,commercial,transactional,navigational'],
+            'newKeywordForm.priority' => ['required', 'string', 'in:low,medium,high,critical'],
+            'newKeywordForm.search_volume' => ['nullable', 'integer', 'min:0'],
+            'newKeywordForm.target_url' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $service = app(\App\Modules\SEO\Services\KeywordResearchService::class);
+        $service->saveKeyword($this->newKeywordForm);
+
+        $this->newKeywordForm = [
+            'keyword' => '',
+            'search_intent' => 'commercial',
+            'search_volume' => 0,
+            'keyword_difficulty' => 30,
+            'cpc' => 1.50,
+            'priority' => 'medium',
+            'target_url' => '',
+            'category_id' => null,
+            'state_id' => null,
+            'city_id' => null,
+        ];
+
+        AdminAuditService::log('seo.keyword_saved', null, null, ['keyword' => $this->newKeywordForm['keyword'] ?? '']);
+        session()->flash('success', 'Keyword created and added to tracking inventory.');
+    }
+
+    public function deleteKeyword(int $id): void
+    {
+        $this->authorizePermission('seo.manage');
+        $kw = \App\Modules\SEO\Models\SeoKeyword::findOrFail($id);
+        $name = $kw->keyword;
+        $kw->delete();
+
+        AdminAuditService::log('seo.keyword_deleted', null, ['keyword' => $name], null);
+        session()->flash('success', "Keyword [{$name}] removed from tracking.");
+    }
+
+    public function saveNewRedirect(): void
+    {
+        $this->authorizePermission('seo.manage');
+        $this->validate([
+            'newRedirectForm.source_path' => ['required', 'string', 'min:1', 'max:255'],
+            'newRedirectForm.target_url' => ['nullable', 'string', 'max:255'],
+            'newRedirectForm.status_code' => ['required', 'integer', 'in:301,302,410'],
+        ]);
+
+        $source = '/' . ltrim(trim($this->newRedirectForm['source_path']), '/');
+        \App\Modules\SEO\Models\SeoRedirect::updateOrCreate(
+            ['source_path' => $source],
+            [
+                'target_url' => $this->newRedirectForm['target_url'] ? trim($this->newRedirectForm['target_url']) : null,
+                'status_code' => (int) $this->newRedirectForm['status_code'],
+                'is_active' => true,
+                'notes' => $this->newRedirectForm['notes'] ?? null,
+            ]
+        );
+
+        $this->newRedirectForm = [
+            'source_path' => '',
+            'target_url' => '',
+            'status_code' => 301,
+            'notes' => '',
+        ];
+
+        AdminAuditService::log('seo.redirect_saved', null, null, ['source' => $source]);
+        session()->flash('success', "Redirect rule for {$source} saved successfully.");
+    }
+
+    public function toggleRedirectStatus(int $id): void
+    {
+        $this->authorizePermission('seo.manage');
+        $redirect = \App\Modules\SEO\Models\SeoRedirect::findOrFail($id);
+        $redirect->update(['is_active' => ! $redirect->is_active]);
+
+        session()->flash('success', "Redirect rule {$redirect->source_path} is now " . ($redirect->is_active ? 'Active' : 'Disabled') . '.');
+    }
+
+    public function deleteRedirect(int $id): void
+    {
+        $this->authorizePermission('seo.manage');
+        $redirect = \App\Modules\SEO\Models\SeoRedirect::findOrFail($id);
+        $path = $redirect->source_path;
+        $redirect->delete();
+
+        AdminAuditService::log('seo.redirect_deleted', null, ['source' => $path], null);
+        session()->flash('success', "Redirect rule for {$path} deleted.");
+    }
+
+    public function resolveSeoIssue(int $id): void
+    {
+        $this->authorizePermission('seo.manage');
+        $issue = \App\Modules\SEO\Models\SeoIssue::findOrFail($id);
+        $issue->update([
+            'is_resolved' => true,
+            'resolved_at' => now(),
+        ]);
+
+        session()->flash('success', "Technical issue #{$id} marked as resolved.");
+    }
+
+    public function saveGscCredentials(): void
+    {
+        $this->authorizePermission('seo.manage');
+        $this->validate([
+            'gscForm.site_url' => ['required', 'string', 'max:255'],
+            'gscForm.auth_mode' => ['required', 'string', 'in:service_account,oauth2'],
+            'gscForm.client_email' => ['nullable', 'email', 'max:150'],
+            'gscForm.private_key' => ['nullable', 'string'],
+        ]);
+
+        $service = app(\App\Modules\SEO\Services\GoogleSearchConsoleService::class);
+        $service->updateCredentials($this->gscForm);
+
+        AdminAuditService::log('seo.gsc_credentials_updated', null, null, ['site_url' => $this->gscForm['site_url']]);
+        session()->flash('success', 'Google Search Console configuration saved successfully.');
+    }
+
+    public function saveRobotsTxt(): void
+    {
+        $this->authorizePermission('seo.manage');
+        $content = trim($this->seoRobotsTxtContent);
+
+        SystemSetting::updateOrCreate(
+            ['group' => 'seo', 'key' => 'robots_txt'],
+            ['value' => $content, 'type' => 'text', 'is_public' => false]
+        );
+
+        AdminAuditService::log('seo.robots_txt_updated', null, null, ['length' => strlen($content)]);
+        session()->flash('success', 'Dynamic robots.txt directives saved.');
     }
 
     public function resetSeoFilters(): void
@@ -5919,22 +6162,26 @@ class AdminEnterpriseHub extends Component
     {
         $this->loadMarketingSettings();
 
-        $query = SeoMeta::query()->orderBy('page_route');
+        // 1. Date Range
+        $startDate = match ($this->seoDateRange) {
+            'today' => now()->startOfDay(),
+            'yesterday' => now()->subDay()->startOfDay(),
+            'last_7_days' => now()->subDays(7)->startOfDay(),
+            'last_28_days' => now()->subDays(28)->startOfDay(),
+            'last_3_months' => now()->subMonths(3)->startOfDay(),
+            'last_6_months' => now()->subMonths(6)->startOfDay(),
+            'last_12_months' => now()->subYears(1)->startOfDay(),
+            'custom' => $this->seoCustomStartDate ? \Illuminate\Support\Carbon::parse($this->seoCustomStartDate)->startOfDay() : now()->subDays(28)->startOfDay(),
+            default => now()->subDays(28)->startOfDay(),
+        };
 
-        if ($this->seoRobotsFilter !== 'all') {
-            $query->where('robots_directive', $this->seoRobotsFilter);
-        }
+        $endDate = match ($this->seoDateRange) {
+            'yesterday' => now()->subDay()->endOfDay(),
+            'custom' => $this->seoCustomEndDate ? \Illuminate\Support\Carbon::parse($this->seoCustomEndDate)->endOfDay() : now()->endOfDay(),
+            default => now()->endOfDay(),
+        };
 
-        if (trim($this->seoSearch) !== '') {
-            $s = trim($this->seoSearch);
-            $query->where(function ($q) use ($s) {
-                $q->where('page_route', 'like', "%{$s}%")
-                    ->orWhere('meta_title', 'like', "%{$s}%")
-                    ->orWhere('meta_description', 'like', "%{$s}%")
-                    ->orWhere('meta_keywords', 'like', "%{$s}%");
-            });
-        }
-
+        // 2. Base Totals
         $allMetas = SeoMeta::all();
         $totalCategories = Category::where('is_active', true)->count();
         $totalStates = State::where('is_active', true)->count();
@@ -5943,64 +6190,188 @@ class AdminEnterpriseHub extends Component
         $totalCms = CmsPage::where('is_published', true)->count();
         $totalEstimatedUrls = 3 + $totalCms + $totalCategories + $totalStates + min($totalCities, 2500) + $totalListings;
 
-        $sitemaps = [
-            [
-                'name' => 'Master Sitemap Index',
-                'route' => route('sitemap.index'),
-                'type' => 'sitemapindex',
-                'frequency' => 'hourly',
-                'priority' => '1.0',
-                'count' => 4,
-                'status' => '200 OK / Live',
-            ],
-            [
-                'name' => 'Core Pages & Legal Sitemaps',
-                'route' => route('sitemaps.pages'),
-                'type' => 'urlset',
-                'frequency' => 'hourly',
-                'priority' => '1.0 / 0.6',
-                'count' => 3 + $totalCms,
-                'status' => '200 OK / Live',
-            ],
-            [
-                'name' => 'Classified Categories Sitemap',
-                'route' => route('sitemaps.categories'),
-                'type' => 'urlset',
-                'frequency' => 'daily',
-                'priority' => '0.8',
-                'count' => $totalCategories,
-                'status' => '200 OK / Live',
-            ],
-            [
-                'name' => 'Geo Locations (50 States & Cities)',
-                'route' => route('sitemaps.locations'),
-                'type' => 'urlset',
-                'frequency' => 'daily',
-                'priority' => '0.7 / 0.6',
-                'count' => $totalStates + min($totalCities, 2500),
-                'status' => '200 OK / Live',
-            ],
-            [
-                'name' => 'Live Classified Listings',
-                'route' => route('sitemaps.listings'),
-                'type' => 'urlset',
-                'frequency' => 'hourly',
-                'priority' => '0.9 / 0.7',
-                'count' => $totalListings,
-                'status' => '200 OK / Live',
-            ],
+        $dbTotalUrls = \App\Modules\SEO\Models\SeoUrlRecord::count();
+        $totalWebsiteUrls = max($dbTotalUrls, $totalEstimatedUrls);
+
+        // 3. Complete 20 SEO Dashboard Metrics
+        $totalIndexedUrls = \App\Modules\SEO\Models\SeoUrlRecord::where('indexing_status', 'indexed')->count();
+        $totalNotIndexedUrls = \App\Modules\SEO\Models\SeoUrlRecord::where('indexing_status', 'not_indexed')->count();
+        $pendingIndexingUrls = \App\Modules\SEO\Models\SeoIndexingQueue::where('status', 'pending')->count();
+        $sitemapUrlsCount = (int) \App\Modules\SEO\Models\SeoSitemap::sum('url_count');
+        $submittedUrls = \App\Modules\SEO\Models\SeoUrlRecord::where('indexing_status', 'submitted')->count();
+        $failedIndexingRequests = \App\Modules\SEO\Models\SeoIndexingQueue::where('status', 'failed')->count();
+
+        $analyticsQuery = \App\Modules\SEO\Models\SeoSearchAnalytic::whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()]);
+        $organicClicks = (int) (clone $analyticsQuery)->sum('clicks');
+        $organicImpressions = (int) (clone $analyticsQuery)->sum('impressions');
+        $avgPosition = round((float) ((clone $analyticsQuery)->avg('position') ?: 0.0), 1);
+        $avgCtr = round((float) (((clone $analyticsQuery)->avg('ctr') ?: 0.0) * 100), 2);
+
+        $totalTargetedKeywords = \App\Modules\SEO\Models\SeoKeyword::count();
+        $rankingKeywords = \App\Modules\SEO\Models\SeoKeyword::whereNotNull('ranking_position')->where('ranking_position', '<=', 100)->count();
+
+        $unresolvedIssuesCount = \App\Modules\SEO\Models\SeoIssue::where('is_resolved', false)->count();
+        $missingTitles = \App\Modules\SEO\Models\SeoIssue::where('issue_type', 'missing_title')->where('is_resolved', false)->count();
+        $missingDescriptions = \App\Modules\SEO\Models\SeoIssue::where('issue_type', 'missing_description')->where('is_resolved', false)->count();
+        $duplicateWarnings = \App\Modules\SEO\Models\SeoIssue::whereIn('issue_type', ['duplicate_title', 'duplicate_description'])->where('is_resolved', false)->count();
+        $brokenLinks = \App\Modules\SEO\Models\SeoIssue::where('issue_type', 'broken_internal_link')->where('is_resolved', false)->count();
+        $crawlErrors = \App\Modules\SEO\Models\SeoIssue::whereIn('issue_type', ['404_error', '500_error'])->where('is_resolved', false)->count();
+
+        $seoHealthScore = $totalWebsiteUrls > 0
+            ? max(10, min(100, (int) round(100 - (($unresolvedIssuesCount / max($totalWebsiteUrls, 1)) * 100))))
+            : 100;
+
+        $seoDashboardMetrics = [
+            'total_website_urls' => $totalWebsiteUrls,
+            'total_indexed_urls' => $totalIndexedUrls,
+            'total_not_indexed_urls' => $totalNotIndexedUrls,
+            'pending_indexing_urls' => $pendingIndexingUrls,
+            'sitemap_urls' => $sitemapUrlsCount > 0 ? $sitemapUrlsCount : $totalWebsiteUrls,
+            'submitted_urls' => $submittedUrls,
+            'failed_indexing_requests' => $failedIndexingRequests,
+            'total_organic_clicks' => $organicClicks,
+            'total_organic_impressions' => $organicImpressions,
+            'average_google_position' => $avgPosition > 0 ? $avgPosition : 0.0,
+            'average_ctr' => $avgCtr > 0 ? $avgCtr : 0.0,
+            'total_targeted_keywords' => $totalTargetedKeywords,
+            'ranking_keywords' => $rankingKeywords,
+            'seo_health_score' => $seoHealthScore,
+            'technical_seo_issues' => $unresolvedIssuesCount,
+            'missing_meta_titles' => $missingTitles,
+            'missing_meta_descriptions' => $missingDescriptions,
+            'duplicate_content_warnings' => $duplicateWarnings,
+            'broken_links' => $brokenLinks,
+            'crawl_errors' => $crawlErrors,
         ];
 
+        // 4. Sub-Tab Queries
+        // Keywords
+        $kwQuery = \App\Modules\SEO\Models\SeoKeyword::with(['group', 'category', 'state', 'city'])->latest('updated_at');
+        if ($this->seoKeywordIntentFilter !== 'all') {
+            $kwQuery->where('search_intent', $this->seoKeywordIntentFilter);
+        }
+        if ($this->seoKeywordPriorityFilter !== 'all') {
+            $kwQuery->where('priority', $this->seoKeywordPriorityFilter);
+        }
+        if (trim($this->seoKeywordSearch) !== '') {
+            $s = trim($this->seoKeywordSearch);
+            $kwQuery->where('keyword', 'like', "%{$s}%");
+        }
+
+        // URL Inventory
+        $urlQuery = \App\Modules\SEO\Models\SeoUrlRecord::latest('updated_at');
+        if ($this->seoUrlTypeFilter !== 'all') {
+            $urlQuery->where('url_type', $this->seoUrlTypeFilter);
+        }
+        if ($this->seoUrlIndexingFilter !== 'all') {
+            $urlQuery->where('indexing_status', $this->seoUrlIndexingFilter);
+        }
+        if (trim($this->seoUrlSearch) !== '') {
+            $s = trim($this->seoUrlSearch);
+            $urlQuery->where(function ($q) use ($s) {
+                $q->where('url', 'like', "%{$s}%")
+                    ->orWhere('meta_title', 'like', "%{$s}%");
+            });
+        }
+
+        // Issues
+        $issueQuery = \App\Modules\SEO\Models\SeoIssue::latest('updated_at');
+        if ($this->seoIssueSeverityFilter !== 'all') {
+            $issueQuery->where('severity', $this->seoIssueSeverityFilter);
+        }
+        if ($this->seoIssueTypeFilter !== 'all') {
+            $issueQuery->where('issue_type', $this->seoIssueTypeFilter);
+        }
+
+        // Redirects
+        $redirQuery = \App\Modules\SEO\Models\SeoRedirect::latest('updated_at');
+        if ($this->seoRedirectStatusFilter !== 'all') {
+            $redirQuery->where('status_code', (int) $this->seoRedirectStatusFilter);
+        }
+        if (trim($this->seoRedirectSearch) !== '') {
+            $s = trim($this->seoRedirectSearch);
+            $redirQuery->where(function ($q) use ($s) {
+                $q->where('source_path', 'like', "%{$s}%")
+                    ->orWhere('target_url', 'like', "%{$s}%");
+            });
+        }
+
+        // Sitemaps list
+        $registeredSitemaps = \App\Modules\SEO\Models\SeoSitemap::all();
+        if ($registeredSitemaps->isEmpty()) {
+            $sitemaps = [
+                ['name' => 'Master Sitemap Index', 'route' => route('sitemap.index'), 'type' => 'sitemapindex', 'frequency' => 'hourly', 'priority' => '1.0', 'count' => 7, 'status' => '200 OK / Live'],
+                ['name' => 'Core Pages & Legal Sitemaps', 'route' => route('sitemaps.pages'), 'type' => 'urlset', 'frequency' => 'hourly', 'priority' => '1.0 / 0.6', 'count' => 7 + $totalCms, 'status' => '200 OK / Live'],
+                ['name' => 'Classified Categories Sitemap', 'route' => route('sitemaps.categories'), 'type' => 'urlset', 'frequency' => 'daily', 'priority' => '0.8', 'count' => $totalCategories, 'status' => '200 OK / Live'],
+                ['name' => 'Geo Locations (50 States & Cities)', 'route' => route('sitemaps.locations'), 'type' => 'urlset', 'frequency' => 'daily', 'priority' => '0.7 / 0.6', 'count' => $totalStates + min($totalCities, 2500), 'status' => '200 OK / Live'],
+                ['name' => 'Dedicated US States Sitemap', 'route' => route('sitemaps.states'), 'type' => 'urlset', 'frequency' => 'daily', 'priority' => '0.8', 'count' => $totalStates, 'status' => '200 OK / Live'],
+                ['name' => 'Dedicated US Cities Sitemap', 'route' => route('sitemaps.cities'), 'type' => 'urlset', 'frequency' => 'daily', 'priority' => '0.6', 'count' => min($totalCities, 5000), 'status' => '200 OK / Live'],
+                ['name' => 'Live Classified Listings', 'route' => route('sitemaps.listings'), 'type' => 'urlset', 'frequency' => 'hourly', 'priority' => '0.9 / 0.7', 'count' => $totalListings, 'status' => '200 OK / Live'],
+                ['name' => 'Media & Photos Sitemap', 'route' => route('sitemaps.images'), 'type' => 'urlset', 'frequency' => 'daily', 'priority' => '0.6', 'count' => min($totalListings * 3, 5000), 'status' => '200 OK / Live'],
+            ];
+        } else {
+            $sitemaps = $registeredSitemaps->map(function ($sm) {
+                return [
+                    'name' => $sm->name,
+                    'route' => url('sitemaps/' . $sm->name),
+                    'type' => str_contains($sm->name, 'index') ? 'sitemapindex' : 'urlset',
+                    'frequency' => 'daily',
+                    'priority' => '0.8',
+                    'count' => $sm->url_count,
+                    'status' => $sm->is_valid_xml ? '200 OK / Valid XML' : 'Error: ' . $sm->validation_error,
+                    'lastmod' => $sm->last_generated_at?->diffForHumans() ?: 'Never',
+                ];
+            })->toArray();
+        }
+
+        // Meta routes query
+        $metaQuery = SeoMeta::query()->orderBy('page_route');
+        if ($this->seoRobotsFilter !== 'all') {
+            $metaQuery->where('robots_directive', $this->seoRobotsFilter);
+        }
+        if (trim($this->seoSearch) !== '') {
+            $s = trim($this->seoSearch);
+            $metaQuery->where(function ($q) use ($s) {
+                $q->where('page_route', 'like', "%{$s}%")
+                    ->orWhere('meta_title', 'like', "%{$s}%")
+                    ->orWhere('meta_description', 'like', "%{$s}%");
+            });
+        }
+
+        $gscService = app(\App\Modules\SEO\Services\GoogleSearchConsoleService::class);
+        $gscSettings = $gscService->getSettings();
+
+        // Load robots.txt content if empty
+        if (empty($this->seoRobotsTxtContent)) {
+            $this->seoRobotsTxtContent = (string) (SystemSetting::where('group', 'seo')->where('key', 'robots_txt')->value('value') ?? '');
+            if (empty(trim($this->seoRobotsTxtContent))) {
+                $this->seoRobotsTxtContent = "User-agent: *\nAllow: /\nDisallow: /account/\nDisallow: /admin/\nDisallow: /api/\nDisallow: /webhooks/\nDisallow: /listings/create\nDisallow: /*/edit\n\nSitemap: " . route('sitemap.index') . "\n";
+            }
+        }
+
         return [
-            'seoMetas' => $query->paginate(15, ['*'], 'seoPage'),
+            'metrics' => $seoDashboardMetrics,
+            'seoMetas' => $metaQuery->paginate(15, ['*'], 'seoPage'),
+            'seoKeywords' => $kwQuery->paginate(15, ['*'], 'seoKeywordsPage'),
+            'seoKeywordGroups' => \App\Modules\SEO\Models\SeoKeywordGroup::all(),
+            'seoUrlRecords' => $urlQuery->paginate(15, ['*'], 'seoUrlsPage'),
             'sitemaps' => $sitemaps,
+            'indexingQueue' => \App\Modules\SEO\Models\SeoIndexingQueue::latest('id')->paginate(15, ['*'], 'seoQueuePage'),
+            'indexingLogs' => \App\Modules\SEO\Models\SeoIndexingLog::latest('id')->limit(20)->get(),
+            'seoIssues' => $issueQuery->paginate(15, ['*'], 'seoIssuesPage'),
+            'seoRedirects' => $redirQuery->paginate(15, ['*'], 'seoRedirectsPage'),
+            'gscAnalytics' => $analyticsQuery->latest('date')->limit(30)->get(),
+            'contentSuggestions' => \App\Modules\SEO\Models\SeoContentSuggestion::latest('id')->limit(15)->get(),
+            'gscSettings' => $gscSettings,
             'searchTrends' => SearchTrend::with(['category', 'state', 'city'])->orderByDesc('hits')->limit(15)->get(),
+            'categories' => Category::where('is_active', true)->get(),
+            'states' => State::where('is_active', true)->get(),
             'seoStats' => [
                 'total_overrides' => $allMetas->count(),
                 'indexable_routes' => $totalEstimatedUrls,
                 'index_follow_count' => $allMetas->where('robots_directive', 'index, follow')->count(),
                 'sitemaps_count' => count($sitemaps),
-                'health_score' => $allMetas->count() > 0 ? 98 : 85,
+                'health_score' => $seoHealthScore,
             ],
         ];
     }

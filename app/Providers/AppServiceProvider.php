@@ -25,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Listing::observe(ListingSearchObserver::class);
+        Listing::observe(\App\Modules\SEO\Observers\ListingSeoObserver::class);
         Gate::policy(ContactMessage::class, ContactMessagePolicy::class);
 
         // Dynamic SMTP configuration from persistent SystemSetting

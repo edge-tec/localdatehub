@@ -5548,6 +5548,14 @@
             <!-- SEO & Marketing Segmented Sub-Tabs Bar -->
             <div class="flex items-center gap-2 overflow-x-auto pb-2 mb-6 border-b border-slate-200">
                 <button 
+                    wire:click="setSeoSubTab('overview')" 
+                    class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'overview' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                    <span>Overview &amp; 20 KPIs</span>
+                </button>
+
+                <button 
                     wire:click="setSeoSubTab('metadata')" 
                     class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'metadata' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
                 >
@@ -5556,11 +5564,67 @@
                 </button>
 
                 <button 
+                    wire:click="setSeoSubTab('keywords')" 
+                    class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'keywords' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                    <span>Keyword Research</span>
+                </button>
+
+                <button 
+                    wire:click="setSeoSubTab('urls')" 
+                    class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'urls' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                    <span>URL Inventory</span>
+                </button>
+
+                <button 
                     wire:click="setSeoSubTab('sitemaps')" 
                     class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'sitemaps' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-                    <span>XML Sitemaps Engine (5)</span>
+                    <span>XML Sitemaps Engine</span>
+                </button>
+
+                <button 
+                    wire:click="setSeoSubTab('indexing')" 
+                    class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'indexing' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                    <span>Indexing Queue</span>
+                </button>
+
+                <button 
+                    wire:click="setSeoSubTab('gsc')" 
+                    class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'gsc' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    <span>Search Console</span>
+                </button>
+
+                <button 
+                    wire:click="setSeoSubTab('audit')" 
+                    class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'audit' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <span>Technical Issues</span>
+                </button>
+
+                <button 
+                    wire:click="setSeoSubTab('redirects')" 
+                    class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'redirects' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                    <span>Redirects &amp; 410</span>
+                </button>
+
+                <button 
+                    wire:click="setSeoSubTab('settings')" 
+                    class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'settings' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
+                    <span>SEO Settings</span>
                 </button>
 
                 <button 
@@ -5595,6 +5659,11 @@
                     <span>Organic Search Trends ({{ $searchTrends->count() }})</span>
                 </button>
             </div>
+
+            {{-- ENTERPRISE SEO SUITE VIEWS --}}
+            @if(in_array($seoSubTab, ['overview', 'keywords', 'urls', 'sitemaps', 'indexing', 'gsc', 'audit', 'redirects', 'settings']))
+                @include('livewire.admin.partials.seo-suite')
+            @endif
 
             {{-- 1. SUB-TAB: METADATA & OPENGRAPH OVERRIDES --}}
             @if($seoSubTab === 'metadata')
