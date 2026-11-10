@@ -2,7 +2,6 @@
     class="messenger-container w-full max-w-[1680px] mx-auto bg-white border border-slate-200/90 rounded-xl sm:rounded-2xl shadow-xl overflow-hidden relative font-sans text-slate-900"
     x-data="{
         lightboxUrl: null,
-        showEmojiPicker: false,
         scrollToBottom() {
             $nextTick(() => {
                 const el = document.getElementById('chat-messages-container');
@@ -170,7 +169,10 @@
                     class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-pink-50 text-slate-600 hover:text-[#F20B65] flex items-center justify-center transition"
                     title="Start New Conversation"
                 >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
                 </button>
             </div>
         </div>
@@ -226,7 +228,7 @@
                 @endphp
                 <div 
                     wire:click="selectConversation('{{ $conv['key'] }}')"
-                    class="p-3.5 flex items-start gap-3 cursor-pointer transition relative group {{ $isActive ? 'bg-pink-50/60 border-l-4 border-[#F20B65]' : ($hasUnread ? 'bg-slate-50/80 hover:bg-slate-100' : 'hover:bg-slate-50/90') }}"
+                    class="p-3.5 flex items-start gap-3 cursor-pointer transition relative group {{ $isActive ? 'bg-pink-50/70 border-l-4 border-[#F20B65]' : ($hasUnread ? 'bg-slate-50/80 hover:bg-slate-100' : 'hover:bg-slate-50/90') }}"
                 >
                     <!-- User Avatar with Status Indicator -->
                     <div class="relative shrink-0">
@@ -279,13 +281,13 @@
 
                             <div class="flex items-center gap-1 shrink-0">
                                 @if($conv['is_starred'])
-                                    <span class="text-[11px]" title="Starred">⭐</span>
+                                    <svg class="w-3.5 h-3.5 text-amber-500 fill-amber-500" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                                 @endif
                                 @if($conv['is_pinned'])
-                                    <span class="text-[11px]" title="Pinned to top">📌</span>
+                                    <svg class="w-3.5 h-3.5 text-blue-600 fill-blue-600" viewBox="0 0 24 24"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
                                 @endif
                                 @if($hasUnread)
-                                    <span class="w-4 h-4 rounded-full bg-[#F20B65] text-white text-[10px] font-black flex items-center justify-center">
+                                    <span class="w-4 h-4 rounded-full bg-[#F20B65] text-white text-[10px] font-black flex items-center justify-center shadow-xs">
                                         {{ $conv['unread_count'] }}
                                     </span>
                                 @endif
@@ -330,7 +332,7 @@
                         class="md:hidden w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition"
                         title="Back to Inbox"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m15 18-6-6 6-6"/></svg>
                     </button>
 
                     <!-- Peer Avatar -->
@@ -355,10 +357,10 @@
                                 <svg class="w-3.5 h-3.5 text-blue-500 fill-current" viewBox="0 0 20 20" title="Verified Member"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                             @endif
                             @if($this->isStarred)
-                                <span class="text-xs" title="Starred">⭐</span>
+                                <svg class="w-3.5 h-3.5 text-amber-500 fill-amber-500" viewBox="0 0 24 24" title="Starred"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                             @endif
                             @if($this->isPinned)
-                                <span class="text-xs" title="Pinned">📌</span>
+                                <svg class="w-3.5 h-3.5 text-blue-600 fill-blue-600" viewBox="0 0 24 24" title="Pinned"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
                             @endif
                         </div>
                         <span class="text-[11px] font-semibold text-emerald-600 flex items-center gap-1 mt-0.5">
@@ -377,7 +379,9 @@
                         title="Voice Call"
                         onclick="alert('Encrypted audio calling is enabled for verified members.')"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        </svg>
                     </button>
 
                     <!-- Video Call Button -->
@@ -387,7 +391,10 @@
                         title="Video Call"
                         onclick="alert('Encrypted video calling is enabled for verified members.')"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"/></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                            <rect width="15" height="14" x="1" y="5" rx="2" ry="2"></rect>
+                        </svg>
                     </button>
 
                     <!-- Toggle Conversation Details (Desktop toggle / Mobile view switch) -->
@@ -397,7 +404,11 @@
                         wire:click="toggleRightPanel"
                         title="{{ $showRightPanel ? 'Hide Details' : 'Show Details' }}"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
                     </button>
 
                     <button 
@@ -406,7 +417,11 @@
                         wire:click="openMobileDetails"
                         title="Conversation Details"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
                     </button>
                 </div>
             </header>
@@ -491,7 +506,7 @@
                         <div class="flex items-end gap-1.5 max-w-[85%] sm:max-w-[75%] {{ $isOutgoing ? 'flex-row-reverse' : 'flex-row' }}">
                             <!-- Bubble -->
                             <div 
-                                class="rounded-2xl px-4 py-2.5 text-xs font-normal leading-relaxed break-words shadow-2xs relative {{ $isOutgoing ? 'bg-[#F20B65] text-white rounded-br-xs' : 'bg-white text-slate-900 border border-slate-200/80 rounded-bl-xs' }}"
+                                class="rounded-2xl px-4 py-2.5 text-xs font-normal leading-relaxed break-words shadow-2xs relative {{ $isOutgoing ? 'bg-gradient-to-r from-[#F20B65] to-rose-600 text-white rounded-br-xs' : 'bg-slate-100 text-slate-900 border border-slate-200/80 rounded-bl-xs' }}"
                             >
                                 <!-- Attached File/Image Rendering -->
                                 @if($message->attachment_path)
@@ -508,7 +523,7 @@
                                                 href="{{ $message->attachment_url }}" 
                                                 download="{{ $message->attachment_name }}" 
                                                 target="_blank"
-                                                class="flex items-center gap-2 p-2.5 rounded-xl transition {{ $isOutgoing ? 'bg-pink-700/60 text-white' : 'bg-slate-100 text-slate-800' }}"
+                                                class="flex items-center gap-2 p-2.5 rounded-xl transition {{ $isOutgoing ? 'bg-pink-700/60 text-white' : 'bg-white text-slate-800' }}"
                                             >
                                                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
                                                 <div class="min-w-0">
@@ -543,19 +558,36 @@
 
                             <!-- Hover Action Controls -->
                             <div class="opacity-0 group-hover/msg:opacity-100 transition flex items-center gap-1 text-slate-400">
-                                <!-- Quick Reaction Dropdown -->
+                                <!-- Modern Floating Quick Reaction Dropdown -->
                                 <div class="relative" x-data="{ open: false }">
-                                    <button @click="open = !open" class="p-1 hover:text-slate-600 rounded">😊</button>
+                                    <button 
+                                        type="button" 
+                                        @click="open = !open" 
+                                        class="w-6 h-6 rounded-full hover:bg-slate-200/80 text-slate-500 hover:text-slate-800 flex items-center justify-center transition"
+                                        title="React"
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                                            <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                                            <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                                        </svg>
+                                    </button>
                                     <div 
                                         x-show="open" 
+                                        x-cloak
                                         @click.away="open = false" 
-                                        class="absolute bottom-6 bg-white border border-slate-200 rounded-full shadow-lg p-1 flex items-center gap-1 z-30"
+                                        x-transition:enter="transition ease-out duration-150"
+                                        x-transition:enter-start="opacity-0 translate-y-1 scale-90"
+                                        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                                        class="absolute bottom-7 {{ $isOutgoing ? 'right-0' : 'left-0' }} bg-white border border-slate-200 rounded-full shadow-xl px-2 py-1 flex items-center gap-1 z-40"
                                     >
-                                        @foreach(['👍', '❤️', '😂', '🔥', '👏', '😮'] as $e)
+                                        @foreach(['❤️', '👍', '😂', '😮', '😢', '🔥'] as $e)
                                             <button 
+                                                type="button"
                                                 wire:click="toggleReaction({{ $message->id }}, '{{ $e }}')" 
                                                 @click="open = false" 
-                                                class="hover:scale-125 transition p-1 text-sm"
+                                                class="hover:scale-135 transition-transform p-1 text-sm leading-none"
                                             >
                                                 {{ $e }}
                                             </button>
@@ -566,10 +598,13 @@
                                 <!-- Reply Action -->
                                 <button 
                                     wire:click="setReplyTo({{ $message->id }})" 
-                                    class="p-1 hover:text-slate-600 rounded"
+                                    class="w-6 h-6 rounded-full hover:bg-slate-200/80 text-slate-500 hover:text-slate-800 flex items-center justify-center transition"
                                     title="Reply"
                                 >
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 016 6v3"/></svg>
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <polyline points="9 17 4 12 9 7"></polyline>
+                                        <path d="M20 18v-2a4 4 0 0 0-4-4H4"></path>
+                                    </svg>
                                 </button>
 
                                 <!-- Delete own message -->
@@ -577,10 +612,14 @@
                                     <button 
                                         wire:click="deleteMessage({{ $message->id }})" 
                                         wire:confirm="Delete this message?"
-                                        class="p-1 hover:text-rose-500 rounded"
+                                        class="w-6 h-6 rounded-full hover:bg-rose-100 text-slate-400 hover:text-rose-600 flex items-center justify-center transition"
                                         title="Delete"
                                     >
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path d="M3 6h18"></path>
+                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                        </svg>
                                     </button>
                                 @endif
                             </div>
@@ -637,62 +676,184 @@
                 @endif
 
                 <!-- Main Composer Input Bar -->
-                <form wire:submit.prevent="sendMessage" class="flex items-end gap-1.5 sm:gap-2">
+                <form wire:submit.prevent="sendMessage" class="flex items-end gap-1.5 sm:gap-2 relative">
                     <!-- Attachment Trigger -->
                     <label 
-                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center cursor-pointer transition shrink-0 border border-slate-200/80"
+                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center cursor-pointer transition shrink-0 border border-slate-200"
                         title="Attach Photo or Document"
                     >
                         <input type="file" wire:model="attachment" class="hidden" accept="image/*,.pdf,.doc,.docx" />
-                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"/></svg>
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                        </svg>
                     </label>
 
-                    <!-- Text Area -->
+                    <!-- Text Area Input -->
                     <div class="flex-1 relative">
                         <textarea 
+                            id="messenger-textarea"
                             wire:model="messageText"
                             rows="1"
-                            placeholder="Write a message..."
-                            class="w-full bg-slate-50 border border-slate-200/90 rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#F20B65]/20 focus:border-[#F20B65] resize-none max-h-24 sm:max-h-32 transition scrollbar-none"
+                            placeholder="Write a message... (Press Enter to send)"
+                            class="w-full bg-slate-50 border border-slate-200/90 rounded-2xl px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#F20B65]/20 focus:border-[#F20B65] resize-none max-h-24 sm:max-h-32 transition scrollbar-none"
                             x-on:keydown.enter.exact.prevent="$wire.sendMessage()"
                         ></textarea>
                     </div>
 
-                    <!-- Quick Emoji Trigger -->
-                    <div class="relative" x-data="{ open: false }">
+                    <!-- Modern Responsive Emoji Picker -->
+                    <div 
+                        class="relative" 
+                        x-data="{ 
+                            open: false, 
+                            category: 'smileys',
+                            insertEmoji(emoji) {
+                                const textarea = document.getElementById('messenger-textarea');
+                                if (textarea) {
+                                    const start = textarea.selectionStart || 0;
+                                    const end = textarea.selectionEnd || 0;
+                                    const text = $wire.messageText || '';
+                                    $wire.messageText = text.substring(0, start) + emoji + text.substring(end);
+                                    $nextTick(() => {
+                                        textarea.focus();
+                                        textarea.setSelectionRange(start + emoji.length, start + emoji.length);
+                                    });
+                                } else {
+                                    $wire.messageText = ($wire.messageText || '') + emoji;
+                                }
+                            }
+                        }"
+                    >
                         <button 
                             type="button" 
                             @click="open = !open" 
-                            class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition shrink-0 border border-slate-200/80"
+                            class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-[#F20B65] flex items-center justify-center transition shrink-0 border border-slate-200"
+                            :class="{ 'bg-pink-50 text-[#F20B65] border-pink-200': open }"
+                            title="Insert Emoji"
                         >
-                            😊
+                            <svg class="w-4 h-4 sm:w-4.5 sm:h-4.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                                <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                                <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                            </svg>
                         </button>
+
+                        <!-- Advanced Floating Emoji Popover -->
                         <div 
                             x-show="open" 
+                            x-cloak
                             @click.away="open = false" 
-                            class="absolute bottom-11 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl p-2 grid grid-cols-4 gap-1.5 z-40"
+                            x-transition:enter="transition ease-out duration-150"
+                            x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                            x-transition:leave="transition ease-in duration-100"
+                            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                            x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                            class="absolute bottom-12 right-0 w-72 sm:w-80 max-w-[calc(100vw-32px)] bg-white border border-slate-200 rounded-2xl shadow-2xl p-3 z-50 flex flex-col gap-2"
                         >
-                            @foreach(['❤️', '👍', '😊', '🔥', '👋', '☕', '📍', '✨'] as $emoji)
-                                <button 
-                                    type="button" 
-                                    wire:click="$set('messageText', '{{ $messageText }}' + '{{ $emoji }}')" 
-                                    @click="open = false" 
-                                    class="p-2 hover:bg-slate-100 rounded-xl text-lg transition"
-                                >
-                                    {{ $emoji }}
-                                </button>
-                            @endforeach
+                            <!-- Category Filter Tabs -->
+                            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                                <div class="flex items-center gap-1">
+                                    <button 
+                                        type="button" 
+                                        @click="category = 'smileys'"
+                                        class="px-2 py-1 rounded-lg text-xs font-bold transition"
+                                        :class="category === 'smileys' ? 'bg-[#F20B65] text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'"
+                                    >
+                                        😀 Smileys
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        @click="category = 'love'"
+                                        class="px-2 py-1 rounded-lg text-xs font-bold transition"
+                                        :class="category === 'love' ? 'bg-[#F20B65] text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'"
+                                    >
+                                        ❤️ Hearts
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        @click="category = 'gestures'"
+                                        class="px-2 py-1 rounded-lg text-xs font-bold transition"
+                                        :class="category === 'gestures' ? 'bg-[#F20B65] text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'"
+                                    >
+                                        👍 Hands
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        @click="category = 'fun'"
+                                        class="px-2 py-1 rounded-lg text-xs font-bold transition"
+                                        :class="category === 'fun' ? 'bg-[#F20B65] text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'"
+                                    >
+                                        🎉 Fun
+                                    </button>
+                                </div>
+                                <button type="button" @click="open = false" class="text-slate-400 hover:text-slate-600 text-sm font-bold px-1">&times;</button>
+                            </div>
+
+                            <!-- Emoji Scrollable Grid -->
+                            <div class="max-h-48 overflow-y-auto pr-1">
+                                <!-- Smileys -->
+                                <div x-show="category === 'smileys'" class="grid grid-cols-7 gap-1 text-center">
+                                    @foreach(['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','😉','😌','😍','🥰','😘','😋','😛','😜','🤪','😎','😏','🤩','🥳','🥺','🤫','🤗','🤔','😴','😷','🥵','🥶','🤯','🥳','😂','🔥','✨'] as $emoji)
+                                        <button 
+                                            type="button" 
+                                            @click="insertEmoji('{{ $emoji }}')"
+                                            class="w-8 h-8 rounded-lg hover:bg-slate-100 text-lg flex items-center justify-center hover:scale-125 transition-transform"
+                                        >
+                                            {{ $emoji }}
+                                        </button>
+                                    @endforeach
+                                </div>
+
+                                <!-- Love & Hearts -->
+                                <div x-show="category === 'love'" class="grid grid-cols-7 gap-1 text-center" style="display: none;">
+                                    @foreach(['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','💌','💋','🔥','✨','⭐','🌟','💫','⚡','💐'] as $emoji)
+                                        <button 
+                                            type="button" 
+                                            @click="insertEmoji('{{ $emoji }}')"
+                                            class="w-8 h-8 rounded-lg hover:bg-slate-100 text-lg flex items-center justify-center hover:scale-125 transition-transform"
+                                        >
+                                            {{ $emoji }}
+                                        </button>
+                                    @endforeach
+                                </div>
+
+                                <!-- Gestures -->
+                                <div x-show="category === 'gestures'" class="grid grid-cols-7 gap-1 text-center" style="display: none;">
+                                    @foreach(['👍','👎','👏','🙌','🤝','🙏','✌️','🤞','👋','👌','💪','🤙','👊','🖐️','💅','👀','🗣️','💋','👑','💍'] as $emoji)
+                                        <button 
+                                            type="button" 
+                                            @click="insertEmoji('{{ $emoji }}')"
+                                            class="w-8 h-8 rounded-lg hover:bg-slate-100 text-lg flex items-center justify-center hover:scale-125 transition-transform"
+                                        >
+                                            {{ $emoji }}
+                                        </button>
+                                    @endforeach
+                                </div>
+
+                                <!-- Fun & Romance -->
+                                <div x-show="category === 'fun'" class="grid grid-cols-7 gap-1 text-center" style="display: none;">
+                                    @foreach(['🌹','💐','🌸','☕','🍷','🍸','🥂','🍻','🎉','🎈','🎁','🍫','🍓','🍰','🚗','✈️','🏖️','🌙','☀️','🎶'] as $emoji)
+                                        <button 
+                                            type="button" 
+                                            @click="insertEmoji('{{ $emoji }}')"
+                                            class="w-8 h-8 rounded-lg hover:bg-slate-100 text-lg flex items-center justify-center hover:scale-125 transition-transform"
+                                        >
+                                            {{ $emoji }}
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Send Button -->
                     <button 
                         type="submit" 
-                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#F20B65] hover:bg-[#d90858] text-white flex items-center justify-center transition shrink-0 shadow-md cursor-pointer disabled:opacity-50"
-                        style="background-color: #F20B65 !important; color: #ffffff !important;"
+                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-r from-[#F20B65] to-rose-600 hover:from-[#d90858] hover:to-rose-700 text-white flex items-center justify-center transition shrink-0 shadow-md cursor-pointer disabled:opacity-50"
                         title="Send Message"
                     >
-                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                        <svg class="w-4 h-4 fill-current rotate-45 -mr-0.5" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                     </button>
                 </form>
             </div>
@@ -737,7 +898,7 @@
                         class="md:hidden w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition"
                         title="Back to Chat"
                     >
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m15 18-6-6 6-6"/></svg>
                     </button>
                     <h3 class="text-xs font-black uppercase tracking-wider text-slate-500">Conversation Details</h3>
                 </div>
@@ -746,10 +907,13 @@
                 <button 
                     type="button"
                     wire:click="toggleRightPanel" 
-                    class="w-7 h-7 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 text-base font-bold flex items-center justify-center transition"
+                    class="w-7 h-7 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition"
                     title="Close Details Panel"
                 >
-                    &times;
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
                 </button>
             </div>
 
@@ -780,25 +944,37 @@
                     <button 
                         type="button"
                         wire:click="$set('reportModal', true)" 
-                        class="px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 transition"
+                        class="px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 transition flex items-center gap-1.5"
                     >
-                        Report User
+                        <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                            <line x1="4" y1="22" x2="4" y2="15"></line>
+                        </svg>
+                        <span>Report</span>
                     </button>
                     @if($this->isUserBlocked)
                         <button 
                             type="button"
                             wire:click="unblockUser" 
-                            class="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200 transition"
+                            class="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200 transition flex items-center gap-1.5"
                         >
-                            Unblock
+                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                <path d="m9 12 2 2 4-4"></path>
+                            </svg>
+                            <span>Unblock</span>
                         </button>
                     @else
                         <button 
                             type="button"
                             wire:click="$set('blockConfirmModal', true)" 
-                            class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold border border-rose-200 transition"
+                            class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold border border-rose-200 transition flex items-center gap-1.5"
                         >
-                            Block
+                            <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="m4.9 4.9 14.2 14.2"></path>
+                            </svg>
+                            <span>Block</span>
                         </button>
                     @endif
                 </div>
@@ -820,7 +996,7 @@
                 </div>
             @endif
 
-            <!-- Section C: Conversation Options (Fully Functional) -->
+            <!-- Section C: Conversation Options (Fully Functional with Lucide SVGs) -->
             <div class="p-4 border-b border-slate-100 space-y-1.5">
                 <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 block mb-2">Options</span>
                 
@@ -831,13 +1007,15 @@
                     class="w-full px-3 py-2.5 rounded-xl transition flex items-center justify-between text-xs font-bold {{ $this->isStarred ? 'bg-amber-50 text-amber-800 border border-amber-200/80 shadow-2xs' : 'hover:bg-slate-50 text-slate-700' }}"
                 >
                     <span class="flex items-center gap-2.5">
-                        <span class="text-sm leading-none">{{ $this->isStarred ? '⭐' : '☆' }}</span>
+                        <svg class="w-4 h-4 {{ $this->isStarred ? 'text-amber-500 fill-amber-500' : 'text-slate-400' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
                         <span>{{ $this->isStarred ? 'Starred Conversation' : 'Star Conversation' }}</span>
                     </span>
                     @if($this->isStarred)
                         <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-amber-200/80 text-amber-900">Starred</span>
                     @else
-                        <span class="text-slate-400">&rsaquo;</span>
+                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6"/></svg>
                     @endif
                 </button>
 
@@ -848,13 +1026,16 @@
                     class="w-full px-3 py-2.5 rounded-xl transition flex items-center justify-between text-xs font-bold {{ $this->isPinned ? 'bg-blue-50 text-blue-800 border border-blue-200/80 shadow-2xs' : 'hover:bg-slate-50 text-slate-700' }}"
                 >
                     <span class="flex items-center gap-2.5">
-                        <span class="text-sm leading-none">📌</span>
+                        <svg class="w-4 h-4 {{ $this->isPinned ? 'text-blue-600 fill-blue-600' : 'text-slate-400' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="17" x2="12" y2="22"></line>
+                            <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path>
+                        </svg>
                         <span>{{ $this->isPinned ? 'Pinned to Top' : 'Pin to Top' }}</span>
                     </span>
                     @if($this->isPinned)
                         <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-blue-200/80 text-blue-900">Pinned</span>
                     @else
-                        <span class="text-slate-400">&rsaquo;</span>
+                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6"/></svg>
                     @endif
                 </button>
 
@@ -865,13 +1046,17 @@
                     class="w-full px-3 py-2.5 rounded-xl transition flex items-center justify-between text-xs font-bold {{ $this->isArchived ? 'bg-purple-50 text-purple-800 border border-purple-200/80 shadow-2xs' : 'hover:bg-slate-50 text-slate-700' }}"
                 >
                     <span class="flex items-center gap-2.5">
-                        <span class="text-sm leading-none">📁</span>
+                        <svg class="w-4 h-4 {{ $this->isArchived ? 'text-purple-600 fill-purple-600/30' : 'text-slate-400' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect width="20" height="5" x="2" y="3" rx="1"></rect>
+                            <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path>
+                            <path d="M10 12h4"></path>
+                        </svg>
                         <span>{{ $this->isArchived ? 'Archived Thread' : 'Archive Thread' }}</span>
                     </span>
                     @if($this->isArchived)
                         <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-purple-200/80 text-purple-900">Archived</span>
                     @else
-                        <span class="text-slate-400">&rsaquo;</span>
+                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6"/></svg>
                     @endif
                 </button>
 
@@ -882,10 +1067,14 @@
                     class="w-full px-3 py-2.5 rounded-xl hover:bg-rose-50 flex items-center justify-between text-xs font-bold text-rose-600 transition"
                 >
                     <span class="flex items-center gap-2.5">
-                        <span class="text-sm leading-none">🗑️</span>
+                        <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M3 6h18"></path>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                        </svg>
                         <span>Delete Conversation</span>
                     </span>
-                    <span class="text-rose-400">&rsaquo;</span>
+                    <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6"/></svg>
                 </button>
             </div>
 
@@ -931,12 +1120,12 @@
                                     download="{{ $fileItem->attachment_name }}" 
                                     class="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center gap-2 text-xs transition"
                                 >
-                                    <span class="text-base">📄</span>
+                                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                                     <div class="min-w-0 flex-1">
                                         <span class="font-bold truncate block text-[11px] text-slate-800">{{ $fileItem->attachment_name }}</span>
                                         <span class="text-[9px] text-slate-400">{{ number_format(($fileItem->attachment_size ?: 1024)/1024, 1) }} KB</span>
                                     </div>
-                                    <span>&darr;</span>
+                                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
                                 </a>
                             @endforeach
                         </div>
@@ -1036,7 +1225,7 @@
         <div class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
             <div class="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-sm p-6 space-y-4 text-center">
                 <div class="w-12 h-12 rounded-full bg-rose-50 text-rose-600 mx-auto flex items-center justify-center font-black text-xl">
-                    🚫
+                    <svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
                 </div>
                 <div>
                     <h3 class="text-sm font-black text-slate-900">Block {{ $activePeer?->name }}?</h3>
@@ -1098,7 +1287,11 @@
         <div class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
             <div class="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-sm p-6 space-y-4 text-center">
                 <div class="w-12 h-12 rounded-full bg-rose-50 text-rose-600 mx-auto flex items-center justify-center font-black text-xl">
-                    🗑️
+                    <svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                    </svg>
                 </div>
                 <div>
                     <h3 class="text-sm font-black text-slate-900">Delete Conversation?</h3>
