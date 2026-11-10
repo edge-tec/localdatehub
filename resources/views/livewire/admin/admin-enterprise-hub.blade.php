@@ -6897,80 +6897,149 @@
                             </div>
                         </div>
 
-                        <!-- Live Visual Preview Showcase -->
+                        <!-- Live Visual Preview Showcase & Direct Image Uploaders -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <!-- Card A: Header Logo (Light Theme) -->
                             <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
                                 <div>
-                                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-500 block mb-2">Header Logo (White Background)</span>
-                                    <div class="h-20 bg-white border border-slate-300 rounded-xl flex items-center justify-center p-3 shadow-inner">
+                                    <div class="flex items-center justify-between gap-2 mb-2">
+                                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-500">Header Logo (White Background)</span>
+                                        <button type="button" wire:click="resetBrandAsset('site_logo_url')" class="text-[10px] font-bold text-slate-400 hover:text-pink-600 transition" title="Reset to default logo">Reset</button>
+                                    </div>
+                                    <div class="h-24 bg-white border border-slate-300 rounded-xl flex items-center justify-center p-3 shadow-inner relative overflow-hidden">
                                         @if(!empty($settingValues['site_logo_url']))
-                                            <img src="{{ $settingValues['site_logo_url'] }}" alt="Logo" class="max-h-12 max-w-full object-contain" onerror="this.src='/images/logo.png'">
+                                            <img src="{{ asset($settingValues['site_logo_url']) }}" alt="Header Logo" class="max-h-14 max-w-full object-contain" onerror="this.onerror=null;this.src='/images/logo.svg';">
                                         @else
-                                            <span class="text-pink-600 font-black text-lg flex items-center gap-1.5">
-                                                <span>❤️</span><span>LocalDateHub</span>
-                                            </span>
+                                            <img src="/images/logo.svg" alt="Header Logo" class="max-h-14 max-w-full object-contain">
                                         @endif
+                                        <div wire:loading.flex wire:target="brandLogoUpload" class="absolute inset-0 bg-white/90 backdrop-blur-xs items-center justify-center gap-2 text-xs font-black text-pink-600">
+                                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                            <span>Uploading Logo...</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="mt-3">
-                                    <label class="block text-xs font-bold text-slate-800 mb-1">Logo URL (Light Background)</label>
-                                    <input type="text" wire:model="settingValues.site_logo_url" class="{{ $input }} text-xs font-mono" placeholder="/images/logo.png">
+
+                                <div class="mt-3 space-y-2.5">
+                                    <div class="flex items-center gap-2">
+                                        <label class="w-full cursor-pointer inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-[#F20B83] to-pink-600 hover:from-pink-600 hover:to-rose-600 text-white text-xs font-black shadow-xs transition">
+                                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                            <span>Upload Logo Image</span>
+                                            <input type="file" wire:model="brandLogoUpload" accept=".png,.jpg,.jpeg,.webp,.svg,.gif,image/*" class="hidden">
+                                        </label>
+                                    </div>
+                                    @error('brandLogoUpload') <p class="text-[11px] font-bold text-rose-600">{{ $message }}</p> @enderror
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Logo URL (Light Background)</label>
+                                        <input type="text" wire:model="settingValues.site_logo_url" class="{{ $input }} text-xs font-mono" placeholder="/images/logo.png">
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- Card B: Header Logo (Dark / Contrast) -->
                             <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
                                 <div>
-                                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-500 block mb-2">Header Logo (Dark / Footer)</span>
-                                    <div class="h-20 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-center p-3 shadow-inner">
+                                    <div class="flex items-center justify-between gap-2 mb-2">
+                                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-500">Header Logo (Dark / Footer)</span>
+                                        <button type="button" wire:click="resetBrandAsset('site_logo_dark_url')" class="text-[10px] font-bold text-slate-400 hover:text-pink-600 transition" title="Reset to default dark logo">Reset</button>
+                                    </div>
+                                    <div class="h-24 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-center p-3 shadow-inner relative overflow-hidden">
                                         @if(!empty($settingValues['site_logo_dark_url']))
-                                            <img src="{{ $settingValues['site_logo_dark_url'] }}" alt="Logo Dark" class="max-h-12 max-w-full object-contain" onerror="this.src='/images/logo.png'">
+                                            <img src="{{ asset($settingValues['site_logo_dark_url']) }}" alt="Dark Logo" class="max-h-14 max-w-full object-contain" onerror="this.onerror=null;this.src='/images/logo-white.svg';">
                                         @else
-                                            <span class="text-white font-black text-lg flex items-center gap-1.5">
-                                                <span class="text-pink-500">❤️</span><span>LocalDateHub</span>
-                                            </span>
+                                            <img src="/images/logo-white.svg" alt="Dark Logo" class="max-h-14 max-w-full object-contain">
                                         @endif
+                                        <div wire:loading.flex wire:target="brandLogoDarkUpload" class="absolute inset-0 bg-slate-900/90 backdrop-blur-xs items-center justify-center gap-2 text-xs font-black text-pink-400">
+                                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                            <span>Uploading Dark Logo...</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="mt-3">
-                                    <label class="block text-xs font-bold text-slate-800 mb-1">Logo URL (Dark Background)</label>
-                                    <input type="text" wire:model="settingValues.site_logo_dark_url" class="{{ $input }} text-xs font-mono" placeholder="/images/logo-white.png">
+
+                                <div class="mt-3 space-y-2.5">
+                                    <div class="flex items-center gap-2">
+                                        <label class="w-full cursor-pointer inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black shadow-xs transition">
+                                            <svg class="w-4 h-4 shrink-0 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                            <span>Upload Dark Logo</span>
+                                            <input type="file" wire:model="brandLogoDarkUpload" accept=".png,.jpg,.jpeg,.webp,.svg,.gif,image/*" class="hidden">
+                                        </label>
+                                    </div>
+                                    @error('brandLogoDarkUpload') <p class="text-[11px] font-bold text-rose-600">{{ $message }}</p> @enderror
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Logo URL (Dark Background)</label>
+                                        <input type="text" wire:model="settingValues.site_logo_dark_url" class="{{ $input }} text-xs font-mono" placeholder="/images/logo-white.png">
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- Card C: Browser Favicon Simulation -->
                             <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
                                 <div>
-                                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-500 block mb-2">Browser Tab Favicon Simulation</span>
+                                    <div class="flex items-center justify-between gap-2 mb-2">
+                                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-500">Browser Tab Favicon Simulation</span>
+                                        <button type="button" wire:click="resetBrandAsset('site_favicon_url')" class="text-[10px] font-bold text-slate-400 hover:text-pink-600 transition" title="Reset to default favicon">Reset</button>
+                                    </div>
                                     <!-- Simulated Browser Tab -->
-                                    <div class="bg-slate-200 rounded-t-xl p-1 pt-1.5 border border-slate-300">
-                                        <div class="bg-white rounded-t-lg px-3 py-1.5 flex items-center gap-2 border-b-2 border-pink-500 shadow-sm max-w-[200px]">
-                                            <img src="{{ $settingValues['site_favicon_url'] ?? '/favicon.ico' }}" alt="Favicon" class="w-4 h-4 object-contain rounded" onerror="this.src='/favicon.ico'">
-                                            <span class="text-[11px] font-bold text-slate-800 truncate">LocalDateHub — Adult Personals</span>
+                                    <div class="h-24 bg-slate-200/80 rounded-xl p-3 border border-slate-300 flex flex-col justify-center relative overflow-hidden">
+                                        <div class="bg-white rounded-t-lg px-3 py-2 flex items-center gap-2.5 border-b-2 border-pink-500 shadow-sm max-w-[230px]">
+                                            <img src="{{ asset($settingValues['site_favicon_url'] ?? '/favicon.ico') }}" alt="Favicon" class="w-5 h-5 object-contain rounded shrink-0" onerror="this.onerror=null;this.src='/images/favicon.svg';">
+                                            <span class="text-[11px] font-bold text-slate-800 truncate">{{ $settingValues['site_name'] ?? 'LocalDateHub' }} — Adult ...</span>
+                                        </div>
+                                        <div wire:loading.flex wire:target="brandFaviconUpload" class="absolute inset-0 bg-white/90 backdrop-blur-xs items-center justify-center gap-2 text-xs font-black text-indigo-600">
+                                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                            <span>Uploading Favicon...</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="mt-3">
-                                    <label class="block text-xs font-bold text-slate-800 mb-1">Browser Favicon URL (.ico / .png)</label>
-                                    <input type="text" wire:model="settingValues.site_favicon_url" class="{{ $input }} text-xs font-mono" placeholder="/favicon.ico">
+
+                                <div class="mt-3 space-y-2.5">
+                                    <div class="flex items-center gap-2">
+                                        <label class="w-full cursor-pointer inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-xs transition">
+                                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                            <span>Upload Favicon Image</span>
+                                            <input type="file" wire:model="brandFaviconUpload" accept=".ico,.png,.jpg,.jpeg,.webp,.svg,image/*" class="hidden">
+                                        </label>
+                                    </div>
+                                    @error('brandFaviconUpload') <p class="text-[11px] font-bold text-rose-600">{{ $message }}</p> @enderror
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Browser Favicon URL (.ico / .png)</label>
+                                        <input type="text" wire:model="settingValues.site_favicon_url" class="{{ $input }} text-xs font-mono" placeholder="/favicon.ico">
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                            <div>
-                                <label class="block text-xs font-black text-slate-800 uppercase mb-1">Mobile Compact Logo URL</label>
-                                <input type="text" wire:model="settingValues.site_mobile_logo_url" class="{{ $input }} text-xs font-mono" placeholder="/images/logo-mobile.png">
-                                <span class="text-[11px] text-slate-500">Condensed square or icon emblem displayed on mobile smartphone headers.</span>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-black text-slate-800 uppercase mb-1">Primary Brand Accent Color</label>
-                                <div class="flex items-center gap-2">
-                                    <input type="color" wire:model="settingValues.primary_brand_color" class="h-9 w-12 rounded-lg border border-slate-300 cursor-pointer p-0.5">
-                                    <input type="text" wire:model="settingValues.primary_brand_color" class="{{ $input }} text-xs font-mono font-bold uppercase" placeholder="#F20B83">
+                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                                <div class="flex items-center justify-between gap-2 mb-2">
+                                    <label class="block text-xs font-black text-slate-800 uppercase">Mobile Compact Logo</label>
+                                    <button type="button" wire:click="resetBrandAsset('site_mobile_logo_url')" class="text-[10px] font-bold text-slate-400 hover:text-pink-600 transition">Reset</button>
                                 </div>
-                                <span class="text-[11px] text-slate-500">Primary accent color used for buttons, highlight badges, and active tabs.</span>
+                                <div class="flex items-center gap-3 mb-2.5">
+                                    <div class="w-12 h-12 rounded-xl bg-white border border-slate-300 flex items-center justify-center p-1.5 shrink-0 shadow-inner relative overflow-hidden">
+                                        <img src="{{ asset($settingValues['site_mobile_logo_url'] ?? '/images/logo-mobile.png') }}" alt="Mobile Logo" class="max-h-9 max-w-full object-contain" onerror="this.onerror=null;this.src='/images/logo-mobile.svg';">
+                                    </div>
+                                    <div class="flex-1 space-y-1.5">
+                                        <label class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-pink-50 text-pink-600 border border-pink-200 text-xs font-black shadow-2xs transition">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                            <span>Upload Mobile Icon</span>
+                                            <input type="file" wire:model="brandMobileLogoUpload" accept=".png,.jpg,.jpeg,.webp,.svg,.gif,image/*" class="hidden">
+                                        </label>
+                                        <div wire:loading wire:target="brandMobileLogoUpload" class="text-[11px] font-bold text-pink-600">Uploading...</div>
+                                        @error('brandMobileLogoUpload') <p class="text-[11px] font-bold text-rose-600">{{ $message }}</p> @enderror
+                                    </div>
+                                </div>
+                                <input type="text" wire:model="settingValues.site_mobile_logo_url" class="{{ $input }} text-xs font-mono" placeholder="/images/logo-mobile.png">
+                                <span class="text-[11px] text-slate-500 block mt-1">Condensed square or icon emblem displayed on mobile smartphone headers.</span>
+                            </div>
+                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+                                <div>
+                                    <label class="block text-xs font-black text-slate-800 uppercase mb-2">Primary Brand Accent Color</label>
+                                    <div class="flex items-center gap-2">
+                                        <input type="color" wire:model.live="settingValues.primary_brand_color" class="h-10 w-14 rounded-lg border border-slate-300 cursor-pointer p-0.5 bg-white">
+                                        <input type="text" wire:model.live="settingValues.primary_brand_color" class="{{ $input }} text-xs font-mono font-bold uppercase" placeholder="#F20B83">
+                                    </div>
+                                </div>
+                                <span class="text-[11px] text-slate-500 mt-2 block">Primary accent color used for buttons, highlight badges, and active tabs.</span>
                             </div>
                         </div>
                     </div>

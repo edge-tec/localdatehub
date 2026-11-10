@@ -1,3 +1,23 @@
+@php
+    $adminFaviconUrl = '/favicon.ico';
+    $adminLogoUrl = '';
+    try {
+        if (\Illuminate\Support\Facades\Schema::hasTable('system_settings')) {
+            $adminBrandSettings = \App\Modules\Admin\Models\SystemSetting::whereIn('key', [
+                'site_favicon_url',
+                'site_logo_url',
+            ])->pluck('value', 'key');
+            if (!empty($adminBrandSettings['site_favicon_url'])) {
+                $adminFaviconUrl = $adminBrandSettings['site_favicon_url'];
+            }
+            if (!empty($adminBrandSettings['site_logo_url'])) {
+                $adminLogoUrl = $adminBrandSettings['site_logo_url'];
+            }
+        }
+    } catch (\Throwable $e) {
+    }
+    $hasCustomAdminLogo = !empty($adminLogoUrl) && !in_array($adminLogoUrl, ['/images/logo.png', '/images/logo.svg'], true);
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-[#F8FAFC] text-slate-900 antialiased">
 <head>
@@ -7,6 +27,9 @@
 
     <title>{{ $title ?? 'Admin Dashboard' }} — LocalDateHub</title>
     <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="{{ asset($adminFaviconUrl) }}">
+    <link rel="shortcut icon" href="{{ asset($adminFaviconUrl) }}">
+    <link rel="apple-touch-icon" href="{{ asset($adminFaviconUrl) }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -46,19 +69,23 @@
                 <!-- Left: Logo & Tagline -->
                 <div class="flex items-center space-x-3 w-64 shrink-0">
                     <a href="{{ route('admin.dashboard') }}" class="flex items-center space-x-2.5 group">
-                        <div class="w-9 h-9 rounded-full flex items-center justify-center text-[#F20B83] group-hover:scale-105 transition">
-                            <svg class="w-8 h-8 stroke-[2.2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="text-xl font-black text-slate-900 tracking-tight leading-none">
-                                LocalDate<span class="text-[#F20B83]">Hub</span>
+                        @if($hasCustomAdminLogo)
+                            <img src="{{ asset($adminLogoUrl) }}" alt="LocalDateHub" class="h-10 max-w-[180px] object-contain" onerror="this.style.display='none'">
+                        @else
+                            <div class="w-9 h-9 rounded-full flex items-center justify-center text-[#F20B83] group-hover:scale-105 transition">
+                                <svg class="w-8 h-8 stroke-[2.2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                                </svg>
                             </div>
-                            <div class="text-[10px] font-semibold text-slate-500 tracking-wider mt-0.5">
-                                Connect • Meet • Enjoy
+                            <div>
+                                <div class="text-xl font-black text-slate-900 tracking-tight leading-none">
+                                    LocalDate<span class="text-[#F20B83]">Hub</span>
+                                </div>
+                                <div class="text-[10px] font-semibold text-slate-500 tracking-wider mt-0.5">
+                                    Connect • Meet • Enjoy
+                                </div>
                             </div>
-                        </div>
+                        @endif
                     </a>
                 </div>
 

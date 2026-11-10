@@ -2,6 +2,22 @@
     $navCategories = \App\Modules\Categories\Models\Category::where('is_active', true)->whereNull('parent_id')->take(8)->get();
     $navStates = \App\Modules\Locations\Models\State::where('is_active', true)->orderBy('name')->take(12)->get();
     $navCities = \App\Modules\Locations\Models\City::with('state')->where('is_popular', true)->take(10)->get();
+
+    $navLogoUrl = '';
+    $navMobileLogoUrl = '';
+    try {
+        if (\Illuminate\Support\Facades\Schema::hasTable('system_settings')) {
+            $navBrand = \App\Modules\Admin\Models\SystemSetting::whereIn('key', [
+                'site_logo_url',
+                'site_mobile_logo_url',
+            ])->pluck('value', 'key');
+            $navLogoUrl = $navBrand['site_logo_url'] ?? '';
+            $navMobileLogoUrl = $navBrand['site_mobile_logo_url'] ?? '';
+        }
+    } catch (\Throwable $e) {
+    }
+    $hasCustomNavLogo = !empty($navLogoUrl) && !in_array($navLogoUrl, ['/images/logo.png', '/images/logo.svg'], true);
+    $hasCustomMobileLogo = !empty($navMobileLogoUrl) && !in_array($navMobileLogoUrl, ['/images/logo-mobile.png', '/images/logo-mobile.svg'], true);
 @endphp
 
 <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs" x-data="{ mobileMenuOpen: false, browseOpen: false, statesOpen: false, citiesOpen: false }">
@@ -10,20 +26,27 @@
             <!-- Left: Logo & Tagline -->
             <div class="flex items-center">
                 <a href="{{ route('home') }}" class="flex items-center space-x-3 group">
-                    <!-- Pink Heart Icon -->
-                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-[#F20B65] transition group-hover:scale-105">
-                        <svg class="w-9 h-9 stroke-[2.2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <div class="text-2xl font-black tracking-tight text-slate-900 flex items-center leading-none">
-                            LocalDate<span class="text-[#F20B65]">Hub</span>
+                    @if($hasCustomNavLogo || $hasCustomMobileLogo)
+                        @if($hasCustomMobileLogo)
+                            <img src="{{ asset($navMobileLogoUrl) }}" alt="LocalDateHub" class="h-10 w-10 object-contain sm:hidden" onerror="this.style.display='none'">
+                        @endif
+                        <img src="{{ asset($hasCustomNavLogo ? $navLogoUrl : $navMobileLogoUrl) }}" alt="LocalDateHub" class="h-11 max-w-[200px] object-contain {{ $hasCustomMobileLogo ? 'hidden sm:block' : '' }}" onerror="this.style.display='none'">
+                    @else
+                        <!-- Pink Heart Icon -->
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-[#F20B65] transition group-hover:scale-105">
+                            <svg class="w-9 h-9 stroke-[2.2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                            </svg>
                         </div>
-                        <div class="text-[11px] font-medium text-slate-500 tracking-wider mt-1">
-                            Connect • Meet • Enjoy
+                        <div>
+                            <div class="text-2xl font-black tracking-tight text-slate-900 flex items-center leading-none">
+                                LocalDate<span class="text-[#F20B65]">Hub</span>
+                            </div>
+                            <div class="text-[11px] font-medium text-slate-500 tracking-wider mt-1">
+                                Connect • Meet • Enjoy
+                            </div>
                         </div>
-                    </div>
+                    @endif
                 </a>
             </div>
 

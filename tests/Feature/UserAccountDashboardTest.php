@@ -993,4 +993,47 @@ class UserAccountDashboardTest extends TestCase
         $this->assertTrue($adminNotif->is_read);
         $this->assertNotNull($adminNotif->read_at);
     }
+
+    public function test_admin_can_upload_logo_and_favicon_images_and_apply_across_platform(): void
+    {
+        Storage::fake('public');
+
+        $admin = User::factory()->create([
+            'role' => 'super_admin',
+            'account_status' => 'active',
+        ]);
+
+        $logoFile = UploadedFile::fake()->image('brand-logo.png', 240, 60);
+        $darkLogoFile = UploadedFile::fake()->image('brand-logo-dark.png', 240, 60);
+        $mobileLogoFile = UploadedFile::fake()->image('brand-mobile.png', 64, 64);
+        $faviconFile = UploadedFile::fake()->image('brand-favicon.png', 32, 32);
+
+        $component = Livewire::actingAs($admin)
+            ->test(AdminEnterpriseHub::class, ['initialTab' => 'settings'])
+            ->set('settingsSubTab', 'branding')
+            ->set('brandLogoUpload', $logoFile)
+            ->set('brandLogoDarkUpload', $darkLogoFile)
+            ->set('brandMobileLogoUpload', $mobileLogoFile)
+            ->set('brandFaviconUpload', $faviconFile);
+
+        $savedLogoUrl = \App\Modules\Admin\Models\SystemSetting::where('key', 'site_logo_url')->value('value');
+        $savedDarkLogoUrl = \App\Modules\Admin\Models\SystemSetting::where('key', 'site_logo_dark_url')->value('value');
+        $savedMobileLogoUrl = \App\Modules\Admin\Models\SystemSetting::where('key', 'site_mobile_logo_url')->value('value');
+        $savedFaviconUrl = \App\Modules\Admin\Models\SystemSetting::where('key', 'site_favicon_url')->value('value');
+
+        $this->assertNotNull($savedLogoUrl);
+        $this->assertStringStartsWith('/storage/branding/', $savedLogoUrl);
+        $this->assertStringStartsWith('/storage/branding/', $savedDarkLogoUrl);
+        $this->assertStringStartsWith('/storage/branding/', $savedMobileLogoUrl);
+        $this->assertStringStartsWith('/storage/branding/', $savedFaviconUrl);
+
+        Storage::disk('public')->assertExists(str_replace('/storage/', '', $savedLogoUrl));
+        Storage::disk('public')->assertExists(str_replace('/storage/', '', $savedDarkLogoUrl));
+        Storage::disk('public')->assertExists(str_replace('/storage/', '', $savedMobileLogoUrl));
+        Storage::disk('public')->assertExists(str_replace('/storage/', '', $savedFaviconUrl));
+
+        // Verify resetBrandAsset works
+        $component->call('resetBrandAsset', 'site_favicon_url');
+        $this->assertEquals('/favicon.ico', \App\Modules\Admin\Models\SystemSetting::where('key', 'site_favicon_url')->value('value'));
+    }
 }

@@ -1,3 +1,28 @@
+@php
+    $brandFaviconUrl = '/favicon.ico';
+    $brandSiteName = config('localdatehub.name', 'LocalDateHub');
+    $brandTagline = config('localdatehub.tagline', 'Your Local Adult Classifieds & Dating Community');
+    try {
+        if (\Illuminate\Support\Facades\Schema::hasTable('system_settings')) {
+            $brandSettings = \App\Modules\Admin\Models\SystemSetting::whereIn('key', [
+                'site_favicon_url',
+                'site_name',
+                'site_tagline',
+            ])->pluck('value', 'key');
+            if (!empty($brandSettings['site_favicon_url'])) {
+                $brandFaviconUrl = $brandSettings['site_favicon_url'];
+            }
+            if (!empty($brandSettings['site_name'])) {
+                $brandSiteName = $brandSettings['site_name'];
+            }
+            if (!empty($brandSettings['site_tagline'])) {
+                $brandTagline = $brandSettings['site_tagline'];
+            }
+        }
+    } catch (\Throwable $e) {
+        // Fallback to defaults if DB is not yet migrated
+    }
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-[#F8FAFC] text-slate-900 antialiased">
 <head>
@@ -5,9 +30,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? config('localdatehub.name', 'LocalDateHub') }} — {{ config('localdatehub.tagline') }}</title>
+    <title>{{ $title ?? $brandSiteName }} — {{ $brandTagline }}</title>
     <meta name="description" content="{{ $description ?? 'LocalDateHub is the privacy-first local adult dating, personal classifieds, and safe date spot discovery platform.' }}">
     <link rel="canonical" href="{{ $canonicalUrl ?? url()->current() }}">
+    <link rel="icon" href="{{ asset($brandFaviconUrl) }}">
+    <link rel="shortcut icon" href="{{ asset($brandFaviconUrl) }}">
+    <link rel="apple-touch-icon" href="{{ asset($brandFaviconUrl) }}">
 
     <!-- OpenGraph / Social Metadata -->
     <meta property="og:title" content="{{ $title ?? config('localdatehub.name', 'LocalDateHub') }}">

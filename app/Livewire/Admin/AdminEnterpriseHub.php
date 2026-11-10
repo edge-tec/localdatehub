@@ -429,6 +429,10 @@ class AdminEnterpriseHub extends Component
     public array $settingValues = [];
     #[Url(as: 'subtab')]
     public string $settingsSubTab = 'general'; // 'general', 'branding', 'smtp', 'notifications', 'safety', 'monetization', 'locations', 'security'
+    public $brandLogoUpload = null;
+    public $brandLogoDarkUpload = null;
+    public $brandMobileLogoUpload = null;
+    public $brandFaviconUpload = null;
     public string $testEmailRecipient = '';
     public ?string $smtpTestSuccessMessage = null;
     public ?string $smtpTestErrorMessage = null;
@@ -4142,9 +4146,106 @@ class AdminEnterpriseHub extends Component
         }
     }
 
+    public function updatedBrandLogoUpload(): void
+    {
+        $this->authorizePermission('settings.manage');
+        $this->validate([
+            'brandLogoUpload' => ['required', 'file', 'mimes:png,jpg,jpeg,webp,svg,gif', 'max:5120'],
+        ]);
+        $path = $this->brandLogoUpload->store('branding', 'public');
+        $url = '/storage/' . $path;
+        $this->settingValues['site_logo_url'] = $url;
+        $this->persistSingleBrandSetting('site_logo_url', $url, 'Header Logo (Light Background)');
+        $this->brandLogoUpload = null;
+    }
+
+    public function updatedBrandLogoDarkUpload(): void
+    {
+        $this->authorizePermission('settings.manage');
+        $this->validate([
+            'brandLogoDarkUpload' => ['required', 'file', 'mimes:png,jpg,jpeg,webp,svg,gif', 'max:5120'],
+        ]);
+        $path = $this->brandLogoDarkUpload->store('branding', 'public');
+        $url = '/storage/' . $path;
+        $this->settingValues['site_logo_dark_url'] = $url;
+        $this->persistSingleBrandSetting('site_logo_dark_url', $url, 'Header Logo (Dark / Footer)');
+        $this->brandLogoDarkUpload = null;
+    }
+
+    public function updatedBrandMobileLogoUpload(): void
+    {
+        $this->authorizePermission('settings.manage');
+        $this->validate([
+            'brandMobileLogoUpload' => ['required', 'file', 'mimes:png,jpg,jpeg,webp,svg,gif', 'max:5120'],
+        ]);
+        $path = $this->brandMobileLogoUpload->store('branding', 'public');
+        $url = '/storage/' . $path;
+        $this->settingValues['site_mobile_logo_url'] = $url;
+        $this->persistSingleBrandSetting('site_mobile_logo_url', $url, 'Mobile Compact Logo');
+        $this->brandMobileLogoUpload = null;
+    }
+
+    public function updatedBrandFaviconUpload(): void
+    {
+        $this->authorizePermission('settings.manage');
+        $this->validate([
+            'brandFaviconUpload' => ['required', 'file', 'mimes:ico,png,jpg,jpeg,webp,svg', 'max:2048'],
+        ]);
+        $path = $this->brandFaviconUpload->store('branding', 'public');
+        $url = '/storage/' . $path;
+        $this->settingValues['site_favicon_url'] = $url;
+        $this->persistSingleBrandSetting('site_favicon_url', $url, 'Browser Tab Favicon');
+        $this->brandFaviconUpload = null;
+    }
+
+    protected function persistSingleBrandSetting(string $key, string $url, string $label): void
+    {
+        $setting = SystemSetting::firstOrNew(['key' => $key]);
+        $before = [$key => $setting->value];
+        $setting->group = 'branding';
+        $setting->type = 'string';
+        $setting->description = $label;
+        $setting->is_public = true;
+        $setting->value = $url;
+        $setting->save();
+
+        AdminAuditService::log('setting.brand_asset_upload', $setting, $before, [$key => $url]);
+        session()->flash('success', "✓ {$label} uploaded and applied live across the platform!");
+        $this->dispatch('toast', type: 'success', message: "{$label} uploaded and saved!");
+    }
+
+    public function resetBrandAsset(string $key): void
+    {
+        $this->authorizePermission('settings.manage');
+        $defaults = [
+            'site_logo_url' => '/images/logo.png',
+            'site_logo_dark_url' => '/images/logo-white.png',
+            'site_mobile_logo_url' => '/images/logo-mobile.png',
+            'site_favicon_url' => '/favicon.ico',
+        ];
+        if (!array_key_exists($key, $defaults)) {
+            return;
+        }
+        $this->settingValues[$key] = $defaults[$key];
+        $this->persistSingleBrandSetting($key, $defaults[$key], ucwords(str_replace('_', ' ', $key)));
+    }
+
     public function saveSystemSettings(): void
     {
         $this->authorizePermission('settings.manage');
+
+        if ($this->brandLogoUpload) {
+            $this->updatedBrandLogoUpload();
+        }
+        if ($this->brandLogoDarkUpload) {
+            $this->updatedBrandLogoDarkUpload();
+        }
+        if ($this->brandMobileLogoUpload) {
+            $this->updatedBrandMobileLogoUpload();
+        }
+        if ($this->brandFaviconUpload) {
+            $this->updatedBrandFaviconUpload();
+        }
 
         $changed = 0;
         foreach ($this->settingValues as $key => $val) {

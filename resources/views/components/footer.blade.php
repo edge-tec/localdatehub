@@ -1,18 +1,36 @@
+@php
+    $footerLogoUrl = '';
+    try {
+        if (\Illuminate\Support\Facades\Schema::hasTable('system_settings')) {
+            $footerBrand = \App\Modules\Admin\Models\SystemSetting::whereIn('key', [
+                'site_logo_url',
+                'site_logo_dark_url',
+            ])->pluck('value', 'key');
+            $footerLogoUrl = $footerBrand['site_logo_url'] ?? '';
+        }
+    } catch (\Throwable $e) {
+    }
+    $hasCustomFooterLogo = !empty($footerLogoUrl) && !in_array($footerLogoUrl, ['/images/logo.png', '/images/logo.svg'], true);
+@endphp
 <footer class="bg-white border-t border-slate-200 text-slate-600 text-sm mt-auto">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <!-- Brand Column -->
             <div class="space-y-3">
                 <div class="flex items-center space-x-2.5">
-                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-[#F20B65]">
-                        <svg class="w-7 h-7 stroke-[2.2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <span class="text-xl font-black text-slate-900 tracking-tight">LocalDate<span class="text-[#F20B65]">Hub</span></span>
-                        <div class="text-[10px] text-slate-500 tracking-wider">Connect • Meet • Enjoy</div>
-                    </div>
+                    @if($hasCustomFooterLogo)
+                        <img src="{{ asset($footerLogoUrl) }}" alt="LocalDateHub" class="h-9 max-w-[180px] object-contain" onerror="this.style.display='none'">
+                    @else
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-[#F20B65]">
+                            <svg class="w-7 h-7 stroke-[2.2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="text-xl font-black text-slate-900 tracking-tight">LocalDate<span class="text-[#F20B65]">Hub</span></span>
+                            <div class="text-[10px] text-slate-500 tracking-wider">Connect • Meet • Enjoy</div>
+                        </div>
+                    @endif
                 </div>
                 <p class="text-xs text-slate-600 leading-relaxed">
                     A premium, privacy-first local adult classifieds and dating connections platform across all 50 US states. Connecting real adults safely and discreetly.

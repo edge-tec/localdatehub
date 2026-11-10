@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 56" fill="none">
+  <rect x="2" y="4" width="48" height="48" rx="14" fill="#1E293B" stroke="#334155" stroke-width="2"/>
+  <path d="M26 39C26 39 14 31.2 14 22.8C14 19.2 16.8 16.5 20.3 16.5C22.4 16.5 24.3 17.6 26 19.5C27.7 17.6 29.6 16.5 31.7 16.5C35.2 16.5 38 19.2 38 22.8C38 31.2 26 39 26 39Z" fill="#F20B83"/>
+  <text x="62" y="31" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="24" font-weight="900" fill="#FFFFFF">LocalDate<tspan fill="#F20B83">Hub</tspan></text>
+  <text x="63" y="45" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="700" letter-spacing="1.2" fill="#94A3B8">CONNECT • MEET • ENJOY</text>
+</svg>

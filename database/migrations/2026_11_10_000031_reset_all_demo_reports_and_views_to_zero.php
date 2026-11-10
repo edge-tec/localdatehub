@@ -70,3 +70,4 @@ return new class extends Migration
         // Irreversible cleanup of demo telemetry and reports
     }
 };
+
