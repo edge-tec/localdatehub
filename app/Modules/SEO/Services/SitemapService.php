@@ -154,33 +154,64 @@ class SitemapService
     }
 
     /**
-     * Combined Locations Sitemap (State + Top Cities).
+     * Dedicated Locations Hub and Local SEO City+Category Sitemap (Phase 4).
+     * Prevents URL duplication with states-sitemap and cities-sitemap.
      */
     public function generateLocationsSitemap(): SeoSitemap
     {
-        $urls = [];
-        $states = State::where('is_active', true)->with('cities')->get();
+        $urls = [
+            [
+                'loc' => route('locations.index'),
+                'lastmod' => now()->toAtomString(),
+                'changefreq' => 'daily',
+                'priority' => '0.8',
+            ],
+        ];
+        $this->syncUrlRecord(route('locations.index'), 'directory', 'Browse Adult Personals by Location', 'Explore adult dating and personal classifieds by state and city.');
 
-        foreach ($states as $st) {
-            $url = route('locations.state', ['stateCode' => strtolower($st->code)]);
+        // High-intent City + Category combinations for locations with active listings
+        $activeListingPairs = Listing::where('status', Listing::STATUS_ACTIVE)
+            ->whereNotNull('state_id')
+            ->whereNotNull('city_id')
+            ->whereNotNull('category_id')
+            ->with(['state', 'city', 'category'])
+            ->get();
+
+        $seenCityCat = [];
+        foreach ($activeListingPairs as $item) {
+            if (! $item->state || ! $item->city || ! $item->category) {
+                continue;
+            }
+            $stateCode = strtolower($item->state->code);
+            $citySlug = $item->city->slug;
+            $catSlug = $item->category->slug;
+            $key = "{$stateCode}/{$citySlug}/{$catSlug}";
+
+            if (isset($seenCityCat[$key])) {
+                continue;
+            }
+            $seenCityCat[$key] = true;
+
+            $cityCatUrl = route('locations.city.category', [
+                'stateCode' => $stateCode,
+                'citySlug' => $citySlug,
+                'categorySlug' => $catSlug,
+            ]);
+
             $urls[] = [
-                'loc' => $url,
-                'lastmod' => $st->updated_at->toAtomString(),
+                'loc' => $cityCatUrl,
+                'lastmod' => $item->updated_at ? $item->updated_at->toAtomString() : now()->toAtomString(),
                 'changefreq' => 'daily',
                 'priority' => '0.7',
             ];
-            $this->syncUrlRecord($url, 'location_state', "Adult Personals in {$st->name} ({$st->code})", "Browse adult personals and dating ads across {$st->name}.", $st);
 
-            foreach ($st->cities->take(50) as $ct) {
-                $cityUrl = route('locations.city', ['stateCode' => strtolower($st->code), 'citySlug' => $ct->slug]);
-                $urls[] = [
-                    'loc' => $cityUrl,
-                    'lastmod' => $ct->updated_at->toAtomString(),
-                    'changefreq' => 'daily',
-                    'priority' => '0.6',
-                ];
-                $this->syncUrlRecord($cityUrl, 'location_city', "Adult Personals in {$ct->name}, {$st->code}", "Find local adult personal ads and dates in {$ct->name}, {$st->code}.", $ct);
-            }
+            $this->syncUrlRecord(
+                $cityCatUrl,
+                'location_city_category',
+                "{$item->category->name} in {$item->city->name}, {$item->state->code}",
+                "Browse local {$item->category->name} in {$item->city->name}, {$item->state->name}.",
+                $item
+            );
         }
 
         $xml = $this->buildUrlsetXml($urls);

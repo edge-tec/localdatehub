@@ -32,6 +32,7 @@
 
     <title>{{ $title ?? $brandSiteName }} — {{ $brandTagline }}</title>
     <meta name="description" content="{{ $description ?? 'LocalDateHub is the privacy-first local adult dating, personal classifieds, and safe date spot discovery platform.' }}">
+    <meta name="robots" content="{{ $robotsMeta ?? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' }}">
     <link rel="canonical" href="{{ $canonicalUrl ?? url()->current() }}">
     <link rel="icon" href="{{ asset($brandFaviconUrl) }}">
     <link rel="shortcut icon" href="{{ asset($brandFaviconUrl) }}">

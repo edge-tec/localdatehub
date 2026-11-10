@@ -1,2 +1,11 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /account/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /webhooks/
+Disallow: /listings/create
+Disallow: /*/edit
+
+Sitemap: https://localdatehub.com/sitemap.xml
+
