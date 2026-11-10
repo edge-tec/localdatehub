@@ -8,7 +8,6 @@ use App\Modules\Listings\Models\Listing;
 use App\Modules\Notifications\Models\NotificationLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -32,9 +31,9 @@ class MessengerHub extends Component
     public ?int $replyToMessageId = null;
     public ?string $replyToMessageSnippet = null;
 
-    // Panels visibility
+    // Panels visibility & responsive state
     public bool $showRightPanel = true;
-    public bool $showMobileChat = false;
+    public string $mobileView = 'chat'; // 'inbox', 'chat', 'details'
 
     // Modals
     public bool $showNewMessageModal = false;
@@ -89,6 +88,8 @@ class MessengerHub extends Component
             if (!empty($conversations)) {
                 $first = reset($conversations);
                 $this->selectConversation($first['key']);
+            } else {
+                $this->mobileView = 'inbox';
             }
         }
     }
@@ -163,60 +164,64 @@ class MessengerHub extends Component
             }
         }
 
-        // Filter by tab
-        $filtered = array_filter($grouped, function ($c) {
-            return match ($this->activeFilter) {
-                'unread' => $c['unread_count'] > 0,
-                'buying' => $c['is_buying'],
-                'selling' => $c['is_selling'],
-                'starred' => $c['is_starred'],
-                'archived' => $c['is_archived'],
-                default => !$c['is_archived'], // 'all' excludes archived
-            };
-        });
+        $conversations = array_values($grouped);
 
-        // Filter by search query
+        // Apply filters
+        if ($this->activeFilter === 'unread') {
+            $conversations = array_filter($conversations, fn($c) => $c['unread_count'] > 0);
+        } elseif ($this->activeFilter === 'buying') {
+            $conversations = array_filter($conversations, fn($c) => $c['is_buying']);
+        } elseif ($this->activeFilter === 'selling') {
+            $conversations = array_filter($conversations, fn($c) => $c['is_selling']);
+        } elseif ($this->activeFilter === 'starred') {
+            $conversations = array_filter($conversations, fn($c) => $c['is_starred']);
+        } elseif ($this->activeFilter === 'archived') {
+            $conversations = array_filter($conversations, fn($c) => $c['is_archived']);
+        } else {
+            // "all" view hides archived threads by default unless requested
+            $conversations = array_filter($conversations, fn($c) => !$c['is_archived']);
+        }
+
+        // Apply search query
         if (!empty(trim($this->searchQuery))) {
-            $query = strtolower(trim($this->searchQuery));
-            $filtered = array_filter($filtered, function ($c) use ($query) {
-                $peerName = strtolower($c['peer']?->name ?? '');
-                $listingTitle = strtolower($c['listing']?->title ?? '');
-                $latestSnippet = strtolower($c['latest_message']?->message_encrypted ?? '');
-                return str_contains($peerName, $query)
-                    || str_contains($listingTitle, $query)
-                    || str_contains($latestSnippet, $query);
+            $search = mb_strtolower(trim($this->searchQuery));
+            $conversations = array_filter($conversations, function ($c) use ($search) {
+                $peerName = mb_strtolower($c['peer']?->name ?? '');
+                $listingTitle = mb_strtolower($c['listing']?->title ?? '');
+                $lastMsg = mb_strtolower($c['latest_message']?->message_encrypted ?? '');
+                return str_contains($peerName, $search) || str_contains($listingTitle, $search) || str_contains($lastMsg, $search);
             });
         }
 
-        // Sort: pinned first, then newest message
-        uasort($filtered, function ($a, $b) {
+        // Sort: pinned threads float to the top, then newest message first
+        usort($conversations, function ($a, $b) {
             if ($a['is_pinned'] !== $b['is_pinned']) {
                 return $b['is_pinned'] <=> $a['is_pinned'];
             }
             return $b['latest_message']->created_at <=> $a['latest_message']->created_at;
         });
 
-        return $filtered;
+        return array_values($conversations);
     }
 
     /**
-     * Active Peer model.
+     * Active peer user model.
      */
     public function getActivePeerProperty(): ?User
     {
-        return $this->activePeerId ? User::with('profile')->find($this->activePeerId) : null;
+        return $this->activePeerId ? User::find($this->activePeerId) : null;
     }
 
     /**
-     * Active Listing model.
+     * Active listing model.
      */
     public function getActiveListingProperty(): ?Listing
     {
-        return $this->activeListingId ? Listing::with(['primaryPhoto', 'city', 'state', 'category', 'user'])->find($this->activeListingId) : null;
+        return $this->activeListingId ? Listing::with('primaryPhoto', 'city', 'state')->find($this->activeListingId) : null;
     }
 
     /**
-     * Messages timeline for current active conversation.
+     * Active message thread list.
      */
     public function getActiveMessagesProperty(): array
     {
@@ -282,6 +287,75 @@ class MessengerHub extends Component
     }
 
     /**
+     * Check if active conversation is currently starred.
+     */
+    public function getIsStarredProperty(): bool
+    {
+        $authId = Auth::id();
+        if (!$authId || !$this->activePeerId) return false;
+
+        return ContactMessage::where(function ($q) use ($authId) {
+            $q->where('sender_id', $authId)->where('recipient_id', $this->activePeerId)
+              ->orWhere('sender_id', $this->activePeerId)->where('recipient_id', $authId);
+        })
+        ->when($this->activeListingId, fn($q) => $q->where('listing_id', $this->activeListingId))
+        ->where('is_starred', true)
+        ->exists();
+    }
+
+    /**
+     * Check if active conversation is currently pinned.
+     */
+    public function getIsPinnedProperty(): bool
+    {
+        $authId = Auth::id();
+        if (!$authId || !$this->activePeerId) return false;
+
+        return ContactMessage::where(function ($q) use ($authId) {
+            $q->where('sender_id', $authId)->where('recipient_id', $this->activePeerId)
+              ->orWhere('sender_id', $this->activePeerId)->where('recipient_id', $authId);
+        })
+        ->when($this->activeListingId, fn($q) => $q->where('listing_id', $this->activeListingId))
+        ->where('is_pinned', true)
+        ->exists();
+    }
+
+    /**
+     * Check if active conversation is currently archived.
+     */
+    public function getIsArchivedProperty(): bool
+    {
+        $authId = Auth::id();
+        if (!$authId || !$this->activePeerId) return false;
+
+        return ContactMessage::where(function ($q) use ($authId) {
+            $q->where('sender_id', $authId)->where('recipient_id', $this->activePeerId)
+              ->orWhere('sender_id', $this->activePeerId)->where('recipient_id', $authId);
+        })
+        ->when($this->activeListingId, fn($q) => $q->where('listing_id', $this->activeListingId))
+        ->where('is_archived', true)
+        ->exists();
+    }
+
+    /**
+     * Check if active peer user is currently blocked by authenticated user.
+     */
+    public function getIsUserBlockedProperty(): bool
+    {
+        $authId = Auth::id();
+        if (!$authId || !$this->activePeerId) return false;
+
+        try {
+            return DB::table('user_blocks')
+                ->where('blocker_id', $authId)
+                ->where('blocked_id', $this->activePeerId)
+                ->exists();
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
      * Select and open a conversation.
      */
     public function selectConversation(string $key): void
@@ -297,7 +371,7 @@ class MessengerHub extends Component
         $this->activeConversationKey = $key;
         $this->activePeerId = $peerId;
         $this->activeListingId = $listingId ?: null;
-        $this->showMobileChat = true;
+        $this->mobileView = 'chat';
         $this->replyToMessageId = null;
         $this->replyToMessageSnippet = null;
 
@@ -472,20 +546,16 @@ class MessengerHub extends Component
         $authId = Auth::id();
         if (!$this->activePeerId) return;
 
-        $isCurrentlyStarred = ContactMessage::where(function ($q) use ($authId) {
-            $q->where('sender_id', $authId)->where('recipient_id', $this->activePeerId)
-              ->orWhere('sender_id', $this->activePeerId)->where('recipient_id', $authId);
-        })
-        ->when($this->activeListingId, fn($q) => $q->where('listing_id', $this->activeListingId))
-        ->where('is_starred', true)
-        ->exists();
+        $newState = !$this->isStarred;
 
         ContactMessage::where(function ($q) use ($authId) {
             $q->where('sender_id', $authId)->where('recipient_id', $this->activePeerId)
               ->orWhere('sender_id', $this->activePeerId)->where('recipient_id', $authId);
         })
         ->when($this->activeListingId, fn($q) => $q->where('listing_id', $this->activeListingId))
-        ->update(['is_starred' => !$isCurrentlyStarred]);
+        ->update(['is_starred' => $newState]);
+
+        session()->flash('messenger_toast', $newState ? '⭐ Conversation starred!' : 'Conversation unstarred.');
     }
 
     /**
@@ -496,20 +566,16 @@ class MessengerHub extends Component
         $authId = Auth::id();
         if (!$this->activePeerId) return;
 
-        $isCurrentlyPinned = ContactMessage::where(function ($q) use ($authId) {
-            $q->where('sender_id', $authId)->where('recipient_id', $this->activePeerId)
-              ->orWhere('sender_id', $this->activePeerId)->where('recipient_id', $authId);
-        })
-        ->when($this->activeListingId, fn($q) => $q->where('listing_id', $this->activeListingId))
-        ->where('is_pinned', true)
-        ->exists();
+        $newState = !$this->isPinned;
 
         ContactMessage::where(function ($q) use ($authId) {
             $q->where('sender_id', $authId)->where('recipient_id', $this->activePeerId)
               ->orWhere('sender_id', $this->activePeerId)->where('recipient_id', $authId);
         })
         ->when($this->activeListingId, fn($q) => $q->where('listing_id', $this->activeListingId))
-        ->update(['is_pinned' => !$isCurrentlyPinned]);
+        ->update(['is_pinned' => $newState]);
+
+        session()->flash('messenger_toast', $newState ? '📌 Conversation pinned to top!' : 'Conversation unpinned.');
     }
 
     /**
@@ -520,20 +586,16 @@ class MessengerHub extends Component
         $authId = Auth::id();
         if (!$this->activePeerId) return;
 
-        $isArchived = ContactMessage::where(function ($q) use ($authId) {
-            $q->where('sender_id', $authId)->where('recipient_id', $this->activePeerId)
-              ->orWhere('sender_id', $this->activePeerId)->where('recipient_id', $authId);
-        })
-        ->when($this->activeListingId, fn($q) => $q->where('listing_id', $this->activeListingId))
-        ->where('is_archived', true)
-        ->exists();
+        $newState = !$this->isArchived;
 
         ContactMessage::where(function ($q) use ($authId) {
             $q->where('sender_id', $authId)->where('recipient_id', $this->activePeerId)
               ->orWhere('sender_id', $this->activePeerId)->where('recipient_id', $authId);
         })
         ->when($this->activeListingId, fn($q) => $q->where('listing_id', $this->activeListingId))
-        ->update(['is_archived' => !$isArchived]);
+        ->update(['is_archived' => $newState]);
+
+        session()->flash('messenger_toast', $newState ? '📁 Conversation archived.' : 'Conversation restored from archive.');
     }
 
     /**
@@ -555,7 +617,9 @@ class MessengerHub extends Component
         $this->activeConversationKey = null;
         $this->activePeerId = null;
         $this->activeListingId = null;
-        $this->showMobileChat = false;
+        $this->mobileView = 'inbox';
+
+        session()->flash('messenger_toast', '🗑️ Conversation deleted.');
     }
 
     /**
@@ -581,11 +645,12 @@ class MessengerHub extends Component
         try {
             DB::table('content_reports')->insert([
                 'reporter_id' => $authId,
-                'reported_user_id' => $this->activePeerId,
-                'listing_id' => $this->activeListingId,
-                'reason' => $this->reportReason,
-                'description' => $this->reportNotes,
-                'status' => 'pending',
+                'reportable_type' => \App\Models\User::class,
+                'reportable_id' => $this->activePeerId,
+                'reason_code' => $this->reportReason ?: 'other',
+                'details' => $this->reportNotes ?: 'User reported via Messenger interface',
+                'status' => 'open',
+                'reporter_ip' => request()->ip(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -595,7 +660,7 @@ class MessengerHub extends Component
 
         $this->reportModal = false;
         $this->reportNotes = '';
-        session()->flash('messenger_toast', 'Report submitted to Trust & Safety team.');
+        session()->flash('messenger_toast', '🛡️ Report submitted to Trust & Safety team.');
     }
 
     /**
@@ -608,15 +673,41 @@ class MessengerHub extends Component
 
         try {
             DB::table('user_blocks')->updateOrInsert(
-                ['user_id' => $authId, 'blocked_user_id' => $this->activePeerId],
-                ['created_at' => now(), 'updated_at' => now()]
+                [
+                    'blocker_id' => $authId,
+                    'blocked_id' => $this->activePeerId,
+                ],
+                [
+                    'reason' => 'User blocked via Messenger',
+                    'created_at' => now(),
+                ]
             );
         } catch (\Throwable $e) {
             // Block fallback
         }
 
         $this->blockConfirmModal = false;
-        session()->flash('messenger_toast', 'User has been blocked.');
+        session()->flash('messenger_toast', '🚫 User has been blocked.');
+    }
+
+    /**
+     * Unblock user.
+     */
+    public function unblockUser(): void
+    {
+        $authId = Auth::id();
+        if (!$this->activePeerId || !$authId) return;
+
+        try {
+            DB::table('user_blocks')
+                ->where('blocker_id', $authId)
+                ->where('blocked_id', $this->activePeerId)
+                ->delete();
+        } catch (\Throwable $e) {
+            // Unblock fallback
+        }
+
+        session()->flash('messenger_toast', 'User unblocked.');
     }
 
     /**
@@ -628,11 +719,21 @@ class MessengerHub extends Component
     }
 
     /**
-     * Return to mobile conversation list.
+     * Responsive mobile navigation helpers.
      */
-    public function closeMobileChat(): void
+    public function backToInbox(): void
     {
-        $this->showMobileChat = false;
+        $this->mobileView = 'inbox';
+    }
+
+    public function backToChat(): void
+    {
+        $this->mobileView = 'chat';
+    }
+
+    public function openMobileDetails(): void
+    {
+        $this->mobileView = 'details';
     }
 
     public function render()

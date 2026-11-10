@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Modules\Contact\Models\ContactMessage;
 use App\Modules\Listings\Models\Listing;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Tests\TestCase;
 use App\Livewire\Messenger\MessengerHub;
@@ -13,6 +14,7 @@ use App\Livewire\Messenger\MessengerHub;
 class MessengerHubTest extends TestCase
 {
     use RefreshDatabase;
+
     public function test_authenticated_user_can_access_messenger(): void
     {
         $user = User::first() ?? User::factory()->create();
@@ -66,5 +68,149 @@ class MessengerHubTest extends TestCase
         $msg->refresh();
         $this->assertArrayHasKey('❤️', $msg->reactions);
         $this->assertContains($sender->id, $msg->reactions['❤️']);
+    }
+
+    public function test_user_can_star_and_unstar_conversation(): void
+    {
+        $sender = User::factory()->create();
+        $recipient = User::factory()->create();
+
+        $msg = ContactMessage::create([
+            'sender_id' => $recipient->id,
+            'recipient_id' => $sender->id,
+            'sender_name' => $recipient->name,
+            'sender_email_encrypted' => $recipient->email,
+            'subject' => 'Inquiry',
+            'message_encrypted' => 'Hi there',
+            'is_read' => true,
+            'is_starred' => false,
+        ]);
+
+        $test = Livewire::actingAs($sender)
+            ->test(MessengerHub::class, ['user' => $recipient->id])
+            ->call('toggleStarConversation');
+
+        $this->assertTrue(ContactMessage::where('id', $msg->id)->value('is_starred'));
+
+        $test->call('toggleStarConversation');
+        $this->assertFalse(ContactMessage::where('id', $msg->id)->value('is_starred'));
+    }
+
+    public function test_user_can_pin_and_unpin_conversation(): void
+    {
+        $sender = User::factory()->create();
+        $recipient = User::factory()->create();
+
+        $msg = ContactMessage::create([
+            'sender_id' => $recipient->id,
+            'recipient_id' => $sender->id,
+            'sender_name' => $recipient->name,
+            'sender_email_encrypted' => $recipient->email,
+            'subject' => 'Inquiry',
+            'message_encrypted' => 'Hi there',
+            'is_read' => true,
+            'is_pinned' => false,
+        ]);
+
+        $test = Livewire::actingAs($sender)
+            ->test(MessengerHub::class, ['user' => $recipient->id])
+            ->call('togglePinConversation');
+
+        $this->assertTrue(ContactMessage::where('id', $msg->id)->value('is_pinned'));
+
+        $test->call('togglePinConversation');
+        $this->assertFalse(ContactMessage::where('id', $msg->id)->value('is_pinned'));
+    }
+
+    public function test_user_can_archive_and_unarchive_conversation(): void
+    {
+        $sender = User::factory()->create();
+        $recipient = User::factory()->create();
+
+        $msg = ContactMessage::create([
+            'sender_id' => $recipient->id,
+            'recipient_id' => $sender->id,
+            'sender_name' => $recipient->name,
+            'sender_email_encrypted' => $recipient->email,
+            'subject' => 'Inquiry',
+            'message_encrypted' => 'Hi there',
+            'is_read' => true,
+            'is_archived' => false,
+        ]);
+
+        $test = Livewire::actingAs($sender)
+            ->test(MessengerHub::class, ['user' => $recipient->id])
+            ->call('toggleArchiveConversation');
+
+        $this->assertTrue(ContactMessage::where('id', $msg->id)->value('is_archived'));
+
+        $test->call('toggleArchiveConversation');
+        $this->assertFalse(ContactMessage::where('id', $msg->id)->value('is_archived'));
+    }
+
+    public function test_user_can_delete_conversation(): void
+    {
+        $sender = User::factory()->create();
+        $recipient = User::factory()->create();
+
+        $msg = ContactMessage::create([
+            'sender_id' => $recipient->id,
+            'recipient_id' => $sender->id,
+            'sender_name' => $recipient->name,
+            'sender_email_encrypted' => $recipient->email,
+            'subject' => 'Inquiry',
+            'message_encrypted' => 'Delete me',
+            'is_read' => true,
+        ]);
+
+        Livewire::actingAs($sender)
+            ->test(MessengerHub::class, ['user' => $recipient->id])
+            ->call('deleteConversation');
+
+        $this->assertNull(ContactMessage::find($msg->id));
+    }
+
+    public function test_user_can_block_and_unblock_user(): void
+    {
+        $sender = User::factory()->create();
+        $recipient = User::factory()->create();
+
+        $test = Livewire::actingAs($sender)
+            ->test(MessengerHub::class, ['user' => $recipient->id])
+            ->call('confirmBlockUser');
+
+        $isBlocked = DB::table('user_blocks')
+            ->where('blocker_id', $sender->id)
+            ->where('blocked_id', $recipient->id)
+            ->exists();
+        $this->assertTrue($isBlocked);
+
+        $test->call('unblockUser');
+        $isStillBlocked = DB::table('user_blocks')
+            ->where('blocker_id', $sender->id)
+            ->where('blocked_id', $recipient->id)
+            ->exists();
+        $this->assertFalse($isStillBlocked);
+    }
+
+    public function test_user_can_submit_report(): void
+    {
+        $sender = User::factory()->create();
+        $recipient = User::factory()->create();
+
+        Livewire::actingAs($sender)
+            ->test(MessengerHub::class, ['user' => $recipient->id])
+            ->set('reportReason', 'harassment')
+            ->set('reportNotes', 'Inappropriate messages sent')
+            ->call('submitReport');
+
+        $report = DB::table('content_reports')
+            ->where('reporter_id', $sender->id)
+            ->where('reportable_id', $recipient->id)
+            ->first();
+
+        $this->assertNotNull($report);
+        $this->assertEquals('harassment', $report->reason_code);
+        $this->assertEquals('Inappropriate messages sent', $report->details);
     }
 }

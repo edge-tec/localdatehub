@@ -1,9 +1,8 @@
 <div 
-    class="w-full h-[calc(100vh-80px)] min-h-[600px] max-w-[1680px] mx-auto bg-white border border-slate-200/90 rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row relative font-sans text-slate-900"
+    class="messenger-container w-full min-h-[620px] max-w-[1680px] mx-auto bg-white border border-slate-200/90 rounded-2xl shadow-xl overflow-hidden relative font-sans text-slate-900"
     x-data="{
         lightboxUrl: null,
         showEmojiPicker: false,
-        copiedMsgId: null,
         scrollToBottom() {
             $nextTick(() => {
                 const el = document.getElementById('chat-messages-container');
@@ -16,6 +15,70 @@
         window.addEventListener('scroll-to-bottom', () => scrollToBottom());
     "
 >
+    <!-- Explicit Layout Styles to guarantee 3-Column Messenger Layout regardless of CSS purging -->
+    <style>
+        .messenger-container {
+            display: flex !important;
+            flex-direction: column !important;
+            height: calc(100vh - 125px);
+            min-height: 620px;
+        }
+        @media (min-width: 768px) {
+            .messenger-container {
+                flex-direction: row !important;
+            }
+            .messenger-inbox-col {
+                display: flex !important;
+                flex-direction: column !important;
+                width: 360px !important;
+                min-width: 340px !important;
+                max-width: 380px !important;
+                height: 100% !important;
+                flex-shrink: 0 !important;
+                border-right: 1px solid #e2e8f0 !important;
+                background-color: #ffffff !important;
+            }
+            .messenger-chat-col {
+                display: flex !important;
+                flex-direction: column !important;
+                flex: 1 1 0% !important;
+                min-width: 0 !important;
+                height: 100% !important;
+                background-color: #f8fafc !important;
+            }
+            .messenger-details-col {
+                display: flex !important;
+                flex-direction: column !important;
+                width: 320px !important;
+                min-width: 300px !important;
+                max-width: 350px !important;
+                height: 100% !important;
+                flex-shrink: 0 !important;
+                border-left: 1px solid #e2e8f0 !important;
+                background-color: #ffffff !important;
+                overflow-y: auto !important;
+            }
+        }
+        @media (max-width: 767.98px) {
+            .messenger-inbox-col {
+                width: 100% !important;
+                height: 100% !important;
+                flex-direction: column !important;
+            }
+            .messenger-chat-col {
+                width: 100% !important;
+                height: 100% !important;
+                flex-direction: column !important;
+            }
+            .messenger-details-col {
+                width: 100% !important;
+                height: 100% !important;
+                flex-direction: column !important;
+                overflow-y: auto !important;
+            }
+        }
+    </style>
+
     <!-- Toast Notification Overlay -->
     @if(session('messenger_toast'))
         <div 
@@ -31,10 +94,10 @@
     @endif
 
     <!-- ========================================================================= -->
-    <!-- 1. LEFT PANEL: INBOX SIDEBAR                                              -->
+    <!-- 1. LEFT PANEL: INBOX SIDEBAR (Always on left on desktop)                   -->
     <!-- ========================================================================= -->
     <aside 
-        class="w-full md:w-[350px] lg:w-[380px] h-full border-r border-slate-200/80 bg-white flex flex-col shrink-0 z-20 transition-all duration-300 {{ $showMobileChat ? 'hidden md:flex' : 'flex' }}"
+        class="messenger-inbox-col {{ $mobileView !== 'inbox' ? 'hidden md:flex' : 'flex' }} z-20"
     >
         <!-- Inbox Top Header -->
         <div class="p-4 border-b border-slate-100 flex items-center justify-between">
@@ -77,7 +140,7 @@
                 <input 
                     type="text" 
                     wire:model.live.debounce.250ms="searchQuery"
-                    placeholder="Search conversations or listings..." 
+                    placeholder="Search conversations..." 
                     class="w-full bg-slate-50 border border-slate-200/80 rounded-xl pl-9 pr-8 py-1.5 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#F20B65]/20 focus:border-[#F20B65] transition"
                 />
                 @if($searchQuery)
@@ -132,7 +195,6 @@
                                 {{ strtoupper(substr($peer?->name ?? 'User', 0, 1)) }}
                             </div>
                         @endif
-                        <!-- Online status dot -->
                         <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow-xs"></span>
                     </div>
 
@@ -174,8 +236,11 @@
                             </p>
 
                             <div class="flex items-center gap-1 shrink-0">
+                                @if($conv['is_starred'])
+                                    <span class="text-[11px]" title="Starred">⭐</span>
+                                @endif
                                 @if($conv['is_pinned'])
-                                    <svg class="w-3 h-3 text-amber-500 fill-current" viewBox="0 0 20 20"><path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"/></svg>
+                                    <span class="text-[11px]" title="Pinned to top">📌</span>
                                 @endif
                                 @if($hasUnread)
                                     <span class="w-4 h-4 rounded-full bg-[#F20B65] text-white text-[10px] font-black flex items-center justify-center">
@@ -201,26 +266,27 @@
                     <div class="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 mx-auto flex items-center justify-center">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0012 3c-2.39 0-4.74.175-7.043.513C3.35 3.722 2.25 5.127 2.25 6.748v4.286c0 1.136.847 2.1 1.98 2.193.34.027.68.052 1.02.072v3.091l3-3c.48 0 .956-.008 1.429-.024"/></svg>
                     </div>
-                    <p class="text-xs font-bold text-slate-600">No conversations in this view</p>
-                    <p class="text-[11px] text-slate-400">When members send you inquiries or replies, they will appear here in real time.</p>
+                    <p class="text-xs font-bold text-slate-600">No conversations here</p>
+                    <p class="text-[11px] text-slate-400">Inquiries on classified listings will appear here in real time.</p>
                 </div>
             @endforelse
         </div>
     </aside>
 
     <!-- ========================================================================= -->
-    <!-- 2. CENTER PANEL: ACTIVE CHAT WINDOW                                       -->
+    <!-- 2. CENTER PANEL: ACTIVE CHAT WINDOW (Middle column on desktop)            -->
     <!-- ========================================================================= -->
-    <main class="flex-1 h-full flex flex-col bg-[#F8FAFC] relative overflow-hidden transition-all duration-300 {{ !$showMobileChat ? 'hidden md:flex' : 'flex' }}">
+    <main class="messenger-chat-col {{ $mobileView !== 'chat' ? 'hidden md:flex' : 'flex' }} relative overflow-hidden">
         @if($activePeer)
             <!-- Chat Header -->
             <header class="p-3.5 px-4 bg-white border-b border-slate-200/80 flex items-center justify-between shrink-0 z-10 shadow-xs">
                 <div class="flex items-center gap-3">
-                    <!-- Mobile Back Button -->
+                    <!-- Mobile Back to Inbox Button -->
                     <button 
                         type="button" 
-                        wire:click="closeMobileChat"
+                        wire:click="backToInbox"
                         class="md:hidden w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition"
+                        title="Back to Inbox"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
                     </button>
@@ -246,6 +312,12 @@
                             @if($activePeer->is_identity_verified)
                                 <svg class="w-3.5 h-3.5 text-blue-500 fill-current" viewBox="0 0 20 20" title="Verified Member"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                             @endif
+                            @if($this->isStarred)
+                                <span class="text-xs" title="Starred">⭐</span>
+                            @endif
+                            @if($this->isPinned)
+                                <span class="text-xs" title="Pinned">📌</span>
+                            @endif
                         </div>
                         <span class="text-[11px] font-semibold text-emerald-600 flex items-center gap-1 mt-0.5">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
@@ -256,12 +328,12 @@
 
                 <!-- Header Actions (Call icons, Info drawer toggle) -->
                 <div class="flex items-center gap-1 sm:gap-2">
-                    <!-- Voice Call Button (Messenger Style) -->
+                    <!-- Voice Call Button -->
                     <button 
                         type="button" 
                         class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition"
                         title="Voice Call"
-                        onclick="alert('Secure encrypted audio calling is available for verified members.')"
+                        onclick="alert('Encrypted audio calling is enabled for verified members.')"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg>
                     </button>
@@ -271,16 +343,25 @@
                         type="button" 
                         class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition"
                         title="Video Call"
-                        onclick="alert('Secure video calling is available for verified members.')"
+                        onclick="alert('Encrypted video calling is enabled for verified members.')"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"/></svg>
                     </button>
 
-                    <!-- Toggle Conversation Details Panel -->
+                    <!-- Toggle Conversation Details (Desktop toggle / Mobile view switch) -->
                     <button 
                         type="button" 
+                        class="hidden md:flex w-8 h-8 rounded-xl transition items-center justify-center {{ $showRightPanel ? 'bg-pink-50 text-[#F20B65]' : 'bg-slate-50 text-slate-600 hover:bg-slate-100' }}"
                         wire:click="toggleRightPanel"
-                        class="w-8 h-8 rounded-xl transition flex items-center justify-center {{ $showRightPanel ? 'bg-pink-50 text-[#F20B65]' : 'bg-slate-50 text-slate-600 hover:bg-slate-100' }}"
+                        title="{{ $showRightPanel ? 'Hide Details' : 'Show Details' }}"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>
+                    </button>
+
+                    <button 
+                        type="button" 
+                        class="md:hidden w-8 h-8 rounded-xl bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center justify-center transition"
+                        wire:click="openMobileDetails"
                         title="Conversation Details"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>
@@ -288,7 +369,7 @@
                 </div>
             </header>
 
-            <!-- Sticky Listing Context Banner (Compact International Marketplace Card) -->
+            <!-- Sticky Listing Context Banner -->
             @if($activeListing)
                 <div class="bg-white border-b border-slate-200/80 px-4 py-2.5 flex items-center justify-between gap-3 shrink-0">
                     <div class="flex items-center gap-3 min-w-0">
@@ -306,7 +387,7 @@
                         @endif
 
                         <div class="min-w-0">
-                            <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Regarding Classified Listing</span>
+                            <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Classified Listing</span>
                             <a href="{{ route('listings.show', $activeListing->slug) }}" target="_blank" class="text-xs font-bold text-slate-900 hover:text-[#F20B65] transition truncate block">
                                 {{ $activeListing->title }}
                             </a>
@@ -482,7 +563,7 @@
                         </div>
                         <h4 class="text-sm font-black text-slate-900">Start the conversation</h4>
                         <p class="text-xs text-slate-500 max-w-sm">
-                            Say hello to {{ $activePeer->name }}! Inquire about their advertisement, verify details, and arrange a safe connection.
+                            Say hello to {{ $activePeer->name }}! Inquire about their advertisement and arrange a safe connection.
                         </p>
                     </div>
                 @endforelse
@@ -524,7 +605,7 @@
                         <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"/></svg>
                     </label>
 
-                    <!-- Text Area (Auto growing feel) -->
+                    <!-- Text Area -->
                     <div class="flex-1 relative">
                         <textarea 
                             wire:model="messageText"
@@ -598,16 +679,36 @@
     </main>
 
     <!-- ========================================================================= -->
-    <!-- 3. RIGHT PANEL: CONVERSATION DETAILS & SHARED MEDIA                       -->
+    <!-- 3. RIGHT PANEL: CONVERSATION DETAILS & OPTIONS (Right column on desktop)  -->
     <!-- ========================================================================= -->
-    @if($activePeer && $showRightPanel)
+    @if($activePeer && ($showRightPanel || $mobileView === 'details'))
         <aside 
-            class="w-full md:w-[320px] lg:w-[340px] h-full border-l border-slate-200/80 bg-white flex flex-col shrink-0 overflow-y-auto z-10 transition-all duration-300"
+            class="messenger-details-col {{ $mobileView !== 'details' ? 'hidden md:flex' : 'flex' }} z-10"
         >
             <!-- Details Header -->
             <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-                <h3 class="text-xs font-black uppercase tracking-wider text-slate-500">Conversation Details</h3>
-                <button wire:click="toggleRightPanel" class="text-slate-400 hover:text-slate-600 text-sm font-bold">&times;</button>
+                <div class="flex items-center gap-2">
+                    <!-- Mobile Back to Chat Button -->
+                    <button 
+                        type="button" 
+                        wire:click="backToChat"
+                        class="md:hidden w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition"
+                        title="Back to Chat"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+                    </button>
+                    <h3 class="text-xs font-black uppercase tracking-wider text-slate-500">Conversation Details</h3>
+                </div>
+
+                <!-- Desktop Close Button -->
+                <button 
+                    type="button"
+                    wire:click="toggleRightPanel" 
+                    class="w-7 h-7 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 text-base font-bold flex items-center justify-center transition"
+                    title="Close Details Panel"
+                >
+                    &times;
+                </button>
             </div>
 
             <!-- Section A: Contact Information -->
@@ -635,17 +736,29 @@
                 <!-- Block & Report Actions -->
                 <div class="flex items-center gap-2 mt-4">
                     <button 
+                        type="button"
                         wire:click="$set('reportModal', true)" 
                         class="px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 transition"
                     >
                         Report User
                     </button>
-                    <button 
-                        wire:click="$set('blockConfirmModal', true)" 
-                        class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold border border-rose-200 transition"
-                    >
-                        Block
-                    </button>
+                    @if($this->isUserBlocked)
+                        <button 
+                            type="button"
+                            wire:click="unblockUser" 
+                            class="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200 transition"
+                        >
+                            Unblock
+                        </button>
+                    @else
+                        <button 
+                            type="button"
+                            wire:click="$set('blockConfirmModal', true)" 
+                            class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold border border-rose-200 transition"
+                        >
+                            Block
+                        </button>
+                    @endif
                 </div>
             </div>
 
@@ -665,49 +778,69 @@
                 </div>
             @endif
 
-            <!-- Section C: Conversation Options -->
-            <div class="p-4 border-b border-slate-100 space-y-1">
+            <!-- Section C: Conversation Options (Fully Functional) -->
+            <div class="p-4 border-b border-slate-100 space-y-1.5">
                 <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 block mb-2">Options</span>
                 
+                <!-- Star Conversation Toggle -->
                 <button 
+                    type="button"
                     wire:click="toggleStarConversation" 
-                    class="w-full px-3 py-2 rounded-xl hover:bg-slate-50 flex items-center justify-between text-xs font-bold text-slate-700 transition"
+                    class="w-full px-3 py-2.5 rounded-xl transition flex items-center justify-between text-xs font-bold {{ $this->isStarred ? 'bg-amber-50 text-amber-800 border border-amber-200/80 shadow-2xs' : 'hover:bg-slate-50 text-slate-700' }}"
                 >
-                    <span class="flex items-center gap-2">
-                        <span>⭐</span>
-                        <span>Star Conversation</span>
+                    <span class="flex items-center gap-2.5">
+                        <span class="text-sm leading-none">{{ $this->isStarred ? '⭐' : '☆' }}</span>
+                        <span>{{ $this->isStarred ? 'Starred Conversation' : 'Star Conversation' }}</span>
                     </span>
-                    <span class="text-slate-400">&rsaquo;</span>
+                    @if($this->isStarred)
+                        <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-amber-200/80 text-amber-900">Starred</span>
+                    @else
+                        <span class="text-slate-400">&rsaquo;</span>
+                    @endif
                 </button>
 
+                <!-- Pin to Top Toggle -->
                 <button 
+                    type="button"
                     wire:click="togglePinConversation" 
-                    class="w-full px-3 py-2 rounded-xl hover:bg-slate-50 flex items-center justify-between text-xs font-bold text-slate-700 transition"
+                    class="w-full px-3 py-2.5 rounded-xl transition flex items-center justify-between text-xs font-bold {{ $this->isPinned ? 'bg-blue-50 text-blue-800 border border-blue-200/80 shadow-2xs' : 'hover:bg-slate-50 text-slate-700' }}"
                 >
-                    <span class="flex items-center gap-2">
-                        <span>📌</span>
-                        <span>Pin to Top</span>
+                    <span class="flex items-center gap-2.5">
+                        <span class="text-sm leading-none">📌</span>
+                        <span>{{ $this->isPinned ? 'Pinned to Top' : 'Pin to Top' }}</span>
                     </span>
-                    <span class="text-slate-400">&rsaquo;</span>
+                    @if($this->isPinned)
+                        <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-blue-200/80 text-blue-900">Pinned</span>
+                    @else
+                        <span class="text-slate-400">&rsaquo;</span>
+                    @endif
                 </button>
 
+                <!-- Archive Thread Toggle -->
                 <button 
+                    type="button"
                     wire:click="toggleArchiveConversation" 
-                    class="w-full px-3 py-2 rounded-xl hover:bg-slate-50 flex items-center justify-between text-xs font-bold text-slate-700 transition"
+                    class="w-full px-3 py-2.5 rounded-xl transition flex items-center justify-between text-xs font-bold {{ $this->isArchived ? 'bg-purple-50 text-purple-800 border border-purple-200/80 shadow-2xs' : 'hover:bg-slate-50 text-slate-700' }}"
                 >
-                    <span class="flex items-center gap-2">
-                        <span>📁</span>
-                        <span>Archive Thread</span>
+                    <span class="flex items-center gap-2.5">
+                        <span class="text-sm leading-none">📁</span>
+                        <span>{{ $this->isArchived ? 'Archived Thread' : 'Archive Thread' }}</span>
                     </span>
-                    <span class="text-slate-400">&rsaquo;</span>
+                    @if($this->isArchived)
+                        <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-purple-200/80 text-purple-900">Archived</span>
+                    @else
+                        <span class="text-slate-400">&rsaquo;</span>
+                    @endif
                 </button>
 
+                <!-- Delete Conversation -->
                 <button 
+                    type="button"
                     wire:click="$set('deleteConfirmModal', true)" 
-                    class="w-full px-3 py-2 rounded-xl hover:bg-rose-50 flex items-center justify-between text-xs font-bold text-rose-600 transition"
+                    class="w-full px-3 py-2.5 rounded-xl hover:bg-rose-50 flex items-center justify-between text-xs font-bold text-rose-600 transition"
                 >
-                    <span class="flex items-center gap-2">
-                        <span>🗑️</span>
+                    <span class="flex items-center gap-2.5">
+                        <span class="text-sm leading-none">🗑️</span>
                         <span>Delete Conversation</span>
                     </span>
                     <span class="text-rose-400">&rsaquo;</span>
@@ -720,12 +853,14 @@
                     <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Shared Media</span>
                     <div class="flex items-center gap-1">
                         <button 
+                            type="button"
                             wire:click="$set('mediaTab', 'photos')" 
                             class="px-2 py-0.5 rounded text-[10px] font-bold {{ $mediaTab === 'photos' ? 'bg-[#F20B65] text-white' : 'text-slate-600 hover:bg-slate-100' }}"
                         >
                             Photos
                         </button>
                         <button 
+                            type="button"
                             wire:click="$set('mediaTab', 'files')" 
                             class="px-2 py-0.5 rounded text-[10px] font-bold {{ $mediaTab === 'files' ? 'bg-[#F20B65] text-white' : 'text-slate-600 hover:bg-slate-100' }}"
                         >
@@ -894,7 +1029,8 @@
                             <option value="spam">Spam / Unsolicited Promotion</option>
                             <option value="harassment">Harassment / Abusive Behavior</option>
                             <option value="commercial_solicitation">Commercial Solicitation</option>
-                            <option value="inappropriate">Inappropriate / Non-consensual Content</option>
+                            <option value="fraud_scam">Fraud / Scam / Fake Profile</option>
+                            <option value="non_consensual">Inappropriate / Non-consensual Content</option>
                             <option value="other">Other Violation</option>
                         </select>
                     </div>
@@ -925,7 +1061,7 @@
                 <div>
                     <h3 class="text-sm font-black text-slate-900">Delete Conversation?</h3>
                     <p class="text-xs text-slate-500 mt-1">
-                        This conversation will be permanently removed from your inbox. This action cannot be undone.
+                        This conversation with {{ $activePeer?->name }} will be permanently removed from your inbox.
                     </p>
                 </div>
                 <div class="flex items-center justify-center gap-2 pt-2">
