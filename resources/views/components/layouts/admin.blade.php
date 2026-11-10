@@ -220,121 +220,270 @@
                         <div 
                             x-show="notificationsOpen" 
                             x-cloak 
-                            x-transition:enter="transition ease-out duration-150"
-                            x-transition:enter-start="opacity-0 translate-y-1"
-                            x-transition:enter-end="opacity-100 translate-y-0"
-                            class="absolute right-0 mt-2 w-96 max-w-[calc(100vw-24px)] rounded-2xl bg-white border border-slate-200 shadow-2xl p-3.5 z-50 text-xs"
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                            x-transition:leave="transition ease-in duration-100"
+                            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                            x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                            class="absolute -right-2 sm:right-0 mt-2.5 w-[calc(100vw-24px)] sm:w-[460px] max-w-[460px] rounded-3xl bg-white border border-slate-200/90 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.18)] p-4 sm:p-5 z-50 text-xs font-sans"
                         >
                             <!-- Dropdown Header -->
-                            <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
-                                <div class="font-black text-slate-900 flex items-center gap-1.5">
-                                    <span>Real-Time Admin Alerts</span>
-                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping" title="Live Polling Active"></span>
+                            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+                                <div>
+                                    <div class="font-black text-slate-900 text-sm tracking-tight flex items-center gap-2">
+                                        <span>Live Notifications</span>
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                            <span>LIVE</span>
+                                        </span>
+                                    </div>
+                                    <div class="text-[10px] font-medium text-slate-400 mt-0.5">Real-time alerts &amp; pending customer requests</div>
                                 </div>
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-1.5">
                                     <button 
                                         type="button" 
                                         @click="pollLatest()" 
-                                        class="text-[10px] text-slate-400 hover:text-slate-700 font-bold transition" 
+                                        class="p-1.5 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition cursor-pointer flex items-center gap-1 text-[11px] font-bold" 
                                         title="Refresh notifications"
                                     >
-                                        ↻ Refresh
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                        </svg>
                                     </button>
-                                    <span class="text-slate-200">|</span>
-                                    <a href="{{ route('admin.dashboard', ['tab' => 'notifications']) }}" class="text-[11px] font-bold text-[#F20B65] hover:underline">
-                                        All Logs &rarr;
-                                    </a>
+                                    <button 
+                                        type="button" 
+                                        @click="markAllSeen()" 
+                                        class="px-2.5 py-1 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer text-[10px] font-bold flex items-center gap-1 border border-slate-200" 
+                                        title="Mark all notifications as read"
+                                    >
+                                        <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                        </svg>
+                                        <span>Mark Read</span>
+                                    </button>
                                 </div>
                             </div>
 
-                            <!-- Filter Pills -->
-                            <div class="flex items-center gap-1 overflow-x-auto pb-2 mb-2 border-b border-slate-100 no-scrollbar">
+                            <!-- Filter Pills (Smooth Responsive Horizontal Scroll) -->
+                            <div class="flex items-center gap-1.5 overflow-x-auto pb-2.5 mb-2.5 border-b border-slate-100 -mx-1 px-1 no-scrollbar">
                                 <button 
                                     type="button" 
                                     @click="activeCategoryFilter = 'all'"
-                                    class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition whitespace-nowrap"
+                                    class="px-2.5 py-1.5 rounded-xl text-[11px] font-black transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer shadow-2xs"
                                     :class="activeCategoryFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
                                 >
-                                    All (<span x-text="items.length"></span>)
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                                    </svg>
+                                    <span>All</span>
+                                    <span class="px-1.5 py-0.2 rounded-full text-[9px]" :class="activeCategoryFilter === 'all' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'" x-text="items.length"></span>
                                 </button>
+
                                 <button 
                                     type="button" 
                                     @click="activeCategoryFilter = 'id_verification'"
-                                    class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition whitespace-nowrap flex items-center gap-1"
+                                    class="px-2.5 py-1.5 rounded-xl text-[11px] font-black transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer shadow-2xs"
                                     :class="activeCategoryFilter === 'id_verification' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'"
                                 >
-                                    <span>🆔 IDs</span>
-                                    <span class="px-1 py-0.2 rounded-full text-[9px]" :class="activeCategoryFilter === 'id_verification' ? 'bg-white text-blue-700' : 'bg-blue-200 text-blue-900'" x-text="counts.id_verifications"></span>
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                                        <circle cx="9" cy="10" r="2"></circle>
+                                        <line x1="15" y1="8" x2="17" y2="8"></line>
+                                        <line x1="15" y1="12" x2="17" y2="12"></line>
+                                        <line x1="7" y1="16" x2="17" y2="16"></line>
+                                    </svg>
+                                    <span>ID Cards</span>
+                                    <span class="px-1.5 py-0.2 rounded-full text-[9px]" :class="activeCategoryFilter === 'id_verification' ? 'bg-white text-blue-700' : 'bg-blue-200 text-blue-900'" x-text="counts.id_verifications"></span>
                                 </button>
+
                                 <button 
                                     type="button" 
                                     @click="activeCategoryFilter = 'listing_pending'"
-                                    class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition whitespace-nowrap flex items-center gap-1"
+                                    class="px-2.5 py-1.5 rounded-xl text-[11px] font-black transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer shadow-2xs"
                                     :class="activeCategoryFilter === 'listing_pending' ? 'bg-amber-600 text-white' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'"
                                 >
-                                    <span>📝 Ads</span>
-                                    <span class="px-1 py-0.2 rounded-full text-[9px]" :class="activeCategoryFilter === 'listing_pending' ? 'bg-white text-amber-700' : 'bg-amber-200 text-amber-900'" x-text="counts.pending_listings"></span>
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                                        <line x1="10" y1="9" x2="8" y2="9"></line>
+                                    </svg>
+                                    <span>Ads</span>
+                                    <span class="px-1.5 py-0.2 rounded-full text-[9px]" :class="activeCategoryFilter === 'listing_pending' ? 'bg-white text-amber-700' : 'bg-amber-200 text-amber-900'" x-text="counts.pending_listings"></span>
                                 </button>
+
                                 <button 
                                     type="button" 
                                     @click="activeCategoryFilter = 'contact_message'"
-                                    class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition whitespace-nowrap flex items-center gap-1"
+                                    class="px-2.5 py-1.5 rounded-xl text-[11px] font-black transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer shadow-2xs"
                                     :class="activeCategoryFilter === 'contact_message' ? 'bg-pink-600 text-white' : 'bg-pink-50 text-pink-700 hover:bg-pink-100'"
                                 >
-                                    <span>💬 Msgs</span>
-                                    <span class="px-1 py-0.2 rounded-full text-[9px]" :class="activeCategoryFilter === 'contact_message' ? 'bg-white text-pink-700' : 'bg-pink-200 text-pink-900'" x-text="counts.messages"></span>
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path>
+                                    </svg>
+                                    <span>Messages</span>
+                                    <span class="px-1.5 py-0.2 rounded-full text-[9px]" :class="activeCategoryFilter === 'contact_message' ? 'bg-white text-pink-700' : 'bg-pink-200 text-pink-900'" x-text="counts.messages"></span>
                                 </button>
+
                                 <button 
                                     type="button" 
                                     @click="activeCategoryFilter = 'abuse_report'"
-                                    class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition whitespace-nowrap flex items-center gap-1"
+                                    class="px-2.5 py-1.5 rounded-xl text-[11px] font-black transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer shadow-2xs"
                                     :class="activeCategoryFilter === 'abuse_report' ? 'bg-rose-600 text-white' : 'bg-rose-50 text-rose-700 hover:bg-rose-100'"
                                 >
-                                    <span>🚨 Reports</span>
-                                    <span class="px-1 py-0.2 rounded-full text-[9px]" :class="activeCategoryFilter === 'abuse_report' ? 'bg-white text-rose-700' : 'bg-rose-200 text-rose-900'" x-text="counts.reports"></span>
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                    </svg>
+                                    <span>Reports</span>
+                                    <span class="px-1.5 py-0.2 rounded-full text-[9px]" :class="activeCategoryFilter === 'abuse_report' ? 'bg-white text-rose-700' : 'bg-rose-200 text-rose-900'" x-text="counts.reports"></span>
                                 </button>
                             </div>
 
                             <!-- Notification Items List -->
-                            <div class="space-y-1.5 max-h-80 overflow-y-auto pr-0.5">
+                            <div class="space-y-2 max-h-84 overflow-y-auto pr-1 no-scrollbar">
                                 <template x-for="item in filteredItems()" :key="item.id">
                                     <a 
                                         :href="item.url" 
-                                        class="block p-2.5 rounded-xl hover:bg-slate-50 border border-slate-100 hover:border-slate-200 transition group"
+                                        class="flex items-start gap-3 p-3 rounded-2xl bg-white hover:bg-slate-50/80 border border-slate-100 hover:border-slate-200 shadow-2xs transition group cursor-pointer"
                                     >
-                                        <div class="flex items-center justify-between gap-2 mb-0.5">
-                                            <div class="flex items-center gap-1.5 min-w-0">
-                                                <span class="text-xs" x-text="item.icon"></span>
-                                                <span 
-                                                    class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border"
-                                                    :class="item.badge_color"
-                                                    x-text="item.badge_label"
-                                                ></span>
-                                                <span class="font-bold text-slate-900 text-[11px] truncate" x-text="item.title"></span>
-                                            </div>
-                                            <span class="text-[10px] text-slate-400 shrink-0 font-medium" x-text="item.time_ago"></span>
+                                        <!-- Category Tile with Crisp SVG -->
+                                        <div 
+                                            class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border transition group-hover:scale-105"
+                                            :class="{
+                                                'bg-blue-50 text-blue-600 border-blue-200/80': item.category === 'id_verification',
+                                                'bg-amber-50 text-amber-600 border-amber-200/80': item.category === 'listing_pending',
+                                                'bg-pink-50 text-[#F20B65] border-pink-200/80': item.category === 'contact_message',
+                                                'bg-rose-50 text-rose-600 border-rose-200/80': item.category === 'abuse_report',
+                                                'bg-indigo-50 text-indigo-600 border-indigo-200/80': item.category === 'system_log'
+                                            }"
+                                        >
+                                            <template x-if="item.category === 'id_verification'">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                                                    <circle cx="9" cy="10" r="2"></circle>
+                                                    <line x1="15" y1="8" x2="17" y2="8"></line>
+                                                    <line x1="15" y1="12" x2="17" y2="12"></line>
+                                                    <line x1="7" y1="16" x2="17" y2="16"></line>
+                                                </svg>
+                                            </template>
+                                            <template x-if="item.category === 'listing_pending'">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                                    <line x1="10" y1="9" x2="8" y2="9"></line>
+                                                </svg>
+                                            </template>
+                                            <template x-if="item.category === 'contact_message'">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path>
+                                                </svg>
+                                            </template>
+                                            <template x-if="item.category === 'abuse_report'">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path>
+                                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                                </svg>
+                                            </template>
+                                            <template x-if="item.category === 'system_log'">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                                                </svg>
+                                            </template>
                                         </div>
-                                        <div class="text-[11px] text-slate-600 truncate pl-4.5" x-text="item.snippet"></div>
+
+                                        <!-- Content -->
+                                        <div class="min-w-0 flex-1">
+                                            <div class="flex items-center justify-between gap-1.5 mb-0.5">
+                                                <div class="flex items-center gap-1.5 min-w-0">
+                                                    <span 
+                                                        class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md border"
+                                                        :class="item.badge_color"
+                                                        x-text="item.badge_label"
+                                                    ></span>
+                                                    <span class="font-bold text-slate-900 text-xs truncate" x-text="item.title"></span>
+                                                </div>
+                                                <span class="text-[10px] text-slate-400 font-semibold shrink-0" x-text="item.time_ago"></span>
+                                            </div>
+                                            <p class="text-[11px] text-slate-600 line-clamp-1 leading-snug" x-text="item.snippet"></p>
+                                        </div>
+
+                                        <!-- Arrow Icon -->
+                                        <div class="shrink-0 self-center text-slate-300 group-hover:text-slate-700 group-hover:translate-x-0.5 transition">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                            </svg>
+                                        </div>
                                     </a>
                                 </template>
 
-                                <div x-show="filteredItems().length === 0" class="py-8 text-center text-slate-400 font-semibold space-y-1">
-                                    <div class="text-lg">✨</div>
-                                    <div class="text-xs text-slate-500">No active alerts in this category</div>
-                                    <div class="text-[10px] text-slate-400">All submissions are currently addressed</div>
+                                <!-- Beautiful Modern Empty State -->
+                                <div x-show="filteredItems().length === 0" class="py-10 text-center space-y-3">
+                                    <div class="w-13 h-13 rounded-3xl bg-gradient-to-tr from-emerald-50 to-teal-50 border border-emerald-200/70 text-emerald-600 flex items-center justify-center mx-auto shadow-2xs">
+                                        <svg class="w-6 h-6 stroke-[2.2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-black text-slate-900">All Caught Up!</h4>
+                                        <p class="text-[11px] text-slate-500 max-w-xs mx-auto mt-0.5">No pending verification requests, listings, or customer inquiries right now.</p>
+                                    </div>
+                                    <div class="pt-1">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-200 text-[10px] font-bold text-slate-500">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                            <span>Real-time monitoring active</span>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Dropdown Footer Quick Links -->
-                            <div class="mt-2.5 pt-2 border-t border-slate-100 grid grid-cols-3 gap-1.5 text-center text-[10px] font-bold">
-                                <a href="{{ route('admin.verifications.index') }}" class="p-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition">
-                                    🆔 ID Queue ↗
+                            <!-- Dropdown Footer Quick Links with SVG Icons -->
+                            <div class="mt-3 pt-3 border-t border-slate-100 grid grid-cols-3 gap-2 text-center text-[10px] font-black">
+                                <a 
+                                    href="{{ route('admin.verifications.index') }}" 
+                                    class="p-2 rounded-2xl bg-blue-50/70 hover:bg-blue-100 text-blue-700 border border-blue-200/60 transition flex items-center justify-center gap-1.5 group shadow-2xs"
+                                >
+                                    <svg class="w-3.5 h-3.5 text-blue-600 group-hover:scale-110 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                                        <circle cx="9" cy="10" r="2"></circle>
+                                        <line x1="15" y1="8" x2="17" y2="8"></line>
+                                        <line x1="15" y1="12" x2="17" y2="12"></line>
+                                        <line x1="7" y1="16" x2="17" y2="16"></line>
+                                    </svg>
+                                    <span>ID Queue</span>
+                                    <svg class="w-2.5 h-2.5 text-blue-400 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
                                 </a>
-                                <a href="{{ route('admin.dashboard', ['tab' => 'listings']) }}" class="p-1.5 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 transition">
-                                    📝 Pending Ads ↗
+
+                                <a 
+                                    href="{{ route('admin.dashboard', ['tab' => 'listings']) }}" 
+                                    class="p-2 rounded-2xl bg-amber-50/70 hover:bg-amber-100 text-amber-700 border border-amber-200/60 transition flex items-center justify-center gap-1.5 group shadow-2xs"
+                                >
+                                    <svg class="w-3.5 h-3.5 text-amber-600 group-hover:scale-110 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                                        <line x1="10" y1="9" x2="8" y2="9"></line>
+                                    </svg>
+                                    <span>Pending Ads</span>
+                                    <svg class="w-2.5 h-2.5 text-amber-400 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
                                 </a>
-                                <a href="{{ route('admin.dashboard', ['tab' => 'moderation_messages']) }}" class="p-1.5 rounded-lg bg-pink-50 text-[#F20B65] hover:bg-pink-100 transition">
-                                    💬 Messages ↗
+
+                                <a 
+                                    href="{{ route('admin.dashboard', ['tab' => 'moderation_messages']) }}" 
+                                    class="p-2 rounded-2xl bg-pink-50/70 hover:bg-pink-100 text-[#F20B65] border border-pink-200/60 transition flex items-center justify-center gap-1.5 group shadow-2xs"
+                                >
+                                    <svg class="w-3.5 h-3.5 text-[#F20B65] group-hover:scale-110 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path>
+                                    </svg>
+                                    <span>Messages</span>
+                                    <svg class="w-2.5 h-2.5 text-pink-400 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
                                 </a>
                             </div>
                         </div>
