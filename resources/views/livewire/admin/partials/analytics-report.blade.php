@@ -220,87 +220,116 @@
 
     {{-- 2. Posts & Post Views --}}
     @if($show('posts'))
-        <div class="grid gap-4 lg:grid-cols-3">
-            <div class="{{ $card }} p-5 lg:col-span-2 overflow-x-auto">
-                <h2 class="text-sm font-extrabold text-slate-900 mb-3">📝 Top Posts by Views</h2>
-                <table class="min-w-full">
-                    <thead>
-                        <tr>
-                            <th class="{{ $th }}">#</th>
-                            <th class="{{ $th }}">Post</th>
-                            <th class="{{ $th }}">Category</th>
-                            <th class="{{ $th }}">Age</th>
-                            @if($showUnique)<th class="{{ $th }}">Unique</th>@endif
-                            @if($showGross)<th class="{{ $th }}">Gross</th>@endif
-                            <th class="{{ $th }}">Replies</th>
-                            <th class="{{ $th }}">Favs</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($topListingsReport as $i => $l)
-                            <tr>
-                                <td class="{{ $td }} font-bold text-slate-400">{{ $i + 1 }}</td>
-                                <td class="{{ $td }} max-w-[220px]">
-                                    <a href="{{ route('listings.show', $l['slug']) }}" target="_blank" class="font-semibold text-slate-900 hover:text-[#F20B65] line-clamp-1">{{ $l['title'] }}</a>
-                                    <div class="text-[10px] text-slate-400">{{ $l['city'] }} · {{ str_replace('_', ' ', $l['status']) }}</div>
-                                </td>
-                                <td class="{{ $td }}">{{ $l['category'] }}</td>
-                                <td class="{{ $td }}">{{ $l['poster_age'] ?? '—' }}</td>
-                                @if($showUnique)<td class="{{ $td }} font-bold text-teal-700">{{ number_format($l['unique_views']) }}</td>@endif
-                                @if($showGross)<td class="{{ $td }} font-bold text-[#F20B65]">{{ number_format($l['gross_views']) }}</td>@endif
-                                <td class="{{ $td }}">{{ $l['reply_count'] }}</td>
-                                <td class="{{ $td }}">{{ $l['favorite_count'] }}</td>
-                            </tr>
-                        @empty
-                            <tr><td class="{{ $td }} text-center text-slate-400" colspan="8">No posts match these filters.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="{{ $card }} p-5 space-y-5">
+        <div class="space-y-4">
+            <!-- Top Summary Visuals: Category Distribution & Status Donut -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 @if($showChart)
-                    <div>
-                        <h2 class="text-sm font-extrabold text-slate-900 mb-3">📊 Post Views by Category</h2>
-                        <div class="space-y-2">
-                            @forelse($topCategories as $c)
-                                @php $catPct = (int) round(((int) $c->total_views / $maxCatViews) * 100); @endphp
-                                <div>
-                                    <div class="flex justify-between text-[11px] font-semibold text-slate-700"><span class="truncate">{{ $c->name }}</span><span>{{ number_format((int) $c->total_views) }} views · {{ $c->listings_count }} posts</span></div>
-                                    <div class="h-2 rounded-full bg-slate-100 mt-1"><div class="h-2 rounded-full bg-[#F20B65]" style="width: {{ max(2, $catPct) }}%"></div></div>
-                                </div>
-                            @empty
-                                <p class="text-xs text-slate-400">No categories.</p>
-                            @endforelse
-                        </div>
-                    </div>
-                @endif
-                @if($showGraph)
-                    @php
-                        $statusTotal = max(1, (int) collect($listingsByStatus)->sum());
-                        $offset = 0;
-                    @endphp
-                    <div>
-                        <h2 class="text-sm font-extrabold text-slate-900 mb-3">🍩 Posts by Status</h2>
-                        <div class="flex items-center gap-4">
-                            <svg viewBox="0 0 36 36" class="w-28 h-28 -rotate-90 shrink-0">
-                                <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#F1F5F9" stroke-width="4.5"/>
-                                @foreach($listingsByStatus as $status => $total)
-                                    @php $p = round(($total / $statusTotal) * 100, 2); @endphp
-                                    <circle cx="18" cy="18" r="15.9155" fill="none" stroke="{{ $donutColors[$loop->index % count($donutColors)] }}" stroke-width="4.5" stroke-dasharray="{{ $p }} {{ 100 - $p }}" stroke-dashoffset="-{{ $offset }}"/>
-                                    @php $offset += $p; @endphp
-                                @endforeach
-                            </svg>
-                            <div class="space-y-1 text-[11px] flex-1">
-                                @forelse($listingsByStatus as $status => $total)
-                                    <div class="flex justify-between"><span class="flex items-center gap-1.5 capitalize"><span class="w-2 h-2 rounded-full" style="background: {{ $donutColors[$loop->index % count($donutColors)] }}"></span>{{ str_replace('_', ' ', $status) }}</span><span class="font-bold">{{ $total }}</span></div>
+                    <div class="{{ $card }} p-5 flex flex-col justify-between">
+                        <div>
+                            <h2 class="text-sm font-extrabold text-slate-900 mb-3">📊 Post Views by Category</h2>
+                            <div class="space-y-2.5">
+                                @forelse($topCategories as $c)
+                                    @php $catPct = (int) round(((int) $c->total_views / max(1, $maxCatViews)) * 100); @endphp
+                                    <div>
+                                        <div class="flex justify-between text-[11px] font-semibold text-slate-700">
+                                            <span class="truncate font-bold">{{ $c->name }}</span>
+                                            <span class="text-slate-500 shrink-0">{{ number_format((int) $c->total_views) }} views · {{ $c->listings_count }} posts</span>
+                                        </div>
+                                        <div class="h-2 rounded-full bg-slate-100 mt-1 overflow-hidden">
+                                            <div class="h-2 rounded-full bg-[#F20B65] transition-all duration-300" style="width: {{ max(2, $catPct) }}%"></div>
+                                        </div>
+                                    </div>
                                 @empty
-                                    <p class="text-slate-400">No data.</p>
+                                    <p class="text-xs text-slate-400">No categories found.</p>
                                 @endforelse
                             </div>
                         </div>
                     </div>
                 @endif
+
+                @if($showGraph)
+                    @php
+                        $statusTotal = max(1, (int) collect($listingsByStatus)->sum());
+                        $offset = 0;
+                    @endphp
+                    <div class="{{ $card }} p-5 flex flex-col justify-between">
+                        <div>
+                            <h2 class="text-sm font-extrabold text-slate-900 mb-3">🍩 Posts by Status</h2>
+                            <div class="flex flex-col sm:flex-row items-center justify-center gap-6 my-auto py-2">
+                                <div class="relative w-32 h-32 sm:w-36 sm:h-36 shrink-0 flex items-center justify-center">
+                                    <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
+                                        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#F1F5F9" stroke-width="4.5"/>
+                                        @foreach($listingsByStatus as $status => $total)
+                                            @php $p = round(($total / $statusTotal) * 100, 2); @endphp
+                                            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="{{ $donutColors[$loop->index % count($donutColors)] }}" stroke-width="4.5" stroke-dasharray="{{ $p }} {{ 100 - $p }}" stroke-dashoffset="-{{ $offset }}"/>
+                                            @php $offset += $p; @endphp
+                                        @endforeach
+                                    </svg>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                        <span class="text-base font-black text-slate-900 leading-none">{{ number_format($statusTotal) }}</span>
+                                        <span class="text-[9px] uppercase font-bold text-slate-400 mt-0.5">Posts</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-2 text-xs w-full sm:w-auto sm:min-w-[150px]">
+                                    @forelse($listingsByStatus as $status => $total)
+                                        <div class="flex items-center justify-between p-1.5 rounded-lg bg-slate-50 border border-slate-100">
+                                            <span class="flex items-center gap-2 capitalize font-semibold text-slate-700">
+                                                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background: {{ $donutColors[$loop->index % count($donutColors)] }}"></span>
+                                                {{ str_replace('_', ' ', $status) }}
+                                            </span>
+                                            <span class="font-extrabold text-slate-900 ml-2">{{ number_format($total) }}</span>
+                                        </div>
+                                    @empty
+                                        <p class="text-slate-400 text-xs">No status data available.</p>
+                                    @endforelse
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            </div>
+
+            <!-- Full-Width Responsive Table for Top Posts (Zero Clipping of Favs / Columns) -->
+            <div class="{{ $card }} p-5">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-sm font-extrabold text-slate-900">📝 Top Posts by Views</h2>
+                    <span class="text-[11px] text-slate-400 font-semibold">{{ count($topListingsReport) }} posts ranked</span>
+                </div>
+                <div class="overflow-x-auto w-full">
+                    <table class="min-w-full divide-y divide-slate-100 text-left text-xs">
+                        <thead>
+                            <tr class="bg-slate-50/80">
+                                <th class="{{ $th }} py-2.5">#</th>
+                                <th class="{{ $th }} py-2.5">Post</th>
+                                <th class="{{ $th }} py-2.5">Category</th>
+                                <th class="{{ $th }} py-2.5">Age</th>
+                                @if($showUnique)<th class="{{ $th }} py-2.5">Unique Views</th>@endif
+                                @if($showGross)<th class="{{ $th }} py-2.5">Gross Views</th>@endif
+                                <th class="{{ $th }} py-2.5">Replies</th>
+                                <th class="{{ $th }} py-2.5">Favs</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @forelse($topListingsReport as $i => $l)
+                                <tr class="hover:bg-slate-50/60 transition">
+                                    <td class="{{ $td }} font-bold text-slate-400">{{ $i + 1 }}</td>
+                                    <td class="{{ $td }} min-w-[200px]">
+                                        <a href="{{ route('listings.show', $l['slug']) }}" target="_blank" class="font-bold text-slate-900 hover:text-[#F20B65] line-clamp-1 block">{{ $l['title'] }}</a>
+                                        <div class="text-[10px] text-slate-400">{{ $l['city'] }} · <span class="capitalize text-slate-600 font-medium">{{ str_replace('_', ' ', $l['status']) }}</span></div>
+                                    </td>
+                                    <td class="{{ $td }} font-medium text-slate-700 whitespace-nowrap">{{ $l['category'] }}</td>
+                                    <td class="{{ $td }} font-mono">{{ $l['poster_age'] ?? '—' }}</td>
+                                    @if($showUnique)<td class="{{ $td }} font-bold text-teal-700 whitespace-nowrap">{{ number_format($l['unique_views']) }}</td>@endif
+                                    @if($showGross)<td class="{{ $td }} font-bold text-[#F20B65] whitespace-nowrap">{{ number_format($l['gross_views']) }}</td>@endif
+                                    <td class="{{ $td }} font-semibold text-slate-700">{{ $l['reply_count'] }}</td>
+                                    <td class="{{ $td }} font-semibold text-slate-700">{{ $l['favorite_count'] }}</td>
+                                </tr>
+                            @empty
+                                <tr><td class="{{ $td }} text-center text-slate-400 py-6" colspan="8">No posts match these filters.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     @endif
@@ -308,55 +337,104 @@
     {{-- 3. Countries --}}
     @if($show('countries'))
         <div class="{{ $card }} p-5">
-            <h2 class="text-sm font-extrabold text-slate-900 mb-4">🌍 Country / Geo Report</h2>
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-sm font-extrabold text-slate-900">🌍 Country / Geo Report</h2>
+                    <p class="text-[11px] text-slate-500">Real-time visitor geographic distribution</p>
+                </div>
+                <span class="text-[10px] font-black text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200">
+                    {{ count($countryReport) }} Countries Reached
+                </span>
+            </div>
+
             @if(empty($countryReport))
-                <p class="text-xs text-slate-400">No real visitor traffic recorded for this period yet.</p>
+                <p class="text-xs text-slate-400 py-6 text-center">No real visitor traffic recorded for this period yet.</p>
             @else
-                <div class="grid gap-6 {{ $showGraph && $showChart ? 'lg:grid-cols-3' : 'lg:grid-cols-2' }}">
-                    @if($showChart)
-                        <div class="space-y-2.5">
-                            <div class="text-[10px] uppercase tracking-wider text-slate-400 font-black">📊 Distribution Chart</div>
-                            @foreach($countryReport as $c)
-                                <div>
-                                    <div class="flex justify-between text-[11px] font-semibold text-slate-700"><span>{{ $flag($c['country_code']) }} {{ $c['country_name'] }}</span><span>{{ $showGross ? $c['gross_pct'] : $c['unique_pct'] }}%</span></div>
-                                    <div class="h-2 rounded-full bg-slate-100 mt-1 flex overflow-hidden">
-                                        <div class="h-2 {{ $showGross ? 'bg-[#F20B65]' : 'bg-teal-600' }}" style="width: {{ max(2, $showGross ? $c['gross_pct'] : $c['unique_pct']) }}%"></div>
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Left: Visual Distribution & Donut Share (5 cols) -->
+                    @if($showGraph || $showChart)
+                        <div class="lg:col-span-5 space-y-4">
+                            @if($showGraph)
+                                @php
+                                    $cTotal = max(1, array_sum(array_column($countryReport, $showGross ? 'hits' : 'unique_visitors')));
+                                    $cOffset = 0;
+                                @endphp
+                                <div class="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 flex flex-col items-center">
+                                    <div class="text-[10px] uppercase tracking-wider text-slate-500 font-black mb-3 self-start">🍩 Country Share Graph</div>
+                                    <div class="relative w-36 h-36 flex items-center justify-center my-1">
+                                        <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
+                                            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#E2E8F0" stroke-width="5"/>
+                                            @foreach(array_slice($countryReport, 0, 8) as $c)
+                                                @php $p = round((($showGross ? $c['hits'] : $c['unique_visitors']) / $cTotal) * 100, 2); @endphp
+                                                <circle cx="18" cy="18" r="15.9155" fill="none" stroke="{{ $donutColors[$loop->index % count($donutColors)] }}" stroke-width="5" stroke-dasharray="{{ $p }} {{ 100 - $p }}" stroke-dashoffset="-{{ $cOffset }}"/>
+                                                @php $cOffset += $p; @endphp
+                                            @endforeach
+                                        </svg>
+                                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                            <span class="text-sm font-black text-slate-900 leading-none">{{ number_format($cTotal) }}</span>
+                                            <span class="text-[9px] uppercase font-bold text-slate-400 mt-0.5">{{ $showGross ? 'Hits' : 'Visitors' }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-wrap justify-center gap-1.5 mt-3 text-[10px] font-bold">
+                                        @foreach(array_slice($countryReport, 0, 8) as $c)
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-700 shadow-2xs">
+                                                <span class="w-2 h-2 rounded-full" style="background: {{ $donutColors[$loop->index % count($donutColors)] }}"></span>
+                                                <span>{{ $c['country_code'] }}</span>
+                                                <span class="text-slate-400 font-normal">({{ $showGross ? $c['gross_pct'] : $c['unique_pct'] }}%)</span>
+                                            </span>
+                                        @endforeach
                                     </div>
                                 </div>
-                            @endforeach
+                            @endif
+
+                            @if($showChart)
+                                <div class="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 space-y-2.5">
+                                    <div class="text-[10px] uppercase tracking-wider text-slate-500 font-black mb-1">📊 Top Country Distribution</div>
+                                    @foreach(array_slice($countryReport, 0, 6) as $c)
+                                        <div>
+                                            <div class="flex justify-between text-[11px] font-semibold text-slate-700">
+                                                <span class="flex items-center gap-1.5 truncate">
+                                                    <span>{{ $flag($c['country_code']) }}</span>
+                                                    <span class="font-bold text-slate-800 truncate">{{ $c['country_name'] }}</span>
+                                                </span>
+                                                <span class="text-slate-600 font-bold shrink-0 ml-2">{{ $showGross ? $c['gross_pct'] : $c['unique_pct'] }}%</span>
+                                            </div>
+                                            <div class="h-2 rounded-full bg-slate-200/60 mt-1 flex overflow-hidden">
+                                                <div class="h-2 {{ $showGross ? 'bg-[#F20B65]' : 'bg-teal-600' }} transition-all duration-300" style="width: {{ max(2, $showGross ? $c['gross_pct'] : $c['unique_pct']) }}%"></div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
                         </div>
                     @endif
-                    @if($showGraph)
-                        @php
-                            $cTotal = max(1, array_sum(array_column($countryReport, $showGross ? 'hits' : 'unique_visitors')));
-                            $cOffset = 0;
-                        @endphp
-                        <div class="flex flex-col items-center">
-                            <div class="text-[10px] uppercase tracking-wider text-slate-400 font-black mb-2 self-start">🍩 Share Graph</div>
-                            <svg viewBox="0 0 36 36" class="w-40 h-40 -rotate-90">
-                                <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#F1F5F9" stroke-width="5"/>
-                                @foreach(array_slice($countryReport, 0, 8) as $c)
-                                    @php $p = round((($showGross ? $c['hits'] : $c['unique_visitors']) / $cTotal) * 100, 2); @endphp
-                                    <circle cx="18" cy="18" r="15.9155" fill="none" stroke="{{ $donutColors[$loop->index] }}" stroke-width="5" stroke-dasharray="{{ $p }} {{ 100 - $p }}" stroke-dashoffset="-{{ $cOffset }}"/>
-                                    @php $cOffset += $p; @endphp
-                                @endforeach
-                            </svg>
-                            <div class="flex flex-wrap justify-center gap-2 mt-3 text-[10px] font-semibold">
-                                @foreach(array_slice($countryReport, 0, 8) as $c)
-                                    <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background: {{ $donutColors[$loop->index] }}"></span>{{ $c['country_code'] }}</span>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full">
-                            <thead><tr><th class="{{ $th }}">Country</th>@if($showUnique)<th class="{{ $th }}">Unique</th>@endif @if($showGross)<th class="{{ $th }}">Gross</th>@endif</tr></thead>
-                            <tbody>
+
+                    <!-- Right: Detailed Country Data Table (7 cols) -->
+                    <div class="{{ ($showGraph || $showChart) ? 'lg:col-span-7' : 'lg:col-span-12' }} overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-100 text-left text-xs">
+                            <thead>
+                                <tr class="bg-slate-50/80">
+                                    <th class="{{ $th }} py-2.5">Country</th>
+                                    @if($showUnique)<th class="{{ $th }} py-2.5">Unique Visitors</th>@endif
+                                    @if($showGross)<th class="{{ $th }} py-2.5">Gross Hits</th>@endif
+                                    <th class="{{ $th }} py-2.5">Traffic Share</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
                                 @foreach($countryReport as $c)
-                                    <tr>
-                                        <td class="{{ $td }}">{{ $flag($c['country_code']) }} {{ $c['country_name'] }}</td>
-                                        @if($showUnique)<td class="{{ $td }} font-bold text-teal-700">{{ number_format($c['unique_visitors']) }}</td>@endif
-                                        @if($showGross)<td class="{{ $td }} font-bold text-[#F20B65]">{{ number_format($c['hits']) }}</td>@endif
+                                    <tr class="hover:bg-slate-50/60 transition">
+                                        <td class="{{ $td }} font-semibold text-slate-900 whitespace-nowrap">
+                                            <span class="mr-1.5">{{ $flag($c['country_code']) }}</span>
+                                            {{ $c['country_name'] }}
+                                            <span class="text-[10px] text-slate-400 font-mono ml-1">({{ $c['country_code'] }})</span>
+                                        </td>
+                                        @if($showUnique)<td class="{{ $td }} font-bold text-teal-700 whitespace-nowrap">{{ number_format($c['unique_visitors']) }}</td>@endif
+                                        @if($showGross)<td class="{{ $td }} font-bold text-[#F20B65] whitespace-nowrap">{{ number_format($c['hits']) }}</td>@endif
+                                        <td class="{{ $td }} font-semibold text-slate-700 whitespace-nowrap">
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-800">
+                                                {{ $showGross ? $c['gross_pct'] : $c['unique_pct'] }}%
+                                            </span>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
