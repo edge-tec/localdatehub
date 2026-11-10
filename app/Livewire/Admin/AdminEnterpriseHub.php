@@ -4554,6 +4554,11 @@ class AdminEnterpriseHub extends Component
         $this->showManualVerifyModal = false;
         $this->showRejectVerificationModal = false;
         $this->showBroadcastModal = false;
+        $this->showInspectNotificationModal = false;
+        $this->inspectNotificationData = null;
+        $this->showInspectAbuseModal = false;
+        $this->inspectAbuseData = null;
+        $this->showPricingRuleModal = false;
         $this->showPreviewCmsModal = false;
         $this->previewCmsData = null;
         $this->showDeleteAdModal = false;

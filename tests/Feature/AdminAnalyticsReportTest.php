@@ -88,4 +88,28 @@ class AdminAnalyticsReportTest extends TestCase
             ->assertSet('analyticsAgeFilter', 'all')
             ->assertSet('analyticsCountryFilter', 'all');
     }
+
+    public function test_inspect_notification_modal_can_be_closed_with_close_button(): void
+    {
+        $this->actingAs($this->admin);
+
+        $log = \App\Modules\Notifications\Models\NotificationLog::create([
+            'user_id' => $this->admin->id,
+            'channel' => 'mail',
+            'notification_type' => 'test_alert',
+            'recipient_target' => 'admin@example.com',
+            'subject' => 'Test Notification Subject',
+            'message' => 'This is a test notification message body.',
+            'status' => 'sent',
+            'sent_at' => now(),
+            'read_at' => now(),
+        ]);
+
+        Livewire::test(AdminEnterpriseHub::class, ['initialTab' => 'notifications'])
+            ->call('inspectNotification', $log->id)
+            ->assertSet('showInspectNotificationModal', true)
+            ->call('closeModals')
+            ->assertSet('showInspectNotificationModal', false)
+            ->assertSet('inspectNotificationData', null);
+    }
 }
