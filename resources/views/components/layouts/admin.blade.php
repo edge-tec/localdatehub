@@ -226,7 +226,7 @@
                             x-transition:leave="transition ease-in duration-100"
                             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                             x-transition:leave-end="opacity-0 translate-y-2 scale-95"
-                            class="absolute right-0 mt-2.5 w-[calc(100vw-24px)] sm:w-[480px] max-w-[500px] rounded-3xl bg-white border border-slate-200/90 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.18)] p-4 sm:p-5 z-50 text-xs font-sans"
+                            class="absolute right-0 mt-2.5 w-[calc(100vw-24px)] sm:w-[500px] max-w-[520px] rounded-3xl bg-white border border-slate-200/90 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.18)] p-3.5 sm:p-5 z-50 text-xs font-sans"
                         >
                             <!-- Dropdown Header -->
                             <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
@@ -265,12 +265,12 @@
                                 </div>
                             </div>
 
-                            <!-- Filter Tabs Grid: 100% Fully Visible, Never Cut Off or Hidden -->
+                            <!-- Filter Tabs Grid: 100% Fully Visible, Never Cut Off, Overlapping, or Broken -->
                             <div class="grid grid-cols-5 gap-1 sm:gap-1.5 pb-3 mb-3 border-b border-slate-100 w-full">
                                 <button 
                                     type="button" 
                                     @click="activeCategoryFilter = 'all'"
-                                    class="w-full py-2 px-1 sm:px-2 rounded-xl text-[10px] sm:text-[11px] font-black transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
+                                    class="w-full min-w-0 py-2 px-1 rounded-xl text-[10px] sm:text-[11px] font-black transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs whitespace-nowrap overflow-hidden"
                                     :class="activeCategoryFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
                                     title="All Notifications"
                                 >
@@ -278,36 +278,35 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                                     </svg>
                                     <span>All</span>
-                                    <span class="px-1.5 py-0.2 rounded-full text-[9px] shrink-0" :class="activeCategoryFilter === 'all' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'" x-text="items.length"></span>
+                                    <span class="px-1.5 py-0.5 rounded-full text-[9px] min-w-[16px] text-center font-bold shrink-0" :class="activeCategoryFilter === 'all' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'" x-text="items.length"></span>
                                 </button>
 
                                 <button 
                                     type="button" 
                                     @click="activeCategoryFilter = 'id_verification'"
-                                    class="w-full py-2 px-1 sm:px-2 rounded-xl text-[10px] sm:text-[11px] font-black transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
+                                    class="w-full min-w-0 py-2 px-1 rounded-xl text-[10px] sm:text-[11px] font-black transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs whitespace-nowrap overflow-hidden"
                                     :class="activeCategoryFilter === 'id_verification' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'"
                                     title="ID Verification Requests"
                                 >
-                                    <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <rect width="18" height="18" x="3" y="3" rx="2"></rect>
                                         <circle cx="9" cy="10" r="2"></circle>
                                         <line x1="15" y1="8" x2="17" y2="8"></line>
                                         <line x1="15" y1="12" x2="17" y2="12"></line>
                                         <line x1="7" y1="16" x2="17" y2="16"></line>
                                     </svg>
-                                    <span class="hidden sm:inline">ID Cards</span>
-                                    <span class="sm:hidden">IDs</span>
-                                    <span class="px-1.5 py-0.2 rounded-full text-[9px] shrink-0" :class="activeCategoryFilter === 'id_verification' ? 'bg-white text-blue-700' : 'bg-blue-200 text-blue-900'" x-text="counts.id_verifications"></span>
+                                    <span>IDs</span>
+                                    <span class="px-1.5 py-0.5 rounded-full text-[9px] min-w-[16px] text-center font-bold shrink-0" :class="activeCategoryFilter === 'id_verification' ? 'bg-white text-blue-700' : 'bg-blue-200 text-blue-900'" x-text="counts.id_verifications"></span>
                                 </button>
 
                                 <button 
                                     type="button" 
                                     @click="activeCategoryFilter = 'listing_pending'"
-                                    class="w-full py-2 px-1 sm:px-2 rounded-xl text-[10px] sm:text-[11px] font-black transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
+                                    class="w-full min-w-0 py-2 px-1 rounded-xl text-[10px] sm:text-[11px] font-black transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs whitespace-nowrap overflow-hidden"
                                     :class="activeCategoryFilter === 'listing_pending' ? 'bg-amber-600 text-white' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'"
                                     title="Pending Classified Ads"
                                 >
-                                    <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
                                         <polyline points="14 2 14 8 20 8"></polyline>
                                         <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -315,39 +314,38 @@
                                         <line x1="10" y1="9" x2="8" y2="9"></line>
                                     </svg>
                                     <span>Ads</span>
-                                    <span class="px-1.5 py-0.2 rounded-full text-[9px] shrink-0" :class="activeCategoryFilter === 'listing_pending' ? 'bg-white text-amber-700' : 'bg-amber-200 text-amber-900'" x-text="counts.pending_listings"></span>
+                                    <span class="px-1.5 py-0.5 rounded-full text-[9px] min-w-[16px] text-center font-bold shrink-0" :class="activeCategoryFilter === 'listing_pending' ? 'bg-white text-amber-700' : 'bg-amber-200 text-amber-900'" x-text="counts.pending_listings"></span>
                                 </button>
 
                                 <button 
                                     type="button" 
                                     @click="activeCategoryFilter = 'contact_message'"
-                                    class="w-full py-2 px-1 sm:px-2 rounded-xl text-[10px] sm:text-[11px] font-black transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
+                                    class="w-full min-w-0 py-2 px-1 rounded-xl text-[10px] sm:text-[11px] font-black transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs whitespace-nowrap overflow-hidden"
                                     :class="activeCategoryFilter === 'contact_message' ? 'bg-pink-600 text-white' : 'bg-pink-50 text-pink-700 hover:bg-pink-100'"
                                     title="Messages & Inquiries"
                                 >
-                                    <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path>
                                     </svg>
-                                    <span class="hidden sm:inline">Messages</span>
-                                    <span class="sm:hidden">Msgs</span>
-                                    <span class="px-1.5 py-0.2 rounded-full text-[9px] shrink-0" :class="activeCategoryFilter === 'contact_message' ? 'bg-white text-pink-700' : 'bg-pink-200 text-pink-900'" x-text="counts.messages"></span>
+                                    <span>Msgs</span>
+                                    <span class="px-1.5 py-0.5 rounded-full text-[9px] min-w-[16px] text-center font-bold shrink-0" :class="activeCategoryFilter === 'contact_message' ? 'bg-white text-pink-700' : 'bg-pink-200 text-pink-900'" x-text="counts.messages"></span>
                                 </button>
 
                                 <button 
                                     type="button" 
                                     @click="activeCategoryFilter = 'abuse_report'"
-                                    class="w-full py-2 px-1 sm:px-2 rounded-xl text-[10px] sm:text-[11px] font-black transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
+                                    class="w-full min-w-0 py-2 px-1 rounded-xl text-[10px] sm:text-[11px] font-black transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs whitespace-nowrap overflow-hidden"
                                     :class="activeCategoryFilter === 'abuse_report' ? 'bg-rose-600 text-white' : 'bg-rose-50 text-rose-700 hover:bg-rose-100'"
                                     title="Abuse & Content Reports"
                                 >
-                                    <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path>
                                         <line x1="12" y1="8" x2="12" y2="12"></line>
                                         <line x1="12" y1="16" x2="12.01" y2="16"></line>
                                     </svg>
                                     <span class="hidden sm:inline">Reports</span>
                                     <span class="sm:hidden">Rep</span>
-                                    <span class="px-1.5 py-0.2 rounded-full text-[9px] shrink-0" :class="activeCategoryFilter === 'abuse_report' ? 'bg-white text-rose-700' : 'bg-rose-200 text-rose-900'" x-text="counts.reports"></span>
+                                    <span class="px-1.5 py-0.5 rounded-full text-[9px] min-w-[16px] text-center font-bold shrink-0" :class="activeCategoryFilter === 'abuse_report' ? 'bg-white text-rose-700' : 'bg-rose-200 text-rose-900'" x-text="counts.reports"></span>
                                 </button>
                             </div>
 
@@ -451,64 +449,21 @@
                                 </div>
                             </div>
 
-                            <!-- Dropdown Footer Quick Links: 4 Clean, Fully Visible Single-Line Buttons -->
-                            <div class="mt-3 pt-3 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 text-center text-[10px] sm:text-[11px] font-black">
+                            <!-- Dropdown Footer: Single Non-Duplicated Action to Full Audit Trail -->
+                            <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <span>Live Monitoring Active</span>
+                                </div>
                                 <a 
-                                    href="{{ route('admin.verifications.index') }}" 
-                                    class="py-2 px-2 rounded-xl bg-blue-50/70 hover:bg-blue-100 text-blue-700 border border-blue-200/60 transition flex items-center justify-center gap-1 group shadow-2xs whitespace-nowrap"
-                                    title="Identity Verification Queue"
+                                    href="{{ route('admin.dashboard', ['tab' => 'audit']) }}" 
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold transition shadow-2xs group"
+                                    title="View Full System Audit Trail & Logs"
                                 >
-                                    <svg class="w-3.5 h-3.5 text-blue-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <rect width="18" height="18" x="3" y="3" rx="2"></rect>
-                                        <circle cx="9" cy="10" r="2"></circle>
-                                        <line x1="15" y1="8" x2="17" y2="8"></line>
-                                        <line x1="15" y1="12" x2="17" y2="12"></line>
-                                        <line x1="7" y1="16" x2="17" y2="16"></line>
+                                    <span>Audit Logs &amp; History</span>
+                                    <svg class="w-3 h-3 text-slate-300 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
                                     </svg>
-                                    <span>ID Queue</span>
-                                    <svg class="w-2.5 h-2.5 text-blue-400 shrink-0 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
-                                </a>
-
-                                <a 
-                                    href="{{ route('admin.dashboard', ['tab' => 'listings']) }}" 
-                                    class="py-2 px-2 rounded-xl bg-amber-50/70 hover:bg-amber-100 text-amber-700 border border-amber-200/60 transition flex items-center justify-center gap-1 group shadow-2xs whitespace-nowrap"
-                                    title="Pending Classified Ads"
-                                >
-                                    <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-                                        <polyline points="14 2 14 8 20 8"></polyline>
-                                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                                        <line x1="10" y1="9" x2="8" y2="9"></line>
-                                    </svg>
-                                    <span>Ads</span>
-                                    <svg class="w-2.5 h-2.5 text-amber-400 shrink-0 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
-                                </a>
-
-                                <a 
-                                    href="{{ route('admin.dashboard', ['tab' => 'moderation_messages']) }}" 
-                                    class="py-2 px-2 rounded-xl bg-pink-50/70 hover:bg-pink-100 text-[#F20B65] border border-pink-200/60 transition flex items-center justify-center gap-1 group shadow-2xs whitespace-nowrap"
-                                    title="Customer Messages & Inquiries"
-                                >
-                                    <svg class="w-3.5 h-3.5 text-[#F20B65] shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path>
-                                    </svg>
-                                    <span>Messages</span>
-                                    <svg class="w-2.5 h-2.5 text-pink-400 shrink-0 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
-                                </a>
-
-                                <a 
-                                    href="{{ route('admin.dashboard', ['tab' => 'reports']) }}" 
-                                    class="py-2 px-2 rounded-xl bg-rose-50/70 hover:bg-rose-100 text-rose-700 border border-rose-200/60 transition flex items-center justify-center gap-1 group shadow-2xs whitespace-nowrap"
-                                    title="Safety & Abuse Reports"
-                                >
-                                    <svg class="w-3.5 h-3.5 text-rose-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path>
-                                        <line x1="12" y1="8" x2="12" y2="12"></line>
-                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                                    </svg>
-                                    <span>Reports</span>
-                                    <svg class="w-2.5 h-2.5 text-rose-400 shrink-0 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
                                 </a>
                             </div>
                         </div>
