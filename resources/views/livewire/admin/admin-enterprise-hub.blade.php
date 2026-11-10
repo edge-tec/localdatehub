@@ -170,9 +170,14 @@
                     ],
                     [
                         'key' => 'verification',
-                        'label' => 'Age Verification',
+                        'label' => 'Age & ID Verification',
                         'icon' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
                         'badge' => $pendingVerificationBadge > 0 ? $pendingVerificationBadge : null,
+                        'has_submenu' => true,
+                        'subitems' => [
+                            ['key' => 'verification', 'label' => 'Age Assurance Audit'],
+                            ['url' => route('admin.verifications.index'), 'label' => 'ID Card & Badge Queue ↗'],
+                        ],
                     ],
                     [
                         'key' => 'notifications',
@@ -2061,13 +2066,21 @@
                         <p class="text-xs text-slate-500 mt-0.5">Mandatory adult compliance gate (18 U.S.C. §§ 2251/2257, Texas HB 1181 & state mandates).</p>
                     </div>
 
-                    @if($this->userCan('verification.manage'))
-                        <button type="button" wire:click="openManualVerifyModal"
-                            class="px-4 py-2 rounded-xl bg-[#F20B83] hover:bg-pink-600 text-white text-xs font-black shadow-sm flex items-center gap-1.5 transition whitespace-nowrap">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                            <span>+ Manual Verify Member</span>
-                        </button>
-                    @endif
+                    <div class="flex items-center gap-2">
+                        <a href="{{ route('admin.verifications.index') }}"
+                            class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black shadow-sm flex items-center gap-1.5 transition whitespace-nowrap">
+                            <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                            <span>ID Card &amp; Badge Review Queue &rarr;</span>
+                        </a>
+
+                        @if($this->userCan('verification.manage'))
+                            <button type="button" wire:click="openManualVerifyModal"
+                                class="px-4 py-2 rounded-xl bg-[#F20B83] hover:bg-pink-600 text-white text-xs font-black shadow-sm flex items-center gap-1.5 transition whitespace-nowrap">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                                <span>+ Manual Verify Member</span>
+                            </button>
+                        @endif
+                    </div>
                 </div>
 
                 <!-- Search & Filter Controls -->

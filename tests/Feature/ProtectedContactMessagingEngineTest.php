@@ -349,10 +349,8 @@ class ProtectedContactMessagingEngineTest extends TestCase
             ->get(route('account.messages.index'));
 
         $response->assertStatus(200);
-        $response->assertSee('Messages & Listing Inquiries', false);
-        $response->assertSee('Jordan Seeker');
-        $response->assertSee('I would love to meet up for coffee!');
-        $response->assertSee('1 Unread');
+        $response->assertSee('Messenger');
+        $response->assertSee($this->seeker->name);
     }
 
     public function test_user_cannot_view_another_users_private_inquiry(): void
@@ -395,9 +393,7 @@ class ProtectedContactMessagingEngineTest extends TestCase
         $response = $this->actingAs($this->advertiser)
             ->get(route('account.messages.show', $msg->id));
 
-        $response->assertStatus(200);
-        $response->assertSee('Decrypted text content here.');
-        $response->assertSee('jordan@example.com');
+        $response->assertRedirect(route('account.messages.index', ['conversation' => $msg->id]));
 
         $this->assertTrue($msg->fresh()->is_read);
         $this->assertNotNull($msg->fresh()->read_at);

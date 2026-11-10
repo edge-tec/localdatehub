@@ -230,4 +230,40 @@ class AdminVerificationAndNotificationsTest extends TestCase
 
         $this->assertDatabaseMissing('ad_placements', ['id' => $ad->id]);
     }
+
+    public function test_admin_can_inspect_and_approve_id_card_verification_granting_verified_badge(): void
+    {
+        $verification = \App\Modules\Verification\Models\IdentityVerification::create([
+            'user_id' => $this->user->id,
+            'document_type' => 'drivers_license',
+            'document_front_path' => 'verifications/test_front.jpg',
+            'document_back_path' => 'verifications/test_back.jpg',
+            'selfie_path' => 'verifications/test_selfie.jpg',
+            'status' => 'pending',
+            'submitted_at' => now(),
+        ]);
+
+        // 1. Admin views queue
+        $response = $this->actingAs($this->admin)->get(route('admin.verifications.index'));
+        $response->assertStatus(200);
+        $response->assertSee('John Candidate');
+        $response->assertSee('drivers license', false);
+
+        // 2. Admin inspects application
+        $showResponse = $this->actingAs($this->admin)->get(route('admin.verifications.show', $verification));
+        $showResponse->assertStatus(200);
+        $showResponse->assertSee('Review: John Candidate');
+        $showResponse->assertSee('Approve & Verify');
+
+        // 3. Admin approves application
+        $approveResponse = $this->actingAs($this->admin)->post(route('admin.verifications.approve', $verification), [
+            'admin_notes' => 'Government ID matches facial selfie perfectly.',
+        ]);
+        $approveResponse->assertRedirect(route('admin.verifications.index'));
+
+        // 4. Verify user and verification records updated
+        $this->assertEquals('verified', $verification->fresh()->status);
+        $this->assertTrue((bool) $this->user->fresh()->is_identity_verified);
+        $this->assertEquals($this->admin->id, $verification->fresh()->reviewer_id);
+    }
 }

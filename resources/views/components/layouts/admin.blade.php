@@ -207,8 +207,9 @@
                             </div>
                         </button>
 
-                        <div x-show="userMenuOpen" x-cloak class="absolute right-0 mt-2 w-48 rounded-2xl bg-white border border-slate-200 shadow-2xl py-1.5 z-50 text-xs">
+                        <div x-show="userMenuOpen" x-cloak class="absolute right-0 mt-2 w-56 rounded-2xl bg-white border border-slate-200 shadow-2xl py-1.5 z-50 text-xs">
                             <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 font-medium text-slate-700 hover:bg-pink-50 hover:text-[#F20B83]">Admin Console</a>
+                            <a href="{{ route('admin.verifications.index') }}" class="block px-4 py-2 font-medium text-slate-700 hover:bg-pink-50 hover:text-[#F20B83]">ID Verifications Queue ↗</a>
                             <a href="{{ url('/') }}" target="_blank" class="block px-4 py-2 font-medium text-slate-700 hover:bg-pink-50 hover:text-[#F20B83]">View Public Site ↗</a>
                             <div class="border-t border-slate-100 my-1"></div>
                             <form method="POST" action="{{ route('logout') }}">
