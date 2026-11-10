@@ -111,13 +111,22 @@
                     
                     <!-- Notification Bell -->
                     @php
-                        $adminUnreadReports = \App\Modules\Moderation\Models\ContentReport::where('is_read', false)->count();
-                        $adminUnreadAbuse = \App\Modules\Contact\Models\ContactMessage::where('is_flagged', true)->where('is_read', false)->count();
-                        $adminUnreadLogs = \App\Modules\Notifications\Models\NotificationLog::where('is_read', false)->count();
-                        $adminTotalUnread = $adminUnreadReports + $adminUnreadAbuse + $adminUnreadLogs;
+                        $adminUnreadReports = 0;
+                        $adminUnreadAbuse = 0;
+                        $adminUnreadLogs = 0;
+                        $adminTotalUnread = 0;
+                        $recentAdminReports = collect();
+                        $recentAdminLogs = collect();
+                        try {
+                            $adminUnreadReports = \App\Modules\Moderation\Models\ContentReport::where('is_read', false)->count();
+                            $adminUnreadAbuse = \App\Modules\Contact\Models\ContactMessage::where('is_flagged', true)->where('is_read', false)->count();
+                            $adminUnreadLogs = \App\Modules\Notifications\Models\NotificationLog::where('is_read', false)->count();
+                            $adminTotalUnread = $adminUnreadReports + $adminUnreadAbuse + $adminUnreadLogs;
 
-                        $recentAdminReports = \App\Modules\Moderation\Models\ContentReport::latest('id')->take(3)->get();
-                        $recentAdminLogs = \App\Modules\Notifications\Models\NotificationLog::with('user')->latest('id')->take(4)->get();
+                            $recentAdminReports = \App\Modules\Moderation\Models\ContentReport::latest('id')->take(3)->get();
+                            $recentAdminLogs = \App\Modules\Notifications\Models\NotificationLog::with('user')->latest('id')->take(4)->get();
+                        } catch (\Throwable $e) {
+                        }
                     @endphp
                     <div class="relative" x-data="{ unreadCount: {{ $adminTotalUnread }}, allMarkedRead: {{ $adminTotalUnread === 0 ? 'true' : 'false' }}, markAllSeen() { if (this.unreadCount > 0) { this.unreadCount = 0; this.allMarkedRead = true; fetch('{{ route('notifications.mark-seen') }}', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, body: JSON.stringify({ scope: 'admin' }) }); } } }" @click.away="notificationsOpen = false">
                         <button @click="notificationsOpen = !notificationsOpen; if (notificationsOpen) { markAllSeen(); }" class="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-900 transition relative" title="Admin Notifications & Alerts">

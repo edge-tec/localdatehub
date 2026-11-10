@@ -145,11 +145,19 @@
                 @else
                     @php
                         $navUser = Auth::user();
-                        $navUnreadMessages = \App\Modules\Contact\Models\ContactMessage::where('recipient_id', $navUser->id)->where('is_read', false)->count();
-                        $navUnreadNotifs = \App\Modules\Notifications\Models\NotificationLog::where('user_id', $navUser->id)->where('is_read', false)->count();
-                        $navTotalUnread = $navUnreadMessages + $navUnreadNotifs;
-                        $navRecentMessages = \App\Modules\Contact\Models\ContactMessage::with('listing')->where('recipient_id', $navUser->id)->whereNull('parent_message_id')->latest('id')->take(3)->get();
-                        $navRecentNotifs = \App\Modules\Notifications\Models\NotificationLog::where('user_id', $navUser->id)->latest('id')->take(3)->get();
+                        $navUnreadMessages = 0;
+                        $navUnreadNotifs = 0;
+                        $navTotalUnread = 0;
+                        $navRecentMessages = collect();
+                        $navRecentNotifs = collect();
+                        try {
+                            $navUnreadMessages = \App\Modules\Contact\Models\ContactMessage::where('recipient_id', $navUser->id)->where('is_read', false)->count();
+                            $navUnreadNotifs = \App\Modules\Notifications\Models\NotificationLog::where('user_id', $navUser->id)->where('is_read', false)->count();
+                            $navTotalUnread = $navUnreadMessages + $navUnreadNotifs;
+                            $navRecentMessages = \App\Modules\Contact\Models\ContactMessage::with('listing')->where('recipient_id', $navUser->id)->latest('id')->take(3)->get();
+                            $navRecentNotifs = \App\Modules\Notifications\Models\NotificationLog::where('user_id', $navUser->id)->latest('id')->take(3)->get();
+                        } catch (\Throwable $e) {
+                        }
                     @endphp
 
                     <!-- User Notification & Message Bell -->
@@ -187,7 +195,7 @@
                                                 <span class="text-[10px] font-black text-[#F20B65] shrink-0">● Unread</span>
                                             @endif
                                         </div>
-                                        <div class="text-[11px] text-slate-600 truncate mt-0.5">{{ $msg->message }}</div>
+                                        <div class="text-[11px] text-slate-600 truncate mt-0.5">{{ $msg->subject ?: ($msg->message_encrypted ?: 'New message received') }}</div>
                                         <div class="text-[10px] text-slate-400 mt-0.5">{{ $msg->created_at?->diffForHumans() }}</div>
                                     </a>
                                 @endforeach
