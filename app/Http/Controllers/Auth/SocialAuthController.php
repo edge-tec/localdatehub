@@ -226,12 +226,10 @@ class SocialAuthController extends Controller
     protected function configureProvider(string $provider): bool
     {
         $clientId = config("services.{$provider}.client_id")
-            ?: SystemSetting::get("{$provider}_client_id")
-            ?: env(strtoupper($provider) . '_CLIENT_ID');
+            ?: SystemSetting::get("{$provider}_client_id");
 
         $clientSecret = config("services.{$provider}.client_secret")
-            ?: SystemSetting::get("{$provider}_client_secret")
-            ?: env(strtoupper($provider) . '_CLIENT_SECRET');
+            ?: SystemSetting::get("{$provider}_client_secret");
 
         if (empty($clientId) || empty($clientSecret)) {
             return false;

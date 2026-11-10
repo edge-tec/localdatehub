@@ -1011,8 +1011,19 @@
                     @forelse($users as $u)
                         <tr class="border-t border-slate-200 hover:bg-slate-50/60 transition" wire:key="user-{{ $u->id }}">
                             <td class="{{ $td }}">
-                                <div class="font-black text-slate-950">{{ $u->name }}</div>
-                                <div class="text-xs font-semibold text-slate-600 font-mono">{{ $u->email }}</div>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center font-black text-xs text-[#F20B65] shrink-0 overflow-hidden shadow-2xs">
+                                        @if($u->avatar_url)
+                                            <img src="{{ $u->avatar_url }}" alt="{{ $u->name }}" class="w-full h-full object-cover">
+                                        @else
+                                            {{ strtoupper(substr($u->name ?: 'U', 0, 1)) }}
+                                        @endif
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="font-black text-slate-950 truncate">{{ $u->name }}</div>
+                                        <div class="text-xs font-semibold text-slate-600 font-mono truncate">{{ $u->email }}</div>
+                                    </div>
+                                </div>
                             </td>
                             <td class="{{ $td }}">
                                 <span class="capitalize text-xs font-bold text-slate-800">{{ str_replace('_', ' ', $u->role) }}</span>
@@ -7743,8 +7754,12 @@
                 @if($showViewUserModal && $viewUserData)
                     <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-rose-50 border-2 border-[#F20B83] text-[#F20B83] font-black text-lg flex items-center justify-center">
-                                {{ strtoupper(substr($viewUserData['name'], 0, 1)) }}
+                            <div class="w-10 h-10 rounded-xl bg-rose-50 border-2 border-[#F20B83] text-[#F20B83] font-black text-lg flex items-center justify-center overflow-hidden shrink-0">
+                                @if(!empty($viewUserData['avatar_url']))
+                                    <img src="{{ $viewUserData['avatar_url'] }}" alt="{{ $viewUserData['name'] }}" class="w-full h-full object-cover">
+                                @else
+                                    {{ strtoupper(substr($viewUserData['name'], 0, 1)) }}
+                                @endif
                             </div>
                             <div>
                                 <h3 class="text-base font-black text-slate-950 flex items-center gap-2">
@@ -7873,6 +7888,49 @@
                     </div>
 
                     <form wire:submit="updateUser" class="space-y-4">
+                        <!-- Profile Photo Management for Admin -->
+                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                            <div class="relative group shrink-0">
+                                <div class="w-16 h-16 rounded-2xl bg-white border border-slate-300 shadow-xs flex items-center justify-center font-black text-xl text-[#F20B65] overflow-hidden">
+                                    @if($editUserAvatar)
+                                        <img src="{{ $editUserAvatar->temporaryUrl() }}" alt="New Avatar Preview" class="w-full h-full object-cover">
+                                    @elseif($editUserAvatarUrl)
+                                        <img src="{{ $editUserAvatarUrl }}" alt="{{ $editUserName }}" class="w-full h-full object-cover">
+                                    @else
+                                        {{ strtoupper(substr($editUserName ?: 'U', 0, 1)) }}
+                                    @endif
+                                </div>
+                                <div wire:loading wire:target="editUserAvatar" class="absolute inset-0 bg-black/60 rounded-2xl flex items-center justify-center text-white">
+                                    <svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                </div>
+                            </div>
+
+                            <div class="space-y-1.5 flex-1 min-w-0 text-center sm:text-left">
+                                <label class="block text-xs font-black text-slate-800">User Profile Picture</label>
+                                <p class="text-[11px] text-slate-500 font-medium">Upload or replace this user's avatar, or remove an inappropriate image.</p>
+                                
+                                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
+                                    <label class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50 text-xs font-bold shadow-2xs transition">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                        <span>{{ $editUserAvatar ? 'Change Selected' : ($editUserAvatarUrl ? 'Replace Photo' : 'Upload Photo') }}</span>
+                                        <input type="file" wire:model="editUserAvatar" accept="image/png,image/jpeg,image/webp" class="hidden">
+                                    </label>
+
+                                    @if($editUserAvatarUrl || $editUserAvatar)
+                                        <button
+                                            type="button"
+                                            wire:click="removeUserAvatarInEditModal"
+                                            wire:confirm="Are you sure you want to delete this user's profile picture?"
+                                            class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition"
+                                        >
+                                            Delete Photo
+                                        </button>
+                                    @endif
+                                </div>
+                                @error('editUserAvatar')<p class="text-xs text-rose-600 mt-1 font-bold">{{ $message }}</p>@enderror
+                            </div>
+                        </div>
+
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs font-black text-slate-800 mb-1">Full Legal Name *</label>

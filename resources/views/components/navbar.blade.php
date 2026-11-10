@@ -127,8 +127,8 @@
                             class="border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-2 group"
                         >
                             <span class="w-6 h-6 rounded-full bg-rose-100 text-[#F20B65] flex items-center justify-center font-black text-xs shrink-0 overflow-hidden">
-                                @if(Auth::user()->profile?->avatar_path)
-                                    <img src="{{ asset('storage/' . Auth::user()->profile->avatar_path) }}" alt="{{ Auth::user()->name }}" class="w-full h-full object-cover">
+                                @if(Auth::user()->avatar_url)
+                                    <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name }}" class="w-full h-full object-cover">
                                 @else
                                     {{ strtoupper(substr(Auth::user()->name ?: 'U', 0, 1)) }}
                                 @endif

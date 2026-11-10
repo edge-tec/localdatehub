@@ -671,7 +671,7 @@ class AccountDashboard extends Component
             'city' => ['nullable', 'string', 'max:100'],
             'stateCode' => ['nullable', 'string', 'max:5'],
             'zipCode' => ['nullable', 'string', 'max:10'],
-            'avatar' => ['nullable', 'image', 'max:2048'],
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
         /** @var User $user */
@@ -691,6 +691,8 @@ class AccountDashboard extends Component
         if ($this->avatar) {
             $path = $this->avatar->store('avatars', 'public');
             $profile->avatar_path = $path;
+            $user->avatar = $path;
+            $user->save();
             $this->avatar = null;
         }
 
@@ -698,15 +700,48 @@ class AccountDashboard extends Component
         session()->flash('success', 'Profile settings updated successfully.');
     }
 
+    public function updatedAvatar(): void
+    {
+        $this->validate([
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+        ]);
+    }
+
+    public function uploadAvatarNow(): void
+    {
+        $this->validate([
+            'avatar' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+        ]);
+
+        /** @var User $user */
+        $user = Auth::user();
+        $path = $this->avatar->store('avatars', 'public');
+
+        $profile = $user->profile ?? new UserProfile(['user_id' => $user->id]);
+        $profile->avatar_path = $path;
+        $profile->save();
+
+        $user->avatar = $path;
+        $user->save();
+
+        $this->avatar = null;
+        session()->flash('success', 'Profile photo uploaded successfully!');
+    }
+
     public function removeAvatar(): void
     {
         /** @var User $user */
-        $user = Auth::user();
-        if ($user->profile && $user->profile->avatar_path) {
-            $user->profile->avatar_path = null;
-            $user->profile->save();
+        $user = User::find(Auth::id()) ?? Auth::user();
+        $user->avatar = null;
+        $user->save();
+
+        $profile = $user->profile()->first();
+        if ($profile) {
+            $profile->avatar_path = null;
+            $profile->save();
         }
 
+        $this->avatar = null;
         session()->flash('success', 'Profile photo removed.');
     }
 

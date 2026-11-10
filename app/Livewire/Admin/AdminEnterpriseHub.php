@@ -68,6 +68,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 /**
@@ -79,7 +80,7 @@ use Livewire\WithPagination;
  */
 class AdminEnterpriseHub extends Component
 {
-    use WithPagination;
+    use WithPagination, WithFileUploads;
 
     /** Staff roles recognised by the platform. */
     public const STAFF_ROLES = [
@@ -173,6 +174,8 @@ class AdminEnterpriseHub extends Component
     public string $editUserAccountStatus = 'active';
     public bool $editUserIsAgeVerified = false;
     public int $editUserCredits = 0;
+    public $editUserAvatar = null;
+    public ?string $editUserAvatarUrl = null;
 
     public bool $showDeleteUserModal = false;
     public ?int $deleteUserId = null;
@@ -919,6 +922,7 @@ class AdminEnterpriseHub extends Component
             'id' => $user->id,
             'name' => $user->name,
             'display_name' => $user->profile?->display_name ?: $user->name,
+            'avatar_url' => $user->avatar_url,
             'email' => $user->email,
             'phone' => $user->phone ?: 'Not provided',
             'role' => $user->role,
@@ -964,6 +968,8 @@ class AdminEnterpriseHub extends Component
         $this->editUserAccountStatus = $user->account_status ?: 'active';
         $this->editUserIsAgeVerified = (bool) $user->is_age_verified;
         $this->editUserCredits = $user->wallet?->balance ?? 0;
+        $this->editUserAvatarUrl = $user->avatar_url;
+        $this->editUserAvatar = null;
         $this->resetValidation();
         $this->showEditUserModal = true;
     }
@@ -981,6 +987,7 @@ class AdminEnterpriseHub extends Component
             'editUserAccountStatus' => ['required', 'string', Rule::in(['active', 'pending_verification', 'suspended', 'closed'])],
             'editUserIsAgeVerified' => ['boolean'],
             'editUserCredits' => ['integer', 'min:0', 'max:100000'],
+            'editUserAvatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
         $user = User::with(['profile', 'wallet'])->findOrFail($this->editUserId);
@@ -1008,11 +1015,19 @@ class AdminEnterpriseHub extends Component
             if (!empty($this->editUserPassword)) {
                 $user->password = Hash::make($this->editUserPassword);
             }
-            $user->save();
 
             // Profile
             $profile = $user->profile ?: new UserProfile(['user_id' => $user->id]);
             $profile->display_name = $this->editUserDisplayName ?: $this->editUserName;
+
+            // Handle Admin Avatar Upload
+            if ($this->editUserAvatar) {
+                $path = $this->editUserAvatar->store('avatars', 'public');
+                $user->avatar = $path;
+                $profile->avatar_path = $path;
+            }
+
+            $user->save();
             $profile->save();
 
             // Roles sync
@@ -1052,7 +1067,33 @@ class AdminEnterpriseHub extends Component
         ]);
 
         $this->showEditUserModal = false;
+        $this->editUserAvatar = null;
+        $this->editUserAvatarUrl = null;
         session()->flash('success', "User [{$user->name}] details updated successfully.");
+    }
+
+    public function removeUserAvatarInEditModal(): void
+    {
+        if (!$this->editUserId) {
+            return;
+        }
+
+        $user = User::with('profile')->findOrFail($this->editUserId);
+        $this->guardAgainstPrivilegedTarget($user);
+
+        $user->avatar = null;
+        $user->save();
+
+        if ($user->profile) {
+            $user->profile->avatar_path = null;
+            $user->profile->save();
+        }
+
+        $this->editUserAvatarUrl = null;
+        $this->editUserAvatar = null;
+
+        AdminAuditService::log('user.avatar_remove', $user, ['avatar' => 'present'], ['avatar' => null]);
+        session()->flash('success', "Profile photo for [{$user->name}] has been removed.");
     }
 
     public function openDeleteUserModal(int $userId): void
@@ -4136,6 +4177,8 @@ class AdminEnterpriseHub extends Component
         $this->viewUserId = null;
         $this->viewUserData = null;
         $this->editUserId = null;
+        $this->editUserAvatar = null;
+        $this->editUserAvatarUrl = null;
         $this->deleteUserId = null;
         $this->viewListingId = null;
         $this->viewListingData = null;
@@ -4198,6 +4241,7 @@ class AdminEnterpriseHub extends Component
             'tabAllowed' => $this->canAccessTab($this->tab),
             'currentRole' => $this->currentUser()?->role,
             'isSuperAdmin' => $this->isSuperAdmin(),
+            'assignableRoles' => $this->assignableRoles(),
         ];
 
         if ($data['tabAllowed']) {

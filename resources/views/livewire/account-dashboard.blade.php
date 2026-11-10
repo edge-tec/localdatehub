@@ -9,12 +9,22 @@
     <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div class="flex items-center gap-4 sm:gap-5 min-w-0">
             <!-- User Avatar Circle/Square -->
-            <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-rose-50 border-2 flex items-center justify-center font-black text-2xl sm:text-3xl shadow-xs shrink-0 select-none overflow-hidden" style="color: #F20B65 !important; border-color: #F20B65 !important;">
-                @if(Auth::user()->profile?->avatar_path)
-                    <img src="{{ asset('storage/' . Auth::user()->profile->avatar_path) }}" alt="{{ Auth::user()->name }}" class="w-full h-full object-cover">
-                @else
-                    {{ strtoupper(substr(Auth::user()->profile?->display_name ?: (Auth::user()->name ?: 'U'), 0, 1)) }}
-                @endif
+            <div class="relative group shrink-0">
+                <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-rose-50 border-2 flex items-center justify-center font-black text-2xl sm:text-3xl shadow-xs shrink-0 select-none overflow-hidden" style="color: #F20B65 !important; border-color: #F20B65 !important;">
+                    @if(Auth::user()->avatar_url)
+                        <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name }}" class="w-full h-full object-cover">
+                    @else
+                        {{ strtoupper(substr(Auth::user()->profile?->display_name ?: (Auth::user()->name ?: 'U'), 0, 1)) }}
+                    @endif
+                </div>
+                <!-- Quick Change Overlay Icon -->
+                <button
+                    wire:click="setTab('profile')"
+                    title="Change Profile Photo"
+                    class="absolute -bottom-1 -right-1 bg-white hover:bg-rose-50 border border-rose-300 p-1.5 rounded-xl shadow-md text-[#F20B65] transition"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                </button>
             </div>
 
             <div class="space-y-1.5 min-w-0">
@@ -1335,7 +1345,64 @@
     @if($tab === 'profile')
         <div class="max-w-3xl space-y-6">
             <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
-                <h2 class="text-xl font-black text-slate-950">Public Profile Settings</h2>
+                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                    <div>
+                        <h2 class="text-xl font-black text-slate-950">Public Profile Settings</h2>
+                        <p class="text-xs text-slate-500 font-semibold mt-0.5">Manage your personal presentation, avatar, bio, and dating preferences.</p>
+                    </div>
+                </div>
+
+                <!-- Profile Avatar Upload Section -->
+                <div class="p-5 rounded-2xl bg-gradient-to-r from-rose-50/70 to-pink-50/40 border border-rose-100 flex flex-col sm:flex-row items-center sm:items-start gap-5">
+                    <!-- Current or Temporary Avatar Preview -->
+                    <div class="relative group shrink-0">
+                        <div class="w-24 h-24 rounded-2xl bg-white border-2 border-rose-300 shadow-md flex items-center justify-center font-black text-3xl text-[#F20B65] overflow-hidden select-none">
+                            @if ($avatar)
+                                <img src="{{ $avatar->temporaryUrl() }}" alt="New Avatar Preview" class="w-full h-full object-cover">
+                            @elseif (Auth::user()->avatar_url)
+                                <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name }}" class="w-full h-full object-cover">
+                            @else
+                                {{ strtoupper(substr(Auth::user()->profile?->display_name ?: (Auth::user()->name ?: 'U'), 0, 1)) }}
+                            @endif
+                        </div>
+                        <div wire:loading wire:target="avatar" class="absolute inset-0 bg-black/60 rounded-2xl flex items-center justify-center text-white">
+                            <svg class="animate-spin h-6 w-6 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 text-center sm:text-left flex-1 min-w-0">
+                        <div>
+                            <h3 class="text-sm font-black text-slate-900">Profile Picture</h3>
+                            <p class="text-xs text-slate-600 font-medium">Upload a profile picture. Maximum size 5 MB (JPG, PNG, WEBP).</p>
+                        </div>
+
+                        <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
+                            <!-- Custom File Upload Button -->
+                            <label class="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-rose-300 text-rose-700 hover:bg-rose-50 text-xs font-bold shadow-xs transition">
+                                <svg class="w-4 h-4 text-[#F20B65]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                <span>{{ $avatar ? 'Change Chosen Image' : 'Choose New Photo' }}</span>
+                                <input type="file" wire:model="avatar" accept="image/png,image/jpeg,image/webp" class="hidden">
+                            </label>
+
+                            @if ($avatar)
+                                <button type="button" wire:click="uploadAvatarNow" class="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-[#F20B83] text-white text-xs font-black shadow-xs hover:shadow-md transition flex items-center gap-1.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                    <span>Save Photo Now</span>
+                                </button>
+                            @endif
+
+                            @if (Auth::user()->avatar_url || $avatar)
+                                <button type="button" wire:click="removeAvatar" wire:confirm="Are you sure you want to remove your profile photo?" class="px-3.5 py-2 rounded-xl bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 text-xs font-bold transition">
+                                    Remove Photo
+                                </button>
+                            @endif
+                        </div>
+
+                        @error('avatar')
+                            <p class="text-xs text-rose-600 font-bold mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
 
                 <form wire:submit="saveProfile" class="space-y-5">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

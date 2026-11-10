@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Livewire\AccountDashboard;
+use App\Livewire\Admin\AdminEnterpriseHub;
 use App\Models\User;
 use App\Modules\Accounts\Models\AgeAssurance;
 use App\Modules\Accounts\Models\UserBlock;
@@ -16,7 +17,9 @@ use App\Modules\Contact\Models\ContactMessage;
 use App\Modules\Listings\Models\Listing;
 use App\Modules\Locations\Models\City;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -740,5 +743,80 @@ class UserAccountDashboardTest extends TestCase
         $this->assertSoftDeleted('users', ['id' => $this->user->id]);
         $this->assertSoftDeleted('listings', ['id' => $listing->id]);
         $this->assertGuest();
+    }
+
+    public function test_user_can_upload_and_remove_profile_photo(): void
+    {
+        Storage::fake('public');
+
+        $photo = UploadedFile::fake()->image('profile-alex.jpg', 400, 400);
+
+        // Upload photo via uploadAvatarNow
+        Livewire::actingAs($this->user)
+            ->test(AccountDashboard::class, ['initialTab' => 'profile'])
+            ->set('avatar', $photo)
+            ->call('uploadAvatarNow')
+            ->assertHasNoErrors();
+
+        $freshUser = $this->user->fresh();
+        $this->assertNotNull($freshUser->avatar);
+        $this->assertNotNull($freshUser->profile->avatar_path);
+        $this->assertNotNull($freshUser->avatar_url);
+        Storage::disk('public')->assertExists($freshUser->avatar);
+
+        // Remove photo
+        Livewire::actingAs($this->user)
+            ->test(AccountDashboard::class, ['initialTab' => 'profile'])
+            ->call('removeAvatar')
+            ->assertHasNoErrors();
+
+        $freshUser = $this->user->fresh();
+        $this->assertNull($freshUser->avatar);
+        $this->assertNull($freshUser->profile->avatar_path);
+        $this->assertNull($freshUser->avatar_url);
+    }
+
+    public function test_admin_can_update_and_remove_user_profile_photo(): void
+    {
+        Storage::fake('public');
+
+        $admin = User::factory()->create([
+            'role' => 'super_admin',
+            'account_status' => 'active',
+        ]);
+
+        $targetUser = User::factory()->create([
+            'role' => 'user',
+            'name' => 'Member Need Photo',
+            'email' => 'target@example.com',
+            'account_status' => 'active',
+        ]);
+
+        $photo = UploadedFile::fake()->image('admin-uploaded.png', 300, 300);
+
+        // Admin uploads a profile photo for the target user
+        Livewire::actingAs($admin)
+            ->test(AdminEnterpriseHub::class, ['tab' => 'users'])
+            ->call('openEditUserModal', $targetUser->id)
+            ->assertSet('editUserId', $targetUser->id)
+            ->set('editUserAvatar', $photo)
+            ->call('updateUser')
+            ->assertHasNoErrors();
+
+        $freshTarget = $targetUser->fresh();
+        $this->assertNotNull($freshTarget->avatar);
+        $this->assertNotNull($freshTarget->profile->avatar_path);
+        Storage::disk('public')->assertExists($freshTarget->avatar);
+
+        // Admin removes the profile photo of the target user
+        Livewire::actingAs($admin)
+            ->test(AdminEnterpriseHub::class, ['tab' => 'users'])
+            ->call('openEditUserModal', $targetUser->id)
+            ->call('removeUserAvatarInEditModal')
+            ->assertHasNoErrors();
+
+        $freshTarget = $targetUser->fresh();
+        $this->assertNull($freshTarget->avatar);
+        $this->assertNull($freshTarget->profile->avatar_path);
     }
 }

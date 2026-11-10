@@ -176,6 +176,26 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(\App\Modules\Verification\Models\IdentityVerification::class)->latestOfMany();
     }
 
+    public function getAvatarUrlAttribute(): ?string
+    {
+        if (!empty($this->avatar)) {
+            if (str_starts_with($this->avatar, 'http://') || str_starts_with($this->avatar, 'https://')) {
+                return $this->avatar;
+            }
+            return asset('storage/' . ltrim($this->avatar, '/'));
+        }
+
+        $profile = $this->relationLoaded('profile') ? $this->profile : $this->profile()->first();
+        if ($profile && !empty($profile->avatar_path)) {
+            if (str_starts_with($profile->avatar_path, 'http://') || str_starts_with($profile->avatar_path, 'https://')) {
+                return $profile->avatar_path;
+            }
+            return asset('storage/' . ltrim($profile->avatar_path, '/'));
+        }
+
+        return null;
+    }
+
     public function getWalletBalance(): int
     {
         return (int) ($this->wallet()->value('balance') ?? 0);
