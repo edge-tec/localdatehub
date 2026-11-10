@@ -23,6 +23,12 @@
         // Fallback to defaults if DB is not yet migrated
     }
 @endphp
+@php
+    $currentPath = request()->path();
+    $isPrivateArea = request()->is('account*', 'admin*', 'checkout*', 'password*', 'email*', 'livewire*', 'api*');
+    $defaultRobots = $isPrivateArea ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+    $finalRobots = $robotsMeta ?? $defaultRobots;
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-[#F8FAFC] text-slate-900 antialiased">
 <head>
@@ -32,7 +38,7 @@
 
     <title>{{ $title ?? $brandSiteName }} — {{ $brandTagline }}</title>
     <meta name="description" content="{{ $description ?? 'LocalDateHub is the privacy-first local adult dating, personal classifieds, and safe date spot discovery platform.' }}">
-    <meta name="robots" content="{{ $robotsMeta ?? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' }}">
+    <meta name="robots" content="{{ $finalRobots }}">
     <link rel="canonical" href="{{ $canonicalUrl ?? url()->current() }}">
     <link rel="icon" href="{{ asset($brandFaviconUrl) }}">
     <link rel="shortcut icon" href="{{ asset($brandFaviconUrl) }}">

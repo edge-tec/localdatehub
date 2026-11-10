@@ -55,6 +55,11 @@ class SecurityHeadersMiddleware
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
         }
 
+        // 10. X-Robots-Tag header for private, admin, and authentication areas
+        if ($request->is('account*', 'admin*', 'checkout*', 'password*', 'email*', 'api*', 'webhooks*')) {
+            $response->headers->set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+        }
+
         return $response;
     }
 }

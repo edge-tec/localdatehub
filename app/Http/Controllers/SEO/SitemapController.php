@@ -200,11 +200,25 @@ class SitemapController extends Controller
     }
 
     /**
-     * Dynamic Google Search Console HTML File Verification (e.g. /google1234567890abcdef.html)
+     * Exact Google Search Console HTML File Verification (e.g. /google1234567890abcdef.html)
+     * Validates against configured Google verification token to prevent arbitrary 200 responses.
      */
     public function googleVerification(string $code): Response
     {
-        return response("google-site-verification: google{$code}.html", 200, [
+        $configuredToken = null;
+        try {
+            $configuredToken = SystemSetting::where('group', 'seo')
+                ->where('key', 'google_verification_code')
+                ->value('value') ?: config('services.google.verification_code');
+        } catch (\Throwable $e) {
+            // DB not ready fallback
+        }
+
+        if (empty($configuredToken) || $code !== $configuredToken) {
+            abort(404, 'Google Site Verification token is not configured or did not match.');
+        }
+
+        return response("google-site-verification: google{$configuredToken}.html", 200, [
             'Content-Type' => 'text/html; charset=utf-8',
             'Cache-Control' => 'public, max-age=86400',
         ]);
