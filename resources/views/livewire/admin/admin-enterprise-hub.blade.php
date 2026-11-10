@@ -518,7 +518,7 @@
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
                     
                     <!-- Website Analytics Chart & Graph (100% Real-Time Dynamic Weekly Telemetry) -->
-                    <div class="lg:col-span-6 {{ $card }} p-5">
+                    <div class="lg:col-span-6 {{ $card }} p-5 overflow-hidden">
                         <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                             <div>
                                 <h2 class="text-sm font-extrabold text-slate-900">Website Analytics (Unique &amp; Gross)</h2>
@@ -526,18 +526,14 @@
                             </div>
                             <div class="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-600">
                                 <!-- Graph vs Chart Toggle -->
-                                <div class="inline-flex rounded-lg bg-slate-200/80 p-0.5 border border-slate-300 text-[10px] font-bold shadow-inner">
+                                <div class="inline-flex rounded-lg bg-slate-200/80 p-0.5 border border-slate-300 text-[10px] font-bold shadow-inner shrink-0">
                                     <button type="button" wire:click="setDashboardChartType('graph')"
-                                        class="px-2 py-0.5 rounded-md transition cursor-pointer {{ $dashboardChartType === 'graph' ? 'bg-[#F20B65] text-white shadow-sm' : 'text-slate-700 hover:text-slate-950 hover:bg-slate-300/60' }}">
+                                        class="px-2.5 py-1 rounded-md transition cursor-pointer {{ $dashboardChartType === 'graph' ? 'bg-[#F20B65] text-white shadow-sm' : 'text-slate-700 hover:text-slate-950 hover:bg-slate-300/60' }}">
                                         📈 Graph
                                     </button>
                                     <button type="button" wire:click="setDashboardChartType('chart')"
-                                        class="px-2 py-0.5 rounded-md transition cursor-pointer {{ $dashboardChartType === 'chart' ? 'bg-[#F20B65] text-white shadow-sm' : 'text-slate-700 hover:text-slate-950 hover:bg-slate-300/60' }}">
+                                        class="px-2.5 py-1 rounded-md transition cursor-pointer {{ $dashboardChartType === 'chart' ? 'bg-[#F20B65] text-white shadow-sm' : 'text-slate-700 hover:text-slate-950 hover:bg-slate-300/60' }}">
                                         📊 Chart
-                                    </button>
-                                    <button type="button" wire:click="setDashboardChartType('both')"
-                                        class="px-2 py-0.5 rounded-md transition cursor-pointer {{ $dashboardChartType === 'both' ? 'bg-[#F20B65] text-white shadow-sm' : 'text-slate-700 hover:text-slate-950 hover:bg-slate-300/60' }}">
-                                        ⚡ Both
                                     </button>
                                 </div>
                                 <a href="{{ route('admin.dashboard', ['tab' => 'analytics']) }}" wire:click.prevent="setTab('analytics')" class="text-[11px] font-bold text-[#F20B65] hover:underline flex items-center gap-0.5 ml-1">
@@ -566,29 +562,47 @@
                             <span class="text-emerald-600 font-extrabold text-[10px]">↗ +{{ $metrics['viewsGrowth'] }}% trend</span>
                         </div>
 
-                        @if(in_array($dashboardChartType, ['graph', 'both'], true))
-                            <!-- Responsive Dynamic SVG Area Line Graph -->
-                            <div class="{{ $dashboardChartType === 'both' ? 'h-32 mb-3' : 'h-44' }} w-full relative">
-                                <svg viewBox="0 0 500 160" class="w-full h-full overflow-visible">
-                                    <defs>
-                                        <linearGradient id="viewsGrad" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="0%" stop-color="#F20B65" stop-opacity="0.28" />
-                                            <stop offset="100%" stop-color="#F20B65" stop-opacity="0.0" />
-                                        </linearGradient>
-                                        <linearGradient id="uniqueGrad" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="0%" stop-color="#0D9488" stop-opacity="0.25" />
-                                            <stop offset="100%" stop-color="#0D9488" stop-opacity="0.0" />
-                                        </linearGradient>
-                                        <linearGradient id="contactsGrad" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="0%" stop-color="#8B35F6" stop-opacity="0.2" />
-                                            <stop offset="100%" stop-color="#8B35F6" stop-opacity="0.0" />
-                                        </linearGradient>
-                                    </defs>
-                                    <!-- Grid Lines -->
-                                    <line x1="0" y1="30" x2="500" y2="30" stroke="#E2E8F0" stroke-dasharray="3,3" />
-                                    <line x1="0" y1="80" x2="500" y2="80" stroke="#E2E8F0" stroke-dasharray="3,3" />
-                                    <line x1="0" y1="130" x2="500" y2="130" stroke="#E2E8F0" />
+                        <!-- 100% Contained, Responsive SVG Visualization (Zero Leakage / No Overflow) -->
+                        <div class="h-44 sm:h-48 w-full relative overflow-hidden my-1">
+                            <svg viewBox="0 0 500 160" class="w-full h-full" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="viewsGrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#F20B65" stop-opacity="0.28" />
+                                        <stop offset="100%" stop-color="#F20B65" stop-opacity="0.0" />
+                                    </linearGradient>
+                                    <linearGradient id="uniqueGrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#0D9488" stop-opacity="0.25" />
+                                        <stop offset="100%" stop-color="#0D9488" stop-opacity="0.0" />
+                                    </linearGradient>
+                                    <linearGradient id="contactsGrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#8B35F6" stop-opacity="0.2" />
+                                        <stop offset="100%" stop-color="#8B35F6" stop-opacity="0.0" />
+                                    </linearGradient>
+                                </defs>
+                                <!-- Grid Lines -->
+                                <line x1="0" y1="30" x2="500" y2="30" stroke="#E2E8F0" stroke-dasharray="3,3" />
+                                <line x1="0" y1="80" x2="500" y2="80" stroke="#E2E8F0" stroke-dasharray="3,3" />
+                                <line x1="0" y1="130" x2="500" y2="130" stroke="#E2E8F0" />
 
+                                @if($dashboardChartType === 'chart')
+                                    <!-- Clean SVG Bar Columns (Fully Contained Inside SVG Coordinates) -->
+                                    @foreach($chart['bars'] ?? [] as $idx => $b)
+                                        @php
+                                            $bx = round($idx * (500 / 6), 1);
+                                            $uHeight = max(4, min(95, round(($b['uniquePct'] / 100) * 85, 1)));
+                                            $gHeight = max(4, min(95, round(($b['grossPct'] / 100) * 85, 1)));
+                                        @endphp
+                                        <rect x="{{ max(2, $bx - 12) }}" y="{{ 130 - $uHeight }}" width="9" height="{{ $uHeight }}" rx="3" fill="#0D9488" opacity="0.9">
+                                            <title>{{ $b['date'] }}: {{ $b['unique'] }} Unique Visitors</title>
+                                        </rect>
+                                        <rect x="{{ max(14, $bx) }}" y="{{ 130 - $gHeight }}" width="9" height="{{ $gHeight }}" rx="3" fill="#F20B65" opacity="0.95">
+                                            <title>{{ $b['date'] }}: {{ $b['gross'] }} Gross Views</title>
+                                        </rect>
+                                        <text x="{{ $bx }}" y="{{ min(130 - $gHeight, 130 - $uHeight) - 6 }}" font-size="9" font-weight="bold" fill="#64748B" text-anchor="middle">
+                                            {{ $b['unique'] }}u / {{ $b['gross'] }}g
+                                        </text>
+                                    @endforeach
+                                @else
                                     <!-- Area Path Gross Views -->
                                     <path d="{{ $chart['viewsAreaD'] }}" fill="url(#viewsGrad)" />
                                     <path d="{{ $chart['viewsLineD'] }}" fill="none" stroke="#F20B65" stroke-width="3" />
@@ -603,28 +617,11 @@
 
                                     <!-- Peak highlight dot -->
                                     <circle cx="{{ $chart['peakX'] }}" cy="{{ $chart['peakY'] }}" r="4.5" fill="#F20B65" stroke="#FFFFFF" stroke-width="2" />
-                                </svg>
-                            </div>
-                        @endif
+                                @endif
+                            </svg>
+                        </div>
 
-                        @if(in_array($dashboardChartType, ['chart', 'both'], true))
-                            <!-- Interactive Weekly Column Bar Chart (Unique vs Gross per Day) -->
-                            <div class="{{ $dashboardChartType === 'both' ? 'h-36 pt-3 mt-2 border-t border-slate-100' : 'h-48 pt-4' }} grid grid-cols-7 gap-2 items-end px-2">
-                                @foreach($chart['bars'] ?? [] as $b)
-                                    <div class="flex flex-col items-center justify-end h-full group relative">
-                                        <div class="text-[9px] font-bold text-slate-500 mb-1.5 whitespace-nowrap opacity-90 group-hover:opacity-100">
-                                            {{ $b['unique'] }}u / {{ $b['gross'] }}g
-                                        </div>
-                                        <div class="w-full flex items-end justify-center gap-1.5 h-20">
-                                            <div class="w-2.5 sm:w-3.5 rounded-t-md bg-teal-500 transition-all duration-300" style="height: {{ $b['uniquePct'] }}%" title="{{ $b['date'] }}: {{ $b['unique'] }} Unique Visitors"></div>
-                                            <div class="w-2.5 sm:w-3.5 rounded-t-md bg-[#F20B65] transition-all duration-300" style="height: {{ $b['grossPct'] }}%" title="{{ $b['date'] }}: {{ $b['gross'] }} Gross Views"></div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @endif
-
-                        <div class="flex justify-between text-[10px] font-bold text-slate-500 mt-1.5 px-1">
+                        <div class="flex justify-between text-[10px] font-bold text-slate-500 mt-2 px-1">
                             @foreach($chart['days'] as $day)
                                 <span>{{ $day }}</span>
                             @endforeach
@@ -762,10 +759,10 @@
                                             </a>
                                             <div class="text-[10px] text-slate-500 mt-0.5 truncate">{{ $rListing->city?->name ?? 'City' }}, {{ $rListing->city?->state?->code ?? 'US' }}</div>
                                         </div>
-                                        <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
-                                            <span class="text-slate-500 flex items-center gap-0.5 font-medium">👁 {{ number_format($rListing->view_count ?? 0) }}</span>
-                                            <div class="flex items-center gap-1">
-                                                <button type="button" wire:click="openViewListingModal({{ $rListing->id }})" class="bg-slate-100 hover:bg-slate-200 text-slate-800 text-[9px] font-bold px-1.5 py-0.5 rounded transition" title="Moderate/Inspect ad">
+                                        <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] gap-1">
+                                            <span class="text-slate-500 flex items-center gap-0.5 font-medium shrink-0">👁 {{ number_format($rListing->view_count ?? 0) }}</span>
+                                            <div class="flex items-center gap-1 shrink-0">
+                                                <button type="button" wire:click="openViewListingModal({{ $rListing->id }})" class="bg-slate-100 hover:bg-slate-200 text-slate-800 text-[9px] font-bold px-1.5 py-0.5 rounded transition cursor-pointer" title="Moderate/Inspect ad">
                                                     Manage
                                                 </button>
                                                 <a href="{{ route('listings.show', $rListing->slug) }}" target="_blank" class="bg-[#F20B65] hover:bg-[#d90858] text-white text-[9px] font-bold px-2 py-0.5 rounded flex items-center gap-0.5 shadow-2xs">
@@ -880,11 +877,11 @@
 
                             <div class="space-y-2 text-xs">
                                 @forelse($liveVisitors as $lv)
-                                    <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100 text-slate-700 hover:bg-slate-100 transition">
-                                        <div class="flex items-center gap-2 truncate">
-                                            <span class="text-sm">{{ \App\Models\PlatformTrafficLog::countryCodeToFlag($lv->country_code) }}</span>
-                                            <span class="font-bold text-slate-900 truncate max-w-[130px]" title="{{ $lv->path }}">{{ $lv->path }}</span>
-                                            <span class="text-[9px] text-slate-400 font-semibold">{{ $lv->device_type }} · {{ $lv->browser }}</span>
+                                    <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100 text-slate-700 hover:bg-slate-100 transition gap-2">
+                                        <div class="flex items-center gap-2 truncate min-w-0">
+                                            <span class="text-sm shrink-0">{{ \App\Models\PlatformTrafficLog::countryCodeToFlag($lv->country_code) }}</span>
+                                            <span class="font-bold text-slate-900 truncate max-w-[110px] sm:max-w-[140px]" title="{{ $lv->path }}">{{ $lv->path }}</span>
+                                            <span class="text-[9px] text-slate-400 font-semibold truncate">{{ $lv->device_type }} · {{ $lv->browser }}</span>
                                         </div>
                                         <div class="text-right shrink-0">
                                             <span class="text-[9px] text-slate-500 font-bold block">{{ $lv->created_at->diffForHumans(short: true) }}</span>

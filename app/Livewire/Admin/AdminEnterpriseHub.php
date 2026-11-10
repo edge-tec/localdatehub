@@ -130,7 +130,7 @@ class AdminEnterpriseHub extends Component
     // Dashboard Telemetry & Analytics Filters
     public string $dashboardLocationMode = 'countries'; // 'countries', 'states'
     public string $dashboardViewMode = 'unique'; // 'unique', 'gross'
-    public string $dashboardChartType = 'both'; // 'graph', 'chart', 'both'
+    public string $dashboardChartType = 'graph'; // 'graph', 'chart', 'both'
 
     // Multi-Dimensional Analytics & Report Filters
     public string $analyticsPeriod = '30d'; // 'today', '7d', '30d', '90d', 'all'
@@ -153,7 +153,7 @@ class AdminEnterpriseHub extends Component
 
     public function setDashboardChartType(string $type): void
     {
-        $this->dashboardChartType = in_array($type, ['graph', 'chart', 'both'], true) ? $type : 'both';
+        $this->dashboardChartType = in_array($type, ['graph', 'chart', 'both'], true) ? $type : 'graph';
     }
 
     public function setAnalyticsDimension(string $dimension): void
