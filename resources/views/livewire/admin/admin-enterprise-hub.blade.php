@@ -379,7 +379,7 @@
                 </div>
 
                 <!-- Row 1: 4 Stat Cards + Promotional Banner (100% Real Database Metrics & Clickable Modules) -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
                     <!-- Stat 1: Total Users -->
                     <div class="bg-white rounded-2xl p-4 text-[#171923] shadow-xs border border-slate-200 hover:border-[#F20B65] hover:shadow-md transition flex flex-col justify-between group">
                         <div class="flex items-center justify-between">
@@ -447,14 +447,14 @@
                                 <span>{{ $dashboardViewMode === 'gross' ? 'Gross Views' : 'Unique Views' }}</span>
                                 <span class="text-[10px]">→</span>
                             </a>
-                            <div class="inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200 text-[9px] font-extrabold">
+                            <div class="inline-flex rounded-lg bg-slate-200/80 p-0.5 border border-slate-300 text-[10px] font-extrabold shrink-0 shadow-inner">
                                 <button type="button" wire:click="setDashboardViewMode('unique')"
-                                    class="px-1.5 py-0.5 rounded-md transition cursor-pointer {{ $dashboardViewMode === 'unique' ? 'bg-teal-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                                    class="px-2 py-0.5 rounded-md transition cursor-pointer {{ $dashboardViewMode === 'unique' ? 'bg-[#F20B65] text-white shadow-sm' : 'text-slate-700 hover:text-slate-950 hover:bg-slate-300/60' }}"
                                     title="Show Unique Visitors & Unique Views">
                                     Unique
                                 </button>
                                 <button type="button" wire:click="setDashboardViewMode('gross')"
-                                    class="px-1.5 py-0.5 rounded-md transition cursor-pointer {{ $dashboardViewMode === 'gross' ? 'bg-teal-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                                    class="px-2 py-0.5 rounded-md transition cursor-pointer {{ $dashboardViewMode === 'gross' ? 'bg-[#F20B65] text-white shadow-sm' : 'text-slate-700 hover:text-slate-950 hover:bg-slate-300/60' }}"
                                     title="Show Total Gross Page & Post Views">
                                     Gross
                                 </button>
@@ -526,17 +526,17 @@
                             </div>
                             <div class="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-600">
                                 <!-- Graph vs Chart Toggle -->
-                                <div class="inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200 text-[10px] font-bold">
+                                <div class="inline-flex rounded-lg bg-slate-200/80 p-0.5 border border-slate-300 text-[10px] font-bold shadow-inner">
                                     <button type="button" wire:click="setDashboardChartType('graph')"
-                                        class="px-2 py-0.5 rounded-md transition cursor-pointer {{ $dashboardChartType === 'graph' ? 'bg-[#F20B65] text-white' : 'text-slate-600 hover:text-slate-900' }}">
+                                        class="px-2 py-0.5 rounded-md transition cursor-pointer {{ $dashboardChartType === 'graph' ? 'bg-[#F20B65] text-white shadow-sm' : 'text-slate-700 hover:text-slate-950 hover:bg-slate-300/60' }}">
                                         📈 Graph
                                     </button>
                                     <button type="button" wire:click="setDashboardChartType('chart')"
-                                        class="px-2 py-0.5 rounded-md transition cursor-pointer {{ $dashboardChartType === 'chart' ? 'bg-[#F20B65] text-white' : 'text-slate-600 hover:text-slate-900' }}">
+                                        class="px-2 py-0.5 rounded-md transition cursor-pointer {{ $dashboardChartType === 'chart' ? 'bg-[#F20B65] text-white shadow-sm' : 'text-slate-700 hover:text-slate-950 hover:bg-slate-300/60' }}">
                                         📊 Chart
                                     </button>
                                     <button type="button" wire:click="setDashboardChartType('both')"
-                                        class="px-2 py-0.5 rounded-md transition cursor-pointer {{ $dashboardChartType === 'both' ? 'bg-[#F20B65] text-white' : 'text-slate-600 hover:text-slate-900' }}">
+                                        class="px-2 py-0.5 rounded-md transition cursor-pointer {{ $dashboardChartType === 'both' ? 'bg-[#F20B65] text-white shadow-sm' : 'text-slate-700 hover:text-slate-950 hover:bg-slate-300/60' }}">
                                         ⚡ Both
                                     </button>
                                 </div>
@@ -609,15 +609,15 @@
 
                         @if(in_array($dashboardChartType, ['chart', 'both'], true))
                             <!-- Interactive Weekly Column Bar Chart (Unique vs Gross per Day) -->
-                            <div class="{{ $dashboardChartType === 'both' ? 'h-28 pt-2 border-t border-slate-100' : 'h-44 pt-4' }} grid grid-cols-7 gap-2 items-end px-2">
+                            <div class="{{ $dashboardChartType === 'both' ? 'h-36 pt-3 mt-2 border-t border-slate-100' : 'h-48 pt-4' }} grid grid-cols-7 gap-2 items-end px-2">
                                 @foreach($chart['bars'] ?? [] as $b)
-                                    <div class="flex flex-col items-center justify-end h-full group">
-                                        <div class="text-[9px] font-bold text-slate-500 mb-1 opacity-85 group-hover:opacity-100">
+                                    <div class="flex flex-col items-center justify-end h-full group relative">
+                                        <div class="text-[9px] font-bold text-slate-500 mb-1.5 whitespace-nowrap opacity-90 group-hover:opacity-100">
                                             {{ $b['unique'] }}u / {{ $b['gross'] }}g
                                         </div>
-                                        <div class="w-full flex items-end justify-center gap-1 h-full">
-                                            <div class="w-3 rounded-t-md bg-teal-500 transition-all duration-300" style="height: {{ $b['uniquePct'] }}%" title="{{ $b['date'] }}: {{ $b['unique'] }} Unique Visitors"></div>
-                                            <div class="w-3 rounded-t-md bg-[#F20B65] transition-all duration-300" style="height: {{ $b['grossPct'] }}%" title="{{ $b['date'] }}: {{ $b['gross'] }} Gross Views"></div>
+                                        <div class="w-full flex items-end justify-center gap-1.5 h-20">
+                                            <div class="w-2.5 sm:w-3.5 rounded-t-md bg-teal-500 transition-all duration-300" style="height: {{ $b['uniquePct'] }}%" title="{{ $b['date'] }}: {{ $b['unique'] }} Unique Visitors"></div>
+                                            <div class="w-2.5 sm:w-3.5 rounded-t-md bg-[#F20B65] transition-all duration-300" style="height: {{ $b['grossPct'] }}%" title="{{ $b['date'] }}: {{ $b['gross'] }} Gross Views"></div>
                                         </div>
                                     </div>
                                 @endforeach
