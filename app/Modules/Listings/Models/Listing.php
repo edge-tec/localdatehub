@@ -113,19 +113,29 @@ class Listing extends Model
 
     public function media(): HasMany
     {
-        return $this->hasMany(ListingMedia::class)->orderBy('display_order');
+        return $this->hasMany(ListingMedia::class)
+            ->where('moderation_status', '!=', 'rejected')
+            ->orderBy('display_order');
+    }
+
+    public function allMedia(): HasMany
+    {
+        return $this->hasMany(ListingMedia::class)
+            ->orderBy('display_order');
     }
 
     public function approvedMedia(): HasMany
     {
         return $this->hasMany(ListingMedia::class)
-            ->where('moderation_status', 'approved')
+            ->where('moderation_status', '!=', 'rejected')
             ->orderBy('display_order');
     }
 
     public function primaryPhoto(): HasOne
     {
-        return $this->hasOne(ListingMedia::class)->where('is_primary', true);
+        return $this->hasOne(ListingMedia::class)
+            ->where('moderation_status', '!=', 'rejected')
+            ->where('is_primary', true);
     }
 
     public function getPrimaryPhotoUrlAttribute(): string
@@ -133,6 +143,12 @@ class Listing extends Model
         if ($this->primaryPhoto && $this->primaryPhoto->url) {
             return $this->primaryPhoto->url;
         }
+
+        $fallback = $this->allMedia->where('moderation_status', '!=', 'rejected')->first();
+        if ($fallback && $fallback->url) {
+            return $fallback->url;
+        }
+
         $index = (($this->id - 1) % 4) + 1;
         return asset("images/featured-{$index}.jpg");
     }

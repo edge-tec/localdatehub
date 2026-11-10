@@ -353,13 +353,25 @@
                         <div class="divide-y divide-slate-100">
                             @foreach($recentListings as $ad)
                                 <div class="py-3.5 flex items-center justify-between gap-3 text-xs">
-                                    <div class="min-w-0">
-                                        <a href="{{ route('listings.show', $ad->slug) }}" class="font-extrabold text-slate-950 hover:text-[#F20B83] truncate block text-sm">
-                                            {{ $ad->title }}
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <a href="{{ route('listings.show', $ad->slug) }}" class="w-13 h-13 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200 block shadow-2xs hover:opacity-90 transition">
+                                            @php $photo = $ad->primaryPhoto ?: $ad->allMedia->first(); @endphp
+                                            @if($photo)
+                                                <img src="{{ $photo->url }}" alt="{{ $ad->title }}" class="w-full h-full object-cover">
+                                            @else
+                                                <div class="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-50">
+                                                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                </div>
+                                            @endif
                                         </a>
-                                        <span class="text-slate-600 font-semibold text-xs mt-0.5 block">
-                                            {{ $ad->category?->name }} &bull; {{ $ad->city?->name }}, {{ $ad->city?->state?->code }} &bull; <strong class="text-slate-900">{{ $ad->view_count }}</strong> Views
-                                        </span>
+                                        <div class="min-w-0">
+                                            <a href="{{ route('listings.show', $ad->slug) }}" class="font-extrabold text-slate-950 hover:text-[#F20B65] truncate block text-sm">
+                                                {{ $ad->title }}
+                                            </a>
+                                            <span class="text-slate-600 font-semibold text-xs mt-0.5 block">
+                                                {{ $ad->category?->name }} &bull; {{ $ad->city?->name }}, {{ $ad->city?->state?->code }} &bull; <strong class="text-slate-900">{{ $ad->view_count }}</strong> Views
+                                            </span>
+                                        </div>
                                     </div>
                                     <div class="flex items-center gap-2 shrink-0">
                                         <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase
@@ -531,14 +543,25 @@
                 <div class="bg-white border border-slate-200 rounded-3xl divide-y divide-slate-100 overflow-hidden shadow-xl">
                     @foreach($myListings as $listing)
                         <div class="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/70 transition {{ $listing->status === 'active' ? 'border-l-4 border-l-emerald-500' : '' }}">
-                            <div class="flex items-start gap-4 min-w-0">
+                            <div class="flex items-start sm:items-center gap-4 min-w-0 flex-1">
                                 <input
                                     type="checkbox"
                                     value="{{ $listing->id }}"
                                     wire:model.live="selectedListings"
-                                    class="mt-1 rounded bg-slate-50 border-slate-300 text-[#F20B83] focus:ring-[#F20B83]"
+                                    class="mt-1 sm:mt-0 rounded bg-slate-50 border-slate-300 text-[#F20B65] focus:ring-[#F20B65]"
                                 >
-                                <div class="space-y-1.5 min-w-0">
+                                <a href="{{ route('listings.show', $listing->slug) }}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200 block shadow-2xs hover:opacity-90 transition relative group">
+                                    @php $photo = $listing->primaryPhoto ?: $listing->allMedia->first(); @endphp
+                                    @if($photo)
+                                        <img src="{{ $photo->url }}" alt="{{ $listing->title }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                                    @else
+                                        <div class="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-50 text-[10px] font-bold">
+                                            <svg class="w-6 h-6 mb-0.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                            <span>No Photo</span>
+                                        </div>
+                                    @endif
+                                </a>
+                                <div class="space-y-1.5 min-w-0 flex-1">
                                     <div class="flex items-center gap-2 flex-wrap">
                                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase
                                             @if($listing->status === 'active') bg-emerald-50 text-emerald-800 border border-emerald-300

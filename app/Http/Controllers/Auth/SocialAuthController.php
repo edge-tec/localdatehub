@@ -226,17 +226,19 @@ class SocialAuthController extends Controller
     protected function configureProvider(string $provider): bool
     {
         $clientId = config("services.{$provider}.client_id")
-            ?: SystemSetting::get("{$provider}_client_id");
+            ?: SystemSetting::get("{$provider}_client_id")
+            ?: env(strtoupper($provider) . '_CLIENT_ID');
 
         $clientSecret = config("services.{$provider}.client_secret")
-            ?: SystemSetting::get("{$provider}_client_secret");
+            ?: SystemSetting::get("{$provider}_client_secret")
+            ?: env(strtoupper($provider) . '_CLIENT_SECRET');
 
         if (empty($clientId) || empty($clientSecret)) {
             return false;
         }
 
         $redirectUri = config("services.{$provider}.redirect")
-            ?: url("/auth/{$provider}/callback");
+            ?: (env('APP_URL') ? rtrim(env('APP_URL'), '/') . "/auth/{$provider}/callback" : url("/auth/{$provider}/callback"));
 
         config([
             "services.{$provider}.client_id" => $clientId,

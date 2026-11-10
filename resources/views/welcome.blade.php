@@ -440,34 +440,43 @@
                     </span>
                 </div>
             </div>
-            <div class="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2.5 sm:gap-3">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-2.5 sm:gap-3">
                 @foreach($homepageCategories as $catCard)
-                    <a href="{{ $catCard['url'] }}" class="bg-white rounded-xl border border-[#E8E4EC] p-3 text-center shadow-xs hover:border-[#F20B65] hover:shadow-md transition-all duration-200 group flex flex-col items-center justify-center min-h-[95px]">
-                        <!-- Pink Category Icon -->
-                        <div class="w-7 h-7 mb-1.5 flex items-center justify-center text-[#F20B65] group-hover:scale-110 transition duration-200">
-                            @if(str_contains($catCard['slug'], 'women') && !str_contains($catCard['slug'], 'couples'))
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4a5 5 0 100 10 5 5 0 000-10zM12 14v7M9 18h6" />
+                    <a href="{{ $catCard['url'] }}" class="bg-white rounded-2xl border-2 border-slate-200/90 hover:border-[#F20B65] p-3 text-center shadow-2xs hover:shadow-lg transition-all duration-300 group flex flex-col items-center justify-center min-h-[105px]">
+                        <!-- Modern Natural Vector Icon -->
+                        <div class="w-10 h-10 mb-2 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-[#F20B65] group-hover:bg-[#F20B65] group-hover:text-white group-hover:scale-105 transition-all duration-300 shadow-2xs">
+                            @if(str_contains($catCard['slug'], 'couples'))
+                                <!-- Couples Connection Natural Duo Icon -->
+                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                                 </svg>
-                            @elseif(str_contains($catCard['slug'], 'men') && !str_contains($catCard['slug'], 'women') && !str_contains($catCard['slug'], 'couples'))
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 3h5m0 0v5m0-5l-6 6M10 14a5 5 0 110-10 5 5 0 010 10z" />
+                            @elseif(str_contains($catCard['slug'], 'women') && str_contains($catCard['slug'], 'men'))
+                                <!-- Men & Women Sparkle Duo Icon -->
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
-                            @elseif(str_contains($catCard['slug'], 'couples') || str_contains($catCard['slug'], 'couples'))
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            @elseif(str_contains($catCard['slug'], 'women'))
+                                <!-- Women Natural Silhouette Icon -->
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4a4 4 0 100 8 4 4 0 000-8zM12 12v8m-3-4h6" />
+                                </svg>
+                            @elseif(str_contains($catCard['slug'], 'men'))
+                                <!-- Men Natural Silhouette Icon -->
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 3h5m0 0v5m0-5l-6 6M10 14a5 5 0 110-10 5 5 0 010 10z" />
                                 </svg>
                             @else
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                <!-- Romance & Connection Heart Icon -->
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>
                             @endif
                         </div>
-                        <div class="text-[11px] font-bold text-[#171923] group-hover:text-[#F20B65] transition leading-tight">
+                        <div class="text-[11px] font-black text-slate-800 group-hover:text-[#F20B65] transition leading-tight">
                             {{ $catCard['title'] }}
                         </div>
                         @if(!empty($catCard['subtitle']))
-                            <div class="text-[10px] font-medium text-[#737784] mt-0.5">
+                            <div class="text-[10px] font-bold text-slate-500 mt-0.5">
                                 {{ $catCard['subtitle'] }}
                             </div>
                         @endif
@@ -475,13 +484,13 @@
                 @endforeach
 
                 <!-- 10th Card: More Categories -->
-                <a href="{{ route('categories.index') }}" class="bg-white rounded-xl border border-[#E8E4EC] p-3 text-center shadow-xs hover:border-[#F20B65] hover:shadow-md transition-all duration-200 group flex flex-col items-center justify-center min-h-[95px]">
-                    <div class="w-7 h-7 mb-1.5 flex items-center justify-center text-[#F20B65] group-hover:scale-110 transition duration-200">
-                        <svg class="w-6 h-6 stroke-[2.2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                <a href="{{ route('categories.index') }}" class="bg-white rounded-2xl border-2 border-slate-200/90 hover:border-[#F20B65] p-3 text-center shadow-2xs hover:shadow-lg transition-all duration-300 group flex flex-col items-center justify-center min-h-[105px]">
+                    <div class="w-10 h-10 mb-2 rounded-2xl bg-pink-50 border border-pink-100 flex items-center justify-center text-[#F20B65] group-hover:bg-[#F20B65] group-hover:text-white group-hover:scale-105 transition-all duration-300 shadow-2xs">
+                        <svg class="w-5 h-5 stroke-[2.2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                         </svg>
                     </div>
-                    <div class="text-[11px] font-bold text-[#171923] group-hover:text-[#F20B65] transition leading-tight flex items-center justify-center gap-0.5">
+                    <div class="text-[11px] font-black text-slate-800 group-hover:text-[#F20B65] transition leading-tight flex items-center justify-center gap-0.5">
                         <span>More</span>
                     </div>
                     <div class="text-[10px] font-bold text-[#F20B65] mt-0.5 flex items-center justify-center">
@@ -597,18 +606,21 @@
                             </a>
                         </div>
 
-                        <!-- Horizontal Row of State Cards matching reference image -->
-                        <div class="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2.5">
+                        <!-- Responsive State Grid with Full Names & High Contrast -->
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                             @foreach($popularStates as $st)
-                                <a href="{{ route('locations.state', strtolower($st->code)) }}" class="bg-white rounded-xl border border-[#E8E4EC] p-3 text-center shadow-xs hover:border-[#F20B65] hover:shadow-md transition-all group flex flex-col items-center justify-center">
-                                    <!-- State Silhouette / Icon -->
-                                    <div class="w-8 h-8 mb-1.5 flex items-center justify-center text-slate-800 group-hover:text-[#F20B65] transition">
-                                        <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
-                                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                                        </svg>
-                                    </div>
-                                    <div class="text-[11px] font-bold text-[#171923] group-hover:text-[#F20B65] transition truncate w-full">
-                                        {{ $st->name }}
+                                <a href="{{ route('locations.state', strtolower($st->code)) }}" class="bg-white rounded-2xl border-2 border-slate-200/90 hover:border-[#F20B65] p-3 shadow-2xs hover:shadow-md transition-all group flex items-center gap-3">
+                                    <span class="w-10 h-10 rounded-xl bg-pink-50 text-[#F20B65] font-black text-xs flex items-center justify-center shrink-0 border border-pink-100 group-hover:bg-[#F20B65] group-hover:text-white transition shadow-2xs">
+                                        {{ $st->code }}
+                                    </span>
+                                    <div class="min-w-0 text-left">
+                                        <div class="text-xs font-black text-slate-800 group-hover:text-[#F20B65] transition leading-tight truncate">
+                                            {{ $st->name }}
+                                        </div>
+                                        <div class="text-[10px] text-slate-400 font-bold mt-0.5 flex items-center gap-1">
+                                            <svg class="w-3 h-3 text-[#F20B65]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+                                            <span>United States</span>
+                                        </div>
                                     </div>
                                 </a>
                             @endforeach

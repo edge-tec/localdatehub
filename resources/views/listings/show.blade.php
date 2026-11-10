@@ -237,16 +237,20 @@
                         </span>
                     </div>
 
-                    @if($listing->approvedMedia->isNotEmpty())
+                    @php
+                        $displayPhotos = $listing->allMedia->where('moderation_status', '!=', 'rejected');
+                    @endphp
+
+                    @if($displayPhotos->isNotEmpty())
                         <!-- User Uploaded Photos -->
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3.5">
-                            @foreach($listing->approvedMedia as $photo)
+                            @foreach($displayPhotos as $photo)
                                 <div
                                     class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 aspect-4/3 relative group cursor-pointer shadow-2xs hover:shadow-md transition-all duration-300"
-                                    @click="activePhotoUrl = '{{ asset('storage/' . $photo->file_path) }}'; lightboxOpen = true"
+                                    @click="activePhotoUrl = '{{ $photo->url }}'; lightboxOpen = true"
                                 >
                                     <img
-                                        src="{{ asset('storage/' . $photo->file_path) }}"
+                                        src="{{ $photo->url }}"
                                         alt="{{ $listing->title }}"
                                         class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                                         loading="lazy"

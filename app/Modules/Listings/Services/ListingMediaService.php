@@ -118,7 +118,7 @@ class ListingMediaService
             'height' => $originalHeight,
             'is_primary' => $isPrimary,
             'display_order' => $displayOrder,
-            'moderation_status' => 'pending', // Starts in pending review
+            'moderation_status' => 'approved', // Immediately approved and visible across post and cards
         ]);
 
         if (!$listing->has_photos) {

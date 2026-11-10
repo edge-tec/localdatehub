@@ -4,9 +4,12 @@
     <div>
         <!-- Photo Container -->
         <div class="relative aspect-video bg-slate-50 overflow-hidden">
-            @if($listing->primaryPhoto)
+            @php
+                $cardPhoto = $listing->primaryPhoto ?: $listing->allMedia->first();
+            @endphp
+            @if($cardPhoto)
                 <img
-                    src="{{ asset('storage/' . ($listing->primaryPhoto->thumbnail_path ?: $listing->primaryPhoto->file_path)) }}"
+                    src="{{ $cardPhoto->url }}"
                     alt="{{ $listing->title }}"
                     loading="lazy"
                     class="w-full h-full object-cover group-hover:scale-105 transition duration-300"

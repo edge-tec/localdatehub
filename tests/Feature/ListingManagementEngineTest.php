@@ -342,7 +342,7 @@ class ListingManagementEngineTest extends TestCase
         $this->assertNotNull($media);
         $this->assertEquals('image/webp', $media->mime_type);
         $this->assertTrue($media->is_primary);
-        $this->assertEquals('pending', $media->moderation_status);
+        $this->assertEquals('approved', $media->moderation_status);
         $this->assertTrue($listing->fresh()->has_photos);
 
         // Upload limit check
