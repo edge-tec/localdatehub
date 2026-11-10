@@ -1,7 +1,8 @@
 @php
     $card = 'bg-white rounded-2xl border border-slate-200/80 shadow-sm';
     $btn = 'inline-flex items-center justify-center font-bold text-xs px-3.5 py-2 rounded-xl transition-all duration-200 shadow-sm focus:outline-none';
-    $btnPrimary = $btn . ' bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white shadow-pink-500/20';
+    $btnPrimary = $btn . ' bg-[#F20B65] hover:bg-[#d90858] text-white shadow-md cursor-pointer';
+    $btnPrimaryStyle = 'background-color: #F20B65 !important; color: #ffffff !important; border: 1px solid #d90858 !important; box-shadow: 0 2px 8px rgba(242, 11, 101, 0.25) !important;';
     $btnSecondary = $btn . ' bg-white hover:bg-slate-50 text-slate-800 border border-slate-200';
     $m = $metrics ?? [];
 @endphp
@@ -60,7 +61,7 @@
                 </button>
 
                 <!-- Action: Process Queue -->
-                <button wire:click="processIndexingQueueNow" wire:loading.attr="disabled" class="{{ $btnPrimary }}">
+                <button wire:click="processIndexingQueueNow" wire:loading.attr="disabled" class="{{ $btnPrimary }}" style="{{ $btnPrimaryStyle }}">
                     <span wire:loading.remove wire:target="processIndexingQueueNow" class="flex items-center gap-1.5">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         <span>Dispatch Queue</span>
@@ -401,7 +402,7 @@
                     </div>
 
                     <div class="flex items-end">
-                        <button type="submit" class="{{ $btnPrimary }} w-full">Add Keyword</button>
+                        <button type="submit" class="{{ $btnPrimary }} w-full" style="{{ $btnPrimaryStyle }}">Add Keyword</button>
                     </div>
                 </form>
             </div>
@@ -631,7 +632,7 @@
                         <h4 class="text-sm font-black text-slate-900">Automated XML Sitemap Hub</h4>
                         <p class="text-xs text-slate-600">Compliant with Google Sitemaps 0.9 protocol (50,000 URL / 50MB limits per file).</p>
                     </div>
-                    <button wire:click="generateAllSitemaps" class="{{ $btnPrimary }}">
+                    <button wire:click="generateAllSitemaps" class="{{ $btnPrimary }}" style="{{ $btnPrimaryStyle }}">
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                         <span>Regenerate &amp; Validate All</span>
                     </button>
@@ -687,7 +688,7 @@
                         <h4 class="text-sm font-black text-slate-900">Google Indexing Submission Queue</h4>
                         <p class="text-xs text-slate-600">Real-time retry queue with exponential backoff (2, 4, 8, 16 mins).</p>
                     </div>
-                    <button wire:click="processIndexingQueueNow" class="{{ $btnPrimary }}">
+                    <button wire:click="processIndexingQueueNow" class="{{ $btnPrimary }}" style="{{ $btnPrimaryStyle }}">
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         <span>Process Queue Now</span>
                     </button>
@@ -750,7 +751,7 @@
                         <p class="text-xs text-slate-600">Official Search Analytics API syncing actual clicks, impressions, CTR, and keyword rankings.</p>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button wire:click="syncGoogleSearchConsoleNow" class="{{ $btnPrimary }}">
+                        <button wire:click="syncGoogleSearchConsoleNow" class="{{ $btnPrimary }}" style="{{ $btnPrimaryStyle }}">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                             <span>Sync Telemetry Now</span>
                         </button>
@@ -844,7 +845,7 @@
                         <h4 class="text-sm font-black text-slate-900">Technical SEO Audit &amp; Issue Resolution Engine</h4>
                         <p class="text-xs text-slate-600">Live checks: missing/duplicate meta, heading hierarchies, broken links, image alts, thin content.</p>
                     </div>
-                    <button wire:click="runTechnicalSeoAudit" class="{{ $btnPrimary }}">
+                    <button wire:click="runTechnicalSeoAudit" class="{{ $btnPrimary }}" style="{{ $btnPrimaryStyle }}">
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         <span>Run Full Audit Scan</span>
                     </button>
@@ -944,7 +945,7 @@
                     </div>
 
                     <div class="flex items-end">
-                        <button type="submit" class="{{ $btnPrimary }} w-full">Save Redirect Rule</button>
+                        <button type="submit" class="{{ $btnPrimary }} w-full" style="{{ $btnPrimaryStyle }}">Save Redirect Rule</button>
                     </div>
                 </form>
             </div>
@@ -1038,7 +1039,7 @@
                         <textarea wire:model="gscForm.private_key" rows="4" placeholder="-----BEGIN PRIVATE KEY----- ... -----END PRIVATE KEY-----" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl font-mono text-[11px]"></textarea>
                     </div>
 
-                    <button type="submit" class="{{ $btnPrimary }}">Save Google Credentials</button>
+                    <button type="submit" class="{{ $btnPrimary }}" style="{{ $btnPrimaryStyle }}">Save Google Credentials</button>
                 </form>
             </div>
 
@@ -1057,7 +1058,7 @@
 
                     <div class="flex items-center justify-between">
                         <span class="text-[11px] text-slate-500">Default protects admin, account, and api endpoints.</span>
-                        <button type="submit" class="{{ $btnPrimary }}">Save Directives</button>
+                        <button type="submit" class="{{ $btnPrimary }}" style="{{ $btnPrimaryStyle }}">Save Directives</button>
                     </div>
                 </form>
             </div>
