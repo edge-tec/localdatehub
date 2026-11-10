@@ -136,188 +136,411 @@
         </x-alert>
     @endif
 
-    <!-- Main Navigation Tabs Bar (100% High-Contrast, ALL OPTIONS 100% VISIBLE & FAIL-SAFE DUAL ENGINE) -->
-    <div class="bg-white border border-slate-200 rounded-3xl p-3 sm:p-4 shadow-sm flex flex-wrap items-center gap-2 sm:gap-2.5 text-xs font-bold">
-        <a
-            href="{{ route('account.dashboard', ['tab' => 'overview']) }}"
-            wire:click.prevent="setTab('overview')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'overview' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
-            @if($tab === 'overview') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
-        >
-            <svg class="w-4 h-4" @if($tab === 'overview') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-            <span>Overview</span>
-        </a>
+    <!-- Main Categorized Navigation Hub (Dropdown Sections, Clean Professional Flow & Fully Responsive) -->
+    <div
+        class="bg-white border border-slate-200 rounded-3xl p-3 sm:p-4 shadow-sm"
+        x-data="{
+            activeMenu: null,
+            toggle(menu) {
+                this.activeMenu = this.activeMenu === menu ? null : menu;
+            },
+            close() {
+                this.activeMenu = null;
+            }
+        }"
+        @click.outside="close()"
+        @keydown.escape.window="close()"
+    >
+        <!-- Mobile Selector (< sm screens) -->
+        <div class="sm:hidden mb-2.5">
+            <div class="relative">
+                <select
+                    wire:change="setTab($event.target.value)"
+                    class="w-full appearance-none bg-slate-50 border border-slate-300 text-slate-800 text-xs font-black rounded-2xl px-4 py-2.5 pr-10 focus:ring-2 focus:ring-[#F20B65] focus:border-[#F20B65] shadow-xs cursor-pointer"
+                >
+                    <option value="overview" @selected($tab === 'overview')>🏠 Dashboard Overview</option>
+                    <optgroup label="📋 Listings & Ads">
+                        <option value="listings" @selected(in_array($tab, ['listings', 'active', 'pending', 'rejected', 'expired', 'suspended']))>My Classifieds ({{ $totalListings }})</option>
+                        <option value="saved" @selected($tab === 'saved')>Saved Bookmarks ({{ $savedListingsCount }})</option>
+                        <option value="promotions" @selected($tab === 'promotions')>Promotions & Placement Boosts</option>
+                        <option value="analytics" @selected($tab === 'analytics')>Performance Analytics</option>
+                    </optgroup>
+                    <optgroup label="👤 Account & Verification">
+                        <option value="profile" @selected($tab === 'profile')>Profile Details</option>
+                        <option value="age_assurance" @selected($tab === 'age_assurance')>18+ Age Assurance</option>
+                        <option value="security" @selected($tab === 'security')>Security & Password</option>
+                        <option value="privacy" @selected($tab === 'privacy')>Privacy Controls</option>
+                        <option value="blocked_users" @selected($tab === 'blocked_users')>Blocked Members ({{ count($blockedUsers) }})</option>
+                    </optgroup>
+                    <optgroup label="💳 Plans & Invoices">
+                        <option value="subscription" @selected($tab === 'subscription')>Membership Subscription</option>
+                        <option value="billing" @selected($tab === 'billing')>Billing & Invoices</option>
+                    </optgroup>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-slate-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+            </div>
+        </div>
 
-        <a
-            href="{{ route('account.dashboard', ['tab' => 'listings']) }}"
-            wire:click.prevent="setTab('listings')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ in_array($tab, ['listings', 'active', 'pending', 'rejected', 'expired', 'suspended']) ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
-            @if(in_array($tab, ['listings', 'active', 'pending', 'rejected', 'expired', 'suspended'])) style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
-        >
-            <svg class="w-4 h-4" @if(in_array($tab, ['listings', 'active', 'pending', 'rejected', 'expired', 'suspended'])) style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-            <span>My Listings</span>
-            <span class="px-2 py-0.5 rounded-full text-[11px] font-black" @if(in_array($tab, ['listings', 'active', 'pending', 'rejected', 'expired', 'suspended'])) style="background-color: #fce7f3 !important; color: #F20B65 !important;" @else class="bg-slate-200 text-slate-800" @endif>
-                {{ $totalListings }}
-            </span>
-        </a>
+        <div class="flex flex-wrap items-center justify-between gap-2.5">
+            <!-- Left: Dropdown Navigation Tabs -->
+            <div class="flex flex-wrap items-center gap-2 sm:gap-2.5 text-xs">
+                <!-- 1. OVERVIEW BUTTON -->
+                <a
+                    href="{{ route('account.dashboard', ['tab' => 'overview']) }}"
+                    wire:click.prevent="setTab('overview'); close()"
+                    class="px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'overview' ? 'font-black shadow-xs bg-[#fff1f2] text-[#F20B65] border-2 border-[#F20B65]' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
+                >
+                    <svg class="w-4 h-4 {{ $tab === 'overview' ? 'text-[#F20B65]' : 'text-slate-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                    <span>Overview</span>
+                </a>
 
-        <a
-            href="{{ route('account.dashboard', ['tab' => 'saved']) }}"
-            wire:click.prevent="setTab('saved')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'saved' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
-            @if($tab === 'saved') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
-        >
-            <svg class="w-4 h-4" @if($tab === 'saved') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-            <span>Saved Listings</span>
-            <span class="px-2 py-0.5 rounded-full text-[11px] font-black" @if($tab === 'saved') style="background-color: #fce7f3 !important; color: #F20B65 !important;" @else class="bg-slate-200 text-slate-800" @endif>
-                {{ $savedListingsCount }}
-            </span>
-        </a>
+                <!-- 2. LISTINGS & ADS DROPDOWN -->
+                @php
+                    $isListingsGroupActive = in_array($tab, ['listings', 'active', 'pending', 'rejected', 'expired', 'suspended', 'saved', 'promotions', 'analytics']);
+                @endphp
+                <div class="relative">
+                    <button
+                        type="button"
+                        @click="toggle('listings')"
+                        class="px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $isListingsGroupActive ? 'font-black shadow-xs bg-[#fff1f2] text-[#F20B65] border-2 border-[#F20B65]' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
+                    >
+                        <svg class="w-4 h-4 {{ $isListingsGroupActive ? 'text-[#F20B65]' : 'text-slate-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                        <span>Listings &amp; Ads</span>
+                        <span class="px-2 py-0.5 rounded-full text-[11px] font-black {{ $isListingsGroupActive ? 'bg-[#fce7f3] text-[#F20B65]' : 'bg-slate-200 text-slate-800' }}">
+                            {{ $totalListings }}
+                        </span>
+                        <svg class="w-3.5 h-3.5 transition-transform duration-200 text-slate-500" :class="{ 'rotate-180': activeMenu === 'listings' }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
 
-        <a
-            href="{{ route('account.dashboard', ['tab' => 'messages']) }}"
-            wire:click.prevent="setTab('messages')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'messages' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
-            @if($tab === 'messages') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
-        >
-            <svg class="w-4 h-4" @if($tab === 'messages') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
-            <span>Messages</span>
-            @if($unreadInquiriesCount > 0)
-                <span class="px-2 py-0.5 rounded-full text-[11px] font-black bg-rose-600 text-white animate-pulse">
-                    {{ $unreadInquiriesCount }} new
+                    <!-- Dropdown Menu -->
+                    <div
+                        x-show="activeMenu === 'listings'"
+                        x-cloak
+                        x-transition:enter="transition ease-out duration-150"
+                        x-transition:enter-start="opacity-0 translate-y-1 scale-95"
+                        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                        x-transition:leave="transition ease-in duration-100"
+                        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                        x-transition:leave-end="opacity-0 translate-y-1 scale-95"
+                        class="absolute left-0 mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-xl border border-slate-200/90 py-2 z-50 divide-y divide-slate-100"
+                    >
+                        <div class="px-3.5 py-2 text-[11px] font-black uppercase tracking-wider text-slate-400">Classifieds &amp; Promotion</div>
+                        <div class="p-1 space-y-0.5">
+                            <!-- My Listings -->
+                            <a
+                                href="{{ route('account.dashboard', ['tab' => 'listings']) }}"
+                                wire:click.prevent="setTab('listings'); close()"
+                                class="flex items-center justify-between p-2.5 rounded-xl transition group {{ in_array($tab, ['listings', 'active', 'pending', 'rejected', 'expired', 'suspended']) ? 'bg-rose-50/80 text-[#F20B65] font-black' : 'hover:bg-slate-50 text-slate-700' }}"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <span class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 {{ in_array($tab, ['listings', 'active', 'pending', 'rejected', 'expired', 'suspended']) ? 'bg-[#F20B65] text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-rose-50 group-hover:text-[#F20B65]' }}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                                    </span>
+                                    <div>
+                                        <div class="text-xs font-bold leading-tight">My Listings</div>
+                                        <div class="text-[10px] text-slate-400 font-normal">Active, pending &amp; past ads</div>
+                                    </div>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-full text-[11px] font-black bg-slate-100 text-slate-800">{{ $totalListings }}</span>
+                            </a>
+
+                            <!-- Saved Listings -->
+                            <a
+                                href="{{ route('account.dashboard', ['tab' => 'saved']) }}"
+                                wire:click.prevent="setTab('saved'); close()"
+                                class="flex items-center justify-between p-2.5 rounded-xl transition group {{ $tab === 'saved' ? 'bg-rose-50/80 text-[#F20B65] font-black' : 'hover:bg-slate-50 text-slate-700' }}"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <span class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 {{ $tab === 'saved' ? 'bg-[#F20B65] text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-rose-50 group-hover:text-[#F20B65]' }}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                                    </span>
+                                    <div>
+                                        <div class="text-xs font-bold leading-tight">Saved Listings</div>
+                                        <div class="text-[10px] text-slate-400 font-normal">Bookmarked personal ads</div>
+                                    </div>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-full text-[11px] font-black bg-slate-100 text-slate-800">{{ $savedListingsCount }}</span>
+                            </a>
+
+                            <!-- Promotions & Featured Ads -->
+                            <a
+                                href="{{ route('account.dashboard', ['tab' => 'promotions']) }}"
+                                wire:click.prevent="setTab('promotions'); close()"
+                                class="flex items-center justify-between p-2.5 rounded-xl transition group {{ $tab === 'promotions' ? 'bg-rose-50/80 text-[#F20B65] font-black' : 'hover:bg-slate-50 text-slate-700' }}"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <span class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 {{ $tab === 'promotions' ? 'bg-[#F20B65] text-white' : 'bg-purple-50 text-purple-600 group-hover:bg-purple-100' }}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                                    </span>
+                                    <div>
+                                        <div class="text-xs font-bold leading-tight">Promotions &amp; Boosts</div>
+                                        <div class="text-[10px] text-slate-400 font-normal">Bump to top &amp; featured badges</div>
+                                    </div>
+                                </div>
+                            </a>
+
+                            <!-- Performance Analytics -->
+                            <a
+                                href="{{ route('account.dashboard', ['tab' => 'analytics']) }}"
+                                wire:click.prevent="setTab('analytics'); close()"
+                                class="flex items-center justify-between p-2.5 rounded-xl transition group {{ $tab === 'analytics' ? 'bg-rose-50/80 text-[#F20B65] font-black' : 'hover:bg-slate-50 text-slate-700' }}"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <span class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 {{ $tab === 'analytics' ? 'bg-[#F20B65] text-white' : 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-100' }}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                    </span>
+                                    <div>
+                                        <div class="text-xs font-bold leading-tight">Performance Analytics</div>
+                                        <div class="text-[10px] text-slate-400 font-normal">Views, inquiries &amp; impressions</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. ACCOUNT & TRUST DROPDOWN -->
+                @php
+                    $isAccountGroupActive = in_array($tab, ['profile', 'privacy', 'age_assurance', 'security', 'blocked_users']);
+                @endphp
+                <div class="relative">
+                    <button
+                        type="button"
+                        @click="toggle('account')"
+                        class="px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $isAccountGroupActive ? 'font-black shadow-xs bg-[#fff1f2] text-[#F20B65] border-2 border-[#F20B65]' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
+                    >
+                        <svg class="w-4 h-4 {{ $isAccountGroupActive ? 'text-[#F20B65]' : 'text-slate-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        <span>Account &amp; Trust</span>
+                        @if(auth()->user()?->is_identity_verified)
+                            <span class="w-2 h-2 rounded-full bg-blue-500" title="Verified Member"></span>
+                        @endif
+                        <svg class="w-3.5 h-3.5 transition-transform duration-200 text-slate-500" :class="{ 'rotate-180': activeMenu === 'account' }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <div
+                        x-show="activeMenu === 'account'"
+                        x-cloak
+                        x-transition:enter="transition ease-out duration-150"
+                        x-transition:enter-start="opacity-0 translate-y-1 scale-95"
+                        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                        x-transition:leave="transition ease-in duration-100"
+                        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                        x-transition:leave-end="opacity-0 translate-y-1 scale-95"
+                        class="absolute left-0 mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-xl border border-slate-200/90 py-2 z-50 divide-y divide-slate-100"
+                    >
+                        <div class="px-3.5 py-2 text-[11px] font-black uppercase tracking-wider text-slate-400">Settings &amp; Verification</div>
+                        <div class="p-1 space-y-0.5">
+                            <!-- Profile Details -->
+                            <a
+                                href="{{ route('account.dashboard', ['tab' => 'profile']) }}"
+                                wire:click.prevent="setTab('profile'); close()"
+                                class="flex items-center justify-between p-2.5 rounded-xl transition group {{ $tab === 'profile' ? 'bg-rose-50/80 text-[#F20B65] font-black' : 'hover:bg-slate-50 text-slate-700' }}"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <span class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 {{ $tab === 'profile' ? 'bg-[#F20B65] text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-rose-50 group-hover:text-[#F20B65]' }}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                    </span>
+                                    <div>
+                                        <div class="text-xs font-bold leading-tight">Profile Details</div>
+                                        <div class="text-[10px] text-slate-400 font-normal">Avatar, bio, city &amp; preferences</div>
+                                    </div>
+                                </div>
+                            </a>
+
+                            <!-- Identity Verification -->
+                            <a
+                                href="{{ route('account.verification.show') }}"
+                                class="flex items-center justify-between p-2.5 rounded-xl transition group hover:bg-slate-50 text-slate-700"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <span class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-blue-50 text-blue-600 group-hover:bg-blue-100">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                    </span>
+                                    <div>
+                                        <div class="text-xs font-bold leading-tight">Identity Verification</div>
+                                        <div class="text-[10px] text-slate-400 font-normal">Official verified trust badge</div>
+                                    </div>
+                                </div>
+                                @if(auth()->user()?->is_identity_verified)
+                                    <span class="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-[10px] font-black">✓ VERIFIED</span>
+                                @else
+                                    <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold">Unverified</span>
+                                @endif
+                            </a>
+
+                            <!-- 18+ Assurance -->
+                            <a
+                                href="{{ route('account.dashboard', ['tab' => 'age_assurance']) }}"
+                                wire:click.prevent="setTab('age_assurance'); close()"
+                                class="flex items-center justify-between p-2.5 rounded-xl transition group {{ $tab === 'age_assurance' ? 'bg-rose-50/80 text-[#F20B65] font-black' : 'hover:bg-slate-50 text-slate-700' }}"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <span class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 {{ $tab === 'age_assurance' ? 'bg-[#F20B65] text-white' : 'bg-amber-50 text-amber-600 group-hover:bg-amber-100' }}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                    </span>
+                                    <div>
+                                        <div class="text-xs font-bold leading-tight">18+ Assurance</div>
+                                        <div class="text-[10px] text-slate-400 font-normal">Adult age verification status</div>
+                                    </div>
+                                </div>
+                            </a>
+
+                            <!-- Security -->
+                            <a
+                                href="{{ route('account.dashboard', ['tab' => 'security']) }}"
+                                wire:click.prevent="setTab('security'); close()"
+                                class="flex items-center justify-between p-2.5 rounded-xl transition group {{ $tab === 'security' ? 'bg-rose-50/80 text-[#F20B65] font-black' : 'hover:bg-slate-50 text-slate-700' }}"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <span class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 {{ $tab === 'security' ? 'bg-[#F20B65] text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-rose-50 group-hover:text-[#F20B65]' }}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                                    </span>
+                                    <div>
+                                        <div class="text-xs font-bold leading-tight">Security &amp; Password</div>
+                                        <div class="text-[10px] text-slate-400 font-normal">Change password &amp; sessions</div>
+                                    </div>
+                                </div>
+                            </a>
+
+                            <!-- Privacy -->
+                            <a
+                                href="{{ route('account.dashboard', ['tab' => 'privacy']) }}"
+                                wire:click.prevent="setTab('privacy'); close()"
+                                class="flex items-center justify-between p-2.5 rounded-xl transition group {{ $tab === 'privacy' ? 'bg-rose-50/80 text-[#F20B65] font-black' : 'hover:bg-slate-50 text-slate-700' }}"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <span class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 {{ $tab === 'privacy' ? 'bg-[#F20B65] text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-rose-50 group-hover:text-[#F20B65]' }}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                    </span>
+                                    <div>
+                                        <div class="text-xs font-bold leading-tight">Privacy Preferences</div>
+                                        <div class="text-[10px] text-slate-400 font-normal">Contact and visibility controls</div>
+                                    </div>
+                                </div>
+                            </a>
+
+                            <!-- Blocked Users -->
+                            <a
+                                href="{{ route('account.dashboard', ['tab' => 'blocked_users']) }}"
+                                wire:click.prevent="setTab('blocked_users'); close()"
+                                class="flex items-center justify-between p-2.5 rounded-xl transition group {{ $tab === 'blocked_users' ? 'bg-rose-50/80 text-[#F20B65] font-black' : 'hover:bg-slate-50 text-slate-700' }}"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <span class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 {{ $tab === 'blocked_users' ? 'bg-[#F20B65] text-white' : 'bg-rose-50 text-rose-600 group-hover:bg-rose-100' }}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                                    </span>
+                                    <div>
+                                        <div class="text-xs font-bold leading-tight">Blocked Users</div>
+                                        <div class="text-[10px] text-slate-400 font-normal">Restricted &amp; ignored accounts</div>
+                                    </div>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-full text-[11px] font-black bg-slate-100 text-slate-800">{{ count($blockedUsers) }}</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. PLANS & BILLING DROPDOWN -->
+                @php
+                    $isBillingGroupActive = in_array($tab, ['subscription', 'billing']);
+                @endphp
+                <div class="relative">
+                    <button
+                        type="button"
+                        @click="toggle('billing')"
+                        class="px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $isBillingGroupActive ? 'font-black shadow-xs bg-[#fff1f2] text-[#F20B65] border-2 border-[#F20B65]' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
+                    >
+                        <svg class="w-4 h-4 {{ $isBillingGroupActive ? 'text-[#F20B65]' : 'text-slate-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                        <span>Plans &amp; Billing</span>
+                        @if($activeSubscription)
+                            <span class="w-2 h-2 rounded-full bg-purple-500" title="Active Subscription"></span>
+                        @endif
+                        <svg class="w-3.5 h-3.5 transition-transform duration-200 text-slate-500" :class="{ 'rotate-180': activeMenu === 'billing' }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <div
+                        x-show="activeMenu === 'billing'"
+                        x-cloak
+                        x-transition:enter="transition ease-out duration-150"
+                        x-transition:enter-start="opacity-0 translate-y-1 scale-95"
+                        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                        x-transition:leave="transition ease-in duration-100"
+                        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                        x-transition:leave-end="opacity-0 translate-y-1 scale-95"
+                        class="absolute left-0 mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-xl border border-slate-200/90 py-2 z-50 divide-y divide-slate-100"
+                    >
+                        <div class="px-3.5 py-2 text-[11px] font-black uppercase tracking-wider text-slate-400">Subscription &amp; Payments</div>
+                        <div class="p-1 space-y-0.5">
+                            <!-- Subscription Plan -->
+                            <a
+                                href="{{ route('account.dashboard', ['tab' => 'subscription']) }}"
+                                wire:click.prevent="setTab('subscription'); close()"
+                                class="flex items-center justify-between p-2.5 rounded-xl transition group {{ $tab === 'subscription' ? 'bg-rose-50/80 text-[#F20B65] font-black' : 'hover:bg-slate-50 text-slate-700' }}"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <span class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 {{ $tab === 'subscription' ? 'bg-[#F20B65] text-white' : 'bg-purple-50 text-purple-600 group-hover:bg-purple-100' }}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                                    </span>
+                                    <div>
+                                        <div class="text-xs font-bold leading-tight">Subscription Plan</div>
+                                        <div class="text-[10px] text-slate-400 font-normal">Membership status &amp; renewal</div>
+                                    </div>
+                                </div>
+                                @if($activeSubscription)
+                                    <span class="px-2 py-0.5 bg-purple-100 text-purple-800 rounded-full text-[10px] font-black">Active</span>
+                                @endif
+                            </a>
+
+                            <!-- Billing & Invoices -->
+                            <a
+                                href="{{ route('account.dashboard', ['tab' => 'billing']) }}"
+                                wire:click.prevent="setTab('billing'); close()"
+                                class="flex items-center justify-between p-2.5 rounded-xl transition group {{ $tab === 'billing' ? 'bg-rose-50/80 text-[#F20B65] font-black' : 'hover:bg-slate-50 text-slate-700' }}"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <span class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 {{ $tab === 'billing' ? 'bg-[#F20B65] text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-rose-50 group-hover:text-[#F20B65]' }}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z"/></svg>
+                                    </span>
+                                    <div>
+                                        <div class="text-xs font-bold leading-tight">Billing &amp; Invoices</div>
+                                        <div class="text-[10px] text-slate-400 font-normal">Invoices &amp; payment records</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Currently active status tag / quick breadcrumb -->
+            <div class="hidden md:flex items-center gap-2 text-xs text-slate-500 font-semibold">
+                <span class="text-slate-400">Current View:</span>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black bg-rose-50 text-[#F20B65] border border-rose-200 shadow-2xs">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#F20B65] animate-pulse"></span>
+                    {{ match($tab) {
+                        'overview' => 'Overview',
+                        'listings', 'active', 'pending', 'rejected', 'expired', 'suspended' => 'My Listings (' . $totalListings . ')',
+                        'saved' => 'Saved Listings (' . $savedListingsCount . ')',
+                        'promotions' => 'Promotions & Boosts',
+                        'analytics' => 'Performance Analytics',
+                        'profile' => 'Profile Details',
+                        'age_assurance' => '18+ Age Assurance',
+                        'security' => 'Security & Password',
+                        'privacy' => 'Privacy Preferences',
+                        'blocked_users' => 'Blocked Users (' . count($blockedUsers) . ')',
+                        'subscription' => 'Subscription Plan',
+                        'billing' => 'Billing & Invoices',
+                        'messages' => 'Messages',
+                        'notifications' => 'Notifications',
+                        default => ucfirst(str_replace('_', ' ', $tab))
+                    } }}
                 </span>
-            @endif
-        </a>
-
-        <a
-            href="{{ route('account.dashboard', ['tab' => 'notifications']) }}"
-            wire:click.prevent="setTab('notifications')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'notifications' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
-            @if($tab === 'notifications') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
-        >
-            <svg class="w-4 h-4" @if($tab === 'notifications') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-            <span>Notifications</span>
-            @if(($unreadNotificationsCount ?? 0) > 0)
-                <span class="px-2 py-0.5 rounded-full text-[11px] font-black bg-rose-600 text-white animate-pulse">
-                    {{ $unreadNotificationsCount }} new
-                </span>
-            @endif
-        </a>
-
-        <a
-            href="{{ route('account.wallet.index') }}"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shrink-0 shadow-2xs"
-        >
-            <svg class="w-4 h-4" style="color: #F20B65 !important;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-            <span>Credit Wallet</span>
-            <span class="px-2 py-0.5 rounded-full text-[11px] font-black bg-emerald-50 text-emerald-800 border border-emerald-300">
-                {{ number_format(auth()->user()?->getWalletBalance() ?? 0) }}
-            </span>
-        </a>
-
-        <a
-            href="{{ route('account.verification.show') }}"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shrink-0 shadow-2xs"
-        >
-            <svg class="w-4 h-4 {{ auth()->user()?->is_identity_verified ? 'text-blue-600' : 'text-slate-500' }}" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-            <span>Verification</span>
-            @if(auth()->user()?->is_identity_verified)
-                <span class="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-[10px] font-black">✓ VERIFIED</span>
-            @endif
-        </a>
-
-        <a
-            href="{{ route('account.dashboard', ['tab' => 'analytics']) }}"
-            wire:click.prevent="setTab('analytics')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'analytics' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
-            @if($tab === 'analytics') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
-        >
-            <svg class="w-4 h-4" @if($tab === 'analytics') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-            <span>Analytics</span>
-        </a>
-
-        <a
-            href="{{ route('account.dashboard', ['tab' => 'promotions']) }}"
-            wire:click.prevent="setTab('promotions')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'promotions' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
-            @if($tab === 'promotions') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
-        >
-            <svg class="w-4 h-4" @if($tab === 'promotions') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-            <span>Promotions</span>
-        </a>
-
-        <a
-            href="{{ route('account.dashboard', ['tab' => 'subscription']) }}"
-            wire:click.prevent="setTab('subscription')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'subscription' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
-            @if($tab === 'subscription') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
-        >
-            <svg class="w-4 h-4" @if($tab === 'subscription') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-            <span>Subscription</span>
-        </a>
-
-        <a
-            href="{{ route('account.dashboard', ['tab' => 'billing']) }}"
-            wire:click.prevent="setTab('billing')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'billing' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
-            @if($tab === 'billing') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
-        >
-            <svg class="w-4 h-4" @if($tab === 'billing') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z"/></svg>
-            <span>Billing</span>
-        </a>
-
-        <a
-            href="{{ route('account.dashboard', ['tab' => 'profile']) }}"
-            wire:click.prevent="setTab('profile')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'profile' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
-            @if($tab === 'profile') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
-        >
-            <svg class="w-4 h-4" @if($tab === 'profile') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-            <span>Profile</span>
-        </a>
-
-        <a
-            href="{{ route('account.dashboard', ['tab' => 'privacy']) }}"
-            wire:click.prevent="setTab('privacy')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'privacy' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
-            @if($tab === 'privacy') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
-        >
-            <svg class="w-4 h-4" @if($tab === 'privacy') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-            <span>Privacy</span>
-        </a>
-
-        <a
-            href="{{ route('account.dashboard', ['tab' => 'age_assurance']) }}"
-            wire:click.prevent="setTab('age_assurance')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'age_assurance' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
-            @if($tab === 'age_assurance') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
-        >
-            <svg class="w-4 h-4" @if($tab === 'age_assurance') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-            <span>18+ Assurance</span>
-        </a>
-
-        <a
-            href="{{ route('account.dashboard', ['tab' => 'security']) }}"
-            wire:click.prevent="setTab('security')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'security' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
-            @if($tab === 'security') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
-        >
-            <svg class="w-4 h-4" @if($tab === 'security') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
-            <span>Security</span>
-        </a>
-
-        <a
-            href="{{ route('account.dashboard', ['tab' => 'blocked_users']) }}"
-            wire:click.prevent="setTab('blocked_users')"
-            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'blocked_users' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
-            @if($tab === 'blocked_users') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
-        >
-            <svg class="w-4 h-4" @if($tab === 'blocked_users') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
-            <span>Blocked Users</span>
-            <span class="px-2 py-0.5 rounded-full text-[11px] font-black" @if($tab === 'blocked_users') style="background-color: #fce7f3 !important; color: #F20B65 !important;" @else class="bg-slate-200 text-slate-800" @endif>
-                {{ count($blockedUsers) }}
-            </span>
-        </a>
+            </div>
+        </div>
     </div>
 
     <!-- TAB 1: OVERVIEW SECTION -->
