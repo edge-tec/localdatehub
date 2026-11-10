@@ -18,8 +18,11 @@ class NotificationLog extends Model
         'channel',
         'notification_type',
         'subject',
+        'message',
         'recipient_target',
         'status',
+        'is_read',
+        'read_at',
         'error_details',
         'sent_at',
     ];
@@ -27,8 +30,19 @@ class NotificationLog extends Model
     protected function casts(): array
     {
         return [
+            'is_read' => 'boolean',
+            'read_at' => 'datetime',
             'sent_at' => 'datetime',
         ];
+    }
+
+    public function markAsRead(): void
+    {
+        if (!$this->is_read) {
+            $this->is_read = true;
+            $this->read_at = now();
+            $this->save();
+        }
     }
 
     public function user(): BelongsTo

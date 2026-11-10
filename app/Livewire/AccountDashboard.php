@@ -17,6 +17,7 @@ use App\Modules\Categories\Models\Category;
 use App\Modules\Contact\Models\ContactMessage;
 use App\Modules\Listings\Models\Listing;
 use App\Modules\Listings\Models\ListingAnalytics;
+use App\Modules\Notifications\Models\NotificationLog;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -59,6 +60,11 @@ class AccountDashboard extends Component
     public array $conversationReplies = [];
     public array $selectedMessages = [];
     public bool $selectAllMessages = false;
+
+    // Notifications Properties
+    public string $notificationFilter = 'all'; // all, unread, read
+    public ?NotificationLog $inspectedNotification = null;
+    public bool $showNotificationModal = false;
 
     // Analytics Properties
     public string $analyticsTimeframe = '30d'; // 7d, 30d, all
@@ -111,6 +117,25 @@ class AccountDashboard extends Component
         }
 
         $this->loadUserProfile();
+
+        if (request()->filled('inspect_message')) {
+            $msgId = (int) request()->query('inspect_message');
+            $exists = ContactMessage::where('id', $msgId)
+                ->where(fn ($q) => $q->where('recipient_id', Auth::id())->orWhere('sender_id', Auth::id()))
+                ->exists();
+            if ($exists) {
+                $this->tab = 'messages';
+                $this->inspectMessage($msgId);
+            }
+        }
+
+        if (request()->filled('inspect_notification')) {
+            $notifId = (int) request()->query('inspect_notification');
+            if (NotificationLog::where('id', $notifId)->where('user_id', Auth::id())->exists()) {
+                $this->tab = 'notifications';
+                $this->inspectNotification($notifId);
+            }
+        }
     }
 
     public function setTab(string $newTab): void
@@ -329,6 +354,12 @@ class AccountDashboard extends Component
             $message->save();
         }
 
+        // Also mark any unread notifications related to incoming messages as read
+        NotificationLog::where('user_id', Auth::id())
+            ->whereIn('notification_type', ['contact_received', 'message_reply'])
+            ->where('is_read', false)
+            ->update(['is_read' => true, 'read_at' => now()]);
+
         $this->inspectedMessage = $message;
         $this->loadConversationThread($message);
         $this->replyMessageContent = '';
@@ -340,8 +371,9 @@ class AccountDashboard extends Component
         if ($message->listing_id) {
             $senderId = $message->sender_id;
             $recipientId = $message->recipient_id;
+            $currentUserId = Auth::id();
 
-            $replies = ContactMessage::where('listing_id', $message->listing_id)
+            $repliesQuery = ContactMessage::where('listing_id', $message->listing_id)
                 ->where('id', '!=', $message->id)
                 ->where(function ($q) use ($senderId, $recipientId, $message) {
                     if ($senderId && $recipientId) {
@@ -353,11 +385,16 @@ class AccountDashboard extends Component
                     } elseif (!empty($message->sender_email_encrypted)) {
                         $q->where('sender_email_encrypted', $message->sender_email_encrypted);
                     }
-                })
-                ->orderBy('created_at', 'asc')
-                ->get();
+                });
 
-            $currentUserId = Auth::id();
+            // Automatically mark any unread replies received by current user in this thread as read/seen
+            (clone $repliesQuery)
+                ->where('recipient_id', $currentUserId)
+                ->where('is_read', false)
+                ->update(['is_read' => true, 'read_at' => now()]);
+
+            $replies = $repliesQuery->orderBy('created_at', 'asc')->get();
+
             $currentUserEmail = Auth::user()?->email;
 
             $this->conversationReplies = $replies->map(fn($r) => [
@@ -366,6 +403,8 @@ class AccountDashboard extends Component
                 'sender_name' => $r->sender_name,
                 'sender_email' => $r->sender_email_encrypted,
                 'message' => $r->message_encrypted,
+                'is_read' => (bool) $r->is_read,
+                'read_at_formatted' => $r->read_at ? $r->read_at->diffForHumans() : null,
                 'created_at_formatted' => $r->created_at ? $r->created_at->format('M d, g:i A') : '',
                 'is_me' => ($r->sender_id === $currentUserId || ($currentUserEmail && $r->sender_email_encrypted === $currentUserEmail)),
             ])->all();
@@ -397,6 +436,8 @@ class AccountDashboard extends Component
             ? $this->inspectedMessage->sender_id 
             : $this->inspectedMessage->recipient_id;
 
+        $replySubject = 'Re: ' . ltrim(str_replace('Re:', '', $this->inspectedMessage->subject ?? 'Inquiry'));
+
         $reply = ContactMessage::create([
             'listing_id' => $this->inspectedMessage->listing_id,
             'sender_id' => $currentUser->id,
@@ -405,7 +446,7 @@ class AccountDashboard extends Component
             'sender_name' => $currentUser->profile?->display_name ?: $currentUser->name,
             'sender_email_encrypted' => $currentUser->email,
             'sender_phone_encrypted' => $currentUser->profile?->phone ?? null,
-            'subject' => 'Re: ' . ltrim(str_replace('Re:', '', $this->inspectedMessage->subject ?? 'Inquiry')),
+            'subject' => $replySubject,
             'message_encrypted' => $this->replyMessageContent,
             'is_read' => false,
             'is_replied' => true,
@@ -414,7 +455,29 @@ class AccountDashboard extends Component
             'user_agent' => substr((string) request()->userAgent(), 0, 255),
         ]);
 
+        if ($targetRecipientId) {
+            $recipientUser = User::find($targetRecipientId);
+            if ($recipientUser) {
+                NotificationLog::create([
+                    'user_id' => $recipientUser->id,
+                    'channel' => 'database',
+                    'notification_type' => 'message_reply',
+                    'subject' => $replySubject,
+                    'message' => $this->replyMessageContent,
+                    'recipient_target' => $recipientUser->email,
+                    'status' => 'sent',
+                    'is_read' => false,
+                    'read_at' => null,
+                    'sent_at' => now(),
+                ]);
+            }
+        }
+
         $this->inspectedMessage->is_replied = true;
+        if ($this->inspectedMessage->recipient_id === $currentUser->id && !$this->inspectedMessage->is_read) {
+            $this->inspectedMessage->is_read = true;
+            $this->inspectedMessage->read_at = now();
+        }
         $this->inspectedMessage->save();
 
         $this->replyMessageContent = '';
@@ -426,6 +489,90 @@ class AccountDashboard extends Component
     public function insertQuickReply(string $template): void
     {
         $this->replyMessageContent = $template;
+    }
+
+    public function markMessageRead(int $messageId): void
+    {
+        $message = ContactMessage::where('recipient_id', Auth::id())->findOrFail($messageId);
+        if (!$message->is_read) {
+            $message->is_read = true;
+            $message->read_at = now();
+            $message->save();
+        }
+
+        if ($this->inspectedMessage && $this->inspectedMessage->id === $messageId) {
+            $this->inspectedMessage->is_read = true;
+            $this->inspectedMessage->read_at = $message->read_at;
+        }
+
+        session()->flash('success', 'Message marked as read (Seen).');
+    }
+
+    public function markAllMessagesRead(): void
+    {
+        ContactMessage::where('recipient_id', Auth::id())
+            ->where('is_read', false)
+            ->update(['is_read' => true, 'read_at' => now()]);
+
+        NotificationLog::where('user_id', Auth::id())
+            ->whereIn('notification_type', ['contact_received', 'message_reply'])
+            ->where('is_read', false)
+            ->update(['is_read' => true, 'read_at' => now()]);
+
+        session()->flash('success', 'All inbox messages have been marked as read (Seen).');
+    }
+
+    public function inspectNotification(int $notificationId): void
+    {
+        $notification = NotificationLog::where('user_id', Auth::id())->findOrFail($notificationId);
+        if (!$notification->is_read) {
+            $notification->is_read = true;
+            $notification->read_at = now();
+            $notification->save();
+        }
+
+        $this->inspectedNotification = $notification;
+        $this->showNotificationModal = true;
+    }
+
+    public function closeNotificationModal(): void
+    {
+        $this->showNotificationModal = false;
+        $this->inspectedNotification = null;
+    }
+
+    public function markNotificationRead(int $notificationId): void
+    {
+        $notification = NotificationLog::where('user_id', Auth::id())->findOrFail($notificationId);
+        $notification->markAsRead();
+        session()->flash('success', 'Notification marked as read (Seen).');
+    }
+
+    public function markNotificationUnread(int $notificationId): void
+    {
+        $notification = NotificationLog::where('user_id', Auth::id())->findOrFail($notificationId);
+        $notification->is_read = false;
+        $notification->read_at = null;
+        $notification->save();
+        session()->flash('success', 'Notification marked as unread.');
+    }
+
+    public function markAllNotificationsRead(): void
+    {
+        NotificationLog::where('user_id', Auth::id())
+            ->where('is_read', false)
+            ->update(['is_read' => true, 'read_at' => now()]);
+
+        session()->flash('success', 'All notifications marked as read (Seen).');
+    }
+
+    public function deleteNotification(int $notificationId): void
+    {
+        NotificationLog::where('user_id', Auth::id())->where('id', $notificationId)->delete();
+        if ($this->inspectedNotification && $this->inspectedNotification->id === $notificationId) {
+            $this->closeNotificationModal();
+        }
+        session()->flash('success', 'Notification removed.');
     }
 
     public function markMessageUnread(int $messageId): void
@@ -1090,6 +1237,17 @@ class AccountDashboard extends Component
 
         $categories = Category::where('is_active', true)->orderBy('name')->get();
 
+        // User Notifications
+        $notificationsQuery = NotificationLog::where('user_id', $userId)->latest();
+        if ($this->notificationFilter === 'unread') {
+            $notificationsQuery->where('is_read', false);
+        } elseif ($this->notificationFilter === 'read') {
+            $notificationsQuery->where('is_read', true);
+        }
+        $userNotifications = $notificationsQuery->paginate(10, ['*'], 'userNotificationsPage');
+        $unreadNotificationsCount = NotificationLog::where('user_id', $userId)->where('is_read', false)->count();
+        $totalNotificationsCount = NotificationLog::where('user_id', $userId)->count();
+
         return view('livewire.account-dashboard', [
             'totalListings' => $totalListings,
             'activeListingsCount' => $activeListingsCount,
@@ -1114,6 +1272,9 @@ class AccountDashboard extends Component
             'totalRepliedCount' => $totalRepliedCount,
             'totalFlaggedCount' => $totalFlaggedCount,
             'userListingsForMessages' => $userListingsForMessages,
+            'userNotifications' => $userNotifications,
+            'unreadNotificationsCount' => $unreadNotificationsCount,
+            'totalNotificationsCount' => $totalNotificationsCount,
             'analyticsListings' => $analyticsListings,
             'activePromotions' => $activePromotions,
             'pricingPlans' => $pricingPlans,

@@ -20,6 +20,8 @@ class ContentReport extends Model
         'details',
         'evidence_urls',
         'status',
+        'is_read',
+        'read_at',
         'risk_level',
         'is_urgent_takedown',
         'resolution_notes',
@@ -32,8 +34,20 @@ class ContentReport extends Model
     {
         return [
             'evidence_urls' => 'array',
+            'is_read' => 'boolean',
+            'read_at' => 'datetime',
+            'is_urgent_takedown' => 'boolean',
             'resolved_at' => 'datetime',
         ];
+    }
+
+    public function markAsRead(): void
+    {
+        if (!$this->is_read) {
+            $this->is_read = true;
+            $this->read_at = now();
+            $this->save();
+        }
     }
 
     public function reporter(): BelongsTo

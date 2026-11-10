@@ -82,22 +82,60 @@
                 <div class="flex items-center space-x-4">
                     
                     <!-- Notification Bell -->
-                    <div class="relative" @click.away="notificationsOpen = false">
-                        <button @click="notificationsOpen = !notificationsOpen" class="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-900 transition relative">
+                    @php
+                        $adminUnreadReports = \App\Modules\Moderation\Models\ContentReport::where('is_read', false)->count();
+                        $adminUnreadAbuse = \App\Modules\Contact\Models\ContactMessage::where('is_flagged', true)->where('is_read', false)->count();
+                        $adminUnreadLogs = \App\Modules\Notifications\Models\NotificationLog::where('is_read', false)->count();
+                        $adminTotalUnread = $adminUnreadReports + $adminUnreadAbuse + $adminUnreadLogs;
+
+                        $recentAdminReports = \App\Modules\Moderation\Models\ContentReport::latest('id')->take(3)->get();
+                        $recentAdminLogs = \App\Modules\Notifications\Models\NotificationLog::with('user')->latest('id')->take(4)->get();
+                    @endphp
+                    <div class="relative" x-data="{ unreadCount: {{ $adminTotalUnread }}, allMarkedRead: {{ $adminTotalUnread === 0 ? 'true' : 'false' }}, markAllSeen() { if (this.unreadCount > 0) { this.unreadCount = 0; this.allMarkedRead = true; fetch('{{ route('notifications.mark-seen') }}', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, body: JSON.stringify({ scope: 'admin' }) }); } } }" @click.away="notificationsOpen = false">
+                        <button @click="notificationsOpen = !notificationsOpen; if (notificationsOpen) { markAllSeen(); }" class="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-900 transition relative" title="Admin Notifications & Alerts">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
-                            <!-- Pink Badge '3' -->
-                            <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#F20B83] text-white text-[10px] font-bold flex items-center justify-center shadow">
-                                3
+                            <span x-show="unreadCount > 0" x-cloak x-text="unreadCount > 99 ? '99+' : unreadCount" class="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-[#F20B83] text-white text-[10px] font-bold flex items-center justify-center shadow">
+                                {{ $adminTotalUnread }}
                             </span>
                         </button>
-                        <div x-show="notificationsOpen" x-cloak class="absolute right-0 mt-2 w-72 rounded-2xl bg-white border border-slate-200 shadow-2xl p-3 z-50 text-xs">
-                            <div class="font-bold text-slate-900 mb-2">Notifications (3 unread)</div>
-                            <div class="space-y-2 text-slate-700">
-                                <div class="p-2 rounded-xl bg-slate-50 border border-slate-200">New listing pending moderation in New York.</div>
-                                <div class="p-2 rounded-xl bg-slate-50 border border-slate-200">Payment received: $49.00 for Featured Plan.</div>
-                                <div class="p-2 rounded-xl bg-slate-50 border border-slate-200">New user registered with 18+ age verification.</div>
+                        <div x-show="notificationsOpen" x-cloak class="absolute right-0 mt-2 w-80 rounded-2xl bg-white border border-slate-200 shadow-2xl p-3.5 z-50 text-xs">
+                            <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+                                <div class="font-black text-slate-900 flex items-center gap-1.5">
+                                    <span>Real-Time Alerts</span>
+                                    <span x-show="allMarkedRead" class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black">✓✓ Seen</span>
+                                </div>
+                                <a href="{{ route('admin.dashboard', ['tab' => 'notifications']) }}" class="text-[11px] font-bold text-[#F20B83] hover:underline">View All &rarr;</a>
+                            </div>
+                            <div class="space-y-2 max-h-72 overflow-y-auto pr-0.5">
+                                @foreach($recentAdminReports as $rep)
+                                    <a href="{{ route('admin.dashboard', ['tab' => 'reports', 'inspect_report' => $rep->id]) }}" class="block p-2.5 rounded-xl bg-rose-50/60 hover:bg-rose-50 border border-rose-100 transition">
+                                        <div class="flex items-center justify-between gap-2">
+                                            <span class="font-black text-rose-800 text-[11px]">🚨 Report #{{ $rep->id }}: {{ ucwords(str_replace('_', ' ', $rep->reason_code)) }}</span>
+                                            <span class="text-[10px] font-black text-emerald-700" x-show="allMarkedRead || {{ $rep->is_read ? 'true' : 'false' }}">✓✓ Seen</span>
+                                        </div>
+                                        <div class="text-[11px] text-slate-600 truncate mt-0.5">{{ $rep->details ?: 'Incident submitted for moderation review.' }}</div>
+                                        <div class="text-[10px] text-slate-400 mt-0.5">{{ $rep->created_at?->diffForHumans() }}</div>
+                                    </a>
+                                @endforeach
+
+                                @foreach($recentAdminLogs as $log)
+                                    <a href="{{ route('admin.dashboard', ['tab' => 'notifications', 'inspect_notification' => $log->id]) }}" class="block p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition">
+                                        <div class="flex items-center justify-between gap-2">
+                                            <span class="font-bold text-slate-900 truncate">{{ $log->subject ?: 'Platform Notification' }}</span>
+                                            <span class="text-[10px] font-black text-emerald-700 shrink-0" x-show="allMarkedRead || {{ $log->is_read ? 'true' : 'false' }}">✓✓ Seen</span>
+                                        </div>
+                                        <div class="text-[11px] text-slate-600 truncate mt-0.5">To: {{ $log->user?->name ?? $log->recipient_target }}</div>
+                                        <div class="text-[10px] text-slate-400 mt-0.5">{{ $log->sent_at?->diffForHumans() ?? $log->created_at?->diffForHumans() }}</div>
+                                    </a>
+                                @endforeach
+
+                                @if($recentAdminReports->isEmpty() && $recentAdminLogs->isEmpty())
+                                    <div class="py-6 text-center text-slate-400 font-semibold">
+                                        No recent notifications or alerts.
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>

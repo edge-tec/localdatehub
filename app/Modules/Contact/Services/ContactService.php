@@ -104,7 +104,8 @@ class ContactService
                 $listing->user,
                 new \App\Modules\Notifications\Notifications\ContactMessageReceivedNotification($message),
                 'contact_received',
-                "New inquiry on: {$listing->title}"
+                "New inquiry on: {$listing->title}",
+                $validated['message']
             );
         }
 

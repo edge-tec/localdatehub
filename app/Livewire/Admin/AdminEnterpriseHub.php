@@ -250,6 +250,10 @@ class AdminEnterpriseHub extends Component
     public string $notificationStatusFilter = 'all';
     public string $notificationsSubTab = 'logs'; // 'logs', 'templates'
     public bool $showBroadcastModal = false;
+    public bool $showInspectNotificationModal = false;
+    public ?array $inspectNotificationData = null;
+    public bool $showInspectAbuseModal = false;
+    public ?array $inspectAbuseData = null;
     public array $broadcastForm = [
         'target_audience' => 'all_users',
         'specific_user_id' => '',
@@ -460,6 +464,17 @@ class AdminEnterpriseHub extends Component
         $this->resetValidation();
         $this->resetErrorBag();
         session()->forget(['error', 'errors']);
+
+        if (request()->filled('inspect_notification')) {
+            $this->tab = 'notifications';
+            $this->inspectNotification((int) request()->query('inspect_notification'));
+        } elseif (request()->filled('inspect_report')) {
+            $this->tab = 'reports';
+            $this->openInspectReportModal((int) request()->query('inspect_report'));
+        } elseif (request()->filled('inspect_abuse')) {
+            $this->tab = 'abuse';
+            $this->inspectAbuseMessage((int) request()->query('inspect_abuse'));
+        }
     }
 
     /*
@@ -1155,6 +1170,21 @@ class AdminEnterpriseHub extends Component
         $from = $this->applyApproval($listing, 'Approved by moderation administrator.');
         AdminAuditService::log('listing.approve', $listing, ['status' => $from], ['status' => Listing::STATUS_ACTIVE]);
 
+        if ($listing->user_id) {
+            NotificationLog::create([
+                'user_id' => $listing->user_id,
+                'channel' => 'database',
+                'notification_type' => 'listing_approved',
+                'subject' => "Listing Approved: {$listing->title}",
+                'message' => "Great news! Your personal classified listing [{$listing->title}] has been approved by moderation and is now live.",
+                'recipient_target' => $listing->user?->email ?? 'user#' . $listing->user_id,
+                'status' => 'sent',
+                'is_read' => false,
+                'read_at' => null,
+                'sent_at' => now(),
+            ]);
+        }
+
         session()->flash('success', "Listing [{$listing->title}] approved and published.");
     }
 
@@ -1190,6 +1220,21 @@ class AdminEnterpriseHub extends Component
         $listing->recordStatusChange(Listing::STATUS_REJECTED, $this->listingActionReason, Auth::id());
 
         AdminAuditService::log('listing.reject', $listing, $before, ['status' => Listing::STATUS_REJECTED, 'reason' => $this->listingActionReason]);
+
+        if ($listing->user_id) {
+            NotificationLog::create([
+                'user_id' => $listing->user_id,
+                'channel' => 'database',
+                'notification_type' => 'listing_rejected',
+                'subject' => "Moderation Notice: {$listing->title}",
+                'message' => "Your classified listing [{$listing->title}] requires revision: {$this->listingActionReason}",
+                'recipient_target' => $listing->user?->email ?? 'user#' . $listing->user_id,
+                'status' => 'sent',
+                'is_read' => false,
+                'read_at' => null,
+                'sent_at' => now(),
+            ]);
+        }
 
         $this->showRejectListingModal = false;
         $this->targetListingId = null;
@@ -1804,8 +1849,11 @@ class AdminEnterpriseHub extends Component
                 'channel' => $validated['channel'],
                 'notification_type' => 'admin_broadcast_announcement',
                 'subject' => $validated['subject'],
+                'message' => $validated['message'],
                 'recipient_target' => $validated['channel'] === 'email' ? $u->email : ($u->phone ?: $u->email),
                 'status' => 'sent',
+                'is_read' => false,
+                'read_at' => null,
                 'sent_at' => now(),
                 'error_details' => null,
             ]);
@@ -1816,6 +1864,47 @@ class AdminEnterpriseHub extends Component
         $msg = "✓ Broadcast announcement dispatched to {$count} recipient(s).";
         session()->flash('success', $msg);
         $this->dispatch('toast', type: 'success', message: $msg);
+    }
+
+    public function inspectNotification(int $logId): void
+    {
+        $this->authorizePermission('settings.manage');
+        $log = NotificationLog::with('user')->findOrFail($logId);
+        $log->markAsRead();
+
+        $this->inspectNotificationData = [
+            'id' => $log->id,
+            'user_name' => $log->user?->name ?? 'User #' . $log->user_id,
+            'recipient_target' => $log->recipient_target,
+            'channel' => strtoupper($log->channel),
+            'notification_type' => $log->notification_type,
+            'subject' => $log->subject ?: 'Platform Notification',
+            'message' => $log->message ?: $log->subject ?: 'System notification dispatched.',
+            'status' => strtoupper($log->status),
+            'is_read' => (bool) $log->is_read,
+            'read_at' => $log->read_at?->format('M j, Y H:i:s') ?? now()->format('M j, Y H:i:s'),
+            'sent_at' => $log->sent_at?->format('M j, Y H:i:s') ?? $log->created_at?->format('M j, Y H:i:s'),
+            'error_details' => $log->error_details,
+        ];
+        $this->showInspectNotificationModal = true;
+    }
+
+    public function markNotificationRead(int $logId): void
+    {
+        $this->authorizePermission('settings.manage');
+        $log = NotificationLog::findOrFail($logId);
+        $log->markAsRead();
+        session()->flash('success', "Notification #{$log->id} marked as read (Seen).");
+    }
+
+    public function markAllNotificationsRead(): void
+    {
+        $this->authorizePermission('settings.manage');
+        NotificationLog::where('is_read', false)->update([
+            'is_read' => true,
+            'read_at' => now(),
+        ]);
+        session()->flash('success', 'All notifications have been marked as read (Seen).');
     }
 
     public function resendNotification(int $logId): void
@@ -1868,6 +1957,7 @@ class AdminEnterpriseHub extends Component
     {
         $this->authorizePermission('reports.manage');
         $report = ContentReport::with(['reporter', 'resolvedBy'])->findOrFail($reportId);
+        $report->markAsRead();
 
         $targetTitle = 'Target Unavailable';
         $targetUrl = null;
@@ -1941,6 +2031,8 @@ class AdminEnterpriseHub extends Component
         $before = ['status' => $report->status];
 
         $report->status = 'investigating';
+        $report->is_read = true;
+        $report->read_at = $report->read_at ?: now();
         $report->resolved_by_user_id = Auth::id();
         $report->resolution_notes = ($report->resolution_notes ? $report->resolution_notes . " | " : '') . 'Investigation initiated by ' . Auth::user()->name . ' on ' . now()->toFormattedDateString();
         $report->save();
@@ -1955,11 +2047,22 @@ class AdminEnterpriseHub extends Component
         $this->authorizePermission('reports.manage');
         $this->targetReportId = $reportId;
         $report = ContentReport::findOrFail($reportId);
+        $report->markAsRead();
         $this->reportResolutionAction = $report->status === 'open' ? 'resolved' : $report->status;
         $this->reportResolutionNotes = $report->resolution_notes ?? '';
         $this->reportQuarantineTarget = false;
         $this->reportSuspendTargetUser = false;
         $this->showResolveReportModal = true;
+    }
+
+    public function markAllReportsRead(): void
+    {
+        $this->authorizePermission('reports.manage');
+        ContentReport::where('is_read', false)->update([
+            'is_read' => true,
+            'read_at' => now(),
+        ]);
+        session()->flash('success', 'All incident reports marked as read (Seen).');
     }
 
     public function resolveReport(?string $action = null): void
@@ -2028,15 +2131,46 @@ class AdminEnterpriseHub extends Component
         session()->flash('success', "Report #{$report->id} concluded as {$act}.");
     }
 
+    public function inspectAbuseMessage(int $messageId): void
+    {
+        $this->authorizePermission('moderation.view');
+        $message = ContactMessage::with(['listing.city.state', 'recipient', 'sender'])->findOrFail($messageId);
+        if (!$message->is_read) {
+            $message->is_read = true;
+            $message->read_at = now();
+            $message->save();
+        }
+
+        $this->inspectAbuseData = [
+            'id' => $message->id,
+            'sender_name' => $message->sender_name,
+            'sender_email' => $message->sender_email_encrypted,
+            'recipient_name' => $message->recipient?->name ?? 'Platform Support',
+            'listing_title' => $message->listing?->title ?? 'Direct Inquiry',
+            'subject' => $message->subject ?? 'Flagged Inquiry',
+            'message' => $message->message_encrypted,
+            'flagged_reason' => $message->flagged_reason ?? 'spam',
+            'is_read' => (bool) $message->is_read,
+            'read_at' => $message->read_at?->format('M j, Y H:i:s'),
+            'created_at' => $message->created_at?->format('M j, Y H:i:s'),
+        ];
+        $this->showInspectAbuseModal = true;
+    }
+
     public function dismissFlaggedMessage(int $messageId): void
     {
         $this->authorizePermission('moderation.act');
         $message = ContactMessage::findOrFail($messageId);
         $message->is_flagged = false;
+        $message->is_read = true;
+        $message->read_at = $message->read_at ?: now();
         $message->save();
 
+        $this->showInspectAbuseModal = false;
+        $this->inspectAbuseData = null;
+
         AdminAuditService::log('contact_abuse.dismiss', $message, ['is_flagged' => true], ['is_flagged' => false]);
-        session()->flash('success', "Flag on message #{$message->id} dismissed.");
+        session()->flash('success', "Flag on message #{$message->id} dismissed and marked as seen.");
     }
 
     public function quarantineReportedListing(int $reportId): void

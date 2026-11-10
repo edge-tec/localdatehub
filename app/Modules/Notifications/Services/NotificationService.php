@@ -12,7 +12,7 @@ class NotificationService
     /**
      * Dispatch notification with user preferences checks and delivery logging.
      */
-    public function send(User $user, Notification $notification, string $type, ?string $subject = null): bool
+    public function send(User $user, Notification $notification, string $type, ?string $subject = null, ?string $messageBody = null): bool
     {
         // 1. Check User Notification Preferences
         $prefs = $user->preferences?->notification_settings ?? [];
@@ -27,8 +27,11 @@ class NotificationService
             'channel' => 'mail',
             'notification_type' => $type,
             'subject' => $subject ?: class_basename($notification),
+            'message' => $messageBody,
             'recipient_target' => $user->email,
             'status' => 'queued',
+            'is_read' => false,
+            'read_at' => null,
         ]);
 
         try {

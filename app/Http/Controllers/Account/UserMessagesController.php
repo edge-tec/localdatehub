@@ -74,6 +74,20 @@ class UserMessagesController extends Controller
             $message->save();
         }
 
+        if ($message->listing_id && $message->recipient_id === $request->user()?->id) {
+            ContactMessage::where('listing_id', $message->listing_id)
+                ->where('recipient_id', $request->user()->id)
+                ->where('is_read', false)
+                ->update(['is_read' => true, 'read_at' => now()]);
+        }
+
+        if ($request->user()) {
+            \App\Modules\Notifications\Models\NotificationLog::where('user_id', $request->user()->id)
+                ->whereIn('notification_type', ['contact_received', 'message_reply'])
+                ->where('is_read', false)
+                ->update(['is_read' => true, 'read_at' => now()]);
+        }
+
         $message->loadMissing(['listing.primaryPhoto', 'listing.city', 'listing.state', 'sender']);
 
         return view('account.messages.show', [

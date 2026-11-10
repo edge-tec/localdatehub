@@ -883,4 +883,114 @@ class UserAccountDashboardTest extends TestCase
         $response->assertHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
         $this->assertStringContainsString("frame-ancestors 'self'", (string) $response->headers->get('Content-Security-Policy'));
     }
+
+    public function test_when_user_or_admin_checks_notification_or_message_it_is_marked_read_seen(): void
+    {
+        $listing = Listing::create([
+            'user_id' => $this->user->id,
+            'category_id' => $this->category->id,
+            'state_id' => $this->city->state_id,
+            'city_id' => $this->city->id,
+            'title' => 'Listing With Inquiry & Notification',
+            'slug' => 'listing-inquiry-notif-' . uniqid(),
+            'description' => 'Testing read/seen states.',
+            'content_hash' => hash('sha256', 'inquiry-' . uniqid()),
+            'poster_age' => 27,
+            'poster_gender' => 'Female',
+            'intent' => 'dating',
+            'status' => Listing::STATUS_ACTIVE,
+        ]);
+
+        $message = ContactMessage::create([
+            'listing_id' => $listing->id,
+            'sender_id' => $this->otherUser->id,
+            'recipient_id' => $this->user->id,
+            'inquiry_type' => 'listing_inquiry',
+            'sender_name' => $this->otherUser->name,
+            'sender_email_encrypted' => $this->otherUser->email,
+            'subject' => 'Interested in your listing',
+            'message_encrypted' => 'Hello, I saw your listing and would love to connect!',
+            'sender_ip' => '127.0.0.1',
+            'is_read' => false,
+            'is_flagged' => true,
+        ]);
+
+        $notification = \App\Modules\Notifications\Models\NotificationLog::create([
+            'user_id' => $this->user->id,
+            'channel' => 'database',
+            'notification_type' => 'contact_received',
+            'recipient_target' => $this->user->email,
+            'subject' => 'New Inquiry Received',
+            'message' => 'Hello, I saw your listing and would love to connect!',
+            'status' => 'sent',
+            'is_read' => false,
+            'read_at' => null,
+            'sent_at' => now(),
+        ]);
+
+        // 1. User checks notification in AccountDashboard -> marked read/seen
+        Livewire::actingAs($this->user)
+            ->test(AccountDashboard::class, ['initialTab' => 'notifications'])
+            ->call('inspectNotification', $notification->id)
+            ->assertSet('showNotificationModal', true);
+
+        $notification->refresh();
+        $this->assertTrue($notification->is_read);
+        $this->assertNotNull($notification->read_at);
+
+        // 2. User checks message in AccountDashboard -> marked read/seen
+        Livewire::actingAs($this->user)
+            ->test(AccountDashboard::class, ['initialTab' => 'messages'])
+            ->call('inspectMessage', $message->id)
+            ->assertSet('showMessageModal', true);
+
+        $message->refresh();
+        $this->assertTrue($message->is_read);
+        $this->assertNotNull($message->read_at);
+
+        // 3. Admin checks report & notification in AdminEnterpriseHub -> marked read/seen
+        $admin = User::factory()->create([
+            'role' => 'super_admin',
+            'account_status' => 'active',
+        ]);
+
+        $report = \App\Modules\Moderation\Models\ContentReport::create([
+            'reporter_user_id' => $this->otherUser->id,
+            'reportable_type' => Listing::class,
+            'reportable_id' => $listing->id,
+            'reason_code' => 'spam_duplicate',
+            'details' => 'Checking if admin inspection marks report as seen.',
+            'status' => 'open',
+            'risk_level' => 'medium',
+            'is_read' => false,
+            'read_at' => null,
+        ]);
+
+        $adminNotif = \App\Modules\Notifications\Models\NotificationLog::create([
+            'user_id' => $this->otherUser->id,
+            'channel' => 'database',
+            'notification_type' => 'admin_broadcast',
+            'recipient_target' => $this->otherUser->email,
+            'subject' => 'System Broadcast Check',
+            'message' => 'Broadcast message body.',
+            'status' => 'sent',
+            'is_read' => false,
+            'read_at' => null,
+            'sent_at' => now(),
+        ]);
+
+        Livewire::actingAs($admin)
+            ->test(AdminEnterpriseHub::class, ['initialTab' => 'reports'])
+            ->call('openInspectReportModal', $report->id)
+            ->assertSet('showInspectReportModal', true)
+            ->call('inspectNotification', $adminNotif->id)
+            ->assertSet('showInspectNotificationModal', true);
+
+        $report->refresh();
+        $adminNotif->refresh();
+        $this->assertTrue($report->is_read);
+        $this->assertNotNull($report->read_at);
+        $this->assertTrue($adminNotif->is_read);
+        $this->assertNotNull($adminNotif->read_at);
+    }
 }

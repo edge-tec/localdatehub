@@ -184,6 +184,50 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{message}', [UserMessagesController::class, 'destroy'])->name('destroy');
         });
     });
+
+    // Real-Time Notification & Message Read/Seen Synchronization
+    Route::post('/notifications/mark-seen', function (Request $request) {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['ok' => false], 401);
+        }
+
+        $now = now();
+        $scope = (string) $request->input('scope', 'user');
+
+        if ($scope === 'admin' && (method_exists($user, 'isStaff') && $user->isStaff() || ($user->is_admin ?? false))) {
+            \App\Modules\Notifications\Models\NotificationLog::where('is_read', false)->update([
+                'is_read' => true,
+                'read_at' => $now,
+            ]);
+            \App\Modules\Moderation\Models\ContentReport::where('is_read', false)->update([
+                'is_read' => true,
+                'read_at' => $now,
+            ]);
+            \App\Modules\Contact\Models\ContactMessage::where('is_flagged', true)->where('is_read', false)->update([
+                'is_read' => true,
+                'read_at' => $now,
+            ]);
+        } else {
+            \App\Modules\Notifications\Models\NotificationLog::where('user_id', $user->id)
+                ->where('is_read', false)
+                ->update([
+                    'is_read' => true,
+                    'read_at' => $now,
+                ]);
+
+            if ($request->boolean('include_messages')) {
+                \App\Modules\Contact\Models\ContactMessage::where('recipient_id', $user->id)
+                    ->where('is_read', false)
+                    ->update([
+                        'is_read' => true,
+                        'read_at' => $now,
+                    ]);
+            }
+        }
+
+        return response()->json(['ok' => true, 'read_at' => $now->toIso8601String()]);
+    })->name('notifications.mark-seen');
 });
 
 /*

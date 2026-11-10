@@ -81,9 +81,12 @@
             @php
                 $pendingQueueCount = \App\Modules\Listings\Models\Listing::where('status', 'pending_review')->count();
                 $pendingAppealsCount = \App\Modules\Moderation\Models\AppealRequest::whereIn('status', ['pending', 'under_review'])->count();
-                $openReportsCount = \App\Modules\Moderation\Models\ContentReport::where('status', 'open')->count();
+                $openReportsCount = \App\Modules\Moderation\Models\ContentReport::where('status', 'open')->where('is_read', false)->count();
+                if ($openReportsCount === 0) {
+                    $openReportsCount = \App\Modules\Moderation\Models\ContentReport::where('status', 'open')->count();
+                }
                 $pendingVerificationBadge = \App\Modules\Accounts\Models\AgeAssurance::where('status', 'pending')->count();
-                $failedNotificationsBadge = \App\Modules\Notifications\Models\NotificationLog::where('status', 'failed')->count();
+                $failedNotificationsBadge = \App\Modules\Notifications\Models\NotificationLog::where('is_read', false)->count();
                 $totalModerationBadge = $pendingQueueCount + $pendingAppealsCount;
 
                 $menuItems = [
@@ -2306,11 +2309,17 @@
                     </div>
 
                     @if($this->userCan('settings.manage'))
-                        <button type="button" wire:click="openBroadcastModal"
-                            class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black shadow-sm flex items-center gap-1.5 transition whitespace-nowrap">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>
-                            <span>+ Send Broadcast Notification</span>
-                        </button>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button type="button" wire:click="markAllNotificationsRead"
+                                class="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-black shadow-xs flex items-center gap-1.5 transition whitespace-nowrap">
+                                <span>✓✓ Mark All as Read</span>
+                            </button>
+                            <button type="button" wire:click="openBroadcastModal"
+                                class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black shadow-sm flex items-center gap-1.5 transition whitespace-nowrap">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>
+                                <span>+ Send Broadcast Notification</span>
+                            </button>
+                        </div>
                     @endif
                 </div>
 
@@ -2355,18 +2364,21 @@
                                     <th class="{{ $th }}">Recipient / Member</th>
                                     <th class="{{ $th }}">Channel</th>
                                     <th class="{{ $th }}">Subject & Notification Type</th>
-                                    <th class="{{ $th }}">Delivery Status</th>
+                                    <th class="{{ $th }}">Delivery & Read Status</th>
                                     <th class="{{ $th }}">Timestamp</th>
                                     <th class="{{ $th }} text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($notifications as $n)
-                                    <tr class="border-t border-slate-100 hover:bg-slate-50/70 transition" wire:key="notif-{{ $n->id }}">
+                                    <tr class="border-t border-slate-100 hover:bg-slate-50/70 transition {{ $n->is_read ? '' : 'bg-rose-50/30' }}" wire:key="notif-{{ $n->id }}">
                                         <!-- User Column -->
                                         <td class="{{ $td }}">
-                                            <div class="font-black text-slate-950 text-xs">
-                                                {{ $n->user?->name ?? 'User #' . $n->user_id }}
+                                            <div class="font-black text-slate-950 text-xs flex items-center gap-1.5">
+                                                @if(!$n->is_read)
+                                                    <span class="w-2 h-2 rounded-full bg-[#F20B83] shrink-0"></span>
+                                                @endif
+                                                <span>{{ $n->user?->name ?? 'User #' . $n->user_id }}</span>
                                             </div>
                                             <div class="text-[11px] font-mono text-slate-600 truncate max-w-[180px]">
                                                 {{ $n->recipient_target }}
@@ -2383,12 +2395,19 @@
 
                                         <!-- Subject & Type Column -->
                                         <td class="{{ $td }}">
-                                            <div class="font-bold text-slate-900 text-xs">
-                                                {{ $n->subject ?: 'Platform Alert' }}
-                                            </div>
-                                            <div class="text-[10px] font-mono text-slate-400 mt-0.5">
-                                                {{ $n->notification_type }}
-                                            </div>
+                                            <button type="button" wire:click="inspectNotification({{ $n->id }})" class="text-left group">
+                                                <div class="font-bold text-slate-900 group-hover:text-[#F20B83] text-xs transition">
+                                                    {{ $n->subject ?: 'Platform Alert' }}
+                                                </div>
+                                                @if($n->message)
+                                                    <div class="text-[11px] text-slate-600 line-clamp-1 max-w-xs mt-0.5">
+                                                        {{ $n->message }}
+                                                    </div>
+                                                @endif
+                                                <div class="text-[10px] font-mono text-slate-400 mt-0.5">
+                                                    {{ $n->notification_type }}
+                                                </div>
+                                            </button>
                                             @if($n->error_details)
                                                 <div class="text-[11px] font-mono text-rose-600 bg-rose-50 p-1 rounded mt-1 border border-rose-100">
                                                     Error: {{ Str::limit($n->error_details, 80) }}
@@ -2398,9 +2417,20 @@
 
                                         <!-- Status Column -->
                                         <td class="{{ $td }}">
-                                            <span class="px-2.5 py-1 rounded-full text-[11px] font-bold {{ $badge($n->status) }}">
-                                                {{ strtoupper($n->status) }}
-                                            </span>
+                                            <div class="flex flex-col items-start gap-1">
+                                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ $badge($n->status) }}">
+                                                    {{ strtoupper($n->status) }}
+                                                </span>
+                                                @if($n->is_read)
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200" title="Read at {{ $n->read_at?->format('M j, Y H:i') }}">
+                                                        ✓✓ SEEN {{ $n->read_at ? '· ' . $n->read_at->diffForHumans() : '' }}
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-700 border border-rose-200">
+                                                        ● UNREAD
+                                                    </span>
+                                                @endif
+                                            </div>
                                         </td>
 
                                         <!-- Timestamp Column -->
@@ -2414,7 +2444,18 @@
                                         </td>
 
                                         <!-- Actions Column -->
-                                        <td class="{{ $td }} text-right">
+                                        <td class="{{ $td }} text-right space-x-1 whitespace-nowrap">
+                                            <button type="button" wire:click="inspectNotification({{ $n->id }})"
+                                                class="{{ $btn }} bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 font-extrabold">
+                                                View / Read
+                                            </button>
+                                            @if(!$n->is_read)
+                                                <button type="button" wire:click="markNotificationRead({{ $n->id }})"
+                                                    class="{{ $btn }} bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold"
+                                                    title="Mark as Seen">
+                                                    ✓✓ Seen
+                                                </button>
+                                            @endif
                                             @if($this->userCan('settings.manage'))
                                                 <button type="button" wire:click="resendNotification({{ $n->id }})"
                                                     class="{{ $btn }} bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200">
@@ -2588,33 +2629,42 @@
                 </div>
 
                 <!-- Sub-Navigation Ribbon -->
-                <div class="flex items-center gap-1.5 border-b border-slate-200 pb-3 overflow-x-auto">
-                    <button 
-                        type="button" 
-                        wire:click="setReportSubTab('queue')"
-                        class="px-3.5 py-2 rounded-xl text-xs font-black transition whitespace-nowrap flex items-center gap-1.5 {{ $reportSubTab === 'queue' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}"
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
+                    <div class="flex items-center gap-1.5 overflow-x-auto">
+                        <button 
+                            type="button" 
+                            wire:click="setReportSubTab('queue')"
+                            class="px-3.5 py-2 rounded-xl text-xs font-black transition whitespace-nowrap flex items-center gap-1.5 {{ $reportSubTab === 'queue' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}"
+                        >
+                            <span>🚨</span>
+                            <span>Live Incident Queue</span>
+                            @if($reportStats['open'] > 0)
+                                <span class="px-1.5 py-0.2 rounded-full text-[10px] {{ $reportSubTab === 'queue' ? 'bg-white/30 text-white' : 'bg-rose-100 text-rose-800 font-black' }}">{{ $reportStats['open'] }}</span>
+                            @endif
+                        </button>
+                        <button 
+                            type="button" 
+                            wire:click="setReportSubTab('trends')"
+                            class="px-3.5 py-2 rounded-xl text-xs font-black transition whitespace-nowrap flex items-center gap-1.5 {{ $reportSubTab === 'trends' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}"
+                        >
+                            <span>📊</span>
+                            <span>Abuse Analytics &amp; Breakdown</span>
+                        </button>
+                        <button 
+                            type="button" 
+                            wire:click="setReportSubTab('export')"
+                            class="px-3.5 py-2 rounded-xl text-xs font-black transition whitespace-nowrap flex items-center gap-1.5 {{ $reportSubTab === 'export' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}"
+                        >
+                            <span>📜</span>
+                            <span>Law Enforcement &amp; Legal Export</span>
+                        </button>
+                    </div>
+                    <button
+                        type="button"
+                        wire:click="markAllReportsRead"
+                        class="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-black transition flex items-center gap-1.5 whitespace-nowrap"
                     >
-                        <span>🚨</span>
-                        <span>Live Incident Queue</span>
-                        @if($reportStats['open'] > 0)
-                            <span class="px-1.5 py-0.2 rounded-full text-[10px] {{ $reportSubTab === 'queue' ? 'bg-white/30 text-white' : 'bg-rose-100 text-rose-800 font-black' }}">{{ $reportStats['open'] }}</span>
-                        @endif
-                    </button>
-                    <button 
-                        type="button" 
-                        wire:click="setReportSubTab('trends')"
-                        class="px-3.5 py-2 rounded-xl text-xs font-black transition whitespace-nowrap flex items-center gap-1.5 {{ $reportSubTab === 'trends' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}"
-                    >
-                        <span>📊</span>
-                        <span>Abuse Analytics &amp; Breakdown</span>
-                    </button>
-                    <button 
-                        type="button" 
-                        wire:click="setReportSubTab('export')"
-                        class="px-3.5 py-2 rounded-xl text-xs font-black transition whitespace-nowrap flex items-center gap-1.5 {{ $reportSubTab === 'export' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}"
-                    >
-                        <span>📜</span>
-                        <span>Law Enforcement &amp; Legal Export</span>
+                        <span>✓✓ Mark All Reports Seen</span>
                     </button>
                 </div>
 
@@ -2702,7 +2752,7 @@
                                 </thead>
                                 <tbody class="divide-y divide-slate-100">
                                     @forelse($reports as $r)
-                                        <tr class="hover:bg-slate-50/80 transition" wire:key="report-row-{{ $r->id }}">
+                                        <tr class="hover:bg-slate-50/80 transition {{ $r->is_read ? '' : 'bg-rose-50/30' }}" wire:key="report-row-{{ $r->id }}">
                                             <!-- ID & Timestamp -->
                                             <td class="{{ $td }} whitespace-nowrap">
                                                 <div class="flex items-center gap-1.5">
@@ -2710,6 +2760,15 @@
                                                     @if($r->is_urgent_takedown)
                                                         <span class="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-rose-600 text-white tracking-wider animate-pulse">
                                                             URGENT
+                                                        </span>
+                                                    @endif
+                                                    @if($r->is_read)
+                                                        <span class="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-emerald-50 text-emerald-700 border border-emerald-200" title="Seen {{ $r->read_at?->diffForHumans() }}">
+                                                            ✓✓ SEEN
+                                                        </span>
+                                                    @else
+                                                        <span class="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-rose-100 text-rose-700 border border-rose-200">
+                                                            ● UNREAD
                                                         </span>
                                                     @endif
                                                 </div>
@@ -3009,20 +3068,32 @@
         {{-- ================= 9. CONTACT ABUSE ================= --}}
         @if($tab === 'abuse')
             <div class="{{ $card }} overflow-x-auto">
-                <div class="p-4 flex justify-between"><h2 class="font-bold text-slate-900">Flagged Contact Messages</h2><a href="{{ route('admin.moderation.messages.queue') }}" class="text-xs text-rose-600 hover:underline">Full message moderation tools &rarr;</a></div>
+                <div class="p-4 flex justify-between items-center"><h2 class="font-bold text-slate-900">Flagged Contact Messages</h2><a href="{{ route('admin.moderation.messages.queue') }}" class="text-xs text-rose-600 hover:underline">Full message moderation tools &rarr;</a></div>
                 <table class="min-w-full">
-                    <thead><tr><th class="{{ $th }}">#</th><th class="{{ $th }}">Listing</th><th class="{{ $th }}">Recipient</th><th class="{{ $th }}">Received</th><th class="{{ $th }}">Actions</th></tr></thead>
+                    <thead><tr><th class="{{ $th }}">#</th><th class="{{ $th }}">Listing</th><th class="{{ $th }}">Recipient</th><th class="{{ $th }}">Status</th><th class="{{ $th }}">Received</th><th class="{{ $th }} text-right">Actions</th></tr></thead>
                     <tbody>
                     @forelse($abuseMessages as $m)
-                        <tr class="border-t border-slate-200" wire:key="abuse-{{ $m->id }}">
-                            <td class="{{ $td }}">{{ $m->id }}</td>
+                        <tr class="border-t border-slate-200 {{ $m->is_read ? '' : 'bg-rose-50/30' }}" wire:key="abuse-{{ $m->id }}">
+                            <td class="{{ $td }} font-bold">#{{ $m->id }}</td>
                             <td class="{{ $td }}">{{ $m->listing?->title ?? '—' }}</td>
                             <td class="{{ $td }}">{{ $m->recipient?->name ?? '—' }}</td>
+                            <td class="{{ $td }}">
+                                @if($m->is_read)
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">✓✓ SEEN {{ $m->read_at ? '· ' . $m->read_at->diffForHumans() : '' }}</span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-700 border border-rose-200">● UNREAD</span>
+                                @endif
+                            </td>
                             <td class="{{ $td }}">{{ $m->created_at?->diffForHumans() }}</td>
-                            <td class="{{ $td }}">@if($this->userCan('moderation.act'))<button wire:click="dismissFlaggedMessage({{ $m->id }})" class="{{ $btn }} bg-slate-200 hover:bg-slate-300 text-slate-900">Dismiss flag</button>@endif</td>
+                            <td class="{{ $td }} text-right space-x-1 whitespace-nowrap">
+                                <button type="button" wire:click="inspectAbuseMessage({{ $m->id }})" class="{{ $btn }} bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 font-bold">Inspect / Read</button>
+                                @if($this->userCan('moderation.act'))
+                                    <button wire:click="dismissFlaggedMessage({{ $m->id }})" class="{{ $btn }} bg-slate-200 hover:bg-slate-300 text-slate-900">Dismiss flag</button>
+                                @endif
+                            </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="{{ $td }} text-center text-slate-400">No flagged messages.</td></tr>
+                        <tr><td colspan="6" class="{{ $td }} text-center text-slate-400">No flagged messages.</td></tr>
                     @endforelse
                     </tbody>
                 </table>
@@ -7691,11 +7762,12 @@
             || $showPreservationModal || $showViewTransactionModal || $showViewCryptoModal
             || $showAssignSubscriptionModal || $showViewSubscriptionModal
             || $showInspectVerificationModal || $showManualVerifyModal || $showRejectVerificationModal || $showBroadcastModal
+            || $showInspectNotificationModal || $showInspectAbuseModal
             || $showPreviewCmsModal || $showDeleteAdModal || $showPreviewAdModal;
     @endphp
     @if($anyModal)
         <div class="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" wire:keydown.escape.window="closeModals">
-            <div class="w-full {{ ($showViewListingModal || $showEditListingModal || $showViewUserModal || $showEditUserModal || $showInspectReportModal || $showViewTransactionModal || $showViewCryptoModal || $showViewSubscriptionModal || $showAssignSubscriptionModal || $showInspectVerificationModal || $showManualVerifyModal || $showBroadcastModal || $showPreviewCmsModal || $showPreviewAdModal) ? 'max-w-2xl' : 'max-w-xl' }} max-h-[90vh] overflow-y-auto rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl">
+            <div class="w-full {{ ($showViewListingModal || $showEditListingModal || $showViewUserModal || $showEditUserModal || $showInspectReportModal || $showViewTransactionModal || $showViewCryptoModal || $showViewSubscriptionModal || $showAssignSubscriptionModal || $showInspectVerificationModal || $showManualVerifyModal || $showBroadcastModal || $showInspectNotificationModal || $showInspectAbuseModal || $showPreviewCmsModal || $showPreviewAdModal) ? 'max-w-2xl' : 'max-w-xl' }} max-h-[90vh] overflow-y-auto rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl">
 
                 {{-- CREATE USER MODAL --}}
                 @if($showCreateUserModal)
@@ -9613,6 +9685,101 @@
                             <button type="submit" class="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black shadow-md transition">Dispatch Broadcast Now</button>
                         </div>
                     </form>
+                @endif
+
+                {{-- INSPECT NOTIFICATION MODAL --}}
+                @if($showInspectNotificationModal && $inspectNotificationData)
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-lg font-black text-slate-950">Notification #{{ $inspectNotificationData['id'] }}</h3>
+                            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                ✓✓ SEEN {{ !empty($inspectNotificationData['read_at']) ? '· ' . $inspectNotificationData['read_at'] : '' }}
+                            </span>
+                        </div>
+                        <button type="button" wire:click="closeModals" class="text-slate-400 hover:text-slate-700 font-bold text-lg">&times;</button>
+                    </div>
+                    <div class="space-y-4 text-xs text-slate-800">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                            <div>
+                                <span class="text-[10px] font-bold uppercase text-slate-400 block">Recipient Member</span>
+                                <span class="font-black text-slate-950 text-sm">{{ $inspectNotificationData['user_name'] }}</span>
+                                <span class="block text-slate-500 font-mono text-[11px]">{{ $inspectNotificationData['recipient_target'] }}</span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold uppercase text-slate-400 block">Channel & Type</span>
+                                <span class="font-black text-slate-900 uppercase">{{ $inspectNotificationData['channel'] }}</span>
+                                <span class="block text-slate-500 font-mono text-[11px]">{{ $inspectNotificationData['notification_type'] }}</span>
+                            </div>
+                        </div>
+
+                        <div class="p-4 rounded-2xl bg-white border border-slate-200 space-y-2">
+                            <div class="text-[10px] font-bold uppercase text-slate-400">Subject</div>
+                            <div class="text-sm font-black text-slate-950">{{ $inspectNotificationData['subject'] }}</div>
+                            <div class="border-t border-slate-100 pt-2 mt-2">
+                                <div class="text-[10px] font-bold uppercase text-slate-400 mb-1">Notification Message</div>
+                                <div class="text-xs text-slate-700 whitespace-pre-line leading-relaxed">{{ $inspectNotificationData['message'] }}</div>
+                            </div>
+                        </div>
+
+                        @if(!empty($inspectNotificationData['error_details']))
+                            <div class="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 font-mono text-[11px]">
+                                Error: {{ $inspectNotificationData['error_details'] }}
+                            </div>
+                        @endif
+
+                        <div class="flex items-center justify-between pt-3 border-t border-slate-200">
+                            <span class="text-[11px] text-slate-500 font-semibold">Sent: {{ $inspectNotificationData['sent_at'] }}</span>
+                            <div class="flex gap-2">
+                                @if($this->userCan('settings.manage'))
+                                    <button type="button" wire:click="resendNotification({{ $inspectNotificationData['id'] }})" class="px-4 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold transition">Resend Alert</button>
+                                @endif
+                                <button type="button" wire:click="closeModals" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black transition">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                {{-- INSPECT ABUSE MESSAGE MODAL --}}
+                @if($showInspectAbuseModal && $inspectAbuseData)
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-lg font-black text-slate-950">Flagged Message #{{ $inspectAbuseData['id'] }}</h3>
+                            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                ✓✓ SEEN {{ !empty($inspectAbuseData['read_at']) ? '· ' . $inspectAbuseData['read_at'] : '' }}
+                            </span>
+                        </div>
+                        <button type="button" wire:click="closeModals" class="text-slate-400 hover:text-slate-700 font-bold text-lg">&times;</button>
+                    </div>
+                    <div class="space-y-4 text-xs text-slate-800">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                            <div>
+                                <span class="text-[10px] font-bold uppercase text-slate-400 block">Sender Details</span>
+                                <span class="font-black text-slate-950 text-sm">{{ $inspectAbuseData['sender_name'] }}</span>
+                                <span class="block text-slate-500 font-mono text-[11px]">{{ $inspectAbuseData['sender_email'] }}</span>
+                                <span class="block text-slate-400 font-mono text-[10px] mt-0.5">IP: {{ $inspectAbuseData['sender_ip'] }}</span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold uppercase text-slate-400 block">Recipient & Target Listing</span>
+                                <span class="font-black text-slate-950 text-sm">{{ $inspectAbuseData['recipient_name'] }}</span>
+                                <span class="block text-[#F20B83] font-bold text-xs mt-0.5">{{ $inspectAbuseData['listing_title'] }}</span>
+                            </div>
+                        </div>
+
+                        <div class="p-4 rounded-2xl bg-white border border-slate-200">
+                            <div class="text-[10px] font-bold uppercase text-slate-400 mb-1">Message Content</div>
+                            <div class="text-xs text-slate-800 whitespace-pre-line leading-relaxed">{{ $inspectAbuseData['message'] }}</div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-3 border-t border-slate-200">
+                            <span class="text-[11px] text-slate-500 font-semibold">Received: {{ $inspectAbuseData['created_at'] }}</span>
+                            <div class="flex gap-2">
+                                @if($this->userCan('moderation.act'))
+                                    <button type="button" wire:click="dismissFlaggedMessage({{ $inspectAbuseData['id'] }})" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black transition">Dismiss Abuse Flag</button>
+                                @endif
+                                <button type="button" wire:click="closeModals" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition">Close</button>
+                            </div>
+                        </div>
+                    </div>
                 @endif
             </div>
         </div>

@@ -190,6 +190,21 @@
         </a>
 
         <a
+            href="{{ route('account.dashboard', ['tab' => 'notifications']) }}"
+            wire:click.prevent="setTab('notifications')"
+            class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'notifications' ? 'font-black shadow-xs' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
+            @if($tab === 'notifications') style="background-color: #fff1f2 !important; color: #F20B65 !important; border: 2px solid #F20B65 !important;" @endif
+        >
+            <svg class="w-4 h-4" @if($tab === 'notifications') style="color: #F20B65 !important;" @else class="text-slate-500" @endif fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            <span>Notifications</span>
+            @if(($unreadNotificationsCount ?? 0) > 0)
+                <span class="px-2 py-0.5 rounded-full text-[11px] font-black bg-rose-600 text-white animate-pulse">
+                    {{ $unreadNotificationsCount }} new
+                </span>
+            @endif
+        </a>
+
+        <a
             href="{{ route('account.wallet.index') }}"
             class="px-3.5 sm:px-4 py-2.5 rounded-2xl transition flex items-center gap-2 bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shrink-0 shadow-2xs"
         >
@@ -423,10 +438,13 @@
                         <div class="divide-y divide-slate-100">
                             @foreach($recentInquiries as $msg)
                                 <div class="py-3.5 flex items-center justify-between gap-3 text-xs">
-                                    <div class="min-w-0">
-                                        <div class="flex items-center gap-2">
+                                    <div class="min-w-0 cursor-pointer" wire:click="inspectMessage({{ $msg->id }})">
+                                        <div class="flex items-center gap-2 flex-wrap">
                                             @if(!$msg->is_read)
                                                 <span class="w-2 h-2 rounded-full bg-[#F20B83] animate-pulse"></span>
+                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-50 text-[#F20B83] border border-rose-200">NEW</span>
+                                            @else
+                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">✓✓ Seen</span>
                                             @endif
                                             <span class="font-black text-slate-950 text-sm">{{ $msg->sender_name }}</span>
                                             <span class="text-slate-500 font-medium text-xs">&bull; {{ $msg->created_at->diffForHumans() }}</span>
@@ -437,9 +455,9 @@
                                     </div>
                                     <button
                                         wire:click="inspectMessage({{ $msg->id }})"
-                                        class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-black text-[#F20B83] shrink-0 transition"
+                                        class="px-3 py-1.5 rounded-xl {{ $msg->is_read ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-slate-100 hover:bg-slate-200 text-[#F20B83]' }} text-xs font-black shrink-0 transition"
                                     >
-                                        Read
+                                        {{ $msg->is_read ? '✓ Seen' : 'Read' }}
                                     </button>
                                 </div>
                             @endforeach
@@ -753,28 +771,39 @@
                         </div>
                     </div>
 
-                    <!-- Folder Toggle: Inbox vs Sent -->
-                    <div class="inline-flex p-1 bg-slate-100 rounded-2xl border border-slate-200 self-start sm:self-auto">
-                        <button
-                            wire:click="$set('messageFolder', 'inbox')"
-                            class="px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 {{ $messageFolder === 'inbox' ? 'bg-white text-slate-950 shadow-xs' : 'text-slate-700 hover:text-slate-950' }}"
-                        >
-                            <svg class="w-4 h-4 {{ $messageFolder === 'inbox' ? 'text-[#F20B83]' : 'text-slate-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
-                            <span>Inbox (Received)</span>
-                            <span class="px-2 py-0.5 rounded-full text-[11px] font-black {{ $totalUnreadCount > 0 ? 'bg-rose-100 text-rose-800 border border-rose-300' : 'bg-slate-200 text-slate-800' }}">
-                                {{ $totalInboxCount }}
-                            </span>
-                        </button>
-                        <button
-                            wire:click="$set('messageFolder', 'sent')"
-                            class="px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 {{ $messageFolder === 'sent' ? 'bg-white text-slate-950 shadow-xs' : 'text-slate-700 hover:text-slate-950' }}"
-                        >
-                            <svg class="w-4 h-4 {{ $messageFolder === 'sent' ? 'text-[#F20B83]' : 'text-slate-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                            <span>Sent Messages</span>
-                            <span class="px-2 py-0.5 rounded-full text-[11px] font-black bg-slate-200 text-slate-800">
-                                {{ $totalSentCount }}
-                            </span>
-                        </button>
+                    <!-- Folder Toggle: Inbox vs Sent & Mark All Read -->
+                    <div class="flex items-center gap-2 flex-wrap self-start sm:self-auto">
+                        @if($messageFolder === 'inbox' && $totalUnreadCount > 0)
+                            <button
+                                wire:click="markAllMessagesRead"
+                                class="px-3.5 py-2 rounded-2xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-black transition flex items-center gap-1.5 shadow-2xs"
+                            >
+                                <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                <span>✓✓ Mark All as Read ({{ $totalUnreadCount }})</span>
+                            </button>
+                        @endif
+                        <div class="inline-flex p-1 bg-slate-100 rounded-2xl border border-slate-200">
+                            <button
+                                wire:click="$set('messageFolder', 'inbox')"
+                                class="px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 {{ $messageFolder === 'inbox' ? 'bg-white text-slate-950 shadow-xs' : 'text-slate-700 hover:text-slate-950' }}"
+                            >
+                                <svg class="w-4 h-4 {{ $messageFolder === 'inbox' ? 'text-[#F20B83]' : 'text-slate-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+                                <span>Inbox (Received)</span>
+                                <span class="px-2 py-0.5 rounded-full text-[11px] font-black {{ $totalUnreadCount > 0 ? 'bg-rose-100 text-rose-800 border border-rose-300' : 'bg-slate-200 text-slate-800' }}">
+                                    {{ $totalInboxCount }}
+                                </span>
+                            </button>
+                            <button
+                                wire:click="$set('messageFolder', 'sent')"
+                                class="px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 {{ $messageFolder === 'sent' ? 'bg-white text-slate-950 shadow-xs' : 'text-slate-700 hover:text-slate-950' }}"
+                            >
+                                <svg class="w-4 h-4 {{ $messageFolder === 'sent' ? 'text-[#F20B83]' : 'text-slate-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                                <span>Sent Messages</span>
+                                <span class="px-2 py-0.5 rounded-full text-[11px] font-black bg-slate-200 text-slate-800">
+                                    {{ $totalSentCount }}
+                                </span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -927,11 +956,33 @@
                                 </div>
 
                                 <!-- Inquiry Content Summary -->
-                                <div class="space-y-1 min-w-0">
+                                <div class="space-y-1 min-w-0 cursor-pointer" wire:click="inspectMessage({{ $msg->id }})">
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        @if($messageFolder === 'inbox' && !$msg->is_read)
-                                            <span class="w-2 h-2 rounded-full bg-[#F20B83] animate-pulse"></span>
-                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-500/10 text-[#F20B83] border border-rose-500/20">NEW</span>
+                                        @if($messageFolder === 'inbox')
+                                            @if(!$msg->is_read)
+                                                <span class="w-2 h-2 rounded-full bg-[#F20B83] animate-pulse"></span>
+                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-500/10 text-[#F20B83] border border-rose-500/20">NEW</span>
+                                            @else
+                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1" title="{{ $msg->read_at ? 'Read at ' . $msg->read_at->format('M d, Y h:i A') : 'Read' }}">
+                                                    <span>✓✓ SEEN</span>
+                                                    @if($msg->read_at)
+                                                        <span class="text-[9px] text-emerald-600/80 font-normal">({{ $msg->read_at->diffForHumans() }})</span>
+                                                    @endif
+                                                </span>
+                                            @endif
+                                        @else
+                                            @if($msg->is_read)
+                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                                                    <span>✓✓ SEEN BY RECIPIENT</span>
+                                                    @if($msg->read_at)
+                                                        <span class="text-[9px] text-emerald-600/80 font-normal">({{ $msg->read_at->diffForHumans() }})</span>
+                                                    @endif
+                                                </span>
+                                            @else
+                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                                                    ✓ SENT (UNREAD)
+                                                </span>
+                                            @endif
                                         @endif
 
                                         @if($msg->is_replied)
@@ -1076,6 +1127,128 @@
                             </button>
                         </div>
                     @endif
+                </div>
+            @endif
+        </div>
+    @endif
+
+    <!-- TAB 4B: USER NOTIFICATIONS CENTER -->
+    @if($tab === 'notifications')
+        <div class="space-y-6">
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl space-y-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-[#F20B83]">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-black text-slate-950 tracking-tight">Account Notifications & Alerts</h2>
+                            <p class="text-xs text-slate-700 font-semibold mt-0.5">Real-time system updates, moderation alerts, and inquiry notifications.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 flex-wrap">
+                        @if(($unreadNotificationsCount ?? 0) > 0)
+                            <button
+                                wire:click="markAllNotificationsRead"
+                                class="px-4 py-2 rounded-2xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-black transition flex items-center gap-1.5 shadow-2xs"
+                            >
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                <span>✓✓ Mark All as Read ({{ $unreadNotificationsCount }})</span>
+                            </button>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Filter Pills -->
+                <div class="flex items-center gap-2 flex-wrap text-xs font-bold">
+                    <button
+                        wire:click="$set('notificationFilter', 'all')"
+                        class="px-3.5 py-1.5 rounded-xl transition {{ $notificationFilter === 'all' ? 'bg-rose-50 text-[#F20B83] border-2 border-[#F20B83] font-black shadow-xs' : 'bg-slate-100 text-slate-700 hover:text-slate-950 hover:bg-slate-200 border border-slate-200 font-bold' }}"
+                    >
+                        All ({{ $totalNotificationsCount ?? 0 }})
+                    </button>
+                    <button
+                        wire:click="$set('notificationFilter', 'unread')"
+                        class="px-3.5 py-1.5 rounded-xl transition flex items-center gap-1.5 {{ $notificationFilter === 'unread' ? 'bg-rose-50 text-[#F20B83] border-2 border-[#F20B83] font-black shadow-xs' : 'bg-slate-100 text-slate-700 hover:text-slate-950 hover:bg-slate-200 border border-slate-200 font-bold' }}"
+                    >
+                        @if(($unreadNotificationsCount ?? 0) > 0)
+                            <span class="w-2 h-2 rounded-full bg-[#F20B83] animate-pulse"></span>
+                        @endif
+                        <span>Unread ({{ $unreadNotificationsCount ?? 0 }})</span>
+                    </button>
+                    <button
+                        wire:click="$set('notificationFilter', 'read')"
+                        class="px-3.5 py-1.5 rounded-xl transition {{ $notificationFilter === 'read' ? 'bg-emerald-50 text-emerald-800 border-2 border-emerald-500 font-black shadow-xs' : 'bg-slate-100 text-slate-700 hover:text-slate-950 hover:bg-slate-200 border border-slate-200 font-bold' }}"
+                    >
+                        ✓✓ Seen / Read ({{ max(0, ($totalNotificationsCount ?? 0) - ($unreadNotificationsCount ?? 0)) }})
+                    </button>
+                </div>
+            </div>
+
+            @if(isset($userNotifications) && $userNotifications->isNotEmpty())
+                <div class="bg-white border border-slate-200 rounded-3xl divide-y divide-slate-100 overflow-hidden shadow-xl">
+                    @foreach($userNotifications as $notif)
+                        <div class="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/70 transition {{ !$notif->is_read ? 'bg-rose-50/25' : 'bg-white' }}">
+                            <div class="flex items-start gap-3.5 min-w-0 cursor-pointer flex-1" wire:click="inspectNotification({{ $notif->id }})">
+                                <div class="w-10 h-10 rounded-2xl {{ !$notif->is_read ? 'bg-gradient-to-tr from-[#F20B83] to-rose-400 text-white shadow-sm' : 'bg-slate-100 text-slate-600' }} flex items-center justify-center shrink-0">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                                </div>
+                                <div class="space-y-1 min-w-0 flex-1">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        @if(!$notif->is_read)
+                                            <span class="w-2 h-2 rounded-full bg-[#F20B83] animate-pulse"></span>
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/10 text-[#F20B83] border border-rose-500/20">NEW</span>
+                                        @else
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                ✓✓ SEEN {{ $notif->read_at ? '(' . $notif->read_at->diffForHumans() . ')' : '' }}
+                                            </span>
+                                        @endif
+                                        <span class="font-extrabold text-slate-900 text-sm">{{ $notif->subject ?: 'Platform Notification' }}</span>
+                                        <span class="text-slate-400 text-xs">&bull; {{ $notif->created_at?->diffForHumans() }}</span>
+                                    </div>
+                                    @if($notif->message)
+                                        <p class="text-xs text-slate-600 truncate">{{ Str::limit($notif->message, 120) }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                                <button
+                                    wire:click="inspectNotification({{ $notif->id }})"
+                                    class="px-3.5 py-1.5 rounded-xl {{ $notif->is_read ? 'bg-slate-100 hover:bg-slate-200 text-slate-800' : 'bg-[#F20B83] hover:bg-pink-600 text-white' }} font-bold text-xs transition"
+                                >
+                                    {{ $notif->is_read ? 'View Details' : 'Read Notification' }}
+                                </button>
+                                @if($notif->is_read)
+                                    <button
+                                        wire:click="markNotificationUnread({{ $notif->id }})"
+                                        title="Mark as unread"
+                                        class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5"/></svg>
+                                    </button>
+                                @endif
+                                <button
+                                    wire:click="deleteNotification({{ $notif->id }})"
+                                    title="Delete notification"
+                                    class="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                <div class="pt-4">
+                    {{ $userNotifications->links() }}
+                </div>
+            @else
+                <div class="bg-white border border-slate-200 rounded-3xl p-12 text-center shadow-xl space-y-3">
+                    <div class="w-16 h-16 rounded-2xl bg-rose-50 border border-rose-200 mx-auto flex items-center justify-center text-[#F20B83]">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">No Notifications Found</h3>
+                    <p class="text-xs text-slate-500 max-w-md mx-auto">You are all caught up! New alerts and platform notifications will appear here in real time.</p>
                 </div>
             @endif
         </div>
@@ -1731,6 +1904,10 @@
                                 <h3 class="text-base font-extrabold text-slate-900">{{ $inspectedMessage->sender_name }}</h3>
                                 @if(!$inspectedMessage->is_read)
                                     <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-500/10 text-[#F20B83] border border-rose-500/20">NEW</span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        ✓✓ SEEN {{ $inspectedMessage->read_at ? '(' . $inspectedMessage->read_at->diffForHumans() . ')' : '' }}
+                                    </span>
                                 @endif
                                 @if($inspectedMessage->is_replied)
                                     <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">REPLIED</span>
@@ -1857,12 +2034,16 @@
                                         $senderName = is_array($reply) ? ($reply['sender_name'] ?? 'User') : $reply->sender_name;
                                         $createdAtFormatted = is_array($reply) ? ($reply['created_at_formatted'] ?? '') : ($reply->created_at ? $reply->created_at->format('M d, g:i A') : '');
                                         $replyMessage = is_array($reply) ? ($reply['message'] ?? '') : $reply->message_encrypted;
+                                        $replyIsRead = is_array($reply) ? ($reply['is_read'] ?? false) : (bool) ($reply->is_read ?? false);
                                     @endphp
                                     <div class="flex flex-col {{ $isMe ? 'items-end ml-auto' : 'items-start' }} space-y-1 max-w-[85%] animate-fadeIn">
                                         <div class="flex items-center gap-2 text-[10px] text-slate-400 font-semibold px-1">
                                             <span>{{ $isMe ? 'You (Owner)' : $senderName }}</span>
                                             <span>&bull;</span>
                                             <span>{{ $createdAtFormatted }}</span>
+                                            <span class="{{ $replyIsRead ? 'text-emerald-600 font-bold' : 'text-slate-400' }}">
+                                                {{ $replyIsRead ? '✓✓ Seen' : '✓ Sent' }}
+                                            </span>
                                         </div>
                                         <div class="p-4 {{ $isMe ? 'bg-gradient-to-r from-rose-500 to-[#F20B83] text-white rounded-tr-xs shadow-xs' : 'bg-white border border-slate-200 text-slate-800 rounded-tl-xs shadow-2xs' }} rounded-2xl text-xs whitespace-pre-line leading-relaxed">
                                             {{ $replyMessage }}
@@ -2000,6 +2181,42 @@
                             <span>Delete</span>
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- MODAL 1B: INSPECT NOTIFICATION MODAL -->
+    @if($showNotificationModal && $inspectedNotification)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn">
+            <div class="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+                    <div class="flex items-center gap-2.5">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            ✓✓ SEEN {{ $inspectedNotification->read_at ? '(' . $inspectedNotification->read_at->diffForHumans() . ')' : '' }}
+                        </span>
+                        <span class="text-xs text-slate-400 font-mono uppercase">{{ $inspectedNotification->channel }}</span>
+                    </div>
+                    <button wire:click="closeNotificationModal" class="text-slate-400 hover:text-slate-900 text-lg font-bold p-1 rounded-lg hover:bg-slate-100 transition">&times;</button>
+                </div>
+
+                <div class="space-y-2">
+                    <h3 class="text-base font-black text-slate-950">{{ $inspectedNotification->subject ?: 'Platform Notification' }}</h3>
+                    <div class="text-xs text-slate-400">
+                        Received {{ $inspectedNotification->created_at?->format('M d, Y @ h:i A') }} ({{ $inspectedNotification->created_at?->diffForHumans() }})
+                    </div>
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 whitespace-pre-line leading-relaxed">
+                        {{ $inspectedNotification->message ?: $inspectedNotification->subject ?: 'You have received a platform notification.' }}
+                    </div>
+                </div>
+
+                <div class="pt-2 flex items-center justify-between">
+                    <button type="button" wire:click="deleteNotification({{ $inspectedNotification->id }})" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-xl transition">
+                        Delete
+                    </button>
+                    <button type="button" wire:click="closeNotificationModal" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition">
+                        Done
+                    </button>
                 </div>
             </div>
         </div>
