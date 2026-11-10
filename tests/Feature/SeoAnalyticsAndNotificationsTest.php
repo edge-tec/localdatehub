@@ -184,10 +184,12 @@ class SeoAnalyticsAndNotificationsTest extends TestCase
         $this->assertEquals(1, $daily->views);
         $this->assertEquals(1, $daily->unique_visitors);
 
-        // Second view from same visitor should increment views but NOT unique visitors
+        // Second view from same visitor should increment views but NOT unique visitors (outside 30m cooldown)
+        \Carbon\Carbon::setTestNow(now()->addMinutes(35));
         $analyticsService->recordListingView($this->listing, $request);
         $this->assertEquals(2, $daily->fresh()->views);
         $this->assertEquals(1, $daily->fresh()->unique_visitors);
+        \Carbon\Carbon::setTestNow();
     }
 
     public function test_analytics_tracking_records_contact_clicks_and_favorite_adds(): void

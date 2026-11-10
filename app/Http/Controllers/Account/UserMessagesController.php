@@ -63,7 +63,7 @@ class UserMessagesController extends Controller
     /**
      * View inquiry details and decrypt communication payload.
      */
-    public function show(ContactMessage $message): View
+    public function show(Request $request, ContactMessage $message): View
     {
         Gate::authorize('view', $message);
 
@@ -74,15 +74,17 @@ class UserMessagesController extends Controller
             $message->save();
         }
 
-        if ($message->listing_id && $message->recipient_id === $request->user()?->id) {
+        $user = $request->user();
+
+        if ($message->listing_id && $user && $message->recipient_id === $user->id) {
             ContactMessage::where('listing_id', $message->listing_id)
-                ->where('recipient_id', $request->user()->id)
+                ->where('recipient_id', $user->id)
                 ->where('is_read', false)
                 ->update(['is_read' => true, 'read_at' => now()]);
         }
 
-        if ($request->user()) {
-            \App\Modules\Notifications\Models\NotificationLog::where('user_id', $request->user()->id)
+        if ($user) {
+            \App\Modules\Notifications\Models\NotificationLog::where('user_id', $user->id)
                 ->whereIn('notification_type', ['contact_received', 'message_reply'])
                 ->where('is_read', false)
                 ->update(['is_read' => true, 'read_at' => now()]);
