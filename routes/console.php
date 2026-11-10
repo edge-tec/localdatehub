@@ -62,3 +62,20 @@ Schedule::command('crypto:monitor-inhouse')
     ->withoutOverlapping(1)
     ->runInBackground()
     ->appendOutputTo(storage_path('logs/scheduler-inhouse-crypto.log'));
+
+// Enterprise SEO Automation Schedules
+Schedule::job(new \App\Modules\SEO\Jobs\ProcessIndexingQueueJob)
+    ->everyFifteenMinutes()
+    ->withoutOverlapping(10);
+
+Schedule::job(new \App\Modules\SEO\Jobs\GenerateSitemapsJob)
+    ->dailyAt('02:00')
+    ->withoutOverlapping(30);
+
+Schedule::job(new \App\Modules\SEO\Jobs\RunTechnicalSeoAuditJob)
+    ->dailyAt('04:00')
+    ->withoutOverlapping(30);
+
+Schedule::job(new \App\Modules\SEO\Jobs\SyncGoogleSearchConsoleJob)
+    ->dailyAt('06:00')
+    ->withoutOverlapping(30);

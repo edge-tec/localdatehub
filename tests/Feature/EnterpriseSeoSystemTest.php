@@ -98,6 +98,40 @@ class EnterpriseSeoSystemTest extends TestCase
             'is_active' => true,
         ]);
 
+        // Create active listing with photo
+        $user = User::factory()->create();
+        $activeListing = Listing::create([
+            'user_id' => $user->id,
+            'category_id' => 1,
+            'state_id' => $state->id,
+            'city_id' => $city->id,
+            'title' => 'Active Miami Listing',
+            'slug' => 'active-miami-listing',
+            'description' => 'Valid active listing description with sufficient text.',
+            'poster_age' => 25,
+            'poster_gender' => 'female',
+            'intent' => 'dating',
+            'status' => Listing::STATUS_ACTIVE,
+            'published_at' => now(),
+        ]);
+
+        // Create expired listing (must NOT be in sitemap)
+        $expiredListing = Listing::create([
+            'user_id' => $user->id,
+            'category_id' => 1,
+            'state_id' => $state->id,
+            'city_id' => $city->id,
+            'title' => 'Expired Miami Listing',
+            'slug' => 'expired-miami-listing',
+            'description' => 'Expired listing description.',
+            'poster_age' => 25,
+            'poster_gender' => 'female',
+            'intent' => 'dating',
+            'status' => Listing::STATUS_EXPIRED,
+            'published_at' => now()->subMonths(2),
+            'expires_at' => now()->subDay(),
+        ]);
+
         $subSitemaps = [
             '/sitemaps/pages.xml',
             '/sitemaps/categories.xml',
@@ -112,8 +146,21 @@ class EnterpriseSeoSystemTest extends TestCase
             $resp = $this->get($url);
             $resp->assertStatus(200);
             $resp->assertHeader('Content-Type', 'application/xml; charset=utf-8');
-            $this->assertStringContainsString('<urlset', $resp->getContent());
+
+            $xmlContent = $resp->getContent();
+            $this->assertStringContainsString('<urlset', $xmlContent);
+
+            // Strict XML Syntax Validation
+            libxml_use_internal_errors(true);
+            $parsed = simplexml_load_string($xmlContent);
+            $this->assertNotFalse($parsed, "Sitemap {$url} failed XML parsing");
+            libxml_clear_errors();
         }
+
+        // Verify active listing IS included in listings sitemap, but expired listing is EXCLUDED
+        $listingsSitemap = $this->get('/sitemaps/listings.xml')->getContent();
+        $this->assertStringContainsString('active-miami-listing', $listingsSitemap);
+        $this->assertStringNotContainsString('expired-miami-listing', $listingsSitemap);
     }
 
     public function test_dynamic_robots_txt_returns_clean_directives(): void
@@ -203,7 +250,7 @@ class EnterpriseSeoSystemTest extends TestCase
         ]);
 
         $url = route('listings.show', $listing->slug);
-        $queueItem = $service->enqueue($url, 'URL_UPDATED', 'sitemap_ping', 5, $listing);
+        $queueItem = $service->enqueue($url, 'URL_UPDATED', 'sitemap_sync', 5, $listing);
 
         $this->assertNotNull($queueItem);
         $this->assertEquals('pending', $queueItem->status);
@@ -213,6 +260,89 @@ class EnterpriseSeoSystemTest extends TestCase
         $this->assertNotNull($urlRecord);
         $this->assertEquals('queued', $urlRecord->indexing_status);
         $this->assertEquals('eligible', $urlRecord->indexing_eligibility);
+    }
+
+    public function test_listing_lifecycle_does_not_apply_410_on_soft_delete_or_expiration(): void
+    {
+        $user = User::factory()->create();
+        $state = State::create([
+            'country_id' => $this->country->id,
+            'name' => 'Nevada',
+            'code' => 'NV',
+            'slug' => 'nevada',
+            'is_active' => true,
+        ]);
+        $city = City::create([
+            'state_id' => $state->id,
+            'name' => 'Las Vegas',
+            'slug' => 'las-vegas',
+            'is_active' => true,
+        ]);
+        $cat = Category::create([
+            'name' => 'Couples Seeking',
+            'slug' => 'couples-seeking',
+            'is_active' => true,
+        ]);
+
+        // 1. Create and Publish
+        $listing = Listing::create([
+            'user_id' => $user->id,
+            'category_id' => $cat->id,
+            'state_id' => $state->id,
+            'city_id' => $city->id,
+            'title' => 'Las Vegas Weekend Dinner Dates',
+            'slug' => 'las-vegas-weekend-dinner-dates',
+            'description' => 'Meeting couples for fine dining on the strip and shows.',
+            'poster_age' => 30,
+            'poster_gender' => 'couple',
+            'intent' => 'dating',
+            'status' => Listing::STATUS_ACTIVE,
+            'published_at' => now(),
+        ]);
+
+        $url = route('listings.show', $listing->slug);
+        $path = '/listings/' . $listing->slug;
+
+        $record = SeoUrlRecord::where('url', $url)->first();
+        $this->assertNotNull($record);
+        $this->assertEquals('eligible', $record->indexing_eligibility);
+        $this->assertEquals('included', $record->sitemap_status);
+
+        // 2. Expire / Pause
+        $listing->update(['status' => Listing::STATUS_EXPIRED]);
+        $record->refresh();
+        $this->assertEquals('ineligible', $record->indexing_eligibility);
+        $this->assertEquals('excluded', $record->sitemap_status);
+        // Crucial: Must NOT create 410 redirect on expiration
+        $this->assertDatabaseMissing('seo_redirects', ['source_path' => $path]);
+
+        // 3. Renew / Re-activate
+        $listing->update(['status' => Listing::STATUS_ACTIVE, 'expires_at' => now()->addDays(30)]);
+        $record->refresh();
+        $this->assertEquals('eligible', $record->indexing_eligibility);
+        $this->assertEquals('included', $record->sitemap_status);
+
+        // 4. Soft Delete
+        $listing->delete(); // Soft delete
+        $record->refresh();
+        $this->assertEquals('ineligible', $record->indexing_eligibility);
+        $this->assertEquals('excluded', $record->sitemap_status);
+        // Crucial: Must NOT create 410 redirect on soft delete (because it can be restored)
+        $this->assertDatabaseMissing('seo_redirects', ['source_path' => $path]);
+
+        // 5. Restore from soft delete
+        $listing->restore();
+        $record->refresh();
+        $this->assertEquals('eligible', $record->indexing_eligibility);
+        $this->assertEquals('included', $record->sitemap_status);
+
+        // 6. Force Delete (Permanent deletion)
+        $listing->forceDelete();
+        $this->assertDatabaseHas('seo_redirects', [
+            'source_path' => $path,
+            'status_code' => 410,
+            'is_active' => true,
+        ]);
     }
 
     public function test_technical_seo_audit_identifies_issues_and_calculates_health_score(): void

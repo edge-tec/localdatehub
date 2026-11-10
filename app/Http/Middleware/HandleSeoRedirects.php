@@ -50,7 +50,14 @@ class HandleSeoRedirects
                 }
 
                 if ($redirect->target_url && in_array($redirect->status_code, [301, 302, 307, 308])) {
-                    return redirect($redirect->target_url, $redirect->status_code);
+                    $target = trim($redirect->target_url);
+
+                    // Open Redirect & SSRF Defense: Block protocol-relative or dangerous schemes
+                    if (str_starts_with($target, '//') || str_starts_with(strtolower($target), 'javascript:') || str_starts_with(strtolower($target), 'data:')) {
+                        return $next($request);
+                    }
+
+                    return redirect($target, $redirect->status_code);
                 }
             }
         } catch (\Throwable) {

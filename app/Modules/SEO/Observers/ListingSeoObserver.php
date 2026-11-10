@@ -10,6 +10,9 @@ use Illuminate\Support\Str;
 
 class ListingSeoObserver
 {
+    /**
+     * Handle listing saved/created/updated/renewed.
+     */
     public function saved(Listing $listing): void
     {
         if (empty($listing->slug)) {
@@ -19,7 +22,7 @@ class ListingSeoObserver
         $url = route('listings.show', $listing->slug);
 
         if ($listing->status === Listing::STATUS_ACTIVE && $listing->published_at && (! $listing->expires_at || $listing->expires_at->isFuture())) {
-            // Eligible for public SEO & Indexing
+            // Eligible for public SEO & Sitemaps
             $title = $listing->title;
             $desc = Str::limit(strip_tags($listing->description), 155);
 
@@ -40,10 +43,15 @@ class ListingSeoObserver
                 ]
             );
 
-            // Enqueue for Google discovery
-            app(GoogleIndexingService::class)->enqueue($url, 'URL_UPDATED', 'sitemap_ping', 5, $listing);
+            // Clean up any stale 410 redirect if it was previously marked gone
+            $path = '/listings/' . $listing->slug;
+            SeoRedirect::where('source_path', $path)->delete();
+
+            // Enqueue for Google Search Console / Sitemaps indexing pipeline
+            app(GoogleIndexingService::class)->enqueue($url, 'URL_UPDATED', 'sitemap_sync', 5, $listing);
         } else {
-            // Ineligible (expired, paused, rejected)
+            // Ineligible (expired, paused, rejected, under review)
+            // Note: Do NOT mark 410 Gone since listing can be renewed or unpaused!
             $record = SeoUrlRecord::where('url', $url)->first();
             if ($record) {
                 $record->update([
@@ -55,6 +63,10 @@ class ListingSeoObserver
         }
     }
 
+    /**
+     * Handle listing deletion.
+     * Only apply 410 Gone if permanently deleted (forceDeleted).
+     */
     public function deleted(Listing $listing): void
     {
         if (empty($listing->slug)) {
@@ -64,28 +76,48 @@ class ListingSeoObserver
         $url = route('listings.show', $listing->slug);
         $path = '/listings/' . $listing->slug;
 
-        // Register 410 Gone for search engines
-        SeoRedirect::updateOrCreate(
-            ['source_path' => $path],
-            [
-                'status_code' => 410,
-                'is_active' => true,
-                'notes' => "Listing #{$listing->id} permanently deleted",
-            ]
-        );
+        // If permanently deleted, assign 410 Gone so search engines immediately drop it
+        if ($listing->isForceDeleting()) {
+            SeoRedirect::updateOrCreate(
+                ['source_path' => $path],
+                [
+                    'status_code' => 410,
+                    'is_active' => true,
+                    'notes' => "Listing #{$listing->id} permanently deleted from database",
+                ]
+            );
 
-        $record = SeoUrlRecord::where('url', $url)->first();
-        if ($record) {
-            $record->update([
-                'indexing_status' => 'excluded',
-                'indexing_eligibility' => 'deleted',
-                'sitemap_status' => 'excluded',
-                'http_status' => 410,
-            ]);
+            $record = SeoUrlRecord::where('url', $url)->first();
+            if ($record) {
+                $record->update([
+                    'indexing_status' => 'excluded',
+                    'indexing_eligibility' => 'deleted',
+                    'sitemap_status' => 'excluded',
+                    'http_status' => 410,
+                ]);
+            }
+        } else {
+            // Soft-deleted: Exclude from sitemaps and indexing, but DO NOT apply 410 Gone
+            // because soft-deleted listings can be restored by the user or moderator.
+            $record = SeoUrlRecord::where('url', $url)->first();
+            if ($record) {
+                $record->update([
+                    'indexing_status' => 'excluded',
+                    'indexing_eligibility' => 'ineligible',
+                    'sitemap_status' => 'excluded',
+                ]);
+            }
         }
 
-        // Enqueue deletion notification
-        app(GoogleIndexingService::class)->enqueue($url, 'URL_DELETED', 'sitemap_ping', 8, null);
+        // Notify indexing pipeline
+        app(GoogleIndexingService::class)->enqueue($url, 'URL_DELETED', 'sitemap_sync', 8, null);
+    }
+
+    /**
+     * Handle listing restored from trash.
+     */
+    public function restored(Listing $listing): void
+    {
+        $this->saved($listing);
     }
 }
-

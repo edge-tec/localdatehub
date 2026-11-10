@@ -464,7 +464,16 @@
                                         @endphp
                                         <span class="px-2 py-0.5 text-[10px] font-bold rounded-md border {{ $intentClasses }} uppercase">{{ $kw->search_intent }}</span>
                                     </td>
-                                    <td class="py-3 font-bold text-slate-800">{{ number_format($kw->search_volume) }}/mo</td>
+                                    <td class="py-3 font-bold text-slate-800">
+                                        @if($kw->search_volume > 0)
+                                            <div>{{ number_format($kw->search_volume) }}/mo</div>
+                                            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase {{ $kw->data_source === 'google_search_console' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600' }}">
+                                                {{ $kw->data_source === 'google_search_console' ? 'Provider Reported (GSC)' : 'Internal Estimate' }}
+                                            </span>
+                                        @else
+                                            <span class="text-slate-400 font-semibold text-[11px]">Unavailable</span>
+                                        @endif
+                                    </td>
                                     <td class="py-3">
                                         <div class="flex items-center gap-2">
                                             <div class="w-16 bg-slate-100 rounded-full h-1.5">
