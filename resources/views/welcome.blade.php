@@ -443,30 +443,97 @@
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-2.5 sm:gap-3">
                 @foreach($homepageCategories as $catCard)
                     <a href="{{ $catCard['url'] }}" class="bg-white rounded-2xl border-2 border-slate-200/90 hover:border-[#F20B65] p-3 text-center shadow-2xs hover:shadow-lg transition-all duration-300 group flex flex-col items-center justify-center min-h-[105px]">
-                        <!-- Modern Natural Vector Icon -->
+                        <!-- Modern Natural Vector Icon Matching Exact Category Desires -->
                         <div class="w-10 h-10 mb-2 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-[#F20B65] group-hover:bg-[#F20B65] group-hover:text-white group-hover:scale-105 transition-all duration-300 shadow-2xs">
-                            @if(str_contains($catCard['slug'], 'couples'))
-                                <!-- Couples Connection Natural Duo Icon -->
-                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            @if($catCard['slug'] === 'men-seeking-women')
+                                <!-- 1. Men Seeking Women: Man + Heart + Woman -->
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                    <circle cx="6" cy="6" r="2.5" />
+                                    <path stroke-linecap="round" d="M2.5 17v-3a3 3 0 013-3h1a3 3 0 013 3v3" />
+                                    <path fill="currentColor" stroke="none" d="M12 9.2c-.8-1.2-2.3-1.4-3.1-.3-.6.8-.4 2 .8 3.1l2.3 2.1 2.3-2.1c1.2-1.1 1.4-2.3.8-3.1-.8-1.1-2.3-.9-3.1.3z" />
+                                    <circle cx="18" cy="6" r="2.5" />
+                                    <path stroke-linecap="round" d="M14.5 17l1.5-6h4l1.5 6" />
                                 </svg>
-                            @elseif(str_contains($catCard['slug'], 'women') && str_contains($catCard['slug'], 'men'))
-                                <!-- Men & Women Sparkle Duo Icon -->
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            @elseif($catCard['slug'] === 'men-seeking-men')
+                                <!-- 2. Men Seeking Men: Two Men Duo -->
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                    <circle cx="7" cy="6" r="2.5" />
+                                    <path stroke-linecap="round" d="M3.5 18v-3a3 3 0 013-3h1a3 3 0 013 3v3" />
+                                    <circle cx="17" cy="6" r="2.5" />
+                                    <path stroke-linecap="round" d="M13.5 18v-3a3 3 0 013-3h1a3 3 0 013 3v3" />
+                                    <path stroke-linecap="round" stroke-width="2" d="M10.5 14h3" />
                                 </svg>
-                            @elseif(str_contains($catCard['slug'], 'women'))
-                                <!-- Women Natural Silhouette Icon -->
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4a4 4 0 100 8 4 4 0 000-8zM12 12v8m-3-4h6" />
+                            @elseif($catCard['slug'] === 'men-seeking-couples')
+                                <!-- 3. Men Seeking Couples: Man + Plus + Couple -->
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                    <circle cx="5" cy="7" r="2" />
+                                    <path stroke-linecap="round" d="M2.5 17v-2a2.5 2.5 0 012.5-2.5h0a2.5 2.5 0 012.5 2.5v2" />
+                                    <path stroke-linecap="round" stroke-width="2.5" d="M9 13.5h2m-1-1v2" />
+                                    <circle cx="14.5" cy="7" r="1.8" />
+                                    <circle cx="19.5" cy="7" r="1.8" />
+                                    <path stroke-linecap="round" d="M13 17v-2a1.8 1.8 0 011.8-1.8h3.4A1.8 1.8 0 0120 15v2" />
                                 </svg>
-                            @elseif(str_contains($catCard['slug'], 'men'))
-                                <!-- Men Natural Silhouette Icon -->
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 3h5m0 0v5m0-5l-6 6M10 14a5 5 0 110-10 5 5 0 010 10z" />
+                            @elseif($catCard['slug'] === 'women-seeking-men')
+                                <!-- 4. Women Seeking Men: Woman + Sparkle + Man -->
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                    <circle cx="6" cy="6" r="2.5" />
+                                    <path stroke-linecap="round" d="M3 17l1.5-6h3L9 17" />
+                                    <path fill="currentColor" stroke="none" d="M12 8.5c-.7-1-1.9-1.2-2.6-.3-.5.7-.3 1.7.7 2.6l1.9 1.8 1.9-1.8c1-.9 1.2-1.9.7-2.6-.7-.9-1.9-.7-2.6.3z" />
+                                    <circle cx="18" cy="6" r="2.5" />
+                                    <path stroke-linecap="round" d="M14.5 17v-3a3 3 0 013-3h1a3 3 0 013 3v3" />
+                                </svg>
+                            @elseif($catCard['slug'] === 'women-seeking-women')
+                                <!-- 5. Women Seeking Women: Two Women Duo -->
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                    <circle cx="7" cy="6" r="2.5" />
+                                    <path stroke-linecap="round" d="M4 18l1.5-6h3L10 18" />
+                                    <circle cx="17" cy="6" r="2.5" />
+                                    <path stroke-linecap="round" d="M14 18l1.5-6h3l1.5 6" />
+                                    <path fill="currentColor" stroke="none" d="M12 3.8c-.5-.7-1.4-.9-1.9-.2-.4.5-.2 1.3.5 1.9l1.4 1.3 1.4-1.3c.7-.6.9-1.4.5-1.9-.5-.7-1.4-.5-1.9.2z" />
+                                </svg>
+                            @elseif($catCard['slug'] === 'women-seeking-couples')
+                                <!-- 6. Women Seeking Couples: Woman + Plus + Couple -->
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                    <circle cx="5" cy="7" r="2" />
+                                    <path stroke-linecap="round" d="M2.5 17l1.2-4.5h2.6l1.2 4.5" />
+                                    <path stroke-linecap="round" stroke-width="2.5" d="M9 13.5h2m-1-1v2" />
+                                    <circle cx="14.5" cy="7" r="1.8" />
+                                    <circle cx="19.5" cy="7" r="1.8" />
+                                    <path stroke-linecap="round" d="M13 17v-2a1.8 1.8 0 011.8-1.8h3.4A1.8 1.8 0 0120 15v2" />
+                                </svg>
+                            @elseif($catCard['slug'] === 'couples-seeking-men')
+                                <!-- 7. Couples Seeking Men: Couple -> Man -->
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                    <circle cx="5" cy="7" r="1.8" />
+                                    <circle cx="10" cy="7" r="1.8" />
+                                    <path stroke-linecap="round" d="M3.5 17v-2a1.8 1.8 0 011.8-1.8h4.4a1.8 1.8 0 011.8 1.8v2" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13.5h2.5m-1-1.5l1.5 1.5-1.5 1.5" />
+                                    <circle cx="19.5" cy="7" r="2" />
+                                    <path stroke-linecap="round" d="M17 17v-2a2.5 2.5 0 012.5-2.5h0a2.5 2.5 0 012.5 2.5v2" />
+                                </svg>
+                            @elseif($catCard['slug'] === 'couples-seeking-women')
+                                <!-- 8. Couples Seeking Women: Couple -> Woman -->
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                    <circle cx="5" cy="7" r="1.8" />
+                                    <circle cx="10" cy="7" r="1.8" />
+                                    <path stroke-linecap="round" d="M3.5 17v-2a1.8 1.8 0 011.8-1.8h4.4a1.8 1.8 0 011.8 1.8v2" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13.5h2.5m-1-1.5l1.5 1.5-1.5 1.5" />
+                                    <circle cx="19.5" cy="7" r="2" />
+                                    <path stroke-linecap="round" d="M17 17l1.2-4.5h2.6l1.2 4.5" />
+                                </svg>
+                            @elseif($catCard['slug'] === 'couples-seeking-couples')
+                                <!-- 9. Couples Seeking Couples: Double Couples Connected -->
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                    <circle cx="4.5" cy="7" r="1.6" />
+                                    <circle cx="8.5" cy="7" r="1.6" />
+                                    <path stroke-linecap="round" d="M3 17v-2a1.5 1.5 0 011.5-1.5h4A1.5 1.5 0 0110 15v2" />
+                                    <path fill="currentColor" stroke="none" d="M12 9.5c-.6-.8-1.6-1-2.2-.2-.4.6-.3 1.4.6 2.2l1.6 1.5 1.6-1.5c.9-.8 1-1.6.6-2.2-.6-.8-1.6-.6-2.2.2z" />
+                                    <circle cx="15.5" cy="7" r="1.6" />
+                                    <circle cx="19.5" cy="7" r="1.6" />
+                                    <path stroke-linecap="round" d="M14 17v-2a1.5 1.5 0 011.5-1.5h4a1.5 1.5 0 011.5 1.5v2" />
                                 </svg>
                             @else
-                                <!-- Romance & Connection Heart Icon -->
+                                <!-- Romance & Desire Default Icon -->
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>
