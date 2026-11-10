@@ -89,6 +89,7 @@ class AccountDashboard extends Component
     public bool $hideLocationDetails = false;
     public bool $hideAge = false;
     public bool $allowContactMessages = true;
+    public bool $showPublicEmail = false;
     public bool $requireVerifiedSenders = false;
 
     // Age Assurance Status
@@ -188,6 +189,7 @@ class AccountDashboard extends Component
 
         if ($preferences) {
             $this->allowContactMessages = (bool) $preferences->allow_contact_messages;
+            $this->showPublicEmail = (bool) ($preferences->show_public_email ?? false);
             $this->requireVerifiedSenders = (bool) $preferences->require_verified_senders;
         }
     }
@@ -227,6 +229,33 @@ class AccountDashboard extends Component
 
         $listing->recordStatusChange(Listing::STATUS_ACTIVE, 'Resumed by advertiser.', Auth::id());
         session()->flash('success', "Listing [{$listing->title}] is now active.");
+    }
+
+    public function toggleListingEmailVisibility(int $listingId): void
+    {
+        $listing = Listing::with('contact')->where('user_id', Auth::id())->findOrFail($listingId);
+        $user = Auth::user();
+
+        $contact = $listing->contact ?: \App\Modules\Listings\Models\ListingContact::create([
+            'listing_id' => $listing->id,
+            'allow_platform_messages' => true,
+            'allow_email_relay' => true,
+            'show_email' => false,
+            'masked_relay_email' => 'relay-' . Str::random(10) . '@localdatehub.com',
+            'preferred_email_encrypted' => $user?->email,
+        ]);
+
+        $contact->show_email = !$contact->show_email;
+        if (empty($contact->preferred_email_encrypted) && $user?->email) {
+            $contact->preferred_email_encrypted = $user->email;
+        }
+        $contact->save();
+
+        $modeLabel = $contact->show_email
+            ? '🌐 Public (anyone viewing the post can see your email)'
+            : '🔒 Encrypted (masked behind anonymous relay)';
+
+        session()->flash('success', "Email visibility for [{$listing->title}] is now set to: {$modeLabel}.");
     }
 
     public function confirmDeleteListing(int $listingId): void
@@ -910,10 +939,29 @@ class AccountDashboard extends Component
 
         $pref = $user->preferences ?? new UserPreference(['user_id' => $user->id]);
         $pref->allow_contact_messages = $this->allowContactMessages;
+        $pref->show_public_email = $this->showPublicEmail;
         $pref->require_verified_senders = $this->requireVerifiedSenders;
         $pref->save();
 
-        session()->flash('success', 'Privacy preferences saved.');
+        // Sync email visibility across the user's listings
+        $userListingIds = Listing::where('user_id', $user->id)->pluck('id');
+        if ($userListingIds->isNotEmpty()) {
+            foreach ($userListingIds as $lId) {
+                $contact = \App\Modules\Listings\Models\ListingContact::firstOrNew(['listing_id' => $lId]);
+                if (!$contact->exists) {
+                    $contact->allow_platform_messages = true;
+                    $contact->allow_email_relay = true;
+                    $contact->masked_relay_email = 'relay-' . Str::random(10) . '@localdatehub.com';
+                }
+                if (empty($contact->preferred_email_encrypted)) {
+                    $contact->preferred_email_encrypted = $user->email;
+                }
+                $contact->show_email = $this->showPublicEmail;
+                $contact->save();
+            }
+        }
+
+        session()->flash('success', 'Privacy & email visibility preferences saved and applied across your posts.');
     }
 
     /*
@@ -1093,7 +1141,7 @@ class AccountDashboard extends Component
     {
         $query = Listing::query()
             ->where('user_id', Auth::id())
-            ->with(['category', 'city.state', 'primaryPhoto']);
+            ->with(['category', 'city.state', 'primaryPhoto', 'contact']);
 
         if (!empty($this->listingSearch)) {
             $query->where('title', 'like', '%' . $this->listingSearch . '%');

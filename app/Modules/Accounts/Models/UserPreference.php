@@ -17,6 +17,7 @@ class UserPreference extends Model
         'privacy_settings',
         'search_defaults',
         'allow_contact_messages',
+        'show_public_email',
         'require_verified_senders',
     ];
 
@@ -27,6 +28,7 @@ class UserPreference extends Model
             'privacy_settings' => 'array',
             'search_defaults' => 'array',
             'allow_contact_messages' => 'boolean',
+            'show_public_email' => 'boolean',
             'require_verified_senders' => 'boolean',
         ];
     }

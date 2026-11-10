@@ -535,14 +535,19 @@ class ListingManagementService
      */
     protected function saveListingContact(Listing $listing, array $data): ListingContact
     {
-        $maskedRelay = 'relay-' . Str::random(10) . '@localadzone.com';
+        $existingContact = $listing->contact()->first();
+        $maskedRelay = $existingContact?->masked_relay_email ?: ('relay-' . Str::random(10) . '@localdatehub.com');
+        $defaultEmail = $listing->user?->email;
+        $preferredEmail = !empty($data['preferred_email']) ? trim((string) $data['preferred_email']) : ($existingContact?->preferred_email_encrypted ?: $defaultEmail);
 
         return ListingContact::updateOrCreate(
             ['listing_id' => $listing->id],
             [
                 'allow_platform_messages' => (bool) ($data['allow_platform_messages'] ?? true),
                 'allow_email_relay' => (bool) ($data['allow_email_relay'] ?? true),
+                'show_email' => (bool) ($data['show_email'] ?? ($listing->user?->preferences?->show_public_email ?? false)),
                 'masked_relay_email' => $data['masked_relay_email'] ?? $maskedRelay,
+                'preferred_email_encrypted' => $preferredEmail,
                 'preferred_phone_encrypted' => !empty($data['preferred_phone']) ? $data['preferred_phone'] : null,
                 'external_handle_encrypted' => !empty($data['external_handle']) ? $data['external_handle'] : null,
                 'show_phone' => (bool) ($data['show_phone'] ?? false),

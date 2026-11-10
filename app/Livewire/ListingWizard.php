@@ -55,6 +55,8 @@ class ListingWizard extends Component
     // Step 8 & 9: Contact Preferences
     public bool $allow_platform_messages = true;
     public bool $allow_email_relay = true;
+    public bool $show_email = false;
+    public string $preferred_email = '';
     public string $preferred_phone = '';
     public string $external_handle = '';
     public bool $show_phone = false;
@@ -72,6 +74,10 @@ class ListingWizard extends Component
     public function mount(?int $listingId = null): void
     {
         $user = Auth::user();
+        if ($user) {
+            $this->preferred_email = (string) $user->email;
+            $this->show_email = (bool) ($user->preferences?->show_public_email ?? false);
+        }
         if ($user && $user->posterProfile) {
             $this->poster_age = $user->posterProfile->age ?: 25;
             $this->poster_gender = $user->posterProfile->gender ?: 'Male';
@@ -141,6 +147,8 @@ class ListingWizard extends Component
         if ($listing->contact) {
             $this->allow_platform_messages = $listing->contact->allow_platform_messages;
             $this->allow_email_relay = $listing->contact->allow_email_relay;
+            $this->show_email = (bool) $listing->contact->show_email;
+            $this->preferred_email = $listing->contact->preferred_email_encrypted ?: ($listing->user?->email ?? '');
             $this->preferred_phone = $listing->contact->preferred_phone_encrypted ?: '';
             $this->external_handle = $listing->contact->external_handle_encrypted ?: '';
             $this->show_phone = $listing->contact->show_phone;
@@ -491,6 +499,8 @@ class ListingWizard extends Component
             'hide_exact_distance' => $this->hide_exact_distance,
             'allow_platform_messages' => $this->allow_platform_messages,
             'allow_email_relay' => $this->allow_email_relay,
+            'show_email' => $this->show_email,
+            'preferred_email' => $this->preferred_email,
             'preferred_phone' => $this->preferred_phone,
             'external_handle' => $this->external_handle,
             'show_phone' => $this->show_phone,

@@ -1036,4 +1036,60 @@ class UserAccountDashboardTest extends TestCase
         $component->call('resetBrandAsset', 'site_favicon_url');
         $this->assertEquals('/favicon.ico', \App\Modules\Admin\Models\SystemSetting::where('key', 'site_favicon_url')->value('value'));
     }
+
+    public function test_user_can_toggle_email_between_public_and_encrypted_on_posts(): void
+    {
+        $listing = Listing::create([
+            'user_id' => $this->user->id,
+            'category_id' => $this->category->id,
+            'state_id' => $this->city->state_id,
+            'city_id' => $this->city->id,
+            'title' => 'Email Visibility Test Listing',
+            'slug' => 'email-visibility-test-' . uniqid(),
+            'description' => 'Testing public vs encrypted email visibility on post.',
+            'content_hash' => hash('sha256', 'email-vis-' . uniqid()),
+            'poster_age' => 28,
+            'poster_gender' => 'Female',
+            'intent' => 'dating',
+            'status' => Listing::STATUS_ACTIVE,
+            'published_at' => now(),
+            'expires_at' => now()->addDays(30),
+        ]);
+
+        \App\Modules\Listings\Models\ListingContact::create([
+            'listing_id' => $listing->id,
+            'allow_platform_messages' => true,
+            'allow_email_relay' => true,
+            'show_email' => false,
+            'masked_relay_email' => 'relay-secret999@localdatehub.com',
+            'preferred_email_encrypted' => $this->user->email,
+        ]);
+
+        // 1. By default (Encrypted mode): post shows masked relay email and hides real email
+        $responseEncrypted = $this->get(route('listings.show', $listing->slug));
+        $responseEncrypted->assertStatus(200);
+        $responseEncrypted->assertSee('relay-secret999@localdatehub.com');
+        $responseEncrypted->assertDontSee('mailto:' . $this->user->email);
+
+        // 2. User toggles email to Public from AccountDashboard
+        Livewire::actingAs($this->user)
+            ->test(AccountDashboard::class, ['initialTab' => 'listings'])
+            ->call('toggleListingEmailVisibility', $listing->id);
+
+        $this->assertTrue($listing->contact()->first()->show_email);
+
+        // 3. Now anyone viewing the post sees the Public Email directly
+        $responsePublic = $this->get(route('listings.show', $listing->slug));
+        $responsePublic->assertStatus(200);
+        $responsePublic->assertSee($this->user->email);
+        $responsePublic->assertSee('Direct Public Email:');
+
+        // 4. User can switch back to Encrypted via Privacy Settings
+        Livewire::actingAs($this->user)
+            ->test(AccountDashboard::class, ['initialTab' => 'privacy'])
+            ->set('showPublicEmail', false)
+            ->call('savePrivacySettings');
+
+        $this->assertFalse($listing->contact()->first()->show_email);
+    }
 }

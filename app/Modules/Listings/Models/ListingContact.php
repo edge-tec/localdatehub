@@ -14,7 +14,9 @@ class ListingContact extends Model
         'listing_id',
         'allow_platform_messages',
         'allow_email_relay',
+        'show_email',
         'masked_relay_email',
+        'preferred_email_encrypted',
         'preferred_phone_encrypted',
         'external_handle_encrypted',
         'show_phone',
@@ -27,7 +29,9 @@ class ListingContact extends Model
         return [
             'allow_platform_messages' => 'boolean',
             'allow_email_relay' => 'boolean',
+            'show_email' => 'boolean',
             'show_phone' => 'boolean',
+            'preferred_email_encrypted' => 'encrypted',
             'preferred_phone_encrypted' => 'encrypted',
             'external_handle_encrypted' => 'encrypted',
         ];

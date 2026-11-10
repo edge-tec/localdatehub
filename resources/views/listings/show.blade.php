@@ -453,11 +453,35 @@
                         <span class="text-white font-black text-sm tracking-wide">Send Protected Message</span>
                     </button>
 
-                    <!-- Masked Anonymous Email Relay -->
-                    @if($listing->contact?->allow_email_relay && $listing->contact?->masked_relay_email)
+                    <!-- Public Email OR Encrypted Anonymous Email Relay -->
+                    @php
+                        $isEmailPublic = (bool) ($listing->contact?->show_email ?? ($listing->user?->preferences?->show_public_email ?? false));
+                        $publicEmailAddress = $listing->contact?->preferred_email_encrypted ?: $listing->user?->email;
+                    @endphp
+                    @if($isEmailPublic && !empty($publicEmailAddress))
+                        <div class="p-3.5 bg-emerald-50/70 border border-emerald-200 rounded-2xl text-xs space-y-2" x-data="{ copiedEmail: false }">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-emerald-900 font-black text-[11px] flex items-center gap-1">
+                                    <span>🌐 Direct Public Email:</span>
+                                </span>
+                                <button
+                                    type="button"
+                                    @click="navigator.clipboard.writeText('{{ $publicEmailAddress }}'); copiedEmail = true; setTimeout(() => copiedEmail = false, 2000)"
+                                    class="text-[11px] text-emerald-700 hover:underline font-black cursor-pointer"
+                                    x-text="copiedEmail ? 'Copied! ✓' : 'Copy Email'"
+                                >Copy Email</button>
+                            </div>
+                            <a href="mailto:{{ $publicEmailAddress }}?subject={{ rawurlencode('Regarding your LocalDateHub post: ' . $listing->title) }}" class="font-mono text-emerald-950 hover:text-[#F20B65] text-xs font-black block break-all select-all bg-white p-2.5 rounded-xl border border-emerald-200 shadow-2xs transition">
+                                ✉️ {{ $publicEmailAddress }}
+                            </a>
+                            <span class="text-[11px] text-emerald-800 font-medium block leading-tight">Advertiser has made their email public on this post for direct contact.</span>
+                        </div>
+                    @elseif($listing->contact?->allow_email_relay && $listing->contact?->masked_relay_email)
                         <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs space-y-1.5" x-data="{ copiedRelay: false }">
                             <div class="flex items-center justify-between">
-                                <span class="text-slate-600 font-bold text-[11px]">Anonymous Email Relay:</span>
+                                <span class="text-slate-700 font-black text-[11px] flex items-center gap-1">
+                                    <span>🔒 Encrypted Email Relay:</span>
+                                </span>
                                 <button
                                     type="button"
                                     @click="navigator.clipboard.writeText('{{ $listing->contact->masked_relay_email }}'); copiedRelay = true; setTimeout(() => copiedRelay = false, 2000)"
@@ -468,7 +492,7 @@
                             <span class="font-mono text-slate-900 text-xs font-bold block break-all select-all bg-white p-2 rounded-xl border border-slate-200">
                                 {{ $listing->contact->masked_relay_email }}
                             </span>
-                            <span class="text-[11px] text-slate-500 font-medium block leading-tight">Personal email address is masked to protect advertiser privacy.</span>
+                            <span class="text-[11px] text-slate-500 font-medium block leading-tight">Personal email is encrypted &amp; masked to protect advertiser privacy.</span>
                         </div>
                     @endif
 

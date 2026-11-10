@@ -542,16 +542,85 @@
                     </label>
                 </div>
 
-                <!-- Email Relay -->
-                <div class="p-4 rounded-2xl border border-slate-200 flex items-center justify-between bg-slate-50">
-                    <div>
-                        <h4 class="text-xs sm:text-sm font-bold text-slate-800">Enable Secure Email Relay</h4>
-                        <p class="text-xs text-slate-500">Mask your personal email behind our proxy address to protect your identity.</p>
+                <!-- Email Visibility & Privacy Control (Encrypted vs Public) -->
+                <div class="p-5 rounded-2xl border border-slate-200 space-y-4 bg-white shadow-2xs">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                        <div>
+                            <h4 class="text-xs sm:text-sm font-black text-slate-900 flex items-center gap-2">
+                                <span>✉️ Email Address Visibility (Public or Encrypted)</span>
+                                @if($show_email)
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">🌐 Public on Post</span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-indigo-50 text-indigo-700 border border-indigo-200">🔒 Encrypted &amp; Masked</span>
+                                @endif
+                            </h4>
+                            <p class="text-xs text-slate-500 mt-0.5">Choose whether anyone viewing your post can see your email publicly, or keep it encrypted behind our privacy relay.</p>
+                        </div>
                     </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" wire:model="allow_email_relay" class="sr-only peer">
-                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F20B83]"></div>
-                    </label>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <!-- Option A: Encrypted / Masked -->
+                        <button
+                            type="button"
+                            wire:click="$set('show_email', false)"
+                            class="text-left p-3.5 rounded-xl border-2 transition cursor-pointer {{ !$show_email ? 'border-[#F20B83] bg-pink-50/40' : 'border-slate-200 bg-slate-50 hover:border-slate-300' }}"
+                        >
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-black text-slate-900">🔒 Keep Email Encrypted</span>
+                                <span class="w-4 h-4 rounded-full border flex items-center justify-center {{ !$show_email ? 'border-[#F20B83] bg-[#F20B83] text-white' : 'border-slate-300 bg-white' }}">
+                                    @if(!$show_email) ✓ @endif
+                                </span>
+                            </div>
+                            <p class="text-[11px] text-slate-600 mt-1">Hides your real email and displays a masked relay address (e.g. <code class="font-mono text-[10px]">relay-xxxx@localdatehub.com</code>).</p>
+                        </button>
+
+                        <!-- Option B: Public Email -->
+                        <button
+                            type="button"
+                            wire:click="$set('show_email', true)"
+                            class="text-left p-3.5 rounded-xl border-2 transition cursor-pointer {{ $show_email ? 'border-emerald-500 bg-emerald-50/40' : 'border-slate-200 bg-slate-50 hover:border-slate-300' }}"
+                        >
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-black text-slate-900">🌐 Make Email Public</span>
+                                <span class="w-4 h-4 rounded-full border flex items-center justify-center {{ $show_email ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-slate-300 bg-white' }}">
+                                    @if($show_email) ✓ @endif
+                                </span>
+                            </div>
+                            <p class="text-[11px] text-slate-600 mt-1">Displays your email address publicly on the post so anyone can view and email you directly.</p>
+                        </button>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                            Contact Email for This Post
+                        </label>
+                        <input
+                            type="email"
+                            wire:model="preferred_email"
+                            placeholder="{{ auth()->user()?->email ?? 'you@example.com' }}"
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83] outline-none"
+                        />
+                        <p class="text-[11px] text-slate-500 mt-1">
+                            @if($show_email)
+                                <span class="text-emerald-700 font-bold">🌐 Public Mode Active:</span> This email will be visible to everyone on your published post.
+                            @else
+                                <span class="text-indigo-700 font-bold">🔒 Encrypted Mode Active:</span> Stored encrypted in our database and hidden behind an anonymous relay on your post.
+                            @endif
+                        </p>
+                    </div>
+
+                    @if(!$show_email)
+                        <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+                            <div>
+                                <span class="text-xs font-bold text-slate-800 block">Enable Anonymous Email Relay Address</span>
+                                <span class="text-[11px] text-slate-500">Show a masked proxy email on your post while keeping your real email encrypted.</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" wire:model="allow_email_relay" class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F20B83]"></div>
+                            </label>
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Phone Preferences -->

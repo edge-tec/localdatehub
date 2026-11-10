@@ -606,6 +606,15 @@
                                                 ★ Featured Spotlight
                                             </span>
                                         @endif
+                                        @php $isPublicEmail = (bool) ($listing->contact?->show_email ?? false); @endphp
+                                        <button
+                                            type="button"
+                                            wire:click="toggleListingEmailVisibility({{ $listing->id }})"
+                                            title="Click to switch between Public Email and Encrypted Email"
+                                            class="px-2.5 py-0.5 rounded-full text-[10px] font-black border transition cursor-pointer {{ $isPublicEmail ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100' : 'bg-indigo-50 text-indigo-800 border-indigo-200 hover:bg-indigo-100' }}"
+                                        >
+                                            {{ $isPublicEmail ? '🌐 Email: Public (Click to Encrypt)' : '🔒 Email: Encrypted (Click to Make Public)' }}
+                                        </button>
                                         <span class="text-xs text-slate-600 font-semibold">{{ $listing->category?->name }} &bull; {{ $listing->city?->name }}, {{ $listing->city?->state?->code }}</span>
                                     </div>
 
@@ -1686,6 +1695,21 @@
                             <span class="text-xs text-slate-700 font-medium block">Enable the protected encrypted contact form on all your listings.</span>
                         </div>
                         <input type="checkbox" wire:model="allowContactMessages" class="rounded bg-white border-slate-300 text-[#F20B83] focus:ring-[#F20B83] w-5 h-5">
+                    </div>
+
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between gap-4">
+                        <div class="space-y-0.5">
+                            <span class="text-xs font-black text-slate-950 flex items-center gap-2">
+                                <span>Make My Email Public on Posts (Uncheck to Keep Encrypted)</span>
+                                @if($showPublicEmail)
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">🌐 Public</span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-indigo-50 text-indigo-700 border border-indigo-200">🔒 Encrypted</span>
+                                @endif
+                            </span>
+                            <span class="text-xs text-slate-700 font-medium block">When enabled, anyone viewing your posts can see your email address directly. When unchecked, your email remains encrypted behind our anonymous relay.</span>
+                        </div>
+                        <input type="checkbox" wire:model.live="showPublicEmail" class="rounded bg-white border-slate-300 text-[#F20B83] focus:ring-[#F20B83] w-5 h-5">
                     </div>
 
                     <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between gap-4">
