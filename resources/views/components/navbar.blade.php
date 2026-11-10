@@ -18,6 +18,21 @@
     }
     $hasCustomNavLogo = !empty($navLogoUrl) && !in_array($navLogoUrl, ['/images/logo.png', '/images/logo.svg'], true);
     $hasCustomMobileLogo = !empty($navMobileLogoUrl) && !in_array($navMobileLogoUrl, ['/images/logo-mobile.png', '/images/logo-mobile.svg'], true);
+
+    $navUser = Auth::user();
+    $navUnreadMessages = 0;
+    $navUnreadNotifs = 0;
+    $navRecentMessages = collect();
+    $navRecentNotifs = collect();
+    if ($navUser) {
+        try {
+            $navUnreadMessages = \App\Modules\Contact\Models\ContactMessage::where('recipient_id', $navUser->id)->where('is_read', false)->count();
+            $navUnreadNotifs = \App\Modules\Notifications\Models\NotificationLog::where('user_id', $navUser->id)->where('is_read', false)->count();
+            $navRecentMessages = \App\Modules\Contact\Models\ContactMessage::with('listing')->where('recipient_id', $navUser->id)->latest('id')->take(3)->get();
+            $navRecentNotifs = \App\Modules\Notifications\Models\NotificationLog::where('user_id', $navUser->id)->latest('id')->take(3)->get();
+        } catch (\Throwable $e) {
+        }
+    }
 @endphp
 
 <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs" x-data="{ mobileMenuOpen: false, browseOpen: false, statesOpen: false, citiesOpen: false }">
@@ -143,64 +158,48 @@
                         <span>Login</span>
                     </a>
                 @else
-                    @php
-                        $navUser = Auth::user();
-                        $navUnreadMessages = 0;
-                        $navUnreadNotifs = 0;
-                        $navTotalUnread = 0;
-                        $navRecentMessages = collect();
-                        $navRecentNotifs = collect();
-                        try {
-                            $navUnreadMessages = \App\Modules\Contact\Models\ContactMessage::where('recipient_id', $navUser->id)->where('is_read', false)->count();
-                            $navUnreadNotifs = \App\Modules\Notifications\Models\NotificationLog::where('user_id', $navUser->id)->where('is_read', false)->count();
-                            $navTotalUnread = $navUnreadMessages + $navUnreadNotifs;
-                            $navRecentMessages = \App\Modules\Contact\Models\ContactMessage::with('listing')->where('recipient_id', $navUser->id)->latest('id')->take(3)->get();
-                            $navRecentNotifs = \App\Modules\Notifications\Models\NotificationLog::where('user_id', $navUser->id)->latest('id')->take(3)->get();
-                        } catch (\Throwable $e) {
-                        }
-                    @endphp
+                    <!-- Dedicated User Messenger Icon Button -->
+                    <a 
+                        href="{{ route('account.messages.index') }}" 
+                        class="w-9 h-9 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-600 hover:text-[#F20B65] transition relative shadow-xs group"
+                        title="Messenger"
+                    >
+                        <svg class="w-4 h-4 fill-current text-slate-600 group-hover:text-[#F20B65] transition" viewBox="0 0 24 24">
+                            <path d="M12 2C6.477 2 2 6.145 2 11.258c0 2.91 1.455 5.518 3.736 7.208V22l3.418-1.874c.91.252 1.872.388 2.846.388 5.523 0 10-4.145 10-9.258C22 6.145 17.523 2 12 2zm1.05 12.443l-2.625-2.8-5.125 2.8 5.637-5.986 2.688 2.8 5.062-2.8-5.637 5.986z"/>
+                        </svg>
+                        @if($navUnreadMessages > 0)
+                            <span class="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-[#F20B65] text-white text-[10px] font-black flex items-center justify-center shadow">
+                                {{ $navUnreadMessages > 99 ? '99+' : $navUnreadMessages }}
+                            </span>
+                        @endif
+                    </a>
 
-                    <!-- User Notification & Message Bell -->
-                    <div class="relative" x-data="{ userBellOpen: false, unreadTotal: {{ $navTotalUnread }}, seenNow: {{ $navTotalUnread === 0 ? 'true' : 'false' }}, markSeen() { if (this.unreadTotal > 0) { this.unreadTotal = 0; this.seenNow = true; fetch('{{ route('notifications.mark-seen') }}', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, body: JSON.stringify({ scope: 'user' }) }); } } }" @click.away="userBellOpen = false">
+                    <!-- User Notifications Bell -->
+                    <div class="relative" x-data="{ userBellOpen: false, unreadNotifs: {{ $navUnreadNotifs }}, seenNow: {{ $navUnreadNotifs === 0 ? 'true' : 'false' }}, markSeen() { if (this.unreadNotifs > 0) { this.unreadNotifs = 0; this.seenNow = true; fetch('{{ route('notifications.mark-seen') }}', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, body: JSON.stringify({ scope: 'user' }) }); } } }" @click.away="userBellOpen = false">
                         <button
                             @click="userBellOpen = !userBellOpen; if (userBellOpen) { markSeen(); }"
                             class="w-9 h-9 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-600 hover:text-[#F20B65] transition relative shadow-xs"
-                            title="Messages & Notifications"
+                            title="Notifications"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
-                            <span x-show="unreadTotal > 0" x-cloak x-text="unreadTotal > 99 ? '99+' : unreadTotal" class="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-[#F20B65] text-white text-[10px] font-black flex items-center justify-center shadow">
-                                {{ $navTotalUnread }}
+                            <span x-show="unreadNotifs > 0" x-cloak x-text="unreadNotifs > 99 ? '99+' : unreadNotifs" class="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-[#F20B65] text-white text-[10px] font-black flex items-center justify-center shadow">
+                                {{ $navUnreadNotifs }}
                             </span>
                         </button>
 
                         <div x-show="userBellOpen" x-cloak class="absolute right-0 mt-2 w-80 rounded-2xl bg-white border border-slate-200 shadow-2xl p-3.5 z-50 text-xs">
                             <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
                                 <span class="font-black text-slate-900 flex items-center gap-1.5">
-                                    <span>Messages & Alerts</span>
+                                    <span>Notifications & Alerts</span>
                                     <span x-show="seenNow" class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black">✓✓ Seen</span>
                                 </span>
                                 <a href="{{ route('account.dashboard', ['tab' => 'notifications']) }}" class="text-[11px] font-bold text-[#F20B65] hover:underline">All Alerts &rarr;</a>
                             </div>
 
                             <div class="space-y-2 max-h-72 overflow-y-auto pr-0.5">
-                                @foreach($navRecentMessages as $msg)
-                                    <a href="{{ route('account.messages.index', ['conversation' => $msg->id]) }}" class="block p-2.5 rounded-xl border transition {{ $msg->is_read ? 'bg-slate-50 border-slate-200 hover:bg-slate-100' : 'bg-rose-50/70 border-rose-200 hover:bg-rose-50' }}">
-                                        <div class="flex items-center justify-between gap-2">
-                                            <span class="font-bold text-slate-900 truncate">💬 {{ $msg->sender_name ?: 'Member Inquiry' }}</span>
-                                            @if($msg->is_read)
-                                                <span class="text-[10px] font-black text-emerald-700 shrink-0">✓✓ Seen</span>
-                                            @else
-                                                <span class="text-[10px] font-black text-[#F20B65] shrink-0">● Unread</span>
-                                            @endif
-                                        </div>
-                                        <div class="text-[11px] text-slate-600 truncate mt-0.5">{{ $msg->subject ?: ($msg->message_encrypted ?: 'New message received') }}</div>
-                                        <div class="text-[10px] text-slate-400 mt-0.5">{{ $msg->created_at?->diffForHumans() }}</div>
-                                    </a>
-                                @endforeach
-
-                                @foreach($navRecentNotifs as $notif)
+                                @forelse($navRecentNotifs as $notif)
                                     <a href="{{ route('account.dashboard', ['tab' => 'notifications', 'inspect_notification' => $notif->id]) }}" class="block p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition">
                                         <div class="flex items-center justify-between gap-2">
                                             <span class="font-bold text-slate-900 truncate">🔔 {{ $notif->subject ?: 'Platform Notification' }}</span>
@@ -211,13 +210,11 @@
                                         @endif
                                         <div class="text-[10px] text-slate-400 mt-0.5">{{ $notif->sent_at?->diffForHumans() ?? $notif->created_at?->diffForHumans() }}</div>
                                     </a>
-                                @endforeach
-
-                                @if($navRecentMessages->isEmpty() && $navRecentNotifs->isEmpty())
+                                @empty
                                     <div class="py-6 text-center text-slate-400 font-semibold">
-                                        No messages or notifications yet.
+                                        No new notifications.
                                     </div>
-                                @endif
+                                @endforelse
                             </div>
                         </div>
                     </div>
@@ -310,8 +307,21 @@
                 </a>
             </div>
 
-            <!-- Mobile Hamburger Button -->
-            <div class="flex items-center lg:hidden">
+            <!-- Mobile Header Actions (Messenger Icon + Hamburger) -->
+            <div class="flex items-center gap-2 lg:hidden">
+                @auth
+                    <a href="{{ route('account.messages.index') }}" class="w-9 h-9 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-700 hover:text-[#F20B65] transition relative shadow-xs" title="Messenger">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                            <path d="M12 2C6.477 2 2 6.145 2 11.258c0 2.91 1.455 5.518 3.736 7.208V22l3.418-1.874c.91.252 1.872.388 2.846.388 5.523 0 10-4.145 10-9.258C22 6.145 17.523 2 12 2zm1.05 12.443l-2.625-2.8-5.125 2.8 5.637-5.986 2.688 2.8 5.062-2.8-5.637 5.986z"/>
+                        </svg>
+                        @if(($navUnreadMessages ?? 0) > 0)
+                            <span class="absolute -top-1 -right-1 min-w-[15px] h-4 px-1 rounded-full bg-[#F20B65] text-white text-[9px] font-black flex items-center justify-center shadow">
+                                {{ $navUnreadMessages > 99 ? '99+' : $navUnreadMessages }}
+                            </span>
+                        @endif
+                    </a>
+                @endauth
+
                 <button @click="mobileMenuOpen = !mobileMenuOpen" class="text-slate-700 hover:text-slate-900 p-2 rounded-md focus:outline-none">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path x-show="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -340,6 +350,18 @@
                     <a href="{{ route('password.request') }}" class="text-xs font-semibold text-slate-500 hover:text-[#F20B65]">Forgot Password?</a>
                 </div>
             @else
+                <a href="{{ route('account.messages.index') }}" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold bg-pink-50/70 text-[#F20B65] border border-pink-100">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.145 2 11.258c0 2.91 1.455 5.518 3.736 7.208V22l3.418-1.874c.91.252 1.872.388 2.846.388 5.523 0 10-4.145 10-9.258C22 6.145 17.523 2 12 2zm1.05 12.443l-2.625-2.8-5.125 2.8 5.637-5.986 2.688 2.8 5.062-2.8-5.637 5.986z"/></svg>
+                        <span>Messenger</span>
+                    </span>
+                    @if(($navUnreadMessages ?? 0) > 0)
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#F20B65] text-white">
+                            {{ $navUnreadMessages }} unread
+                        </span>
+                    @endif
+                </a>
+
                 <div class="flex items-center space-x-2">
                     <a href="{{ route('account.dashboard') }}" class="flex-1 text-center py-2.5 rounded-xl bg-white border border-slate-300 text-xs font-bold text-slate-700">Account Dashboard</a>
                     <form method="POST" action="{{ route('logout') }}" class="flex-1">

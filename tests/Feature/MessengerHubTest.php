@@ -24,6 +24,26 @@ class MessengerHubTest extends TestCase
         $response->assertSeeLivewire(MessengerHub::class);
     }
 
+    public function test_navbar_displays_message_icon_with_unread_count(): void
+    {
+        $user = User::factory()->create();
+        $sender = User::factory()->create();
+
+        ContactMessage::create([
+            'sender_id' => $sender->id,
+            'recipient_id' => $user->id,
+            'sender_name' => $sender->name,
+            'sender_email_encrypted' => $sender->email,
+            'subject' => 'Inquiry',
+            'message_encrypted' => 'Unread message for navbar badge test',
+            'is_read' => false,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('home'));
+        $response->assertStatus(200);
+        $response->assertSee(route('account.messages.index'));
+    }
+
     public function test_user_can_send_message_in_messenger(): void
     {
         $sender = User::factory()->create();
