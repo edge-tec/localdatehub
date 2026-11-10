@@ -28,6 +28,47 @@
     $isPrivateArea = request()->is('account*', 'admin*', 'checkout*', 'password*', 'email*', 'livewire*', 'api*');
     $defaultRobots = $isPrivateArea ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
     $finalRobots = $robotsMeta ?? $defaultRobots;
+
+    // Build Schema.org Structured Data Graph
+    $schemaGraph = [
+        [
+            '@type' => 'WebSite',
+            '@id' => url('/') . '#website',
+            'url' => url('/'),
+            'name' => config('localdatehub.name', 'LocalDateHub'),
+            'description' => 'USA Adult Personal Classified Listings & Dating Platform',
+            'potentialAction' => [
+                '@type' => 'SearchAction',
+                'target' => url('/search') . '?q={search_term_string}',
+                'query-input' => 'required name=search_term_string',
+            ],
+        ],
+        [
+            '@type' => 'Organization',
+            '@id' => url('/') . '#organization',
+            'name' => config('localdatehub.name', 'LocalDateHub'),
+            'url' => url('/'),
+            'logo' => [
+                '@type' => 'ImageObject',
+                'url' => asset('images/logo.png'),
+            ],
+        ],
+    ];
+
+    if (!empty($structuredData)) {
+        if (isset($structuredData['@graph']) && is_array($structuredData['@graph'])) {
+            foreach ($structuredData['@graph'] as $node) {
+                $schemaGraph[] = $node;
+            }
+        } elseif (is_array($structuredData)) {
+            $schemaGraph[] = $structuredData;
+        }
+    }
+
+    $jsonLdPayload = [
+        '@context' => 'https://schema.org',
+        '@graph' => $schemaGraph,
+    ];
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-[#F8FAFC] text-slate-900 antialiased">
@@ -49,7 +90,19 @@
     <meta property="og:title" content="{{ $title ?? config('localdatehub.name', 'LocalDateHub') }}">
     <meta property="og:description" content="{{ $description ?? 'LocalDateHub is the privacy-first local adult dating, personal classifieds, and safe date spot discovery platform.' }}">
     <meta property="og:url" content="{{ $canonicalUrl ?? url()->current() }}">
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="{{ $ogType ?? 'website' }}">
+    <meta property="og:image" content="{{ $ogImage ?? asset('images/promo-banner.jpg') }}">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $title ?? config('localdatehub.name', 'LocalDateHub') }}">
+    <meta name="twitter:description" content="{{ $description ?? 'LocalDateHub is the privacy-first local adult dating, personal classifieds, and safe date spot discovery platform.' }}">
+    <meta name="twitter:image" content="{{ $ogImage ?? asset('images/promo-banner.jpg') }}">
+
+    <!-- Global WebSite & Organization Structured Data (Schema.org) -->
+    <script type="application/ld+json">
+    {!! json_encode($jsonLdPayload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+    </script>
 
     <!-- Design Tokens & Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

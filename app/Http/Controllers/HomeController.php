@@ -118,6 +118,8 @@ class HomeController extends Controller
             }
         }
 
+        $seo = app(\App\Modules\SEO\Services\SeoService::class)->generateForHome();
+
         return view('welcome', [
             'categories' => $categories,
             'homepageCategories' => $homepageCategories,
@@ -127,6 +129,7 @@ class HomeController extends Controller
             'allStates' => $allStates,
             'popularCities' => $popularCities,
             'stats' => $stats,
+            'seo' => $seo,
         ]);
     }
 }

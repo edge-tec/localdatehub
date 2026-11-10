@@ -1,4 +1,10 @@
-<x-layouts.app title="{{ $listing->title }} — {{ $listing->city?->name }}, {{ $listing->state?->code }} | LocalDateHub">
+<x-layouts.app
+    :title="$seo->title ?? ($listing->title . ' — ' . ($listing->city?->name ? $listing->city->name . ', ' : '') . ($listing->state?->code ?? 'USA') . ' | LocalDateHub')"
+    :description="$seo->description ?? null"
+    :canonicalUrl="$seo->canonicalUrl ?? null"
+    :structuredData="$seo->structuredData ?? null"
+    :ogImage="$seo->ogImage ?? null"
+>
     <div
         class="py-6 sm:py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8"
         x-data="{

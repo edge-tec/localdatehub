@@ -85,6 +85,8 @@ class CategoryWebController extends Controller
         // All applicable dynamic attributes
         $attributes = $category->allAttributes()->where('is_filterable', true);
 
+        $seo = app(\App\Modules\SEO\Services\SeoService::class)->generateForCategory($category, (int) $request->input('page', 1));
+
         return view('categories.show', [
             'category' => $category,
             'subcategories' => $subcategories,
@@ -92,6 +94,7 @@ class CategoryWebController extends Controller
             'listings' => $listings,
             'breadcrumbs' => $category->getBreadcrumbs(),
             'isPreview' => !$category->is_active && $isAdmin,
+            'seo' => $seo,
         ]);
     }
 }

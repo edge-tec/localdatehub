@@ -1,4 +1,9 @@
-<x-layouts.app title="LocalDateHub — Your Local Adult Classifieds & Dating Community">
+<x-layouts.app
+    :title="$seo->title ?? 'LocalDateHub — Your Local Adult Classifieds & Dating Community'"
+    :description="$seo->description ?? null"
+    :canonicalUrl="$seo->canonicalUrl ?? null"
+    :structuredData="$seo->structuredData ?? null"
+>
 
     <!-- ======================================================================= -->
     <!-- 1. HERO SECTION (Clean White with Search Bar & Trust Badges) -->
