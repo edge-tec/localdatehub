@@ -42,7 +42,7 @@ class SitemapController extends Controller
 
         $xml .= '</sitemapindex>';
 
-        return response($xml, 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+        return $this->xmlResponse($xml, 3600);
     }
 
     /**
@@ -52,11 +52,11 @@ class SitemapController extends Controller
     {
         $sitemap = SeoSitemap::where('name', 'pages-sitemap.xml')->first();
         if ($sitemap && $sitemap->file_path && Storage::disk('public')->exists($sitemap->file_path)) {
-            return response(Storage::disk('public')->get($sitemap->file_path), 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+            return $this->xmlResponse(Storage::disk('public')->get($sitemap->file_path), 3600);
         }
 
         $record = $this->sitemapService->generatePagesSitemap();
-        return response(Storage::disk('public')->get($record->file_path), 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+        return $this->xmlResponse(Storage::disk('public')->get($record->file_path), 3600);
     }
 
     /**
@@ -66,11 +66,11 @@ class SitemapController extends Controller
     {
         $sitemap = SeoSitemap::where('name', 'categories-sitemap.xml')->first();
         if ($sitemap && $sitemap->file_path && Storage::disk('public')->exists($sitemap->file_path)) {
-            return response(Storage::disk('public')->get($sitemap->file_path), 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+            return $this->xmlResponse(Storage::disk('public')->get($sitemap->file_path), 3600);
         }
 
         $record = $this->sitemapService->generateCategoriesSitemap();
-        return response(Storage::disk('public')->get($record->file_path), 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+        return $this->xmlResponse(Storage::disk('public')->get($record->file_path), 3600);
     }
 
     /**
@@ -80,11 +80,11 @@ class SitemapController extends Controller
     {
         $sitemap = SeoSitemap::where('name', 'locations-sitemap.xml')->first();
         if ($sitemap && $sitemap->file_path && Storage::disk('public')->exists($sitemap->file_path)) {
-            return response(Storage::disk('public')->get($sitemap->file_path), 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+            return $this->xmlResponse(Storage::disk('public')->get($sitemap->file_path), 7200);
         }
 
         $record = $this->sitemapService->generateLocationsSitemap();
-        return response(Storage::disk('public')->get($record->file_path), 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+        return $this->xmlResponse(Storage::disk('public')->get($record->file_path), 7200);
     }
 
     /**
@@ -94,11 +94,11 @@ class SitemapController extends Controller
     {
         $sitemap = SeoSitemap::where('name', 'states-sitemap.xml')->first();
         if ($sitemap && $sitemap->file_path && Storage::disk('public')->exists($sitemap->file_path)) {
-            return response(Storage::disk('public')->get($sitemap->file_path), 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+            return $this->xmlResponse(Storage::disk('public')->get($sitemap->file_path), 86400);
         }
 
         $record = $this->sitemapService->generateStatesSitemap();
-        return response(Storage::disk('public')->get($record->file_path), 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+        return $this->xmlResponse(Storage::disk('public')->get($record->file_path), 86400);
     }
 
     /**
@@ -108,11 +108,11 @@ class SitemapController extends Controller
     {
         $sitemap = SeoSitemap::where('name', 'cities-sitemap.xml')->first();
         if ($sitemap && $sitemap->file_path && Storage::disk('public')->exists($sitemap->file_path)) {
-            return response(Storage::disk('public')->get($sitemap->file_path), 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+            return $this->xmlResponse(Storage::disk('public')->get($sitemap->file_path), 7200);
         }
 
         $record = $this->sitemapService->generateCitiesSitemap();
-        return response(Storage::disk('public')->get($record->file_path), 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+        return $this->xmlResponse(Storage::disk('public')->get($record->file_path), 7200);
     }
 
     /**
@@ -122,11 +122,11 @@ class SitemapController extends Controller
     {
         $sitemap = SeoSitemap::where('name', 'listings-sitemap.xml')->first();
         if ($sitemap && $sitemap->file_path && Storage::disk('public')->exists($sitemap->file_path)) {
-            return response(Storage::disk('public')->get($sitemap->file_path), 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+            return $this->xmlResponse(Storage::disk('public')->get($sitemap->file_path), 1800);
         }
 
         $record = $this->sitemapService->generateListingsSitemap();
-        return response(Storage::disk('public')->get($record->file_path), 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+        return $this->xmlResponse(Storage::disk('public')->get($record->file_path), 1800);
     }
 
     /**
@@ -136,11 +136,11 @@ class SitemapController extends Controller
     {
         $sitemap = SeoSitemap::where('name', 'images-sitemap.xml')->first();
         if ($sitemap && $sitemap->file_path && Storage::disk('public')->exists($sitemap->file_path)) {
-            return response(Storage::disk('public')->get($sitemap->file_path), 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+            return $this->xmlResponse(Storage::disk('public')->get($sitemap->file_path), 3600);
         }
 
         $record = $this->sitemapService->generateImagesSitemap();
-        return response(Storage::disk('public')->get($record->file_path), 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+        return $this->xmlResponse(Storage::disk('public')->get($record->file_path), 3600);
     }
 
     /**
@@ -157,7 +157,7 @@ class SitemapController extends Controller
         }
 
         if (! empty(trim($customRobots))) {
-            return response($customRobots, 200, ['Content-Type' => 'text/plain; charset=utf-8']);
+            return $this->textResponse($customRobots, 86400);
         }
 
         $content = "User-agent: *\n";
@@ -171,6 +171,53 @@ class SitemapController extends Controller
         $content .= "\n";
         $content .= "Sitemap: " . route('sitemap.index') . "\n";
 
-        return response($content, 200, ['Content-Type' => 'text/plain; charset=utf-8']);
+        return $this->textResponse($content, 86400);
+    }
+
+    /**
+     * Diagnostic endpoint for SEO subsystem.
+     */
+    public function health()
+    {
+        return response()->json([
+            'status' => 'healthy',
+            'subsystem' => 'Enterprise SEO Management',
+            'timestamp' => now()->toIso8601String(),
+            'sitemaps' => [
+                'index' => route('sitemap.index'),
+                'pages' => route('sitemaps.pages'),
+                'categories' => route('sitemaps.categories'),
+                'locations' => route('sitemaps.locations'),
+                'states' => route('sitemaps.states'),
+                'cities' => route('sitemaps.cities'),
+                'listings' => route('sitemaps.listings'),
+                'images' => route('sitemaps.images'),
+            ],
+            'robots' => route('seo.robots'),
+        ], 200, [
+            'Cache-Control' => 'public, max-age=60',
+        ]);
+    }
+
+    /**
+     * Return XML response with optimal public cache-control and no session cookies.
+     */
+    protected function xmlResponse(string $xml, int $maxAge = 3600): Response
+    {
+        return response($xml, 200, [
+            'Content-Type' => 'application/xml; charset=utf-8',
+            'Cache-Control' => 'public, max-age=' . $maxAge . ', s-maxage=' . $maxAge . ', stale-while-revalidate=600',
+        ]);
+    }
+
+    /**
+     * Return Text response with optimal public cache-control.
+     */
+    protected function textResponse(string $text, int $maxAge = 86400): Response
+    {
+        return response($text, 200, [
+            'Content-Type' => 'text/plain; charset=utf-8',
+            'Cache-Control' => 'public, max-age=' . $maxAge . ', s-maxage=' . $maxAge . ', stale-while-revalidate=3600',
+        ]);
     }
 }

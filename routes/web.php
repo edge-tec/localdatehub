@@ -386,18 +386,27 @@ Route::middleware('auth')->get('/account/invoices/{invoice}', [InvoiceWebControl
 Route::post('/webhooks/payments/{gateway}', [PaymentWebhookController::class, 'handle'])->name('webhooks.payments');
 Route::post('/api/payments/webhook/{gateway}', [PaymentWebhookController::class, 'handle'])->name('api.webhooks.payments');
 
-// SEO, Sitemaps & Robots.txt
-Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('seo.robots');
-Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
-Route::get('/sitemap_index.xml', [SitemapController::class, 'index'])->name('sitemap.index.alias');
-Route::prefix('sitemaps')->name('sitemaps.')->group(function () {
-    Route::get('/pages.xml', [SitemapController::class, 'pages'])->name('pages');
-    Route::get('/categories.xml', [SitemapController::class, 'categories'])->name('categories');
-    Route::get('/locations.xml', [SitemapController::class, 'locations'])->name('locations');
-    Route::get('/states.xml', [SitemapController::class, 'states'])->name('states');
-    Route::get('/cities.xml', [SitemapController::class, 'cities'])->name('cities');
-    Route::get('/listings.xml', [SitemapController::class, 'listings'])->name('listings');
-    Route::get('/images.xml', [SitemapController::class, 'images'])->name('images');
+// SEO, Sitemaps & Robots.txt (Stateless, Public Caching, No Session Cookies)
+Route::withoutMiddleware('web')->group(function () {
+    Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('seo.robots');
+    Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
+    Route::get('/sitemap_index.xml', [SitemapController::class, 'index'])->name('sitemap.index.alias');
+    Route::prefix('sitemaps')->name('sitemaps.')->group(function () {
+        Route::get('/pages.xml', [SitemapController::class, 'pages'])->name('pages');
+        Route::get('/categories.xml', [SitemapController::class, 'categories'])->name('categories');
+        Route::get('/locations.xml', [SitemapController::class, 'locations'])->name('locations');
+        Route::get('/states.xml', [SitemapController::class, 'states'])->name('states');
+        Route::get('/cities.xml', [SitemapController::class, 'cities'])->name('cities');
+        Route::get('/listings.xml', [SitemapController::class, 'listings'])->name('listings');
+        Route::get('/images.xml', [SitemapController::class, 'images'])->name('images');
+    });
+
+    // Explicit SEO URI prefix aliases (supports `php artisan route:list --path=seo`)
+    Route::prefix('seo')->name('seo.')->group(function () {
+        Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+        Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots.custom');
+        Route::get('/health', [SitemapController::class, 'health'])->name('health');
+    });
 });
 
 // =========================================================================
