@@ -59,7 +59,7 @@ class PublicPageController extends Controller
             'message' => ['required', 'string', 'min:10', 'max:3000'],
         ]);
 
-        ContactMessage::create([
+        $contactMsg = ContactMessage::create([
             'sender_id' => $request->user()?->id,
             'inquiry_type' => $validated['inquiry_type'],
             'sender_name' => strip_tags(trim($validated['name'])),
@@ -70,6 +70,20 @@ class PublicPageController extends Controller
             'client_ip' => $request->ip(),
             'user_agent' => substr((string) $request->userAgent(), 0, 255),
         ]);
+
+        try {
+            \App\Modules\Notifications\Models\NotificationLog::create([
+                'user_id' => $request->user()?->id,
+                'channel' => 'system',
+                'notification_type' => 'contact_message_received',
+                'subject' => "💬 Contact Form: " . strip_tags(trim($validated['subject'])),
+                'message' => "From " . strip_tags(trim($validated['name'])) . " (" . $validated['inquiry_type'] . "): " . \Illuminate\Support\Str::limit(strip_tags(trim($validated['message'])), 120),
+                'recipient_target' => 'admin',
+                'status' => 'sent',
+                'is_read' => false,
+                'sent_at' => now(),
+            ]);
+        } catch (\Throwable $e) {}
 
         return redirect()->route('pages.contact')->with('success', 'Thank you! Your message has been safely received. Our support team will review and respond promptly.');
     }

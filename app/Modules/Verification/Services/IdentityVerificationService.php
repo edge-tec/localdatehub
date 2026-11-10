@@ -62,6 +62,20 @@ class IdentityVerificationService
                 'created_at' => now(),
             ]);
 
+            try {
+                \App\Modules\Notifications\Models\NotificationLog::create([
+                    'user_id' => $user->id,
+                    'channel' => 'system',
+                    'notification_type' => 'id_verification_submitted',
+                    'subject' => "🆔 ID Verification Submitted: {$user->name}",
+                    'message' => "User submitted " . str_replace('_', ' ', $documentType) . " with photo ID and selfie for review.",
+                    'recipient_target' => 'admin',
+                    'status' => 'sent',
+                    'is_read' => false,
+                    'sent_at' => now(),
+                ]);
+            } catch (\Throwable $e) {}
+
             return $verification;
         });
     }

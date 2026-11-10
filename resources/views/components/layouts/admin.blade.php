@@ -111,68 +111,231 @@
                     
                     <!-- Notification Bell -->
                     @php
+                        $adminPendingId = 0;
+                        $adminPendingListings = 0;
                         $adminUnreadReports = 0;
-                        $adminUnreadAbuse = 0;
+                        $adminUnreadMessages = 0;
                         $adminUnreadLogs = 0;
                         $adminTotalUnread = 0;
-                        $recentAdminReports = collect();
-                        $recentAdminLogs = collect();
+                        $adminInitialItems = [];
                         try {
+                            $adminPendingId = \App\Modules\Verification\Models\IdentityVerification::where('status', 'pending')->count();
+                            $adminPendingListings = \App\Modules\Listings\Models\Listing::whereIn('status', ['pending', 'under_review'])->count();
                             $adminUnreadReports = \App\Modules\Moderation\Models\ContentReport::where('is_read', false)->count();
-                            $adminUnreadAbuse = \App\Modules\Contact\Models\ContactMessage::where('is_flagged', true)->where('is_read', false)->count();
-                            $adminUnreadLogs = \App\Modules\Notifications\Models\NotificationLog::where('is_read', false)->count();
-                            $adminTotalUnread = $adminUnreadReports + $adminUnreadAbuse + $adminUnreadLogs;
+                            $adminUnreadMessages = \App\Modules\Contact\Models\ContactMessage::where(function ($q) {
+                                $q->where('is_flagged', true)
+                                  ->orWhere('recipient_id', auth()->id())
+                                  ->orWhereNull('listing_id');
+                            })->where('is_read', false)->count();
+                            $adminUnreadLogs = \App\Modules\Notifications\Models\NotificationLog::where('is_read', false)
+                                ->where(function ($q) {
+                                    $q->where('recipient_target', 'admin')
+                                      ->orWhere('user_id', auth()->id())
+                                      ->orWhereNull('user_id');
+                                })->count();
+                            $adminTotalUnread = $adminPendingId + $adminPendingListings + $adminUnreadReports + $adminUnreadMessages + $adminUnreadLogs;
 
-                            $recentAdminReports = \App\Modules\Moderation\Models\ContentReport::latest('id')->take(3)->get();
-                            $recentAdminLogs = \App\Modules\Notifications\Models\NotificationLog::with('user')->latest('id')->take(4)->get();
+                            $feedResponse = app(\App\Http\Controllers\Admin\AdminDashboardController::class)->notificationFeed(request());
+                            $feedData = json_decode($feedResponse->getContent(), true);
+                            if (!empty($feedData['items'])) {
+                                $adminInitialItems = $feedData['items'];
+                            }
                         } catch (\Throwable $e) {
                         }
                     @endphp
-                    <div class="relative" x-data="{ unreadCount: {{ $adminTotalUnread }}, allMarkedRead: {{ $adminTotalUnread === 0 ? 'true' : 'false' }}, markAllSeen() { if (this.unreadCount > 0) { this.unreadCount = 0; this.allMarkedRead = true; fetch('{{ route('notifications.mark-seen') }}', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, body: JSON.stringify({ scope: 'admin' }) }); } } }" @click.away="notificationsOpen = false">
-                        <button @click="notificationsOpen = !notificationsOpen; if (notificationsOpen) { markAllSeen(); }" class="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-900 transition relative" title="Admin Notifications & Alerts">
+                    <div class="relative" 
+                        x-data="{ 
+                            unreadCount: {{ $adminTotalUnread }}, 
+                            allMarkedRead: {{ $adminTotalUnread === 0 ? 'true' : 'false' }}, 
+                            items: {{ Js::from($adminInitialItems) }},
+                            counts: {
+                                id_verifications: {{ $adminPendingId }},
+                                pending_listings: {{ $adminPendingListings }},
+                                reports: {{ $adminUnreadReports }},
+                                messages: {{ $adminUnreadMessages }},
+                                system_logs: {{ $adminUnreadLogs }}
+                            },
+                            notificationsOpen: false,
+                            activeCategoryFilter: 'all',
+                            pollTimer: null,
+                            init() {
+                                this.pollTimer = setInterval(() => {
+                                    this.pollLatest();
+                                }, 12000);
+                            },
+                            pollLatest() {
+                                fetch('{{ route('admin.notifications.feed') }}')
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if (data && data.ok) {
+                                            this.unreadCount = data.total_unread;
+                                            this.counts = data.counts;
+                                            if (data.items) {
+                                                this.items = data.items;
+                                            }
+                                            if (this.unreadCount > 0) {
+                                                this.allMarkedRead = false;
+                                            }
+                                        }
+                                    })
+                                    .catch(() => {});
+                            },
+                            markAllSeen() { 
+                                if (this.unreadCount > 0) { 
+                                    this.allMarkedRead = true; 
+                                    fetch('{{ route('notifications.mark-seen') }}', { 
+                                        method: 'POST', 
+                                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, 
+                                        body: JSON.stringify({ scope: 'admin' }) 
+                                    }).then(() => {
+                                        this.pollLatest();
+                                    }); 
+                                } 
+                            },
+                            filteredItems() {
+                                if (this.activeCategoryFilter === 'all') return this.items;
+                                return this.items.filter(item => item.category === this.activeCategoryFilter);
+                            }
+                        }" 
+                        @click.away="notificationsOpen = false"
+                    >
+                        <button 
+                            @click="notificationsOpen = !notificationsOpen; if (notificationsOpen) { markAllSeen(); }" 
+                            class="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-900 transition relative cursor-pointer" 
+                            title="Admin Real-Time Notifications &amp; Alerts"
+                        >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
-                            <span x-show="unreadCount > 0" x-cloak x-text="unreadCount > 99 ? '99+' : unreadCount" class="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-[#F20B83] text-white text-[10px] font-bold flex items-center justify-center shadow">
+                            <span 
+                                x-show="unreadCount > 0" 
+                                x-cloak 
+                                x-text="unreadCount > 99 ? '99+' : unreadCount" 
+                                class="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[#F20B65] text-white text-[10px] font-black flex items-center justify-center shadow-xs animate-pulse"
+                            >
                                 {{ $adminTotalUnread }}
                             </span>
                         </button>
-                        <div x-show="notificationsOpen" x-cloak class="absolute right-0 mt-2 w-80 rounded-2xl bg-white border border-slate-200 shadow-2xl p-3.5 z-50 text-xs">
+
+                        <div 
+                            x-show="notificationsOpen" 
+                            x-cloak 
+                            x-transition:enter="transition ease-out duration-150"
+                            x-transition:enter-start="opacity-0 translate-y-1"
+                            x-transition:enter-end="opacity-100 translate-y-0"
+                            class="absolute right-0 mt-2 w-96 max-w-[calc(100vw-24px)] rounded-2xl bg-white border border-slate-200 shadow-2xl p-3.5 z-50 text-xs"
+                        >
+                            <!-- Dropdown Header -->
                             <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
                                 <div class="font-black text-slate-900 flex items-center gap-1.5">
-                                    <span>Real-Time Alerts</span>
-                                    <span x-show="allMarkedRead" class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black">✓✓ Seen</span>
+                                    <span>Real-Time Admin Alerts</span>
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping" title="Live Polling Active"></span>
                                 </div>
-                                <a href="{{ route('admin.dashboard', ['tab' => 'notifications']) }}" class="text-[11px] font-bold text-[#F20B83] hover:underline">View All &rarr;</a>
+                                <div class="flex items-center gap-2">
+                                    <button 
+                                        type="button" 
+                                        @click="pollLatest()" 
+                                        class="text-[10px] text-slate-400 hover:text-slate-700 font-bold transition" 
+                                        title="Refresh notifications"
+                                    >
+                                        ↻ Refresh
+                                    </button>
+                                    <span class="text-slate-200">|</span>
+                                    <a href="{{ route('admin.dashboard', ['tab' => 'notifications']) }}" class="text-[11px] font-bold text-[#F20B65] hover:underline">
+                                        All Logs &rarr;
+                                    </a>
+                                </div>
                             </div>
-                            <div class="space-y-2 max-h-72 overflow-y-auto pr-0.5">
-                                @foreach($recentAdminReports as $rep)
-                                    <a href="{{ route('admin.dashboard', ['tab' => 'reports', 'inspect_report' => $rep->id]) }}" class="block p-2.5 rounded-xl bg-rose-50/60 hover:bg-rose-50 border border-rose-100 transition">
-                                        <div class="flex items-center justify-between gap-2">
-                                            <span class="font-black text-rose-800 text-[11px]">🚨 Report #{{ $rep->id }}: {{ ucwords(str_replace('_', ' ', $rep->reason_code)) }}</span>
-                                            <span class="text-[10px] font-black text-emerald-700" x-show="allMarkedRead || {{ $rep->is_read ? 'true' : 'false' }}">✓✓ Seen</span>
-                                        </div>
-                                        <div class="text-[11px] text-slate-600 truncate mt-0.5">{{ $rep->details ?: 'Incident submitted for moderation review.' }}</div>
-                                        <div class="text-[10px] text-slate-400 mt-0.5">{{ $rep->created_at?->diffForHumans() }}</div>
-                                    </a>
-                                @endforeach
 
-                                @foreach($recentAdminLogs as $log)
-                                    <a href="{{ route('admin.dashboard', ['tab' => 'notifications', 'inspect_notification' => $log->id]) }}" class="block p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition">
-                                        <div class="flex items-center justify-between gap-2">
-                                            <span class="font-bold text-slate-900 truncate">{{ $log->subject ?: 'Platform Notification' }}</span>
-                                            <span class="text-[10px] font-black text-emerald-700 shrink-0" x-show="allMarkedRead || {{ $log->is_read ? 'true' : 'false' }}">✓✓ Seen</span>
-                                        </div>
-                                        <div class="text-[11px] text-slate-600 truncate mt-0.5">To: {{ $log->user?->name ?? $log->recipient_target }}</div>
-                                        <div class="text-[10px] text-slate-400 mt-0.5">{{ $log->sent_at?->diffForHumans() ?? $log->created_at?->diffForHumans() }}</div>
-                                    </a>
-                                @endforeach
+                            <!-- Filter Pills -->
+                            <div class="flex items-center gap-1 overflow-x-auto pb-2 mb-2 border-b border-slate-100 no-scrollbar">
+                                <button 
+                                    type="button" 
+                                    @click="activeCategoryFilter = 'all'"
+                                    class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition whitespace-nowrap"
+                                    :class="activeCategoryFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                                >
+                                    All (<span x-text="items.length"></span>)
+                                </button>
+                                <button 
+                                    type="button" 
+                                    @click="activeCategoryFilter = 'id_verification'"
+                                    class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition whitespace-nowrap flex items-center gap-1"
+                                    :class="activeCategoryFilter === 'id_verification' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'"
+                                >
+                                    <span>🆔 IDs</span>
+                                    <span class="px-1 py-0.2 rounded-full text-[9px]" :class="activeCategoryFilter === 'id_verification' ? 'bg-white text-blue-700' : 'bg-blue-200 text-blue-900'" x-text="counts.id_verifications"></span>
+                                </button>
+                                <button 
+                                    type="button" 
+                                    @click="activeCategoryFilter = 'listing_pending'"
+                                    class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition whitespace-nowrap flex items-center gap-1"
+                                    :class="activeCategoryFilter === 'listing_pending' ? 'bg-amber-600 text-white' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'"
+                                >
+                                    <span>📝 Ads</span>
+                                    <span class="px-1 py-0.2 rounded-full text-[9px]" :class="activeCategoryFilter === 'listing_pending' ? 'bg-white text-amber-700' : 'bg-amber-200 text-amber-900'" x-text="counts.pending_listings"></span>
+                                </button>
+                                <button 
+                                    type="button" 
+                                    @click="activeCategoryFilter = 'contact_message'"
+                                    class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition whitespace-nowrap flex items-center gap-1"
+                                    :class="activeCategoryFilter === 'contact_message' ? 'bg-pink-600 text-white' : 'bg-pink-50 text-pink-700 hover:bg-pink-100'"
+                                >
+                                    <span>💬 Msgs</span>
+                                    <span class="px-1 py-0.2 rounded-full text-[9px]" :class="activeCategoryFilter === 'contact_message' ? 'bg-white text-pink-700' : 'bg-pink-200 text-pink-900'" x-text="counts.messages"></span>
+                                </button>
+                                <button 
+                                    type="button" 
+                                    @click="activeCategoryFilter = 'abuse_report'"
+                                    class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition whitespace-nowrap flex items-center gap-1"
+                                    :class="activeCategoryFilter === 'abuse_report' ? 'bg-rose-600 text-white' : 'bg-rose-50 text-rose-700 hover:bg-rose-100'"
+                                >
+                                    <span>🚨 Reports</span>
+                                    <span class="px-1 py-0.2 rounded-full text-[9px]" :class="activeCategoryFilter === 'abuse_report' ? 'bg-white text-rose-700' : 'bg-rose-200 text-rose-900'" x-text="counts.reports"></span>
+                                </button>
+                            </div>
 
-                                @if($recentAdminReports->isEmpty() && $recentAdminLogs->isEmpty())
-                                    <div class="py-6 text-center text-slate-400 font-semibold">
-                                        No recent notifications or alerts.
-                                    </div>
-                                @endif
+                            <!-- Notification Items List -->
+                            <div class="space-y-1.5 max-h-80 overflow-y-auto pr-0.5">
+                                <template x-for="item in filteredItems()" :key="item.id">
+                                    <a 
+                                        :href="item.url" 
+                                        class="block p-2.5 rounded-xl hover:bg-slate-50 border border-slate-100 hover:border-slate-200 transition group"
+                                    >
+                                        <div class="flex items-center justify-between gap-2 mb-0.5">
+                                            <div class="flex items-center gap-1.5 min-w-0">
+                                                <span class="text-xs" x-text="item.icon"></span>
+                                                <span 
+                                                    class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border"
+                                                    :class="item.badge_color"
+                                                    x-text="item.badge_label"
+                                                ></span>
+                                                <span class="font-bold text-slate-900 text-[11px] truncate" x-text="item.title"></span>
+                                            </div>
+                                            <span class="text-[10px] text-slate-400 shrink-0 font-medium" x-text="item.time_ago"></span>
+                                        </div>
+                                        <div class="text-[11px] text-slate-600 truncate pl-4.5" x-text="item.snippet"></div>
+                                    </a>
+                                </template>
+
+                                <div x-show="filteredItems().length === 0" class="py-8 text-center text-slate-400 font-semibold space-y-1">
+                                    <div class="text-lg">✨</div>
+                                    <div class="text-xs text-slate-500">No active alerts in this category</div>
+                                    <div class="text-[10px] text-slate-400">All submissions are currently addressed</div>
+                                </div>
+                            </div>
+
+                            <!-- Dropdown Footer Quick Links -->
+                            <div class="mt-2.5 pt-2 border-t border-slate-100 grid grid-cols-3 gap-1.5 text-center text-[10px] font-bold">
+                                <a href="{{ route('admin.verifications.index') }}" class="p-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition">
+                                    🆔 ID Queue ↗
+                                </a>
+                                <a href="{{ route('admin.dashboard', ['tab' => 'listings']) }}" class="p-1.5 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 transition">
+                                    📝 Pending Ads ↗
+                                </a>
+                                <a href="{{ route('admin.dashboard', ['tab' => 'moderation_messages']) }}" class="p-1.5 rounded-lg bg-pink-50 text-[#F20B65] hover:bg-pink-100 transition">
+                                    💬 Messages ↗
+                                </a>
                             </div>
                         </div>
                     </div>

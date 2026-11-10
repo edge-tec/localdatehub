@@ -204,7 +204,9 @@ Route::middleware('auth')->group(function () {
                 'is_read' => true,
                 'read_at' => $now,
             ]);
-            \App\Modules\Contact\Models\ContactMessage::where('is_flagged', true)->where('is_read', false)->update([
+            \App\Modules\Contact\Models\ContactMessage::where(function ($q) use ($user) {
+                $q->where('is_flagged', true)->orWhere('recipient_id', $user->id)->orWhereNull('listing_id');
+            })->where('is_read', false)->update([
                 'is_read' => true,
                 'read_at' => $now,
             ]);
@@ -281,6 +283,7 @@ Route::middleware(['auth'])->get('/admin/impersonate/stop', [AdminDashboardContr
 Route::middleware(['auth', 'admin.rbac'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('index');
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/notifications/feed', [AdminDashboardController::class, 'notificationFeed'])->name('notifications.feed');
 });
 
 // Administrative Location Management

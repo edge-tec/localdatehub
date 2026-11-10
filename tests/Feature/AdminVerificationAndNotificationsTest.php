@@ -266,4 +266,63 @@ class AdminVerificationAndNotificationsTest extends TestCase
         $this->assertTrue((bool) $this->user->fresh()->is_identity_verified);
         $this->assertEquals($this->admin->id, $verification->fresh()->reviewer_id);
     }
+
+    public function test_admin_realtime_notification_feed_aggregates_id_verifications_listings_and_messages(): void
+    {
+        // 1. Create a pending ID verification
+        \App\Modules\Verification\Models\IdentityVerification::create([
+            'user_id' => $this->user->id,
+            'document_type' => 'passport',
+            'document_front_path' => 'verifications/front.jpg',
+            'selfie_path' => 'verifications/selfie.jpg',
+            'status' => 'pending',
+            'submitted_at' => now(),
+        ]);
+
+        // 2. Create a pending listing
+        $category = \App\Modules\Categories\Models\Category::first();
+        $city = \App\Modules\Locations\Models\City::first();
+        $listing = \App\Modules\Listings\Models\Listing::create([
+            'user_id' => $this->user->id,
+            'category_id' => $category?->id ?? 1,
+            'city_id' => $city?->id ?? 1,
+            'state_id' => $city?->state_id ?? 1,
+            'title' => 'Seeking evening date in Miami',
+            'slug' => 'seeking-evening-date-' . uniqid(),
+            'description' => 'Looking for pleasant conversation and nice dinner.',
+            'status' => 'pending',
+            'poster_age' => 28,
+        ]);
+
+        // 3. Create an unread contact message
+        \App\Modules\Contact\Models\ContactMessage::create([
+            'sender_id' => $this->user->id,
+            'recipient_id' => $this->admin->id,
+            'inquiry_type' => 'general_support',
+            'sender_name' => 'Alice Member',
+            'sender_email_encrypted' => 'alice@test.com',
+            'subject' => 'Urgent Account Question',
+            'message_encrypted' => 'I need help with my verification badge.',
+            'is_read' => false,
+        ]);
+
+        // Hit the real-time notification feed endpoint
+        $response = $this->actingAs($this->admin)->get(route('admin.notifications.feed'));
+        $response->assertStatus(200);
+        $response->assertJson([
+            'ok' => true,
+        ]);
+
+        $data = $response->json();
+        $this->assertGreaterThanOrEqual(3, $data['total_unread']);
+        $this->assertGreaterThanOrEqual(1, $data['counts']['id_verifications']);
+        $this->assertGreaterThanOrEqual(1, $data['counts']['pending_listings']);
+        $this->assertGreaterThanOrEqual(1, $data['counts']['messages']);
+
+        // Check feed items contain our elements
+        $itemsCollection = collect($data['items']);
+        $this->assertTrue($itemsCollection->contains(fn($item) => str_contains($item['title'], 'John Candidate') || $item['category'] === 'id_verification'));
+        $this->assertTrue($itemsCollection->contains(fn($item) => str_contains($item['title'], 'Seeking evening date') || $item['category'] === 'listing_pending'));
+        $this->assertTrue($itemsCollection->contains(fn($item) => str_contains($item['title'], 'Alice Member') || $item['category'] === 'contact_message'));
+    }
 }

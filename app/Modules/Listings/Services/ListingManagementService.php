@@ -244,6 +244,20 @@ class ListingManagementService
                         'listing_submitted'
                     );
                 }
+
+                try {
+                    \App\Modules\Notifications\Models\NotificationLog::create([
+                        'user_id' => $user->id,
+                        'channel' => 'system',
+                        'notification_type' => 'listing_submitted_admin',
+                        'subject' => "📝 New Listing " . ($initialStatus === Listing::STATUS_ACTIVE ? 'Published' : 'Pending Review') . ": \"{$listing->title}\"",
+                        'message' => "Submitted by {$user->name} in " . ($listing->city?->name ?? 'location') . ". " . ($initialStatus === Listing::STATUS_ACTIVE ? 'Auto-approved.' : 'Awaiting staff moderation.'),
+                        'recipient_target' => 'admin',
+                        'status' => 'sent',
+                        'is_read' => false,
+                        'sent_at' => now(),
+                    ]);
+                } catch (\Throwable $e) {}
             }
 
             return $listing;
