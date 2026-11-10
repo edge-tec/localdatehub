@@ -102,7 +102,7 @@ class SeoService
     }
 
     /**
-     * Generate metadata for Category pages.
+     * Generate metadata for Category pages with self-referencing pagination canonicals.
      */
     public function generateForCategory(Category $category, int $page = 1): MetaTagsDTO
     {
@@ -112,12 +112,14 @@ class SeoService
         }
 
         $description = "Browse verified {$category->name} personal ads, dating listings, and activity partners. Safe, private adult classifieds.";
-        $canonical = route('categories.show', $category->slug);
+        $canonical = $page > 1
+            ? route('categories.show', ['slug' => $category->slug, 'page' => $page])
+            : route('categories.show', $category->slug);
 
         $breadcrumbs = [
             ['name' => 'Home', 'url' => url('/')],
             ['name' => 'Categories', 'url' => url('/categories')],
-            ['name' => $category->name, 'url' => $canonical],
+            ['name' => $category->name, 'url' => route('categories.show', $category->slug)],
         ];
 
         return new MetaTagsDTO(
@@ -140,27 +142,33 @@ class SeoService
     }
 
     /**
-     * Generate metadata for State & City Landing Pages.
+     * Generate metadata for State & City Landing Pages with self-referencing pagination canonicals.
      */
     public function generateForLocation(?State $state, ?City $city = null, int $page = 1): MetaTagsDTO
     {
         if ($city && $state) {
             $title = "Adult Personals & Dating in {$city->name}, {$state->code} | {$this->brandName}";
             $description = "Find local adult personal ads in {$city->name}, {$state->name}. Browse verified classifieds, dating listings, and local companions.";
-            $canonical = route('locations.city', ['stateCode' => strtolower($state->code), 'citySlug' => $city->slug]);
+            $canonical = $page > 1
+                ? route('locations.city', ['stateCode' => strtolower($state->code), 'citySlug' => $city->slug, 'page' => $page])
+                : route('locations.city', ['stateCode' => strtolower($state->code), 'citySlug' => $city->slug]);
+
             $breadcrumbs = [
                 ['name' => 'Home', 'url' => url('/')],
                 ['name' => $state->name, 'url' => route('locations.state', ['stateCode' => strtolower($state->code)])],
-                ['name' => $city->name, 'url' => $canonical],
+                ['name' => $city->name, 'url' => route('locations.city', ['stateCode' => strtolower($state->code), 'citySlug' => $city->slug])],
             ];
         } elseif ($state) {
             $title = "{$state->name} Adult Personals & Classifieds ({$state->code}) | {$this->brandName}";
             $description = "Connect with consenting adults in {$state->name}. Browse verified personal classifieds in Austin, Dallas, Houston, and surrounding cities.";
-            $canonical = route('locations.state', ['stateCode' => strtolower($state->code)]);
+            $canonical = $page > 1
+                ? route('locations.state', ['stateCode' => strtolower($state->code), 'page' => $page])
+                : route('locations.state', ['stateCode' => strtolower($state->code)]);
+
             $breadcrumbs = [
                 ['name' => 'Home', 'url' => url('/')],
                 ['name' => 'Locations', 'url' => url('/locations')],
-                ['name' => $state->name, 'url' => $canonical],
+                ['name' => $state->name, 'url' => route('locations.state', ['stateCode' => strtolower($state->code)])],
             ];
         } else {
             return $this->generateForHome();

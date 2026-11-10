@@ -192,17 +192,30 @@ class GoogleSearchConsoleService
         Cache::increment($quotaKey);
 
         try {
-            $response = Http::withToken($token)->post('https://searchconsole.googleapis.com/v1/urlInspection/index:inspect', [
-                'inspectionUrl' => $url,
-                'siteUrl' => $settings['site_url'],
-            ]);
+            $response = Http::withToken($token)
+                ->retry(2, 500, throw: false)
+                ->post('https://searchconsole.googleapis.com/v1/urlInspection/index:inspect', [
+                    'inspectionUrl' => $url,
+                    'siteUrl' => $settings['site_url'],
+                ]);
+
+            if ($response->status() === 429) {
+                // Dynamically mark daily quota as exhausted if Google returns 429
+                Cache::put($quotaKey, self::DAILY_INSPECTION_QUOTA, now()->endOfDay());
+                return [
+                    'success' => false,
+                    'quota_exceeded' => true,
+                    'state' => 'rate_limited',
+                    'message' => 'Google Search Console API quota or rate limit exceeded (HTTP 429 Resource Exhausted).',
+                ];
+            }
 
             if ($response->successful()) {
                 $data = $response->json();
                 $verdict = $data['inspectionResult']['indexStatusResult']['verdict'] ?? null;
                 $coverage = $data['inspectionResult']['indexStatusResult']['coverageState'] ?? null;
 
-                // Authoritative Google response mapping
+                // Authoritative Google response mapping (Strictly separate Inspection from Guaranteed Indexing)
                 $urlRecord = SeoUrlRecord::where('url', $url)->first();
                 if ($urlRecord) {
                     if ($verdict === 'PASS' || str_contains(strtolower($coverage ?? ''), 'indexed')) {
@@ -221,6 +234,8 @@ class GoogleSearchConsoleService
                 return [
                     'success' => true,
                     'quota_exceeded' => false,
+                    'state' => 'inspected',
+                    'is_indexed' => ($verdict === 'PASS' || str_contains(strtolower($coverage ?? ''), 'indexed')),
                     'verdict' => $verdict,
                     'coverage' => $coverage,
                     'raw' => $data,

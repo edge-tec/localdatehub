@@ -136,4 +136,34 @@ class SeoProductionSignoffTest extends TestCase
         $res->assertHeader('Cache-Control', 'max-age=3600, public, s-maxage=3600, stale-while-revalidate=600');
         $this->assertEmpty($res->headers->getCookies());
     }
+
+    /**
+     * Requirement 1: Self-Referencing Canonical URLs on Paginated Pages (Google Guidelines)
+     */
+    public function test_pagination_canonical_is_self_referencing(): void
+    {
+        $cat = Category::create(['name' => 'Personals', 'slug' => 'personals', 'is_active' => true]);
+        $seoService = app(\App\Modules\SEO\Services\SeoService::class);
+
+        // Page 1 canonical is root category
+        $metaPage1 = $seoService->generateForCategory($cat, 1);
+        $this->assertEquals(route('categories.show', $cat->slug), $metaPage1->canonicalUrl);
+        $this->assertEquals('index, follow', $metaPage1->robots);
+
+        // Page 2 canonical is self-referencing to ?page=2 with noindex, follow to prevent index bloat while preserving link crawling
+        $metaPage2 = $seoService->generateForCategory($cat, 2);
+        $this->assertStringContainsString('page=2', $metaPage2->canonicalUrl);
+        $this->assertEquals('noindex, follow', $metaPage2->robots);
+    }
+
+    /**
+     * Requirement 3: Adult Content Rating Metadata (Google Explicit Content & RTA)
+     */
+    public function test_adult_content_rating_metadata_is_rendered(): void
+    {
+        $res = $this->get('/');
+        $res->assertStatus(200);
+        $res->assertSee('<meta name="rating" content="adult">', false);
+        $res->assertSee('<meta name="RATING" content="RTA-5042-1996-1400-1579-RTA">', false);
+    }
 }
