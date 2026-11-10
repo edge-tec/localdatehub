@@ -819,4 +819,68 @@ class UserAccountDashboardTest extends TestCase
         $this->assertNull($freshTarget->avatar);
         $this->assertNull($freshTarget->profile->avatar_path);
     }
+
+    public function test_user_report_submission_syncs_in_realtime_to_admin_reports_and_can_be_deleted(): void
+    {
+        $listing = Listing::create([
+            'user_id' => $this->otherUser->id,
+            'category_id' => $this->category->id,
+            'state_id' => $this->city->state_id,
+            'city_id' => $this->city->id,
+            'title' => 'Suspicious Ad Needing Report',
+            'slug' => 'suspicious-ad-' . uniqid(),
+            'description' => 'Suspicious description.',
+            'content_hash' => hash('sha256', 'suspicious-' . uniqid()),
+            'poster_age' => 25,
+            'poster_gender' => 'Male',
+            'intent' => 'dating',
+            'status' => Listing::STATUS_ACTIVE,
+        ]);
+
+        $response = $this->actingAs($this->user)->post(route('listings.report.submit', $listing->id), [
+            'report_reason' => 'fraud_scam',
+            'report_details' => 'This advertiser asked for a wire transfer before meeting in person.',
+            'reporter_name' => $this->user->name,
+            'reporter_email' => $this->user->email,
+        ]);
+
+        $response->assertRedirect();
+
+        $this->assertDatabaseHas('content_reports', [
+            'reportable_type' => Listing::class,
+            'reportable_id' => $listing->id,
+            'reason_code' => 'fraud_scam',
+            'status' => 'open',
+            'risk_level' => 'high',
+        ]);
+
+        $report = \App\Modules\Moderation\Models\ContentReport::where('reportable_id', $listing->id)->latest('id')->first();
+        $this->assertNotNull($report);
+
+        $admin = User::factory()->create([
+            'role' => 'super_admin',
+            'account_status' => 'active',
+        ]);
+
+        Livewire::actingAs($admin)
+            ->test(AdminEnterpriseHub::class, ['initialTab' => 'reports'])
+            ->assertSee('This advertiser asked for a wire transfer before meeting in person.')
+            ->call('deleteReport', $report->id)
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseMissing('content_reports', ['id' => $report->id]);
+    }
+
+    public function test_enterprise_security_headers_are_enforced(): void
+    {
+        $response = $this->get(route('home'));
+
+        $response->assertHeader('X-Frame-Options', 'SAMEORIGIN');
+        $response->assertHeader('X-Content-Type-Options', 'nosniff');
+        $response->assertHeader('X-XSS-Protection', '1; mode=block');
+        $response->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+        $response->assertHeader('X-Permitted-Cross-Domain-Policies', 'none');
+        $response->assertHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+        $this->assertStringContainsString("frame-ancestors 'self'", (string) $response->headers->get('Content-Security-Policy'));
+    }
 }

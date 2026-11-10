@@ -116,11 +116,17 @@
                     <!-- Admin Profile Avatar & Role -->
                     <div class="relative" @click.away="userMenuOpen = false">
                         <button @click="userMenuOpen = !userMenuOpen" class="flex items-center space-x-2.5 p-1 rounded-xl hover:bg-slate-100 transition">
-                            <img 
-                                src="{{ asset('images/admin-avatar.jpg') }}" 
-                                alt="Admin Avatar" 
-                                class="w-8 h-8 rounded-full object-cover border-2 border-[#F20B83]"
-                            />
+                            @if(auth()->user()?->avatar_url)
+                                <img 
+                                    src="{{ auth()->user()->avatar_url }}" 
+                                    alt="{{ auth()->user()?->name ?? 'Admin' }}" 
+                                    class="w-8 h-8 rounded-full object-cover border-2 border-[#F20B83]"
+                                />
+                            @else
+                                <div class="w-8 h-8 rounded-full bg-rose-50 border-2 border-[#F20B83] text-[#F20B83] flex items-center justify-center font-black text-xs">
+                                    {{ strtoupper(substr(auth()->user()?->name ?: 'A', 0, 1)) }}
+                                </div>
+                            @endif
                             <div class="text-left hidden sm:block">
                                 <div class="text-xs font-bold text-slate-900 flex items-center gap-1">
                                     <span>{{ auth()->user()?->name ?? 'Super Admin' }}</span>

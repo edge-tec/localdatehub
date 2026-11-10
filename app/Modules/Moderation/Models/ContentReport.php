@@ -20,6 +20,8 @@ class ContentReport extends Model
         'details',
         'evidence_urls',
         'status',
+        'risk_level',
+        'is_urgent_takedown',
         'resolution_notes',
         'resolved_by_user_id',
         'resolved_at',

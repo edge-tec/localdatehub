@@ -90,6 +90,8 @@ class ProfileController extends Controller
             directory: 'avatars/' . $user->id
         );
 
+        $user->update(['avatar' => $stored['path']]);
+
         $user->profile()->updateOrCreate(
             ['user_id' => $user->id],
             ['avatar_path' => $stored['path']]

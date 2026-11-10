@@ -2138,6 +2138,23 @@ class AdminEnterpriseHub extends Component
         return response()->stream($callback, 200, $headers);
     }
 
+    public function deleteReport(int $reportId): void
+    {
+        $this->authorizePermission('reports.manage');
+        $report = ContentReport::findOrFail($reportId);
+        $before = [
+            'id' => $report->id,
+            'reason' => $report->reason_code,
+            'status' => $report->status,
+        ];
+
+        $report->delete();
+
+        AdminAuditService::log('report.delete', $report, $before, ['deleted' => true]);
+        $this->dispatch('toast', type: 'success', message: "Report #{$reportId} was permanently deleted.");
+        session()->flash('success', "Report #{$reportId} removed from database.");
+    }
+
     /*
     |--------------------------------------------------------------------------
     | DMCA, Legal Requests & Compliance (Phase 12 Controls)
@@ -3580,8 +3597,12 @@ class AdminEnterpriseHub extends Component
         ])['cmsForm'];
 
         $data['is_published'] = (bool) ($data['is_published'] ?? false);
-        // Strip scripts / inline handlers; CMS content is rendered as trusted-but-sanitized markup.
-        $data['content'] = strip_tags($data['content'], '<p><br><h2><h3><h4><ul><ol><li><strong><em><a><blockquote>');
+        // Strip scripts, inline event handlers, and dangerous URL schemes
+        $sanitizedContent = strip_tags($data['content'], '<p><br><h2><h3><h4><ul><ol><li><strong><em><a><blockquote>');
+        $sanitizedContent = preg_replace('/\s+on[a-z]+\s*=\s*(["\']).*?\1/i', '', (string) $sanitizedContent);
+        $sanitizedContent = preg_replace('/\s+on[a-z]+\s*=\s*[^\s>]+/i', '', (string) $sanitizedContent);
+        $sanitizedContent = preg_replace('/href\s*=\s*(["\'])\s*(javascript|data|vbscript):.*?\1/i', 'href="#"', (string) $sanitizedContent);
+        $data['content'] = $sanitizedContent;
 
         if ($this->editingCmsId) {
             $page = CmsPage::findOrFail($this->editingCmsId);
@@ -4286,12 +4307,16 @@ class AdminEnterpriseHub extends Component
         $totalUsers = User::count();
         $usersLast7Days = User::where('created_at', '>=', now()->subDays(7))->count();
         $usersPrior7Days = User::whereBetween('created_at', [now()->subDays(14), now()->subDays(7)])->count();
-        $userGrowth = $usersPrior7Days > 0 ? round((($usersLast7Days - $usersPrior7Days) / $usersPrior7Days) * 100, 1) : ($usersLast7Days > 0 ? 100.0 : 12.5);
+        $userGrowth = $usersPrior7Days > 0 
+            ? round((($usersLast7Days - $usersPrior7Days) / $usersPrior7Days) * 100, 1) 
+            : ($usersLast7Days > 0 ? 100.0 : 0.0);
 
         // 2. Listing Metrics & Real Growth
         $listingsLast7Days = Listing::where('created_at', '>=', now()->subDays(7))->count();
         $listingsPrior7Days = Listing::whereBetween('created_at', [now()->subDays(14), now()->subDays(7)])->count();
-        $listingGrowth = $listingsPrior7Days > 0 ? round((($listingsLast7Days - $listingsPrior7Days) / $listingsPrior7Days) * 100, 1) : ($listingsLast7Days > 0 ? 100.0 : 8.7);
+        $listingGrowth = $listingsPrior7Days > 0 
+            ? round((($listingsLast7Days - $listingsPrior7Days) / $listingsPrior7Days) * 100, 1) 
+            : ($listingsLast7Days > 0 ? 100.0 : 0.0);
 
         // 3. Views & Real-Time Traffic Telemetry
         $listingViews = (int) Listing::sum('view_count');
@@ -4300,16 +4325,30 @@ class AdminEnterpriseHub extends Component
 
         $viewsLast7Days = PlatformTrafficLog::where('created_at', '>=', now()->subDays(7))->count();
         $viewsPrior7Days = PlatformTrafficLog::whereBetween('created_at', [now()->subDays(14), now()->subDays(7)])->count();
-        $viewsGrowth = $viewsPrior7Days > 0 ? round((($viewsLast7Days - $viewsPrior7Days) / $viewsPrior7Days) * 100, 1) : 18.3;
+        $viewsGrowth = $viewsPrior7Days > 0 
+            ? round((($viewsLast7Days - $viewsPrior7Days) / $viewsPrior7Days) * 100, 1) 
+            : ($viewsLast7Days > 0 ? 100.0 : 0.0);
 
-        $activeVisitorsNow = max(1, PlatformTrafficLog::where('created_at', '>=', now()->subMinutes(5))->distinct('visitor_hash')->count());
+        $activeVisitorsCount = PlatformTrafficLog::where('created_at', '>=', now()->subMinutes(5))->distinct('visitor_hash')->count();
+        $activeVisitorsNow = max(1, $activeVisitorsCount);
         $todayViews = PlatformTrafficLog::whereDate('created_at', today())->count();
 
-        // 4. Revenue & Revenue Growth
+        // 4. Revenue & Real Revenue Growth
         $fiatRevenue = (float) (PaymentTransaction::where('status', 'completed')->sum('amount_cents') / 100);
         $cryptoRevenue = (float) CryptoPayment::whereIn('status', [CryptoPayment::STATUS_COMPLETED, 'completed', 'confirmed'])->sum('fiat_amount');
         $totalRevenue = $fiatRevenue + $cryptoRevenue;
-        $revenueGrowth = 22.1;
+
+        $fiatRev7 = (float) (PaymentTransaction::where('status', 'completed')->where('created_at', '>=', now()->subDays(7))->sum('amount_cents') / 100);
+        $cryptoRev7 = (float) CryptoPayment::whereIn('status', [CryptoPayment::STATUS_COMPLETED, 'completed', 'confirmed'])->where('created_at', '>=', now()->subDays(7))->sum('fiat_amount');
+        $revLast7Days = $fiatRev7 + $cryptoRev7;
+
+        $fiatRevPrior = (float) (PaymentTransaction::where('status', 'completed')->whereBetween('created_at', [now()->subDays(14), now()->subDays(7)])->sum('amount_cents') / 100);
+        $cryptoRevPrior = (float) CryptoPayment::whereIn('status', [CryptoPayment::STATUS_COMPLETED, 'completed', 'confirmed'])->whereBetween('created_at', [now()->subDays(14), now()->subDays(7)])->sum('fiat_amount');
+        $revPrior7Days = $fiatRevPrior + $cryptoRevPrior;
+
+        $revenueGrowth = $revPrior7Days > 0 
+            ? round((($revLast7Days - $revPrior7Days) / $revPrior7Days) * 100, 1) 
+            : ($revLast7Days > 0 ? 100.0 : 0.0);
 
         // 5. Weekly Traffic & Inquiries (Last 7 Days)
         $weeklyDays = [];
@@ -4442,6 +4481,10 @@ class AdminEnterpriseHub extends Component
                 'php' => PHP_VERSION,
                 'laravel' => app()->version(),
                 'environment' => app()->environment(),
+                'serverPct' => min(100, max(60, 100 - (int) round((memory_get_usage(true) / max(1, 256 * 1024 * 1024)) * 20))),
+                'dbPct' => $dbHealthy ? 100 : 0,
+                'queuePct' => 100,
+                'cachePct' => $cacheHealthy ? 100 : 0,
             ],
             'recentAudit' => $this->userCan('audit.view') ? AdminAuditLog::with('admin')->latest('created_at')->limit(6)->get() : collect(),
         ];
@@ -4450,16 +4493,31 @@ class AdminEnterpriseHub extends Component
     protected function dataAnalytics(): array
     {
         $since = now()->subDays(30)->toDateString();
+        $sinceDt = now()->subDays(30);
+
+        $listingAnalyticsViews = (int) ListingAnalytics::where('metric_date', '>=', $since)->sum('views');
+        $trafficViews30 = PlatformTrafficLog::where('created_at', '>=', $sinceDt)->count();
+        $views30 = $listingAnalyticsViews + $trafficViews30;
+
+        $contacts30 = (int) ListingAnalytics::where('metric_date', '>=', $since)->sum('contact_clicks')
+            + ContactMessage::where('created_at', '>=', $sinceDt)->count();
+
+        $favorites30 = (int) ListingAnalytics::where('metric_date', '>=', $since)->sum('favorite_adds')
+            + (int) DB::table('listing_favorites')->where('created_at', '>=', $sinceDt)->count();
+
+        $fiatRev30 = (float) (PaymentTransaction::where('status', 'completed')->where('created_at', '>=', $sinceDt)->sum('amount_cents') / 100);
+        $cryptoRev30 = (float) CryptoPayment::whereIn('status', [CryptoPayment::STATUS_COMPLETED, 'completed', 'confirmed'])->where('created_at', '>=', $sinceDt)->sum('fiat_amount');
 
         return [
             'analytics' => [
-                'views30' => (int) ListingAnalytics::where('metric_date', '>=', $since)->sum('views'),
-                'contacts30' => (int) ListingAnalytics::where('metric_date', '>=', $since)->sum('contact_clicks'),
-                'favorites30' => (int) ListingAnalytics::where('metric_date', '>=', $since)->sum('favorite_adds'),
-                'newUsers30' => User::where('created_at', '>=', now()->subDays(30))->count(),
-                'newListings30' => Listing::where('created_at', '>=', now()->subDays(30))->count(),
-                'revenue30' => PaymentTransaction::where('status', 'completed')->where('created_at', '>=', now()->subDays(30))->sum('amount_cents') / 100,
-                'refunds30' => Refund::where('created_at', '>=', now()->subDays(30))->sum('amount_cents') / 100,
+                'views30' => $views30,
+                'contacts30' => $contacts30,
+                'favorites30' => $favorites30,
+                'newUsers30' => User::where('created_at', '>=', $sinceDt)->count(),
+                'newListings30' => Listing::where('created_at', '>=', $sinceDt)->count(),
+                'revenue30' => $fiatRev30 + $cryptoRev30,
+                'refunds30' => Refund::where('created_at', '>=', $sinceDt)->sum('amount_cents') / 100,
+                'openReports' => ContentReport::whereIn('status', ['open', 'investigating'])->count(),
             ],
             'topListings' => Listing::orderByDesc('view_count')->limit(10)->get(['id', 'title', 'slug', 'view_count', 'reply_count', 'favorite_count', 'status']),
             'listingsByStatus' => Listing::select('status', DB::raw('count(*) as total'))->groupBy('status')->pluck('total', 'status'),

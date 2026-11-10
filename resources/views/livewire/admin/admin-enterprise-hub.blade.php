@@ -20,7 +20,13 @@
                 <button type="button" @click="adminProfileOpen = !adminProfileOpen"
                     class="w-full flex items-center space-x-3 p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition text-left cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#F20B65]/30">
                     <div class="relative shrink-0">
-                        <img src="{{ asset('images/admin-avatar.jpg') }}" alt="{{ auth()->user()?->name ?? 'Admin' }}" class="w-10 h-10 rounded-full object-cover border-2 border-[#F20B65]" />
+                        @if(auth()->user()?->avatar_url)
+                            <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()?->name ?? 'Admin' }}" class="w-10 h-10 rounded-full object-cover border-2 border-[#F20B65]" />
+                        @else
+                            <div class="w-10 h-10 rounded-full bg-rose-50 border-2 border-[#F20B65] text-[#F20B65] flex items-center justify-center font-black text-sm">
+                                {{ strtoupper(substr(auth()->user()?->name ?: 'A', 0, 1)) }}
+                            </div>
+                        @endif
                         <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>
                     </div>
                     <div class="flex-1 min-w-0">
@@ -835,9 +841,9 @@
                                     <div class="relative w-12 h-12 mx-auto">
                                         <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                                             <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                            <path class="text-emerald-500" stroke-width="3" stroke-dasharray="98, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                            <path class="text-emerald-500" stroke-width="3" stroke-dasharray="{{ $health['serverPct'] ?? 98 }}, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                         </svg>
-                                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">98%</span>
+                                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">{{ $health['serverPct'] ?? 98 }}%</span>
                                     </div>
                                     <div class="text-[10px] font-bold text-slate-500 mt-1">Server</div>
                                 </div>
@@ -847,9 +853,9 @@
                                     <div class="relative w-12 h-12 mx-auto">
                                         <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                                             <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                            <path class="text-emerald-500" stroke-width="3" stroke-dasharray="100, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                            <path class="{{ ($health['dbPct'] ?? 100) >= 80 ? 'text-emerald-500' : 'text-rose-500' }}" stroke-width="3" stroke-dasharray="{{ $health['dbPct'] ?? 100 }}, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                         </svg>
-                                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">100%</span>
+                                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">{{ $health['dbPct'] ?? 100 }}%</span>
                                     </div>
                                     <div class="text-[10px] font-bold text-slate-500 mt-1">Database</div>
                                 </div>
@@ -859,9 +865,9 @@
                                     <div class="relative w-12 h-12 mx-auto">
                                         <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                                             <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                            <path class="text-emerald-500" stroke-width="3" stroke-dasharray="99, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                            <path class="text-emerald-500" stroke-width="3" stroke-dasharray="{{ $health['queuePct'] ?? 100 }}, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                         </svg>
-                                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">99%</span>
+                                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">{{ $health['queuePct'] ?? 100 }}%</span>
                                     </div>
                                     <div class="text-[10px] font-bold text-slate-500 mt-1">Queue</div>
                                 </div>
@@ -871,9 +877,9 @@
                                     <div class="relative w-12 h-12 mx-auto">
                                         <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                                             <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                            <path class="text-emerald-500" stroke-width="3" stroke-dasharray="97, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                            <path class="{{ ($health['cachePct'] ?? 100) >= 80 ? 'text-emerald-500' : 'text-rose-500' }}" stroke-width="3" stroke-dasharray="{{ $health['cachePct'] ?? 100 }}, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                         </svg>
-                                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">97%</span>
+                                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">{{ $health['cachePct'] ?? 100 }}%</span>
                                     </div>
                                     <div class="text-[10px] font-bold text-slate-500 mt-1">Cache</div>
                                 </div>
@@ -932,37 +938,54 @@
 
         {{-- ================= 17. ANALYTICS ================= --}}
         @if($tab === 'analytics')
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                @foreach([
-                    ['Views (30d)', number_format($analytics['views30'])],
-                    ['Contact Clicks (30d)', number_format($analytics['contacts30'])],
-                    ['Favorites (30d)', number_format($analytics['favorites30'])],
-                    ['New Users (30d)', number_format($analytics['newUsers30'])],
-                    ['New Listings (30d)', number_format($analytics['newListings30'])],
-                    ['Revenue (30d)', '$' . number_format($analytics['revenue30'], 2)],
-                    ['Refunds (30d)', '$' . number_format($analytics['refunds30'], 2)],
-                ] as [$label, $value])
-                    <div class="{{ $card }} p-4">
-                        <div class="text-[11px] uppercase tracking-wider text-slate-400">{{ $label }}</div>
-                        <div class="mt-1 text-xl font-black text-slate-900">{{ $value }}</div>
+            <div wire:poll.10s class="space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <h1 class="text-2xl font-black text-slate-900">Real-Time Analytics &amp; Reports</h1>
+                        <p class="text-xs text-slate-500 mt-0.5">30-day rolling platform performance, traffic, and monetization telemetry.</p>
                     </div>
-                @endforeach
-            </div>
-            <div class="grid md:grid-cols-3 gap-4">
-                <div class="{{ $card }} p-5 md:col-span-2 overflow-x-auto">
-                    <h2 class="font-bold text-slate-900 mb-3">Top Listings by Views</h2>
-                    <table class="min-w-full"><thead><tr><th class="{{ $th }}">Title</th><th class="{{ $th }}">Views</th><th class="{{ $th }}">Replies</th><th class="{{ $th }}">Favs</th></tr></thead>
-                        <tbody>@forelse($topListings as $l)<tr class="border-t border-slate-200"><td class="{{ $td }}">{{ $l->title }}</td><td class="{{ $td }}">{{ number_format($l->view_count) }}</td><td class="{{ $td }}">{{ $l->reply_count }}</td><td class="{{ $td }}">{{ $l->favorite_count }}</td></tr>@empty<tr><td class="{{ $td }}" colspan="4">No listings yet.</td></tr>@endforelse</tbody></table>
+                    <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800 shadow-2xs w-max">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        <span>Real-Time Sync · Auto-updating (10s)</span>
+                    </div>
                 </div>
-                <div class="{{ $card }} p-5">
-                    <h2 class="font-bold text-slate-900 mb-3">Listings by Status</h2>
-                    @forelse($listingsByStatus as $status => $total)
-                        <div class="flex justify-between text-sm py-1"><span>{{ str_replace('_', ' ', $status) }}</span><span class="font-semibold">{{ $total }}</span></div>
-                    @empty <p class="text-sm text-slate-400">No data.</p> @endforelse
-                    <h2 class="font-bold text-slate-900 mt-5 mb-3">Top Categories</h2>
-                    @foreach($topCategories as $c)
-                        <div class="flex justify-between text-sm py-1"><span>{{ $c->name }}</span><span class="font-semibold">{{ $c->listings_count }}</span></div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    @foreach([
+                        ['Views (30d)', number_format($analytics['views30'])],
+                        ['Contact Clicks (30d)', number_format($analytics['contacts30'])],
+                        ['Favorites (30d)', number_format($analytics['favorites30'])],
+                        ['New Users (30d)', number_format($analytics['newUsers30'])],
+                        ['New Listings (30d)', number_format($analytics['newListings30'])],
+                        ['Revenue (30d)', '$' . number_format($analytics['revenue30'], 2)],
+                        ['Refunds (30d)', '$' . number_format($analytics['refunds30'], 2)],
+                        ['Open Incident Reports', number_format($analytics['openReports'] ?? 0)],
+                    ] as [$label, $value])
+                        <div class="{{ $card }} p-4">
+                            <div class="text-[11px] uppercase tracking-wider text-slate-400 font-bold">{{ $label }}</div>
+                            <div class="mt-1 text-xl font-black text-slate-900">{{ $value }}</div>
+                        </div>
                     @endforeach
+                </div>
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div class="{{ $card }} p-5 md:col-span-2 overflow-x-auto">
+                        <h2 class="font-bold text-slate-900 mb-3">Top Listings by Views</h2>
+                        <table class="min-w-full"><thead><tr><th class="{{ $th }}">Title</th><th class="{{ $th }}">Views</th><th class="{{ $th }}">Replies</th><th class="{{ $th }}">Favs</th></tr></thead>
+                            <tbody>@forelse($topListings as $l)<tr class="border-t border-slate-200"><td class="{{ $td }}">{{ $l->title }}</td><td class="{{ $td }}">{{ number_format($l->view_count) }}</td><td class="{{ $td }}">{{ $l->reply_count }}</td><td class="{{ $td }}">{{ $l->favorite_count }}</td></tr>@empty<tr><td class="{{ $td }}" colspan="4">No listings yet.</td></tr>@endforelse</tbody></table>
+                    </div>
+                    <div class="{{ $card }} p-5">
+                        <h2 class="font-bold text-slate-900 mb-3">Listings by Status</h2>
+                        @forelse($listingsByStatus as $status => $total)
+                            <div class="flex justify-between text-sm py-1"><span class="capitalize">{{ str_replace('_', ' ', $status) }}</span><span class="font-semibold">{{ $total }}</span></div>
+                        @empty <p class="text-sm text-slate-400">No data.</p> @endforelse
+                        <h2 class="font-bold text-slate-900 mt-5 mb-3">Top Categories</h2>
+                        @foreach($topCategories as $c)
+                            <div class="flex justify-between text-sm py-1"><span>{{ $c->name }}</span><span class="font-semibold">{{ $c->listings_count }}</span></div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
         @endif
@@ -2845,6 +2868,17 @@
                                                         Quarantine
                                                     </button>
                                                 @endif
+
+                                                <!-- Permanently Delete Report -->
+                                                <button 
+                                                    type="button" 
+                                                    wire:click="deleteReport({{ $r->id }})"
+                                                    wire:confirm="Permanently delete this report from the database?"
+                                                    class="{{ $btn }} bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-700 border border-slate-200 font-bold"
+                                                    title="Permanently Delete Report"
+                                                >
+                                                    Delete
+                                                </button>
                                             </td>
                                         </tr>
                                     @empty

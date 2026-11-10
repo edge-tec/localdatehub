@@ -103,19 +103,25 @@ Route::post('/age-confirmation/confirm', function (Request $request) {
 Route::middleware('guest')->group(function () {
     // Registration
     Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
-    Route::post('/register', [RegisteredUserController::class, 'store']);
+    Route::post('/register', [RegisteredUserController::class, 'store'])->middleware('throttle:10,1');
 
     // Login
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
-    Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+    Route::post('/login', [AuthenticatedSessionController::class, 'store'])->middleware('throttle:10,1');
 
     // Social Authentication (Google, Facebook)
-    Route::get('/auth/{provider}', [\App\Http\Controllers\Auth\SocialAuthController::class, 'redirect'])->name('social.redirect');
-    Route::get('/auth/{provider}/callback', [\App\Http\Controllers\Auth\SocialAuthController::class, 'callback'])->name('social.callback');
+    Route::get('/auth/{provider}', [\App\Http\Controllers\Auth\SocialAuthController::class, 'redirect'])
+        ->middleware('throttle:15,1')
+        ->name('social.redirect');
+    Route::get('/auth/{provider}/callback', [\App\Http\Controllers\Auth\SocialAuthController::class, 'callback'])
+        ->middleware('throttle:15,1')
+        ->name('social.callback');
 
     // Two-Factor Authentication Challenge
     Route::get('/login/2fa', [AuthenticatedSessionController::class, 'show2fa'])->name('login.2fa');
-    Route::post('/login/2fa', [AuthenticatedSessionController::class, 'verify2fa'])->name('login.2fa.verify');
+    Route::post('/login/2fa', [AuthenticatedSessionController::class, 'verify2fa'])
+        ->middleware('throttle:6,1')
+        ->name('login.2fa.verify');
 
     // Password Reset
     Route::get('/forgot-password', [PasswordResetController::class, 'create'])->name('password.request');

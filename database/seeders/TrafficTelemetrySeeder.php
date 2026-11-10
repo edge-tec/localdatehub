@@ -15,6 +15,10 @@ class TrafficTelemetrySeeder extends Seeder
      */
     public function run(): void
     {
+        if (!app()->environment('testing')) {
+            return;
+        }
+
         if (PlatformTrafficLog::count() > 50) {
             return;
         }

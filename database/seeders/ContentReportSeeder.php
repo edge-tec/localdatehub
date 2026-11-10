@@ -11,6 +11,10 @@ class ContentReportSeeder extends Seeder
 {
     public function run(): void
     {
+        // Only seed sample reports in automated testing environments
+        if (!app()->environment('testing')) {
+            return;
+        }
         $admin = User::where('role', 'admin')->orWhere('role', 'super_admin')->first() ?? User::first();
         $users = User::where('id', '!=', $admin?->id)->take(10)->get();
         $listings = Listing::take(10)->get();

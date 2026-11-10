@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Modules\Contact\DTOs\ContactMessageData;
 use App\Modules\Contact\Models\ContactMessage;
 use App\Modules\Listings\Models\Listing;
+use App\Modules\Moderation\Models\ContentReport;
 use App\Support\Exceptions\ProhibitedContentException;
 use InvalidArgumentException;
 
@@ -136,6 +137,29 @@ class ContactService
             'message_encrypted' => $details,
             'client_ip' => $clientIp,
             'user_agent' => substr((string) $userAgent, 0, 255),
+        ]);
+
+        $riskLevel = match ($reason) {
+            'underage_minor', 'underage_suspected', 'human_trafficking', 'non_consensual' => 'critical',
+            'commercial_sex', 'commercial_solicitation', 'violence_threat', 'fraud_scam' => 'high',
+            'harassment', 'prohibited_goods' => 'medium',
+            default => 'low',
+        };
+
+        $isUrgent = in_array($riskLevel, ['critical'], true);
+
+        // Record real-time incident in ContentReport for the Trust & Safety team and Admin Hub
+        ContentReport::create([
+            'reporter_id' => $reporter?->id,
+            'reportable_type' => Listing::class,
+            'reportable_id' => $listing->id,
+            'reason_code' => $reason,
+            'details' => $details,
+            'evidence_urls' => [],
+            'status' => 'open',
+            'risk_level' => $riskLevel,
+            'is_urgent_takedown' => $isUrgent,
+            'reporter_ip' => $clientIp,
         ]);
 
         // Zero-tolerance escalation: immediately put listing into pending review if report is severe
