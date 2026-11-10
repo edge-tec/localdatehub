@@ -96,6 +96,11 @@
                         'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
                     ],
                     [
+                        'key' => 'analytics',
+                        'label' => 'Analytics & Reports',
+                        'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+                    ],
+                    [
                         'key' => 'users',
                         'label' => 'Users',
                         'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z',
@@ -435,26 +440,38 @@
                         </div>
                     </div>
 
-                    <!-- Stat 3: Total Views & Real-Time Traffic -->
+                    <!-- Stat 3: Total Views & Real-Time Traffic (Unique vs Gross Toggle) -->
                     <div class="bg-white rounded-2xl p-4 text-[#171923] shadow-xs border border-slate-200 hover:border-teal-500 hover:shadow-md transition flex flex-col justify-between group">
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between gap-1">
                             <a href="{{ route('admin.dashboard', ['tab' => 'analytics']) }}" wire:click.prevent="setTab('analytics')" class="text-xs font-bold text-slate-500 group-hover:text-teal-600 transition flex items-center gap-1">
-                                <span>Total Views</span>
-                                <span class="opacity-0 group-hover:opacity-100 transition text-[10px]">→</span>
+                                <span>{{ $dashboardViewMode === 'gross' ? 'Gross Views' : 'Unique Views' }}</span>
+                                <span class="text-[10px]">→</span>
                             </a>
-                            <div class="w-8 h-8 rounded-full bg-teal-500/10 text-teal-600 flex items-center justify-center">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/></svg>
+                            <div class="inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200 text-[9px] font-extrabold">
+                                <button type="button" wire:click="setDashboardViewMode('unique')"
+                                    class="px-1.5 py-0.5 rounded-md transition cursor-pointer {{ $dashboardViewMode === 'unique' ? 'bg-teal-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                                    title="Show Unique Visitors & Unique Views">
+                                    Unique
+                                </button>
+                                <button type="button" wire:click="setDashboardViewMode('gross')"
+                                    class="px-1.5 py-0.5 rounded-md transition cursor-pointer {{ $dashboardViewMode === 'gross' ? 'bg-teal-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                                    title="Show Total Gross Page & Post Views">
+                                    Gross
+                                </button>
                             </div>
                         </div>
                         <div class="mt-2">
                             <a href="{{ route('admin.dashboard', ['tab' => 'analytics']) }}" wire:click.prevent="setTab('analytics')" class="text-2xl font-black text-[#171923] hover:text-teal-600 transition block">
                                 {{ $metrics['totalViews'] >= 1000000 ? number_format($metrics['totalViews'] / 1000000, 1) . 'M' : ($metrics['totalViews'] >= 1000 ? number_format($metrics['totalViews'] / 1000, 1) . 'k' : number_format($metrics['totalViews'])) }}
                             </a>
-                            <div class="text-[11px] font-bold text-emerald-600 flex items-center gap-1 mt-0.5">
-                                <span>↗ +{{ $metrics['viewsGrowth'] }}% traffic</span>
+                            <div class="text-[10px] font-bold text-slate-600 flex items-center justify-between gap-1 mt-0.5">
+                                <span title="Total Unique Visitors">👤 {{ number_format($metrics['uniqueVisitors'] ?? 0) }} Unique</span>
+                                <span>·</span>
+                                <span title="Total Gross Views">👁 {{ number_format($metrics['grossViews'] ?? 0) }} Gross</span>
                             </div>
-                            <a href="{{ route('admin.dashboard', ['tab' => 'analytics']) }}" wire:click.prevent="setTab('analytics')" class="text-[10px] text-teal-600 hover:underline font-semibold mt-1 block">
-                                {{ number_format($metrics['todayViews']) }} page views today
+                            <a href="{{ route('admin.dashboard', ['tab' => 'analytics']) }}" wire:click.prevent="setTab('analytics')" class="text-[10px] text-teal-600 hover:underline font-semibold mt-1 flex items-center justify-between">
+                                <span>{{ number_format($metrics['todayUniqueVisitors'] ?? 0) }} unique / {{ number_format($metrics['todayGrossViews'] ?? 0) }} gross today</span>
+                                <span class="text-emerald-600 font-bold">↗ +{{ $metrics['viewsGrowth'] }}%</span>
                             </a>
                         </div>
                     </div>
@@ -500,60 +517,114 @@
                 <!-- Row 2: Website Analytics, Listing Status Donut, Quick Actions -->
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
                     
-                    <!-- Website Analytics Chart (100% Real-Time Dynamic Weekly Telemetry) -->
+                    <!-- Website Analytics Chart & Graph (100% Real-Time Dynamic Weekly Telemetry) -->
                     <div class="lg:col-span-6 {{ $card }} p-5">
-                        <div class="flex items-center justify-between mb-4">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                             <div>
-                                <h2 class="text-sm font-extrabold text-slate-900">Website Analytics</h2>
-                                <p class="text-[11px] text-slate-500">Weekly traffic and inquiry metrics</p>
+                                <h2 class="text-sm font-extrabold text-slate-900">Website Analytics (Unique &amp; Gross)</h2>
+                                <p class="text-[11px] text-slate-500">Real-time visitor, post view &amp; inquiry telemetry (Reloads deduplicated)</p>
                             </div>
-                            <div class="flex items-center space-x-3 text-[11px] font-semibold text-slate-600">
-                                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#F20B65]"></span>Views ({{ number_format($chart['totalWeeklyViews']) }})</span>
-                                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#8B35F6]"></span>Contacts ({{ number_format($chart['totalWeeklyContacts']) }})</span>
-                                <a href="{{ route('admin.dashboard', ['tab' => 'analytics']) }}" wire:click.prevent="setTab('analytics')" class="text-[11px] font-bold text-[#F20B65] hover:underline flex items-center gap-0.5 ml-2">
-                                    <span>Full Report</span>
+                            <div class="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-600">
+                                <!-- Graph vs Chart Toggle -->
+                                <div class="inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200 text-[10px] font-bold">
+                                    <button type="button" wire:click="setDashboardChartType('graph')"
+                                        class="px-2 py-0.5 rounded-md transition cursor-pointer {{ $dashboardChartType === 'graph' ? 'bg-[#F20B65] text-white' : 'text-slate-600 hover:text-slate-900' }}">
+                                        📈 Graph
+                                    </button>
+                                    <button type="button" wire:click="setDashboardChartType('chart')"
+                                        class="px-2 py-0.5 rounded-md transition cursor-pointer {{ $dashboardChartType === 'chart' ? 'bg-[#F20B65] text-white' : 'text-slate-600 hover:text-slate-900' }}">
+                                        📊 Chart
+                                    </button>
+                                    <button type="button" wire:click="setDashboardChartType('both')"
+                                        class="px-2 py-0.5 rounded-md transition cursor-pointer {{ $dashboardChartType === 'both' ? 'bg-[#F20B65] text-white' : 'text-slate-600 hover:text-slate-900' }}">
+                                        ⚡ Both
+                                    </button>
+                                </div>
+                                <a href="{{ route('admin.dashboard', ['tab' => 'analytics']) }}" wire:click.prevent="setTab('analytics')" class="text-[11px] font-bold text-[#F20B65] hover:underline flex items-center gap-0.5 ml-1">
+                                    <span>Full Report &amp; Filters</span>
                                     <span>→</span>
                                 </a>
                             </div>
                         </div>
 
-                        <!-- Active Tooltip Badge -->
-                        <div class="inline-flex items-center space-x-2 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-xs font-bold text-slate-900 mb-2">
-                            <span>{{ number_format($chart['totalWeeklyViews']) }} Weekly Page Views</span>
+                        <!-- Active Summary Badges (Unique vs Gross) -->
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-teal-50 border border-teal-200 text-[11px] font-bold text-teal-900">
+                                    <span class="w-2 h-2 rounded-full bg-teal-500"></span>
+                                    <span>Unique Visitors (7d): {{ number_format($chart['totalWeeklyUniqueViews'] ?? 0) }}</span>
+                                </span>
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-200 text-[11px] font-bold text-rose-900">
+                                    <span class="w-2 h-2 rounded-full bg-[#F20B65]"></span>
+                                    <span>Gross Views (7d): {{ number_format($chart['totalWeeklyGrossViews'] ?? 0) }}</span>
+                                </span>
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50 border border-purple-200 text-[11px] font-bold text-purple-900">
+                                    <span class="w-2 h-2 rounded-full bg-[#8B35F6]"></span>
+                                    <span>Inquiries: {{ number_format($chart['totalWeeklyContacts'] ?? 0) }}</span>
+                                </span>
+                            </div>
                             <span class="text-emerald-600 font-extrabold text-[10px]">↗ +{{ $metrics['viewsGrowth'] }}% trend</span>
                         </div>
 
-                        <!-- Responsive Dynamic SVG Area Chart Generated from Database Telemetry -->
-                        <div class="h-44 w-full relative">
-                            <svg viewBox="0 0 500 160" class="w-full h-full overflow-visible">
-                                <defs>
-                                    <linearGradient id="viewsGrad" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stop-color="#F20B65" stop-opacity="0.3" />
-                                        <stop offset="100%" stop-color="#F20B65" stop-opacity="0.0" />
-                                    </linearGradient>
-                                    <linearGradient id="contactsGrad" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stop-color="#8B35F6" stop-opacity="0.2" />
-                                        <stop offset="100%" stop-color="#8B35F6" stop-opacity="0.0" />
-                                    </linearGradient>
-                                </defs>
-                                <!-- Grid Lines -->
-                                <line x1="0" y1="30" x2="500" y2="30" stroke="#E2E8F0" stroke-dasharray="3,3" />
-                                <line x1="0" y1="80" x2="500" y2="80" stroke="#E2E8F0" stroke-dasharray="3,3" />
-                                <line x1="0" y1="130" x2="500" y2="130" stroke="#E2E8F0" />
+                        @if(in_array($dashboardChartType, ['graph', 'both'], true))
+                            <!-- Responsive Dynamic SVG Area Line Graph -->
+                            <div class="{{ $dashboardChartType === 'both' ? 'h-32 mb-3' : 'h-44' }} w-full relative">
+                                <svg viewBox="0 0 500 160" class="w-full h-full overflow-visible">
+                                    <defs>
+                                        <linearGradient id="viewsGrad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stop-color="#F20B65" stop-opacity="0.28" />
+                                            <stop offset="100%" stop-color="#F20B65" stop-opacity="0.0" />
+                                        </linearGradient>
+                                        <linearGradient id="uniqueGrad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stop-color="#0D9488" stop-opacity="0.25" />
+                                            <stop offset="100%" stop-color="#0D9488" stop-opacity="0.0" />
+                                        </linearGradient>
+                                        <linearGradient id="contactsGrad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stop-color="#8B35F6" stop-opacity="0.2" />
+                                            <stop offset="100%" stop-color="#8B35F6" stop-opacity="0.0" />
+                                        </linearGradient>
+                                    </defs>
+                                    <!-- Grid Lines -->
+                                    <line x1="0" y1="30" x2="500" y2="30" stroke="#E2E8F0" stroke-dasharray="3,3" />
+                                    <line x1="0" y1="80" x2="500" y2="80" stroke="#E2E8F0" stroke-dasharray="3,3" />
+                                    <line x1="0" y1="130" x2="500" y2="130" stroke="#E2E8F0" />
 
-                                <!-- Area Path Views -->
-                                <path d="{{ $chart['viewsAreaD'] }}" fill="url(#viewsGrad)" />
-                                <path d="{{ $chart['viewsLineD'] }}" fill="none" stroke="#F20B65" stroke-width="3" />
+                                    <!-- Area Path Gross Views -->
+                                    <path d="{{ $chart['viewsAreaD'] }}" fill="url(#viewsGrad)" />
+                                    <path d="{{ $chart['viewsLineD'] }}" fill="none" stroke="#F20B65" stroke-width="3" />
 
-                                <!-- Area Path Contacts -->
-                                <path d="{{ $chart['contactsAreaD'] }}" fill="url(#contactsGrad)" />
-                                <path d="{{ $chart['contactsLineD'] }}" fill="none" stroke="#8B35F6" stroke-width="2.5" stroke-dasharray="4,2" />
+                                    <!-- Area Path Unique Visitors -->
+                                    <path d="{{ $chart['uniqueAreaD'] }}" fill="url(#uniqueGrad)" />
+                                    <path d="{{ $chart['uniqueLineD'] }}" fill="none" stroke="#0D9488" stroke-width="2.5" />
 
-                                <!-- Peak highlight dot -->
-                                <circle cx="{{ $chart['peakX'] }}" cy="{{ $chart['peakY'] }}" r="4.5" fill="#F20B65" stroke="#FFFFFF" stroke-width="2" />
-                            </svg>
-                        </div>
-                        <div class="flex justify-between text-[10px] font-bold text-slate-500 mt-1 px-1">
+                                    <!-- Area Path Contacts -->
+                                    <path d="{{ $chart['contactsAreaD'] }}" fill="url(#contactsGrad)" />
+                                    <path d="{{ $chart['contactsLineD'] }}" fill="none" stroke="#8B35F6" stroke-width="2" stroke-dasharray="4,2" />
+
+                                    <!-- Peak highlight dot -->
+                                    <circle cx="{{ $chart['peakX'] }}" cy="{{ $chart['peakY'] }}" r="4.5" fill="#F20B65" stroke="#FFFFFF" stroke-width="2" />
+                                </svg>
+                            </div>
+                        @endif
+
+                        @if(in_array($dashboardChartType, ['chart', 'both'], true))
+                            <!-- Interactive Weekly Column Bar Chart (Unique vs Gross per Day) -->
+                            <div class="{{ $dashboardChartType === 'both' ? 'h-28 pt-2 border-t border-slate-100' : 'h-44 pt-4' }} grid grid-cols-7 gap-2 items-end px-2">
+                                @foreach($chart['bars'] ?? [] as $b)
+                                    <div class="flex flex-col items-center justify-end h-full group">
+                                        <div class="text-[9px] font-bold text-slate-500 mb-1 opacity-85 group-hover:opacity-100">
+                                            {{ $b['unique'] }}u / {{ $b['gross'] }}g
+                                        </div>
+                                        <div class="w-full flex items-end justify-center gap-1 h-full">
+                                            <div class="w-3 rounded-t-md bg-teal-500 transition-all duration-300" style="height: {{ $b['uniquePct'] }}%" title="{{ $b['date'] }}: {{ $b['unique'] }} Unique Visitors"></div>
+                                            <div class="w-3 rounded-t-md bg-[#F20B65] transition-all duration-300" style="height: {{ $b['grossPct'] }}%" title="{{ $b['date'] }}: {{ $b['gross'] }} Gross Views"></div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        <div class="flex justify-between text-[10px] font-bold text-slate-500 mt-1.5 px-1">
                             @foreach($chart['days'] as $day)
                                 <span>{{ $day }}</span>
                             @endforeach
@@ -944,58 +1015,9 @@
             </div>
         @endif
 
-        {{-- ================= 17. ANALYTICS ================= --}}
+        {{-- ================= 17. ANALYTICS & REPORTS ================= --}}
         @if($tab === 'analytics')
-            <div wire:poll.10s class="space-y-6">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div>
-                        <h1 class="text-2xl font-black text-slate-900">Real-Time Analytics &amp; Reports</h1>
-                        <p class="text-xs text-slate-500 mt-0.5">30-day rolling platform performance, traffic, and monetization telemetry.</p>
-                    </div>
-                    <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800 shadow-2xs w-max">
-                        <span class="relative flex h-2 w-2">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                        </span>
-                        <span>Real-Time Sync · Auto-updating (10s)</span>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    @foreach([
-                        ['Views (30d)', number_format($analytics['views30'])],
-                        ['Contact Clicks (30d)', number_format($analytics['contacts30'])],
-                        ['Favorites (30d)', number_format($analytics['favorites30'])],
-                        ['New Users (30d)', number_format($analytics['newUsers30'])],
-                        ['New Listings (30d)', number_format($analytics['newListings30'])],
-                        ['Revenue (30d)', '$' . number_format($analytics['revenue30'], 2)],
-                        ['Refunds (30d)', '$' . number_format($analytics['refunds30'], 2)],
-                        ['Open Incident Reports', number_format($analytics['openReports'] ?? 0)],
-                    ] as [$label, $value])
-                        <div class="{{ $card }} p-4">
-                            <div class="text-[11px] uppercase tracking-wider text-slate-400 font-bold">{{ $label }}</div>
-                            <div class="mt-1 text-xl font-black text-slate-900">{{ $value }}</div>
-                        </div>
-                    @endforeach
-                </div>
-                <div class="grid md:grid-cols-3 gap-4">
-                    <div class="{{ $card }} p-5 md:col-span-2 overflow-x-auto">
-                        <h2 class="font-bold text-slate-900 mb-3">Top Listings by Views</h2>
-                        <table class="min-w-full"><thead><tr><th class="{{ $th }}">Title</th><th class="{{ $th }}">Views</th><th class="{{ $th }}">Replies</th><th class="{{ $th }}">Favs</th></tr></thead>
-                            <tbody>@forelse($topListings as $l)<tr class="border-t border-slate-200"><td class="{{ $td }}">{{ $l->title }}</td><td class="{{ $td }}">{{ number_format($l->view_count) }}</td><td class="{{ $td }}">{{ $l->reply_count }}</td><td class="{{ $td }}">{{ $l->favorite_count }}</td></tr>@empty<tr><td class="{{ $td }}" colspan="4">No listings yet.</td></tr>@endforelse</tbody></table>
-                    </div>
-                    <div class="{{ $card }} p-5">
-                        <h2 class="font-bold text-slate-900 mb-3">Listings by Status</h2>
-                        @forelse($listingsByStatus as $status => $total)
-                            <div class="flex justify-between text-sm py-1"><span class="capitalize">{{ str_replace('_', ' ', $status) }}</span><span class="font-semibold">{{ $total }}</span></div>
-                        @empty <p class="text-sm text-slate-400">No data.</p> @endforelse
-                        <h2 class="font-bold text-slate-900 mt-5 mb-3">Top Categories</h2>
-                        @foreach($topCategories as $c)
-                            <div class="flex justify-between text-sm py-1"><span>{{ $c->name }}</span><span class="font-semibold">{{ $c->listings_count }}</span></div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
+            @include('livewire.admin.partials.analytics-report')
         @endif
 
         {{-- ================= 1. USERS ================= --}}

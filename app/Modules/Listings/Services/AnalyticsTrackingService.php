@@ -26,11 +26,34 @@ class AnalyticsTrackingService
 
     /**
      * Record a privacy-conscious listing view and update daily aggregated metrics.
+     * Prevents reload inflation, bot views, and self-views by the author/admin.
      */
     public function recordListingView(Listing $listing, Request $request): void
     {
+        $ua = (string) ($request->userAgent() ?: '');
+        if (preg_match('/(bot|crawl|spider|slurp|facebookexternalhit|bingbot|googlebot|headless|lighthouse)/i', $ua)) {
+            return;
+        }
+
+        // Do not count self-views when the listing author or an admin reloads the listing
+        $viewer = $request->user();
+        if ($viewer && ((int) $viewer->id === (int) $listing->user_id || $viewer->is_admin || in_array($viewer->role, ['super_admin', 'admin', 'moderator'], true))) {
+            return;
+        }
+
         $hash = $this->computeVisitorHash($request);
         $today = now()->toDateString();
+
+        // Check if this visitor reloaded the same listing within the last 30 minutes
+        $reloadedWithinCooldown = AnalyticsEvent::where('listing_id', $listing->id)
+            ->where('event_type', 'listing_view')
+            ->where('visitor_hash', $hash)
+            ->where('created_at', '>=', now()->subMinutes(30))
+            ->exists();
+
+        if ($reloadedWithinCooldown) {
+            return;
+        }
 
         // 1. Check if this visitor already viewed today (unique visitor check)
         $alreadyViewedToday = AnalyticsEvent::where('listing_id', $listing->id)
@@ -53,10 +76,12 @@ class AnalyticsTrackingService
             'created_at' => now(),
         ]);
 
-        // 3. Atomically increment listing lifetime counter
-        $listing->increment('view_count');
+        // 3. Increment listing view_count only once per unique visitor per day (or outside cooldown)
+        if (! $alreadyViewedToday) {
+            $listing->increment('view_count');
+        }
 
-        // 4. Update daily aggregated ListingAnalytics record
+        // 4. Update daily aggregated ListingAnalytics record (tracks both Gross views and Unique visitors)
         $analytics = ListingAnalytics::where('listing_id', $listing->id)
             ->whereDate('metric_date', $today)
             ->first();

@@ -19,15 +19,27 @@ class TrackPlatformTraffic
         $response = $next($request);
         $durationMs = (int) round((microtime(true) - $startTime) * 1000);
 
-        // Only track GET/POST requests and skip internal / asset routes
-        if (! in_array($request->method(), ['GET', 'POST'], true)) {
+        // Only track real GET page navigations (skip POST, AJAX, JSON, Livewire, prefetch)
+        if ($request->method() !== 'GET' || $request->expectsJson() || $request->ajax() || $request->hasHeader('X-Livewire')) {
+            return $response;
+        }
+
+        // Ignore browser prefetch / prerender requests
+        $purpose = strtolower((string) ($request->header('Purpose') ?: $request->header('Sec-Purpose') ?: $request->header('X-moz')));
+        if (str_contains($purpose, 'prefetch') || str_contains($purpose, 'preview') || str_contains($purpose, 'prerender')) {
             return $response;
         }
 
         $path = '/' . ltrim($request->path(), '/');
 
-        // Ignore assets, health checks, and livewire internal calls
+        // Ignore admin panel, assets, health checks, and internal calls
         if ($this->shouldSkipTracking($path)) {
+            return $response;
+        }
+
+        // Skip if logged-in user is an admin/moderator browsing the site so admin reloads never inflate views
+        $user = Auth::user();
+        if ($user && ($user->is_admin || in_array($user->role, ['super_admin', 'admin', 'moderator', 'support', 'finance_admin'], true))) {
             return $response;
         }
 
@@ -42,26 +54,32 @@ class TrackPlatformTraffic
 
     protected function shouldSkipTracking(string $path): bool
     {
-        $skipPatterns = [
-            'livewire/livewire',
-            'livewire/update',
+        $normalized = ltrim(strtolower($path), '/');
+
+        // Never track admin dashboard or internal API/notification endpoints as visitor traffic
+        $skipPrefixes = [
+            'admin',
+            'livewire',
+            'api/',
+            'notifications/',
+            'storage/',
+            'build/',
             'up',
             'health',
             'telescope',
             'horizon',
             '_debugbar',
-            'api/v1/ping',
         ];
 
-        foreach ($skipPatterns as $pattern) {
-            if (str_contains($path, $pattern)) {
+        foreach ($skipPrefixes as $prefix) {
+            if ($normalized === $prefix || str_starts_with($normalized, $prefix)) {
                 return true;
             }
         }
 
-        $extensions = ['.css', '.js', '.map', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf'];
+        $extensions = ['.css', '.js', '.map', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.webp', '.json'];
         foreach ($extensions as $ext) {
-            if (str_ends_with(strtolower($path), $ext)) {
+            if (str_ends_with($normalized, $ext)) {
                 return true;
             }
         }
@@ -144,7 +162,20 @@ class TrackPlatformTraffic
             $os = 'Linux';
         }
 
-        $isBot = (bool) preg_match('/(bot|crawl|spider|slurp|facebookexternalhit|bingbot|googlebot)/i', $ua);
+        $isBot = (bool) preg_match('/(bot|crawl|spider|slurp|facebookexternalhit|bingbot|googlebot|headless|lighthouse|pingdom|uptimerobot)/i', $ua);
+        if ($isBot) {
+            return;
+        }
+
+        // Prevent URL reload inflation: if the same visitor_hash already loaded this exact path in the last 30 minutes, do not add a new view row
+        $alreadyVisitedRecently = PlatformTrafficLog::where('visitor_hash', $hash)
+            ->where('path', substr($path, 0, 255))
+            ->where('created_at', '>=', now()->subMinutes(30))
+            ->exists();
+
+        if ($alreadyVisitedRecently) {
+            return;
+        }
 
         PlatformTrafficLog::create([
             'ip_address' => $ip,

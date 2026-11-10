@@ -127,12 +127,60 @@ class AdminEnterpriseHub extends Component
     #[Url(as: 'tab')]
     public string $tab = 'dashboard';
 
-    // Dashboard Telemetry
+    // Dashboard Telemetry & Analytics Filters
     public string $dashboardLocationMode = 'countries'; // 'countries', 'states'
+    public string $dashboardViewMode = 'unique'; // 'unique', 'gross'
+    public string $dashboardChartType = 'both'; // 'graph', 'chart', 'both'
+
+    // Multi-Dimensional Analytics & Report Filters
+    public string $analyticsPeriod = '30d'; // 'today', '7d', '30d', '90d', 'all'
+    public string $analyticsViewMode = 'both'; // 'unique', 'gross', 'both'
+    public string $analyticsVisualMode = 'both'; // 'graph', 'chart', 'both'
+    public string $analyticsDimension = 'all'; // 'all', 'visitors', 'posts', 'countries', 'devices', 'age'
+    public string $analyticsCountryFilter = 'all';
+    public string $analyticsDeviceFilter = 'all';
+    public string $analyticsAgeFilter = 'all';
 
     public function setDashboardLocationMode(string $mode): void
     {
         $this->dashboardLocationMode = in_array($mode, ['countries', 'states'], true) ? $mode : 'countries';
+    }
+
+    public function setDashboardViewMode(string $mode): void
+    {
+        $this->dashboardViewMode = in_array($mode, ['unique', 'gross'], true) ? $mode : 'unique';
+    }
+
+    public function setDashboardChartType(string $type): void
+    {
+        $this->dashboardChartType = in_array($type, ['graph', 'chart', 'both'], true) ? $type : 'both';
+    }
+
+    public function setAnalyticsDimension(string $dimension): void
+    {
+        $allowed = ['all', 'visitors', 'posts', 'countries', 'devices', 'age'];
+        $this->analyticsDimension = in_array($dimension, $allowed, true) ? $dimension : 'all';
+    }
+
+    public function setAnalyticsVisualMode(string $mode): void
+    {
+        $this->analyticsVisualMode = in_array($mode, ['graph', 'chart', 'both'], true) ? $mode : 'both';
+    }
+
+    public function setAnalyticsViewMode(string $mode): void
+    {
+        $this->analyticsViewMode = in_array($mode, ['unique', 'gross', 'both'], true) ? $mode : 'both';
+    }
+
+    public function resetAnalyticsFilters(): void
+    {
+        $this->analyticsPeriod = '30d';
+        $this->analyticsViewMode = 'both';
+        $this->analyticsVisualMode = 'both';
+        $this->analyticsDimension = 'all';
+        $this->analyticsCountryFilter = 'all';
+        $this->analyticsDeviceFilter = 'all';
+        $this->analyticsAgeFilter = 'all';
     }
 
     // Users
@@ -4590,20 +4638,46 @@ class AdminEnterpriseHub extends Component
             ? round((($listingsLast7Days - $listingsPrior7Days) / $listingsPrior7Days) * 100, 1) 
             : ($listingsLast7Days > 0 ? 100.0 : 0.0);
 
-        // 3. Views & Real-Time Traffic Telemetry
-        $listingViews = (int) Listing::sum('view_count');
-        $trafficLogsCount = PlatformTrafficLog::count();
-        $totalViews = $listingViews + $trafficLogsCount;
+        // 3. Views & Real-Time Traffic Telemetry (Real Public Visitor Traffic Only)
+        $baseTrafficQuery = fn () => PlatformTrafficLog::where('is_bot', false)
+            ->where(function ($q) {
+                $q->whereNull('path')
+                    ->orWhere(function ($sq) {
+                        $sq->where('path', 'not like', 'admin%')
+                            ->where('path', 'not like', '/admin%')
+                            ->where('path', 'not like', 'livewire%')
+                            ->where('path', 'not like', '/livewire%');
+                    });
+            });
 
-        $viewsLast7Days = PlatformTrafficLog::where('created_at', '>=', now()->subDays(7))->count();
-        $viewsPrior7Days = PlatformTrafficLog::whereBetween('created_at', [now()->subDays(14), now()->subDays(7)])->count();
+        $listingUniqueViews = (int) Listing::sum('view_count');
+        $listingAnalyticsGross = (int) ListingAnalytics::sum('views');
+        $listingAnalyticsUnique = (int) ListingAnalytics::sum('unique_visitors');
+        $postGrossViews = max($listingUniqueViews, $listingAnalyticsGross);
+        $postUniqueViews = $listingAnalyticsUnique > 0 ? max($listingAnalyticsUnique, $listingUniqueViews) : $listingUniqueViews;
+
+        $siteGrossViews = (int) $baseTrafficQuery()->count();
+        $siteUniqueVisitors = (int) $baseTrafficQuery()->distinct('visitor_hash')->count('visitor_hash');
+
+        $grossViews = $siteGrossViews + $postGrossViews;
+        $uniqueVisitors = max($siteUniqueVisitors, $postUniqueViews);
+        $totalViews = $this->dashboardViewMode === 'gross' ? $grossViews : $uniqueVisitors;
+
+        $viewsLast7Days = $this->dashboardViewMode === 'gross'
+            ? $baseTrafficQuery()->where('created_at', '>=', now()->subDays(7))->count()
+            : $baseTrafficQuery()->where('created_at', '>=', now()->subDays(7))->distinct('visitor_hash')->count('visitor_hash');
+        $viewsPrior7Days = $this->dashboardViewMode === 'gross'
+            ? $baseTrafficQuery()->whereBetween('created_at', [now()->subDays(14), now()->subDays(7)])->count()
+            : $baseTrafficQuery()->whereBetween('created_at', [now()->subDays(14), now()->subDays(7)])->distinct('visitor_hash')->count('visitor_hash');
         $viewsGrowth = $viewsPrior7Days > 0 
             ? round((($viewsLast7Days - $viewsPrior7Days) / $viewsPrior7Days) * 100, 1) 
             : ($viewsLast7Days > 0 ? 100.0 : 0.0);
 
-        $activeVisitorsCount = PlatformTrafficLog::where('created_at', '>=', now()->subMinutes(5))->distinct('visitor_hash')->count();
-        $activeVisitorsNow = max(1, $activeVisitorsCount);
-        $todayViews = PlatformTrafficLog::whereDate('created_at', today())->count();
+        $activeVisitorsCount = $baseTrafficQuery()->where('created_at', '>=', now()->subMinutes(5))->distinct('visitor_hash')->count('visitor_hash');
+        $activeVisitorsNow = $activeVisitorsCount;
+        $todayGrossViews = $baseTrafficQuery()->whereDate('created_at', today())->count();
+        $todayUniqueVisitors = $baseTrafficQuery()->whereDate('created_at', today())->distinct('visitor_hash')->count('visitor_hash');
+        $todayViews = $this->dashboardViewMode === 'gross' ? $todayGrossViews : $todayUniqueVisitors;
 
         // 4. Revenue & Real Revenue Growth
         $fiatRevenue = (float) (PaymentTransaction::where('status', 'completed')->sum('amount_cents') / 100);
@@ -4622,34 +4696,68 @@ class AdminEnterpriseHub extends Component
             ? round((($revLast7Days - $revPrior7Days) / $revPrior7Days) * 100, 1) 
             : ($revLast7Days > 0 ? 100.0 : 0.0);
 
-        // 5. Weekly Traffic & Inquiries (Last 7 Days)
+        // 5. Weekly Traffic & Inquiries (Last 7 Days - Unique & Gross + Post Views)
         $weeklyDays = [];
+        $weeklyDates = [];
+        $weeklyGrossViews = [];
+        $weeklyUniqueViews = [];
+        $weeklyPostViews = [];
         $weeklyViews = [];
         $weeklyContacts = [];
         for ($i = 6; $i >= 0; $i--) {
             $day = now()->subDays($i);
             $dateStr = $day->toDateString();
             $weeklyDays[] = $day->format('D');
-            $vCount = PlatformTrafficLog::whereDate('created_at', $dateStr)->count();
+            $weeklyDates[] = $day->format('M j');
+
+            $gCount = $baseTrafficQuery()->whereDate('created_at', $dateStr)->count();
+            $uCount = $baseTrafficQuery()->whereDate('created_at', $dateStr)->distinct('visitor_hash')->count('visitor_hash');
+            $pCount = (int) ListingAnalytics::whereDate('metric_date', $dateStr)->sum('views');
             $cCount = ContactMessage::whereDate('created_at', $dateStr)->count() 
                 + AnalyticsEvent::where('event_type', 'contact_click')->whereDate('created_at', $dateStr)->count();
-            $weeklyViews[] = $vCount;
+
+            $weeklyGrossViews[] = $gCount + $pCount;
+            $weeklyUniqueViews[] = max($uCount, (int) ListingAnalytics::whereDate('metric_date', $dateStr)->sum('unique_visitors'));
+            $weeklyPostViews[] = $pCount;
+            $weeklyViews[] = $this->dashboardViewMode === 'gross' ? ($gCount + $pCount) : max($uCount, (int) ListingAnalytics::whereDate('metric_date', $dateStr)->sum('unique_visitors'));
             $weeklyContacts[] = $cCount;
         }
 
         $totalWeeklyViews = array_sum($weeklyViews);
+        $totalWeeklyGrossViews = array_sum($weeklyGrossViews);
+        $totalWeeklyUniqueViews = array_sum($weeklyUniqueViews);
+        $totalWeeklyPostViews = array_sum($weeklyPostViews);
         $totalWeeklyContacts = array_sum($weeklyContacts);
 
         // Dynamic SVG coordinate generator for 7 days (width 500, height 130)
-        $maxV = max(1, ...$weeklyViews);
+        $maxV = max(1, ...$weeklyViews, ...$weeklyGrossViews);
+        $maxU = max(1, ...$weeklyUniqueViews);
         $maxC = max(1, ...$weeklyContacts);
 
         $viewPoints = [];
+        $uniquePoints = [];
         $contactPoints = [];
+        $barHeights = [];
         foreach ($weeklyViews as $idx => $val) {
             $x = round($idx * (500 / 6), 1);
             $y = round(120 - (($val / $maxV) * 85), 1);
             $viewPoints[] = "{$x},{$y}";
+
+            $uVal = $weeklyUniqueViews[$idx] ?? 0;
+            $gVal = $weeklyGrossViews[$idx] ?? 0;
+            $uY = round(120 - (($uVal / $maxV) * 85), 1);
+            $uniquePoints[] = "{$x},{$uY}";
+
+            $barHeights[] = [
+                'day' => $weeklyDays[$idx],
+                'date' => $weeklyDates[$idx],
+                'gross' => $gVal,
+                'unique' => $uVal,
+                'posts' => $weeklyPostViews[$idx] ?? 0,
+                'contacts' => $weeklyContacts[$idx] ?? 0,
+                'grossPct' => max(6, (int) round(($gVal / $maxV) * 100)),
+                'uniquePct' => max(6, (int) round(($uVal / $maxV) * 100)),
+            ];
         }
         foreach ($weeklyContacts as $idx => $val) {
             $x = round($idx * (500 / 6), 1);
@@ -4659,6 +4767,8 @@ class AdminEnterpriseHub extends Component
 
         $viewsLineD = 'M ' . implode(' L ', $viewPoints);
         $viewsAreaD = $viewsLineD . ' L 500,130 L 0,130 Z';
+        $uniqueLineD = 'M ' . implode(' L ', $uniquePoints);
+        $uniqueAreaD = $uniqueLineD . ' L 500,130 L 0,130 Z';
         $contactsLineD = 'M ' . implode(' L ', $contactPoints);
         $contactsAreaD = $contactsLineD . ' L 500,130 L 0,130 Z';
 
@@ -4674,8 +4784,9 @@ class AdminEnterpriseHub extends Component
         $penPct = (int) round(($pending / $statusTotal) * 100);
         $rejPct = max(0, 100 - ($pubPct + $penPct));
 
-        // 7. Top Countries & Locations (Real Database Records)
-        $topCountries = PlatformTrafficLog::select('country_code', 'country_name', DB::raw('count(*) as hits'), DB::raw('count(distinct visitor_hash) as unique_visitors'))
+        // 7. Top Countries & Locations (Real Public Database Records)
+        $topCountries = $baseTrafficQuery()
+            ->select('country_code', 'country_name', DB::raw('count(*) as hits'), DB::raw('count(distinct visitor_hash) as unique_visitors'))
             ->groupBy('country_code', 'country_name')
             ->orderByDesc('hits')
             ->limit(5)
@@ -4686,8 +4797,8 @@ class AdminEnterpriseHub extends Component
             ->limit(5)
             ->get();
 
-        // 8. Live Real-Time Visitor Stream
-        $liveVisitors = PlatformTrafficLog::latest('created_at')->limit(6)->get();
+        // 8. Live Real-Time Visitor Stream (Public Only)
+        $liveVisitors = $baseTrafficQuery()->latest('created_at')->limit(6)->get();
 
         // 9. Recent 4 listings for dashboard
         $recentListings = Listing::with(['city.state', 'primaryPhoto', 'category'])
@@ -4702,8 +4813,16 @@ class AdminEnterpriseHub extends Component
                 'totalListings' => $totalListings,
                 'listingGrowth' => $listingGrowth,
                 'totalViews' => $totalViews,
+                'grossViews' => $grossViews,
+                'uniqueVisitors' => $uniqueVisitors,
+                'siteGrossViews' => $siteGrossViews,
+                'siteUniqueVisitors' => $siteUniqueVisitors,
+                'postGrossViews' => $postGrossViews,
+                'postUniqueViews' => $postUniqueViews,
                 'viewsGrowth' => $viewsGrowth,
                 'todayViews' => $todayViews,
+                'todayGrossViews' => $todayGrossViews,
+                'todayUniqueVisitors' => $todayUniqueVisitors,
                 'activeVisitorsNow' => $activeVisitorsNow,
                 'totalRevenue' => $totalRevenue,
                 'revenueGrowth' => $revenueGrowth,
@@ -4721,12 +4840,22 @@ class AdminEnterpriseHub extends Component
             ],
             'chart' => [
                 'days' => $weeklyDays,
+                'dates' => $weeklyDates,
                 'views' => $weeklyViews,
+                'grossViews' => $weeklyGrossViews,
+                'uniqueViews' => $weeklyUniqueViews,
+                'postViews' => $weeklyPostViews,
                 'contacts' => $weeklyContacts,
+                'bars' => $barHeights,
                 'totalWeeklyViews' => $totalWeeklyViews,
+                'totalWeeklyGrossViews' => $totalWeeklyGrossViews,
+                'totalWeeklyUniqueViews' => $totalWeeklyUniqueViews,
+                'totalWeeklyPostViews' => $totalWeeklyPostViews,
                 'totalWeeklyContacts' => $totalWeeklyContacts,
                 'viewsLineD' => $viewsLineD,
                 'viewsAreaD' => $viewsAreaD,
+                'uniqueLineD' => $uniqueLineD,
+                'uniqueAreaD' => $uniqueAreaD,
                 'contactsLineD' => $contactsLineD,
                 'contactsAreaD' => $contactsAreaD,
                 'peakX' => $peakX,
@@ -4764,36 +4893,419 @@ class AdminEnterpriseHub extends Component
 
     protected function dataAnalytics(): array
     {
-        $since = now()->subDays(30)->toDateString();
-        $sinceDt = now()->subDays(30);
+        $daysCount = match ($this->analyticsPeriod) {
+            'today' => 1,
+            '7d' => 7,
+            '30d' => 30,
+            '90d' => 90,
+            'all' => 3650,
+            default => 30,
+        };
 
-        $listingAnalyticsViews = (int) ListingAnalytics::where('metric_date', '>=', $since)->sum('views');
-        $trafficViews30 = PlatformTrafficLog::where('created_at', '>=', $sinceDt)->count();
-        $views30 = $listingAnalyticsViews + $trafficViews30;
+        $sinceDt = $this->analyticsPeriod === 'today'
+            ? today()->startOfDay()
+            : ($this->analyticsPeriod === 'all' ? now()->subYears(10) : now()->subDays($daysCount));
+        $since = $sinceDt->toDateString();
 
-        $contacts30 = (int) ListingAnalytics::where('metric_date', '>=', $since)->sum('contact_clicks')
+        // Base filtered public traffic query
+        $trafficQuery = fn () => PlatformTrafficLog::where('is_bot', false)
+            ->where('created_at', '>=', $sinceDt)
+            ->where(function ($q) {
+                $q->whereNull('path')
+                    ->orWhere(function ($sq) {
+                        $sq->where('path', 'not like', 'admin%')
+                            ->where('path', 'not like', '/admin%')
+                            ->where('path', 'not like', 'livewire%')
+                            ->where('path', 'not like', '/livewire%');
+                    });
+            })
+            ->when($this->analyticsCountryFilter !== 'all', fn ($q) => $q->where('country_code', $this->analyticsCountryFilter))
+            ->when($this->analyticsDeviceFilter !== 'all', fn ($q) => $q->where('device_type', $this->analyticsDeviceFilter));
+
+        // Base filtered Listing query (supports Age group filter)
+        $listingQuery = fn () => Listing::query()
+            ->when($this->analyticsAgeFilter !== 'all', function ($q) {
+                match ($this->analyticsAgeFilter) {
+                    '18-24' => $q->whereBetween('poster_age', [18, 24]),
+                    '25-34' => $q->whereBetween('poster_age', [25, 34]),
+                    '35-44' => $q->whereBetween('poster_age', [35, 44]),
+                    '45-54' => $q->whereBetween('poster_age', [45, 54]),
+                    '55+'   => $q->where('poster_age', '>=', 55),
+                    default => null,
+                };
+            });
+
+        $filteredListingIds = $this->analyticsAgeFilter !== 'all'
+            ? $listingQuery()->pluck('id')->all()
+            : null;
+
+        $listingAnalyticsQuery = fn () => ListingAnalytics::where('metric_date', '>=', $since)
+            ->when($filteredListingIds !== null, fn ($q) => $q->whereIn('listing_id', $filteredListingIds));
+
+        // 1. Visitor & View Totals (Gross vs Unique)
+        $siteGrossViews = (int) $trafficQuery()->count();
+        $siteUniqueVisitors = (int) $trafficQuery()->distinct('visitor_hash')->count('visitor_hash');
+
+        $postAnalyticsGross = (int) $listingAnalyticsQuery()->sum('views');
+        $postAnalyticsUnique = (int) $listingAnalyticsQuery()->sum('unique_visitors');
+        $listingTableViews = (int) $listingQuery()->sum('view_count');
+
+        $postGrossViews = max($postAnalyticsGross, $this->analyticsPeriod === 'all' || $this->analyticsPeriod === '30d' ? $listingTableViews : $postAnalyticsGross);
+        $postUniqueViews = max($postAnalyticsUnique, $this->analyticsPeriod === 'all' || $this->analyticsPeriod === '30d' ? $listingTableViews : $postAnalyticsUnique);
+
+        $totalGrossViews = $siteGrossViews + $postGrossViews;
+        $totalUniqueVisitors = max($siteUniqueVisitors, $postUniqueViews);
+        $repeatViews = max(0, $totalGrossViews - $totalUniqueVisitors);
+
+        $contacts30 = (int) $listingAnalyticsQuery()->sum('contact_clicks')
             + ContactMessage::where('created_at', '>=', $sinceDt)->count();
 
-        $favorites30 = (int) ListingAnalytics::where('metric_date', '>=', $since)->sum('favorite_adds')
+        $favorites30 = (int) $listingAnalyticsQuery()->sum('favorite_adds')
             + (int) DB::table('listing_favorites')->where('created_at', '>=', $sinceDt)->count();
 
         $fiatRev30 = (float) (PaymentTransaction::where('status', 'completed')->where('created_at', '>=', $sinceDt)->sum('amount_cents') / 100);
         $cryptoRev30 = (float) CryptoPayment::whereIn('status', [CryptoPayment::STATUS_COMPLETED, 'completed', 'confirmed'])->where('created_at', '>=', $sinceDt)->sum('fiat_amount');
 
+        // 2. Daily Trend Series for Graph & Bar Chart (7 or 14 buckets)
+        $chartDaysCount = match ($this->analyticsPeriod) {
+            'today' => 7,
+            '7d' => 7,
+            default => 14,
+        };
+        $trendLabels = [];
+        $trendGross = [];
+        $trendUnique = [];
+        $trendPostViews = [];
+        $trendContacts = [];
+
+        for ($i = $chartDaysCount - 1; $i >= 0; $i--) {
+            $d = now()->subDays($i);
+            $dStr = $d->toDateString();
+            $trendLabels[] = $d->format('M j');
+
+            $dayTraffic = PlatformTrafficLog::where('is_bot', false)
+                ->whereDate('created_at', $dStr)
+                ->where(function ($q) {
+                    $q->whereNull('path')
+                        ->orWhere(function ($sq) {
+                            $sq->where('path', 'not like', 'admin%')
+                                ->where('path', 'not like', '/admin%')
+                                ->where('path', 'not like', 'livewire%')
+                                ->where('path', 'not like', '/livewire%');
+                        });
+                })
+                ->when($this->analyticsCountryFilter !== 'all', fn ($q) => $q->where('country_code', $this->analyticsCountryFilter))
+                ->when($this->analyticsDeviceFilter !== 'all', fn ($q) => $q->where('device_type', $this->analyticsDeviceFilter));
+
+            $gDay = (int) (clone $dayTraffic)->count();
+            $uDay = (int) (clone $dayTraffic)->distinct('visitor_hash')->count('visitor_hash');
+
+            $pDayQuery = ListingAnalytics::whereDate('metric_date', $dStr)
+                ->when($filteredListingIds !== null, fn ($q) => $q->whereIn('listing_id', $filteredListingIds));
+            $pGrossDay = (int) (clone $pDayQuery)->sum('views');
+            $pUniqueDay = (int) (clone $pDayQuery)->sum('unique_visitors');
+
+            $cDay = ContactMessage::whereDate('created_at', $dStr)->count();
+
+            $trendGross[] = $gDay + $pGrossDay;
+            $trendUnique[] = max($uDay, $pUniqueDay);
+            $trendPostViews[] = $pGrossDay;
+            $trendContacts[] = $cDay;
+        }
+
+        $maxTrendVal = max(1, ...$trendGross, ...$trendUnique, ...$trendPostViews);
+        $grossPts = [];
+        $uniquePts = [];
+        $postPts = [];
+        $trendBars = [];
+        $stepX = 600 / max(1, count($trendLabels) - 1);
+
+        foreach ($trendLabels as $idx => $lbl) {
+            $x = round($idx * $stepX, 1);
+            $gVal = $trendGross[$idx];
+            $uVal = $trendUnique[$idx];
+            $pVal = $trendPostViews[$idx];
+
+            $gY = round(145 - (($gVal / $maxTrendVal) * 115), 1);
+            $uY = round(145 - (($uVal / $maxTrendVal) * 115), 1);
+            $pY = round(145 - (($pVal / $maxTrendVal) * 115), 1);
+
+            $grossPts[] = "{$x},{$gY}";
+            $uniquePts[] = "{$x},{$uY}";
+            $postPts[] = "{$x},{$pY}";
+
+            $trendBars[] = [
+                'label' => $lbl,
+                'gross' => $gVal,
+                'unique' => $uVal,
+                'postViews' => $pVal,
+                'contacts' => $trendContacts[$idx],
+                'grossPct' => max(5, (int) round(($gVal / $maxTrendVal) * 100)),
+                'uniquePct' => max(5, (int) round(($uVal / $maxTrendVal) * 100)),
+                'postPct' => max(4, (int) round(($pVal / $maxTrendVal) * 100)),
+            ];
+        }
+
+        $grossLineD = 'M ' . implode(' L ', $grossPts);
+        $grossAreaD = $grossLineD . ' L 600,155 L 0,155 Z';
+        $uniqueLineD = 'M ' . implode(' L ', $uniquePts);
+        $uniqueAreaD = $uniqueLineD . ' L 600,155 L 0,155 Z';
+        $postLineD = 'M ' . implode(' L ', $postPts);
+
+        // 3. Country Breakdown Report (Chart & Graph)
+        $countryRows = PlatformTrafficLog::where('is_bot', false)
+            ->where('created_at', '>=', $sinceDt)
+            ->where(function ($q) {
+                $q->whereNull('path')
+                    ->orWhere(function ($sq) {
+                        $sq->where('path', 'not like', 'admin%')
+                            ->where('path', 'not like', '/admin%')
+                            ->where('path', 'not like', 'livewire%')
+                            ->where('path', 'not like', '/livewire%');
+                    });
+            })
+            ->when($this->analyticsDeviceFilter !== 'all', fn ($q) => $q->where('device_type', $this->analyticsDeviceFilter))
+            ->select(
+                'country_code',
+                'country_name',
+                DB::raw('count(*) as hits'),
+                DB::raw('count(distinct visitor_hash) as unique_visitors')
+            )
+            ->groupBy('country_code', 'country_name')
+            ->orderByDesc('hits')
+            ->limit(15)
+            ->get();
+
+        $totalCountryHits = max(1, (int) $countryRows->sum('hits'));
+        $totalCountryUnique = max(1, (int) $countryRows->sum('unique_visitors'));
+        $countryReport = $countryRows->map(function ($row) use ($totalCountryHits, $totalCountryUnique) {
+            return [
+                'country_code' => $row->country_code ?: 'US',
+                'country_name' => $row->country_name ?: 'United States',
+                'hits' => (int) $row->hits,
+                'unique_visitors' => (int) $row->unique_visitors,
+                'gross_pct' => (int) round(($row->hits / $totalCountryHits) * 100),
+                'unique_pct' => (int) round(($row->unique_visitors / $totalCountryUnique) * 100),
+            ];
+        })->values()->all();
+
+        $availableCountries = PlatformTrafficLog::where('is_bot', false)
+            ->select('country_code', 'country_name')
+            ->whereNotNull('country_code')
+            ->groupBy('country_code', 'country_name')
+            ->orderBy('country_name')
+            ->get();
+
+        // 4. Device, Browser & OS Breakdown Report
+        $deviceRows = $trafficQuery()
+            ->select(
+                'device_type',
+                DB::raw('count(*) as hits'),
+                DB::raw('count(distinct visitor_hash) as unique_visitors')
+            )
+            ->groupBy('device_type')
+            ->orderByDesc('hits')
+            ->get()
+            ->keyBy(fn ($r) => ucfirst(strtolower((string) $r->device_type)));
+
+        $deviceTypes = ['Desktop', 'Mobile', 'Tablet'];
+        $deviceTotalHits = max(1, (int) $deviceRows->sum('hits'));
+        $deviceTotalUnique = max(1, (int) $deviceRows->sum('unique_visitors'));
+        $deviceReport = [];
+        foreach ($deviceTypes as $dt) {
+            $r = $deviceRows->get($dt);
+            $hits = $r ? (int) $r->hits : 0;
+            $uniq = $r ? (int) $r->unique_visitors : 0;
+            $deviceReport[] = [
+                'device' => $dt,
+                'hits' => $hits,
+                'unique_visitors' => $uniq,
+                'gross_pct' => $deviceRows->sum('hits') > 0 ? (int) round(($hits / $deviceTotalHits) * 100) : 0,
+                'unique_pct' => $deviceRows->sum('unique_visitors') > 0 ? (int) round(($uniq / $deviceTotalUnique) * 100) : 0,
+            ];
+        }
+
+        $browserRows = $trafficQuery()
+            ->select('browser', DB::raw('count(*) as hits'), DB::raw('count(distinct visitor_hash) as unique_visitors'))
+            ->whereNotNull('browser')
+            ->groupBy('browser')
+            ->orderByDesc('hits')
+            ->limit(6)
+            ->get();
+        $maxBrowserHits = max(1, (int) ($browserRows->max('hits') ?? 1));
+        $browserReport = $browserRows->map(fn ($r) => [
+            'browser' => $r->browser ?: 'Browser',
+            'hits' => (int) $r->hits,
+            'unique_visitors' => (int) $r->unique_visitors,
+            'pct' => (int) round(($r->hits / $maxBrowserHits) * 100),
+        ])->values()->all();
+
+        $osRows = $trafficQuery()
+            ->select('os', DB::raw('count(*) as hits'), DB::raw('count(distinct visitor_hash) as unique_visitors'))
+            ->whereNotNull('os')
+            ->groupBy('os')
+            ->orderByDesc('hits')
+            ->limit(6)
+            ->get();
+        $maxOsHits = max(1, (int) ($osRows->max('hits') ?? 1));
+        $osReport = $osRows->map(fn ($r) => [
+            'os' => $r->os ?: 'OS',
+            'hits' => (int) $r->hits,
+            'unique_visitors' => (int) $r->unique_visitors,
+            'pct' => (int) round(($r->hits / $maxOsHits) * 100),
+        ])->values()->all();
+
+        // 5. Age Demographics Report (18-24, 25-34, 35-44, 45-54, 55+)
+        $ageBrackets = [
+            '18-24' => [18, 24],
+            '25-34' => [25, 34],
+            '35-44' => [35, 44],
+            '45-54' => [45, 54],
+            '55+'   => [55, 120],
+        ];
+
+        $profilesWithBirthdate = UserProfile::whereNotNull('birthdate')->get(['birthdate']);
+        $ageRaw = [];
+        foreach ($ageBrackets as $label => [$minAge, $maxAge]) {
+            $postsInBracket = Listing::whereBetween('poster_age', [$minAge, $maxAge]);
+            $postsCount = (clone $postsInBracket)->count();
+            $postViewsInBracket = (int) (clone $postsInBracket)->sum('view_count');
+
+            $usersCount = $profilesWithBirthdate->filter(function ($profile) use ($minAge, $maxAge) {
+                $age = $profile->age;
+                return $age !== null && $age >= $minAge && $age <= $maxAge;
+            })->count();
+
+            $ageRaw[$label] = [
+                'bracket' => $label,
+                'posts_count' => $postsCount,
+                'post_views' => $postViewsInBracket,
+                'users_count' => $usersCount,
+                'combined_count' => $postsCount + $usersCount,
+            ];
+        }
+
+        $maxAgeCombined = max(1, ...array_column($ageRaw, 'combined_count'));
+        $totalAgeCombined = max(1, array_sum(array_column($ageRaw, 'combined_count')));
+        $maxAgeViews = max(1, ...array_column($ageRaw, 'post_views'));
+        $totalAgeViews = max(1, array_sum(array_column($ageRaw, 'post_views')));
+
+        $ageReport = [];
+        $ageGraphPts = [];
+        $ageIdx = 0;
+        foreach ($ageRaw as $label => $item) {
+            $sharePct = array_sum(array_column($ageRaw, 'combined_count')) > 0
+                ? (int) round(($item['combined_count'] / $totalAgeCombined) * 100)
+                : 0;
+            $barHeightPct = (int) round(($item['combined_count'] / $maxAgeCombined) * 100);
+            $viewsSharePct = array_sum(array_column($ageRaw, 'post_views')) > 0
+                ? (int) round(($item['post_views'] / $totalAgeViews) * 100)
+                : 0;
+            $viewsHeightPct = (int) round(($item['post_views'] / $maxAgeViews) * 100);
+
+            $x = round($ageIdx * (400 / 4), 1);
+            $y = round(120 - (($item['combined_count'] / $maxAgeCombined) * 90), 1);
+            $ageGraphPts[] = "{$x},{$y}";
+            $ageIdx++;
+
+            $ageReport[] = array_merge($item, [
+                'share_pct' => $sharePct,
+                'bar_pct' => max(6, $barHeightPct),
+                'views_share_pct' => $viewsSharePct,
+                'views_bar_pct' => max(6, $viewsHeightPct),
+            ]);
+        }
+        $ageLineD = 'M ' . implode(' L ', $ageGraphPts);
+        $ageAreaD = $ageLineD . ' L 400,130 L 0,130 Z';
+
+        // 6. Posts & Post Views Report (Top Listings + Categories with Views)
+        $topListings = $listingQuery()
+            ->with(['category:id,name', 'city:id,name'])
+            ->orderByDesc('view_count')
+            ->limit(10)
+            ->get(['id', 'category_id', 'city_id', 'title', 'slug', 'poster_age', 'view_count', 'reply_count', 'favorite_count', 'status']);
+
+        $listingAnalyticsByListing = ListingAnalytics::whereIn('listing_id', $topListings->pluck('id'))
+            ->select('listing_id', DB::raw('SUM(views) as gross_views'), DB::raw('SUM(unique_visitors) as unique_views'))
+            ->groupBy('listing_id')
+            ->get()
+            ->keyBy('listing_id');
+
+        $topListingsReport = $topListings->map(function ($l) use ($listingAnalyticsByListing) {
+            $la = $listingAnalyticsByListing->get($l->id);
+            $uniqueV = max((int) $l->view_count, $la ? (int) $la->unique_views : 0);
+            $grossV = max($uniqueV, $la ? (int) $la->gross_views : (int) $l->view_count);
+            return [
+                'id' => $l->id,
+                'title' => $l->title,
+                'slug' => $l->slug,
+                'category' => $l->category?->name ?? 'General',
+                'city' => $l->city?->name ?? '—',
+                'poster_age' => $l->poster_age,
+                'unique_views' => $uniqueV,
+                'gross_views' => $grossV,
+                'reply_count' => (int) $l->reply_count,
+                'favorite_count' => (int) $l->favorite_count,
+                'status' => $l->status,
+            ];
+        })->all();
+
+        $topCategories = Category::withCount('listings')
+            ->withSum('listings as total_views', 'view_count')
+            ->orderByDesc('listings_count')
+            ->limit(8)
+            ->get(['id', 'name']);
+
+        $maxCatViews = max(1, (int) ($topCategories->max('total_views') ?? 1));
+        $maxCatListings = max(1, (int) ($topCategories->max('listings_count') ?? 1));
+
         return [
             'analytics' => [
-                'views30' => $views30,
+                'views30' => $this->analyticsViewMode === 'gross' ? $totalGrossViews : $totalUniqueVisitors,
+                'grossViews' => $totalGrossViews,
+                'uniqueVisitors' => $totalUniqueVisitors,
+                'repeatViews' => $repeatViews,
+                'siteGrossViews' => $siteGrossViews,
+                'siteUniqueVisitors' => $siteUniqueVisitors,
+                'postGrossViews' => $postGrossViews,
+                'postUniqueViews' => $postUniqueViews,
                 'contacts30' => $contacts30,
                 'favorites30' => $favorites30,
                 'newUsers30' => User::where('created_at', '>=', $sinceDt)->count(),
-                'newListings30' => Listing::where('created_at', '>=', $sinceDt)->count(),
+                'newListings30' => $listingQuery()->where('created_at', '>=', $sinceDt)->count(),
+                'totalActivePosts' => $listingQuery()->where('status', Listing::STATUS_ACTIVE)->count(),
+                'countriesCount' => count($countryReport),
                 'revenue30' => $fiatRev30 + $cryptoRev30,
                 'refunds30' => Refund::where('created_at', '>=', $sinceDt)->sum('amount_cents') / 100,
                 'openReports' => ContentReport::whereIn('status', ['open', 'investigating'])->count(),
             ],
-            'topListings' => Listing::orderByDesc('view_count')->limit(10)->get(['id', 'title', 'slug', 'view_count', 'reply_count', 'favorite_count', 'status']),
-            'listingsByStatus' => Listing::select('status', DB::raw('count(*) as total'))->groupBy('status')->pluck('total', 'status'),
-            'topCategories' => Category::withCount('listings')->orderByDesc('listings_count')->limit(8)->get(['id', 'name']),
+            'trendChart' => [
+                'labels' => $trendLabels,
+                'gross' => $trendGross,
+                'unique' => $trendUnique,
+                'postViews' => $trendPostViews,
+                'contacts' => $trendContacts,
+                'bars' => $trendBars,
+                'grossLineD' => $grossLineD,
+                'grossAreaD' => $grossAreaD,
+                'uniqueLineD' => $uniqueLineD,
+                'uniqueAreaD' => $uniqueAreaD,
+                'postLineD' => $postLineD,
+            ],
+            'countryReport' => $countryReport,
+            'availableCountries' => $availableCountries,
+            'deviceReport' => $deviceReport,
+            'browserReport' => $browserReport,
+            'osReport' => $osReport,
+            'ageReport' => $ageReport,
+            'ageLineD' => $ageLineD,
+            'ageAreaD' => $ageAreaD,
+            'topListings' => $topListings,
+            'topListingsReport' => $topListingsReport,
+            'listingsByStatus' => $listingQuery()->select('status', DB::raw('count(*) as total'))->groupBy('status')->pluck('total', 'status'),
+            'topCategories' => $topCategories,
+            'maxCatViews' => $maxCatViews,
+            'maxCatListings' => $maxCatListings,
         ];
     }
 
