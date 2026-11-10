@@ -2289,6 +2289,43 @@ class AdminEnterpriseHub extends Component
         session()->flash('success', "Report #{$reportId} removed from database.");
     }
 
+    public function resetAllTrafficAndViewCounts(): void
+    {
+        $this->authorizePermission('settings.manage');
+
+        DB::table('listings')->update([
+            'view_count' => 0,
+            'reply_count' => 0,
+            'favorite_count' => 0,
+        ]);
+        DB::table('platform_traffic_logs')->delete();
+        if (Schema::hasTable('listing_analytics')) {
+            DB::table('listing_analytics')->delete();
+        }
+        if (Schema::hasTable('analytics_events')) {
+            DB::table('analytics_events')->delete();
+        }
+        if (Schema::hasTable('ad_placements')) {
+            DB::table('ad_placements')->update(['impressions' => 0, 'clicks' => 0]);
+        }
+
+        AdminAuditService::log('analytics.reset_all_views_to_zero', null, null, ['reset_to_zero' => true]);
+        $this->dispatch('toast', type: 'success', message: 'All traffic logs and view counters have been reset to 0.');
+        session()->flash('success', 'All traffic logs, page views, and listing view counters have been reset to 0.');
+    }
+
+    public function resetAllContentReports(): void
+    {
+        $this->authorizePermission('reports.manage');
+
+        $count = ContentReport::count();
+        DB::table('content_reports')->delete();
+
+        AdminAuditService::log('reports.reset_all_to_zero', null, ['previous_count' => $count], ['reset_to_zero' => true]);
+        $this->dispatch('toast', type: 'success', message: 'All incident reports have been cleared and reset to 0.');
+        session()->flash('success', 'All incident reports have been cleared and reset to 0.');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | DMCA, Legal Requests & Compliance (Phase 12 Controls)

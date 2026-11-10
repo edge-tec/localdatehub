@@ -187,8 +187,8 @@ class DemoListingSeeder extends Seeder
                     'is_featured' => $sl['is_featured'],
                     'is_verified_poster' => true,
                     'has_photos' => false,
-                    'view_count' => rand(25, 180),
-                    'reply_count' => rand(1, 12),
+                    'view_count' => app()->environment('testing') ? rand(25, 180) : 0,
+                    'reply_count' => app()->environment('testing') ? rand(1, 12) : 0,
                     'published_at' => now()->subDays(rand(1, 5)),
                     'expires_at' => now()->addDays(25),
                 ]

@@ -362,6 +362,11 @@
                             </span>
                             <span>{{ $metrics['activeVisitorsNow'] }} Visitors Online Now · Auto-updating (10s)</span>
                         </div>
+                        @if($this->userCan('settings.manage'))
+                            <button type="button" wire:click="resetAllTrafficAndViewCounts" wire:confirm="Are you sure you want to reset all traffic views and listing view counters to 0?" class="px-3 py-1.5 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition shadow-xs" title="Reset All Views & Traffic to 0">
+                                ↺ Reset Views to 0
+                            </button>
+                        @endif
                         <button type="button" wire:click="$refresh" class="p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition" title="Refresh Telemetry Now">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                         </button>
@@ -2659,13 +2664,25 @@
                             <span>Law Enforcement &amp; Legal Export</span>
                         </button>
                     </div>
-                    <button
-                        type="button"
-                        wire:click="markAllReportsRead"
-                        class="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-black transition flex items-center gap-1.5 whitespace-nowrap"
-                    >
-                        <span>✓✓ Mark All Reports Seen</span>
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button
+                            type="button"
+                            wire:click="markAllReportsRead"
+                            class="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-black transition flex items-center gap-1.5 whitespace-nowrap"
+                        >
+                            <span>✓✓ Mark All Reports Seen</span>
+                        </button>
+                        @if($reportStats['total'] > 0)
+                            <button
+                                type="button"
+                                wire:click="resetAllContentReports"
+                                wire:confirm="Are you sure you want to clear all incident reports and reset the counter to 0?"
+                                class="px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-black transition flex items-center gap-1.5 whitespace-nowrap"
+                            >
+                                <span>🗑️ Reset All Reports (0)</span>
+                            </button>
+                        @endif
+                    </div>
                 </div>
 
                 {{-- SUB-TAB 1: LIVE INCIDENT QUEUE --}}

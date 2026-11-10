@@ -60,58 +60,60 @@ class EnterpriseContentAndOperationsSeeder extends Seeder
             CmsPage::updateOrCreate(['slug' => $p['slug']], $p);
         }
 
-        // 2. Active Advertisement Placements
-        $ads = [
-            [
-                'name' => 'VIP Dating Lounge & Events Sponsorship',
-                'slot' => 'homepage_top',
-                'advertiser_name' => 'Elite Evening Social Club',
-                'image_url' => 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=900&auto=format&fit=crop&q=80',
-                'target_url' => 'https://example.com/vip-lounge',
-                'is_active' => true,
-                'starts_at' => now()->subDays(10),
-                'ends_at' => now()->addDays(20),
-                'impressions' => 12450,
-                'clicks' => 382,
-                'price_cents' => 15000,
-                'created_by_admin_id' => $admin?->id,
-            ],
-            [
-                'name' => 'Safe Date Concierge & Screening Services',
-                'slot' => 'sidebar',
-                'advertiser_name' => 'Guardian Dating Verification',
-                'image_url' => 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&auto=format&fit=crop&q=80',
-                'target_url' => 'https://example.com/safe-date',
-                'is_active' => true,
-                'starts_at' => now()->subDays(5),
-                'ends_at' => now()->addDays(25),
-                'impressions' => 8910,
-                'clicks' => 245,
-                'price_cents' => 9900,
-                'created_by_admin_id' => $admin?->id,
-            ],
-            [
-                'name' => 'Luxury Rooftop Lounge Weekend Mixer',
-                'slot' => 'search_results',
-                'advertiser_name' => 'Skyline Entertainment NY',
-                'image_url' => 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=900&auto=format&fit=crop&q=80',
-                'target_url' => 'https://example.com/skyline-mixer',
-                'is_active' => true,
-                'starts_at' => now()->subDays(2),
-                'ends_at' => now()->addDays(12),
-                'impressions' => 5430,
-                'clicks' => 178,
-                'price_cents' => 12000,
-                'created_by_admin_id' => $admin?->id,
-            ],
-        ];
+        // 2. Active Advertisement Placements (Only in testing)
+        if (app()->environment('testing')) {
+            $ads = [
+                [
+                    'name' => 'VIP Dating Lounge & Events Sponsorship',
+                    'slot' => 'homepage_top',
+                    'advertiser_name' => 'Elite Evening Social Club',
+                    'image_url' => 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=900&auto=format&fit=crop&q=80',
+                    'target_url' => 'https://example.com/vip-lounge',
+                    'is_active' => true,
+                    'starts_at' => now()->subDays(10),
+                    'ends_at' => now()->addDays(20),
+                    'impressions' => 0,
+                    'clicks' => 0,
+                    'price_cents' => 15000,
+                    'created_by_admin_id' => $admin?->id,
+                ],
+                [
+                    'name' => 'Safe Date Concierge & Screening Services',
+                    'slot' => 'sidebar',
+                    'advertiser_name' => 'Guardian Dating Verification',
+                    'image_url' => 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&auto=format&fit=crop&q=80',
+                    'target_url' => 'https://example.com/safe-date',
+                    'is_active' => true,
+                    'starts_at' => now()->subDays(5),
+                    'ends_at' => now()->addDays(25),
+                    'impressions' => 0,
+                    'clicks' => 0,
+                    'price_cents' => 9900,
+                    'created_by_admin_id' => $admin?->id,
+                ],
+                [
+                    'name' => 'Luxury Rooftop Lounge Weekend Mixer',
+                    'slot' => 'search_results',
+                    'advertiser_name' => 'Skyline Entertainment NY',
+                    'image_url' => 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=900&auto=format&fit=crop&q=80',
+                    'target_url' => 'https://example.com/skyline-mixer',
+                    'is_active' => true,
+                    'starts_at' => now()->subDays(2),
+                    'ends_at' => now()->addDays(12),
+                    'impressions' => 0,
+                    'clicks' => 0,
+                    'price_cents' => 12000,
+                    'created_by_admin_id' => $admin?->id,
+                ],
+            ];
 
-        foreach ($ads as $ad) {
-            AdPlacement::updateOrCreate(['name' => $ad['name']], $ad);
+            foreach ($ads as $ad) {
+                AdPlacement::updateOrCreate(['name' => $ad['name']], $ad);
+            }
         }
 
-        // 3. Age Assurance Submissions (Pending and Approved)
-        if ($users->isNotEmpty()) {
+        // 3. Age Assurance Submissions (Only in testing)
+        if (app()->environment('testing') && $users->isNotEmpty()) {
             $user1 = $users->get(0);
             $user2 = $users->get(1);
             $user3 = $users->get(2);
@@ -164,9 +166,9 @@ class EnterpriseContentAndOperationsSeeder extends Seeder
             }
         }
 
-        // 4. Active Subscriptions
+        // 4. Active Subscriptions (Only in testing)
         $plans = PricingPlan::where('is_active', true)->get();
-        if ($plans->isNotEmpty() && $users->isNotEmpty()) {
+        if (app()->environment('testing') && $plans->isNotEmpty() && $users->isNotEmpty()) {
             $plan1 = $plans->first();
             $plan2 = $plans->count() > 1 ? $plans->get(1) : $plan1;
 
