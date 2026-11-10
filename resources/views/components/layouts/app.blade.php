@@ -36,6 +36,7 @@
     <link rel="icon" href="{{ asset($brandFaviconUrl) }}">
     <link rel="shortcut icon" href="{{ asset($brandFaviconUrl) }}">
     <link rel="apple-touch-icon" href="{{ asset($brandFaviconUrl) }}">
+    <style>[x-cloak] { display: none !important; }</style>
 
     <!-- OpenGraph / Social Metadata -->
     <meta property="og:title" content="{{ $title ?? config('localdatehub.name', 'LocalDateHub') }}">

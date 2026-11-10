@@ -30,6 +30,7 @@
     <link rel="icon" href="{{ asset($adminFaviconUrl) }}">
     <link rel="shortcut icon" href="{{ asset($adminFaviconUrl) }}">
     <link rel="apple-touch-icon" href="{{ asset($adminFaviconUrl) }}">
+    <style>[x-cloak] { display: none !important; }</style>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -167,16 +168,11 @@
                         </div>
                     </div>
 
-                    <!-- Language Selector (US Flag + English) -->
-                    <div class="relative hidden sm:block" @click.away="langOpen = false">
-                        <button @click="langOpen = !langOpen" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 hover:text-slate-900 transition">
-                            <span class="text-sm">🇺🇸</span>
-                            <span>English</span>
-                            <svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
-                    </div>
+                    <!-- Quick Link to Public Site -->
+                    <a href="{{ url('/') }}" target="_blank" class="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-xs font-bold text-slate-700 hover:text-slate-900 transition">
+                        <span>🌐</span>
+                        <span>Live Site ↗</span>
+                    </a>
 
                     <!-- Admin Profile Avatar & Role -->
                     <div class="relative" @click.away="userMenuOpen = false">
