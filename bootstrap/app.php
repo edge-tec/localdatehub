@@ -26,6 +26,11 @@ return Application::configure(basePath: dirname(__DIR__))
         \App\Console\Commands\NotifyExpiringListingsCommand::class,
         \App\Console\Commands\ExpireListingBoostsCommand::class,
         \App\Console\Commands\CheckPendingCryptoPaymentsCommand::class,
+        \App\Console\Commands\SeoSitemapGenerateCommand::class,
+        \App\Console\Commands\SeoGscSyncCommand::class,
+        \App\Console\Commands\SeoGoogleInspectCommand::class,
+        \App\Console\Commands\SeoProcessIndexingCommand::class,
+        \App\Console\Commands\SeoRunAuditCommand::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(\App\Http\Middleware\HandleSeoRedirects::class);

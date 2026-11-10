@@ -200,6 +200,72 @@ class SitemapController extends Controller
     }
 
     /**
+     * Dynamic Google Search Console HTML File Verification (e.g. /google1234567890abcdef.html)
+     */
+    public function googleVerification(string $code): Response
+    {
+        return response("google-site-verification: google{$code}.html", 200, [
+            'Content-Type' => 'text/html; charset=utf-8',
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
+    }
+
+    /**
+     * Google Search Console & Webmaster status endpoint.
+     */
+    public function googleStatus()
+    {
+        $gsc = app(\App\Modules\SEO\Services\GoogleSearchConsoleService::class);
+        return response()->json([
+            'service' => 'Google Search Console & Webmaster Integration',
+            'settings' => $gsc->getSettings(),
+            'timestamp' => now()->toIso8601String(),
+        ], 200, [
+            'Cache-Control' => 'no-cache, private',
+        ]);
+    }
+
+    /**
+     * Google URL Inspection API query endpoint.
+     */
+    public function googleInspection(\Illuminate\Http\Request $request)
+    {
+        $url = (string) $request->input('url', $request->query('url', ''));
+        if (empty($url)) {
+            return response()->json(['error' => 'A valid URL is required for inspection.'], 422);
+        }
+
+        $gsc = app(\App\Modules\SEO\Services\GoogleSearchConsoleService::class);
+        $result = $gsc->inspectUrl($url);
+
+        return response()->json($result);
+    }
+
+    /**
+     * Trigger Google Search Console analytics synchronization.
+     */
+    public function googleSync()
+    {
+        $gsc = app(\App\Modules\SEO\Services\GoogleSearchConsoleService::class);
+        $result = $gsc->syncAnalytics();
+
+        return response()->json($result);
+    }
+
+    /**
+     * Inbound Google Indexing & Webmaster notification webhook.
+     */
+    public function googleIndexingWebhook(\Illuminate\Http\Request $request)
+    {
+        \Illuminate\Support\Facades\Log::info('Inbound Google Webmaster/Indexing Webhook received', [
+            'payload' => $request->all(),
+            'headers' => $request->headers->all(),
+        ]);
+
+        return response()->json(['status' => 'acknowledged', 'received_at' => now()->toIso8601String()]);
+    }
+
+    /**
      * Return XML response with optimal public cache-control and no session cookies.
      */
     protected function xmlResponse(string $xml, int $maxAge = 3600): Response

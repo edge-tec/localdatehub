@@ -401,12 +401,31 @@ Route::withoutMiddleware('web')->group(function () {
         Route::get('/images.xml', [SitemapController::class, 'images'])->name('images');
     });
 
+    // Dynamic Google Search Console HTML verification file support (e.g. /google1234567890abcdef.html)
+    Route::get('/google{code}.html', [SitemapController::class, 'googleVerification'])
+        ->where('code', '[a-zA-Z0-9_\-]+')
+        ->name('seo.google.verify');
+
     // Explicit SEO URI prefix aliases (supports `php artisan route:list --path=seo`)
     Route::prefix('seo')->name('seo.')->group(function () {
         Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
         Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots.custom');
         Route::get('/health', [SitemapController::class, 'health'])->name('health');
+        Route::get('/google/status', [SitemapController::class, 'googleStatus'])->name('google.status');
+        Route::get('/google/inspection', [SitemapController::class, 'googleInspection'])->name('google.inspection');
+        Route::get('/google/webmaster', [SitemapController::class, 'googleStatus'])->name('google.webmaster');
     });
+});
+
+// Google Indexing & SEO Webhooks (CSRF-exempt)
+Route::post('/webhooks/seo/google/indexing', [SitemapController::class, 'googleIndexingWebhook'])->name('webhooks.seo.google.indexing');
+
+// Admin SEO & Google Search Console Management Routes
+Route::middleware(['auth', 'admin.rbac'])->prefix('admin/seo')->name('admin.seo.')->group(function () {
+    Route::match(['get', 'post'], '/google/sync', [SitemapController::class, 'googleSync'])->name('google.sync');
+    Route::match(['get', 'post'], '/google/inspect', [SitemapController::class, 'googleInspection'])->name('google.inspect');
+    Route::get('/google/console', [SitemapController::class, 'googleStatus'])->name('google.console');
+    Route::get('/webmaster/status', [SitemapController::class, 'googleStatus'])->name('webmaster.status');
 });
 
 // =========================================================================
