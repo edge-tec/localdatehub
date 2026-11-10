@@ -221,17 +221,15 @@ class SocialAuthController extends Controller
     }
 
     /**
-     * Resolve and apply OAuth credentials dynamically from .env or SystemSetting.
+     * Resolve and apply OAuth credentials dynamically from .env, config or SystemSetting.
      */
     protected function configureProvider(string $provider): bool
     {
         $clientId = config("services.{$provider}.client_id")
-            ?: SystemSetting::get("{$provider}_client_id")
-            ?: env(strtoupper($provider) . '_CLIENT_ID');
+            ?: SystemSetting::get("{$provider}_client_id");
 
         $clientSecret = config("services.{$provider}.client_secret")
-            ?: SystemSetting::get("{$provider}_client_secret")
-            ?: env(strtoupper($provider) . '_CLIENT_SECRET');
+            ?: SystemSetting::get("{$provider}_client_secret");
 
         if (empty($clientId) || empty($clientSecret)) {
             return false;

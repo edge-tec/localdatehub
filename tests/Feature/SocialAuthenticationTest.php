@@ -179,3 +179,4 @@ class SocialAuthenticationTest extends TestCase
         $this->assertStringContainsString('accounts.google.com', $response->headers->get('Location'));
     }
 }
+
