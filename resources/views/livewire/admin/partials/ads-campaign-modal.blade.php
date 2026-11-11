@@ -115,24 +115,29 @@
                         </div>
                     @endif
 
-                    <!-- Desktop & Mobile Banner Upload Zone (Available for All Campaign Types) -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <!-- Desktop & Mobile Banner Upload Zone (Full Uncropped Banner Preview) -->
+                    <div class="grid grid-cols-1 gap-4">
                         <!-- Desktop Banner Uploader -->
-                        <div class="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-2.5">
-                            <div class="flex items-center justify-between gap-2">
+                        <div class="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-3">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
                                 <div>
                                     <label class="block text-xs font-black text-slate-900">Desktop Banner Image</label>
-                                    <span class="text-[10px] font-semibold text-slate-400">Recommended: 728&times;90 or 1200&times;200</span>
+                                    <span class="text-[11px] font-semibold text-slate-400">Recommended: 728&times;90 or 1200&times;200 (Displayed at full aspect ratio)</span>
                                 </div>
-                                @if(!empty($campaignForm['desktop_banner_url']))
-                                    <button type="button" wire:click="clearCampaignMedia('desktop_banner_url')" class="px-2 py-0.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-[10px] font-black text-rose-600 border border-rose-200 transition cursor-pointer">Remove</button>
-                                @endif
+                                <div class="flex items-center gap-2 shrink-0">
+                                    @if(!empty($campaignForm['desktop_banner_url']))
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-rose-50 text-[#F20B83] border border-rose-200 text-[10px] font-black uppercase tracking-wider">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                            <span>Uploaded</span>
+                                        </span>
+                                        <button type="button" wire:click="clearCampaignMedia('desktop_banner_url')" class="px-2.5 py-0.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-[10px] font-black text-rose-600 border border-rose-200 transition cursor-pointer">Remove</button>
+                                    @endif
+                                </div>
                             </div>
 
                             @if(!empty($campaignForm['desktop_banner_url']))
-                                <div class="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
-                                    <img src="{{ $campaignForm['desktop_banner_url'] }}" alt="Desktop Banner Preview" class="w-full h-24 object-cover" />
-                                    <span class="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full bg-emerald-600/90 text-white text-[9px] font-black uppercase tracking-wider shadow-xs">Uploaded</span>
+                                <div class="rounded-xl border border-slate-200 bg-slate-950/[0.03] p-2.5">
+                                    <img src="{{ $campaignForm['desktop_banner_url'] }}" alt="Desktop Banner Preview" class="w-full h-auto max-h-72 object-contain mx-auto rounded-lg block" />
                                 </div>
                             @endif
 
@@ -158,21 +163,26 @@
                         </div>
 
                         <!-- Mobile Banner Uploader -->
-                        <div class="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-2.5">
-                            <div class="flex items-center justify-between gap-2">
+                        <div class="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-3">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
                                 <div>
                                     <label class="block text-xs font-black text-slate-900">Mobile Banner Image</label>
-                                    <span class="text-[10px] font-semibold text-slate-400">Recommended: 320&times;100 or 320&times;250</span>
+                                    <span class="text-[11px] font-semibold text-slate-400">Recommended: 320&times;100 or 320&times;250 (Displayed at full aspect ratio)</span>
                                 </div>
-                                @if(!empty($campaignForm['mobile_banner_url']))
-                                    <button type="button" wire:click="clearCampaignMedia('mobile_banner_url')" class="px-2 py-0.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-[10px] font-black text-rose-600 border border-rose-200 transition cursor-pointer">Remove</button>
-                                @endif
+                                <div class="flex items-center gap-2 shrink-0">
+                                    @if(!empty($campaignForm['mobile_banner_url']))
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-rose-50 text-[#F20B83] border border-rose-200 text-[10px] font-black uppercase tracking-wider">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                            <span>Uploaded</span>
+                                        </span>
+                                        <button type="button" wire:click="clearCampaignMedia('mobile_banner_url')" class="px-2.5 py-0.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-[10px] font-black text-rose-600 border border-rose-200 transition cursor-pointer">Remove</button>
+                                    @endif
+                                </div>
                             </div>
 
                             @if(!empty($campaignForm['mobile_banner_url']))
-                                <div class="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
-                                    <img src="{{ $campaignForm['mobile_banner_url'] }}" alt="Mobile Banner Preview" class="w-full h-24 object-cover" />
-                                    <span class="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full bg-emerald-600/90 text-white text-[9px] font-black uppercase tracking-wider shadow-xs">Uploaded</span>
+                                <div class="rounded-xl border border-slate-200 bg-slate-950/[0.03] p-2.5">
+                                    <img src="{{ $campaignForm['mobile_banner_url'] }}" alt="Mobile Banner Preview" class="w-full h-auto max-h-72 object-contain mx-auto rounded-lg block" />
                                 </div>
                             @endif
 
@@ -232,7 +242,9 @@
                                         @endif
                                     </div>
                                     @if(!empty($campaignForm['thumbnail_url']))
-                                        <img src="{{ $campaignForm['thumbnail_url'] }}" alt="Thumbnail Preview" class="w-full h-16 object-cover rounded-lg border border-purple-200 mb-1.5" />
+                                        <div class="rounded-lg border border-purple-200 bg-white p-1.5 mb-1.5">
+                                            <img src="{{ $campaignForm['thumbnail_url'] }}" alt="Thumbnail Preview" class="w-full h-auto max-h-40 object-contain mx-auto rounded block" />
+                                        </div>
                                     @endif
                                     <label class="flex items-center justify-center gap-1.5 w-full px-3 py-1.5 mb-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-[11px] font-black transition cursor-pointer">
                                         <input type="file" wire:model="campaignThumbnailUpload" accept=".jpg,.jpeg,.png,.webp,.gif,image/*" class="sr-only" />

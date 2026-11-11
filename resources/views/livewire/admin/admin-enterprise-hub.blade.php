@@ -5357,7 +5357,7 @@
                             <div class="flex items-start justify-between gap-3">
                                 <div class="flex items-center gap-3 min-w-0">
                                     @if($ad->image_url)
-                                        <img src="{{ $ad->image_url }}" alt="{{ $ad->name }}" class="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0" />
+                                        <img src="{{ $ad->image_url }}" alt="{{ $ad->name }}" class="w-16 h-11 rounded-xl object-contain bg-slate-100 p-0.5 border border-slate-200 shrink-0" />
                                     @else
                                         <div class="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 font-mono text-[10px] font-bold shrink-0">HTML</div>
                                     @endif
@@ -5429,7 +5429,7 @@
                                     <div class="flex items-center gap-2.5">
                                         @if($ad->image_url)
                                             <button type="button" wire:click="openPreviewAdModal({{ $ad->id }})" class="shrink-0 group">
-                                                <img src="{{ $ad->image_url }}" alt="{{ $ad->name }}" class="w-10 h-10 rounded-lg object-cover border border-slate-300 group-hover:ring-2 ring-pink-500 transition" />
+                                                <img src="{{ $ad->image_url }}" alt="{{ $ad->name }}" class="w-16 h-10 rounded-lg object-contain bg-slate-100 p-0.5 border border-slate-300 group-hover:ring-2 ring-pink-500 transition" />
                                             </button>
                                         @else
                                             <div class="w-10 h-10 rounded-lg bg-slate-100 border border-slate-300 flex items-center justify-center text-slate-500 font-mono text-[10px] shrink-0 font-bold">
@@ -9393,17 +9393,19 @@
                             </div>
 
                             @if(!empty($adForm['image_url']))
-                                <div class="p-2 rounded-xl bg-white border border-slate-200 flex items-center justify-between gap-3">
-                                    <div class="flex items-center gap-2.5 min-w-0">
-                                        <img src="{{ $adForm['image_url'] }}" alt="Banner preview" class="w-24 h-12 rounded-lg object-cover border border-slate-200 bg-slate-100 shrink-0" />
-                                        <div class="min-w-0">
-                                            <span class="block text-[11px] font-black text-slate-800 truncate">Active Banner Preview</span>
+                                <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-2.5">
+                                    <div class="rounded-lg bg-slate-950/[0.03] border border-slate-100 p-2">
+                                        <img src="{{ $adForm['image_url'] }}" alt="Banner preview" class="w-full h-auto max-h-56 rounded-lg object-contain mx-auto block" />
+                                    </div>
+                                    <div class="flex flex-wrap items-center justify-between gap-2">
+                                        <div class="min-w-0 flex-1">
+                                            <span class="block text-[11px] font-black text-slate-800">Active Banner Preview</span>
                                             <span class="block text-[10px] text-slate-500 font-mono truncate">{{ $adForm['image_url'] }}</span>
                                         </div>
+                                        <button type="button" wire:click="clearAdBannerMedia" class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-black shrink-0 cursor-pointer">
+                                            Remove
+                                        </button>
                                     </div>
-                                    <button type="button" wire:click="clearAdBannerMedia" class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-black shrink-0 cursor-pointer">
-                                        Remove
-                                    </button>
                                 </div>
                             @endif
 

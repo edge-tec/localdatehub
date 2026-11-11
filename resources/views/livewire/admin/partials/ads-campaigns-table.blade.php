@@ -285,7 +285,7 @@
                             <div class="flex items-center gap-3">
                                 @if($thumb)
                                     <button type="button" wire:click="openPreviewCampaignModal({{ $camp->id }})" class="shrink-0 group cursor-pointer" title="Preview Creative">
-                                        <img src="{{ $thumb }}" alt="{{ $camp->name }}" class="w-12 h-12 rounded-xl object-cover border border-slate-200 group-hover:ring-2 ring-[#F20B83] transition" />
+                                        <img src="{{ $thumb }}" alt="{{ $camp->name }}" class="w-16 h-11 rounded-xl object-contain bg-slate-100 p-0.5 border border-slate-200 group-hover:ring-2 ring-[#F20B83] transition" />
                                     </button>
                                 @else
                                     <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-50 to-purple-50 border border-pink-200 flex items-center justify-center text-[#F20B83] shrink-0">
@@ -445,7 +445,7 @@
                             class="rounded border-slate-300 text-[#F20B83] focus:ring-[#F20B83]"
                         />
                         @if($thumb)
-                            <img src="{{ $thumb }}" alt="{{ $camp->name }}" class="w-11 h-11 rounded-2xl object-cover border border-slate-200 shrink-0" />
+                            <img src="{{ $thumb }}" alt="{{ $camp->name }}" class="w-16 h-11 rounded-xl object-contain bg-slate-100 p-0.5 border border-slate-200 shrink-0" />
                         @endif
                         <div class="min-w-0">
                             <div class="font-black text-slate-950 text-sm truncate">{{ $camp->name }}</div>
