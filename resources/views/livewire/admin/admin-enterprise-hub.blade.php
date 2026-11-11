@@ -8087,11 +8087,11 @@
             || $showInspectVerificationModal || $showManualVerifyModal || $showRejectVerificationModal || $showBroadcastModal
             || $showInspectNotificationModal || $showInspectAbuseModal
             || $showPreviewCmsModal || $showDeleteAdModal || $showPreviewAdModal
-            || $showCampaignModal || $showDeleteCampaignModal || $showPreviewCampaignModal;
+            || $showCampaignModal || $showDeleteCampaignModal || $showPreviewCampaignModal || $showDiagnosticModal;
     @endphp
     @if($anyModal)
         <div class="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" wire:keydown.escape.window="closeModals">
-            <div class="w-full {{ ($showCampaignModal || $showPreviewCampaignModal) ? 'max-w-4xl' : (($showViewListingModal || $showEditListingModal || $showViewUserModal || $showEditUserModal || $showInspectReportModal || $showViewTransactionModal || $showViewCryptoModal || $showViewSubscriptionModal || $showAssignSubscriptionModal || $showInspectVerificationModal || $showManualVerifyModal || $showBroadcastModal || $showInspectNotificationModal || $showInspectAbuseModal || $showPreviewCmsModal || $showPreviewAdModal) ? 'max-w-2xl' : 'max-w-xl') }} max-h-[90vh] overflow-y-auto rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl">
+            <div class="w-full {{ ($showCampaignModal || $showPreviewCampaignModal || $showDiagnosticModal) ? 'max-w-4xl' : (($showViewListingModal || $showEditListingModal || $showViewUserModal || $showEditUserModal || $showInspectReportModal || $showViewTransactionModal || $showViewCryptoModal || $showViewSubscriptionModal || $showAssignSubscriptionModal || $showInspectVerificationModal || $showManualVerifyModal || $showBroadcastModal || $showInspectNotificationModal || $showInspectAbuseModal || $showPreviewCmsModal || $showPreviewAdModal) ? 'max-w-2xl' : 'max-w-xl') }} max-h-[90vh] overflow-y-auto rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl">
 
                 {{-- CREATE USER MODAL --}}
                 @if($showCreateUserModal)
@@ -9328,6 +9328,7 @@
                 @endif
 
                 @include('livewire.admin.partials.ads-campaign-modal')
+                @include('livewire.admin.partials.ads-diagnostic-modal')
 
                 @if($showAdModal)
                     <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">

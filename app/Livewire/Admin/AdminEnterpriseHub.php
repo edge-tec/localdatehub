@@ -4269,10 +4269,6 @@ class AdminEnterpriseHub extends Component
         }
 
         $this->showAdModal = false;
-        $this->showCampaignModal = false;
-        $this->showDeleteCampaignModal = false;
-        $this->showPreviewCampaignModal = false;
-        $this->previewCampaignData = null;
         $this->resetAdForm();
         session()->flash('success', "Advertisement [{$ad->name}] saved successfully.");
         $this->dispatch('toast', type: 'success', message: "Campaign [{$ad->name}] saved!");
@@ -4843,6 +4839,8 @@ class AdminEnterpriseHub extends Component
         $this->showDeleteCampaignModal = false;
         $this->showPreviewCampaignModal = false;
         $this->previewCampaignData = null;
+        $this->showDiagnosticModal = false;
+        $this->diagnosticData = null;
         $this->showAuditDetailModal = false;
         $this->showDmcaModal = false;
         $this->showLegalModal = false;

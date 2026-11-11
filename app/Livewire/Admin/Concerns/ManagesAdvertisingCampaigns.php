@@ -43,6 +43,9 @@ trait ManagesAdvertisingCampaigns
     public bool $showPreviewCampaignModal = false;
     public ?array $previewCampaignData = null;
 
+    public bool $showDiagnosticModal = false;
+    public ?array $diagnosticData = null;
+
     public string $adAnalyticsRange = 'last_7_days';
     public string $adAnalyticsCustomStart = '';
     public string $adAnalyticsCustomEnd = '';
@@ -241,6 +244,7 @@ trait ManagesAdvertisingCampaigns
             'frequency_cap_per_session' => '',
             'starts_at' => '',
             'ends_at' => '',
+            'timezone' => (string) config('app.timezone', 'UTC'),
             'creative_title' => '',
             'creative_description' => '',
             'cta_text' => 'Learn More',
@@ -257,7 +261,7 @@ trait ManagesAdvertisingCampaigns
             'click_id_param' => '',
             'html_snippet' => '',
             'placements' => [AdCampaign::SLOT_BETWEEN_LISTINGS],
-            'target_countries' => ['US'],
+            'target_countries' => [],
             'target_states' => [],
             'target_cities' => [],
             'target_zip_codes' => '',
@@ -304,6 +308,7 @@ trait ManagesAdvertisingCampaigns
                 'frequency_cap_per_session' => $campaign->frequency_cap_per_session ? (string) $campaign->frequency_cap_per_session : '',
                 'starts_at' => $campaign->starts_at?->format('Y-m-d\TH:i') ?? '',
                 'ends_at' => $campaign->ends_at?->format('Y-m-d\TH:i') ?? '',
+                'timezone' => (string) config('app.timezone', 'UTC'),
                 'creative_title' => (string) $creative?->title,
                 'creative_description' => (string) $creative?->short_description,
                 'cta_text' => (string) ($creative?->cta_text ?: 'Learn More'),
@@ -320,7 +325,7 @@ trait ManagesAdvertisingCampaigns
                 'click_id_param' => (string) $creative?->click_id_param,
                 'html_snippet' => (string) $creative?->html_snippet,
                 'placements' => $campaign->placements->pluck('placement_slot')->all(),
-                'target_countries' => $rules->get(AdTargetingRule::RULE_COUNTRY)?->pluck('rule_value')->all() ?: ['US'],
+                'target_countries' => $rules->get(AdTargetingRule::RULE_COUNTRY)?->pluck('rule_value')->all() ?: [],
                 'target_states' => $rules->get(AdTargetingRule::RULE_STATE)?->pluck('rule_value')->all() ?: [],
                 'target_cities' => $rules->get(AdTargetingRule::RULE_CITY)?->pluck('rule_value')->all() ?: [],
                 'target_zip_codes' => $rules->get(AdTargetingRule::RULE_ZIP_CODE)?->pluck('rule_value')->implode(', ') ?? '',
@@ -413,6 +418,7 @@ trait ManagesAdvertisingCampaigns
             'campaignForm.frequency_cap_per_session' => ['nullable', 'integer', 'min:1', 'max:100'],
             'campaignForm.starts_at' => ['nullable', 'date'],
             'campaignForm.ends_at' => ['nullable', 'date', 'after_or_equal:campaignForm.starts_at'],
+            'campaignForm.timezone' => ['nullable', 'string', 'max:64'],
             'campaignForm.creative_title' => ['nullable', 'string', 'max:160'],
             'campaignForm.creative_description' => ['nullable', 'string', 'max:1000'],
             'campaignForm.cta_text' => ['nullable', 'string', 'max:60'],
@@ -464,14 +470,62 @@ trait ManagesAdvertisingCampaigns
 
         $campaign = AdCampaign::findOrFail($campaignId);
         $before = ['status' => $campaign->status];
-        $campaign->update([
+        $updates = [
             'status' => $newStatus,
             'updated_by_admin_id' => Auth::id(),
-        ]);
+        ];
+
+        // When explicitly activating a campaign whose starts_at is in the future (e.g. timezone offset), start immediately
+        if ($newStatus === AdCampaign::STATUS_ACTIVE && $campaign->starts_at && $campaign->starts_at->isFuture()) {
+            $updates['starts_at'] = now();
+        }
+
+        $campaign->update($updates);
+        app(AdDeliveryService::class)->clearCache();
 
         AdminAuditService::log('ads.campaign.status', $campaign, $before, ['status' => $newStatus]);
         session()->flash('success', "Campaign [{$campaign->name}] updated to " . ucwords(str_replace('_', ' ', $newStatus)) . '.');
         $this->dispatch('toast', type: 'info', message: "Status set to " . ucwords(str_replace('_', ' ', $newStatus)));
+    }
+
+    public function openDiagnosticModal(int $campaignId): void
+    {
+        $this->authorizePermission('ads.manage');
+        $campaign = AdCampaign::with(['creatives', 'placements', 'targetingRules'])->findOrFail($campaignId);
+        $this->diagnosticData = app(AdDeliveryService::class)->diagnoseCampaign($campaign);
+        $this->showDiagnosticModal = true;
+    }
+
+    public function flushAdDeliveryCache(?int $refreshCampaignId = null): void
+    {
+        $this->authorizePermission('ads.manage');
+        $delivery = app(AdDeliveryService::class);
+        $delivery->clearCache();
+
+        if ($refreshCampaignId) {
+            $campaign = AdCampaign::with(['creatives', 'placements', 'targetingRules'])->findOrFail($refreshCampaignId);
+            $this->diagnosticData = $delivery->diagnoseCampaign($campaign);
+        }
+
+        $this->dispatch('toast', type: 'success', message: 'Ad delivery cache flushed and re-evaluated.');
+    }
+
+    public function startCampaignImmediately(int $campaignId): void
+    {
+        $this->authorizePermission('ads.manage');
+        $campaign = AdCampaign::with(['creatives', 'placements', 'targetingRules'])->findOrFail($campaignId);
+        $campaign->update([
+            'status' => AdCampaign::STATUS_ACTIVE,
+            'starts_at' => now()->subMinute(),
+            'updated_by_admin_id' => Auth::id(),
+        ]);
+
+        $delivery = app(AdDeliveryService::class);
+        $delivery->clearCache();
+        $this->diagnosticData = $delivery->diagnoseCampaign($campaign->fresh(['creatives', 'placements', 'targetingRules']));
+
+        AdminAuditService::log('ads.campaign.start_now', $campaign, null, ['starts_at' => now()->toIso8601String()]);
+        $this->dispatch('toast', type: 'success', message: "Campaign [{$campaign->name}] is now live immediately.");
     }
 
     public function duplicateCampaign(int $campaignId): void
@@ -698,8 +752,16 @@ trait ManagesAdvertisingCampaigns
         $totalClicks = (int) $allCampaigns->sum('total_clicks') + $legacyClicks;
         $totalConversions = (int) $allCampaigns->sum('total_conversions');
 
+        $paginatedCampaigns = $query->paginate(12, ['*'], 'campaignPage');
+        $deliveryService = app(AdDeliveryService::class);
+        $campaignDiagnostics = [];
+        foreach ($paginatedCampaigns->getCollection() as $campRow) {
+            $campaignDiagnostics[$campRow->id] = $deliveryService->diagnoseCampaign($campRow);
+        }
+
         return [
-            'campaigns' => $query->paginate(12, ['*'], 'campaignPage'),
+            'campaigns' => $paginatedCampaigns,
+            'campaignDiagnostics' => $campaignDiagnostics,
             'placementConfigs' => $placementConfigs,
             'analyticsReport' => $analyticsReport,
             'enterpriseStats' => [

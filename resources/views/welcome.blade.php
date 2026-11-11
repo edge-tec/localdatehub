@@ -668,12 +668,24 @@
                                 </div>
                             @endforelse
 
-                            @if(isset($homepageFeaturedAds) && $homepageFeaturedAds->isNotEmpty())
-                                @foreach($homepageFeaturedAds as $featuredAd)
-                                    <x-sponsored-listing-card :ad="$featuredAd" />
-                                @endforeach
-                            @endif
                         </div>
+
+                        @if(isset($homepageFeaturedAds) && $homepageFeaturedAds->isNotEmpty())
+                            @php
+                                $featuredBanners = $homepageFeaturedAds->filter(fn ($ad) => ($ad['format'] ?? 'banner') === 'banner' && (!empty($ad['desktop_banner_url']) || !empty($ad['mobile_banner_url']) || !empty($ad['html_snippet'])));
+                                $featuredCards = $homepageFeaturedAds->reject(fn ($ad) => ($ad['format'] ?? 'banner') === 'banner' && (!empty($ad['desktop_banner_url']) || !empty($ad['mobile_banner_url']) || !empty($ad['html_snippet'])));
+                            @endphp
+                            @if($featuredCards->isNotEmpty())
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-5">
+                                    @foreach($featuredCards as $featuredAd)
+                                        <x-sponsored-listing-card :ad="$featuredAd" />
+                                    @endforeach
+                                </div>
+                            @endif
+                            @if($featuredBanners->isNotEmpty())
+                                <x-ad-banner placement="homepage_featured" :ads="$featuredBanners" variant="leaderboard" class="mt-5" />
+                            @endif
+                        @endif
                     </div>
 
                     <!-- B. Popular Locations Section -->

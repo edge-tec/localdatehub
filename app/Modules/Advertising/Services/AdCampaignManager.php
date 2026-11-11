@@ -24,8 +24,15 @@ class AdCampaignManager
     {
         $campaign = DB::transaction(function () use ($data, $campaignId, $adminId) {
             $status = $data['status'] ?? AdCampaign::STATUS_DRAFT;
-            $startsAt = !empty($data['starts_at']) ? Carbon::parse($data['starts_at']) : null;
-            $endsAt = !empty($data['ends_at']) ? Carbon::parse($data['ends_at']) : null;
+            $inputTz = $this->resolveValidTimezone($data['timezone'] ?? null);
+            $appTz = (string) config('app.timezone', 'UTC');
+
+            $startsAt = !empty($data['starts_at'])
+                ? Carbon::parse((string) $data['starts_at'], $inputTz)->setTimezone($appTz)
+                : null;
+            $endsAt = !empty($data['ends_at'])
+                ? Carbon::parse((string) $data['ends_at'], $inputTz)->setTimezone($appTz)
+                : null;
 
             // Automatically promote/classify scheduled future campaigns cleanly when saved as active with future start
             if ($status === AdCampaign::STATUS_ACTIVE && $startsAt && $startsAt->isFuture()) {
@@ -95,9 +102,9 @@ class AdCampaignManager
             'short_description' => $this->nullableString($data['creative_description'] ?? null) ?: $campaign->description,
             'cta_text' => $this->nullableString($data['cta_text'] ?? null) ?: ($format === AdCreative::FORMAT_AFFILIATE ? 'Claim Offer' : 'Learn More'),
             'destination_url' => $this->nullableString($data['destination_url'] ?? null),
-            'desktop_banner_url' => $this->nullableString($data['desktop_banner_url'] ?? null),
-            'mobile_banner_url' => $this->nullableString($data['mobile_banner_url'] ?? null),
-            'thumbnail_url' => $this->nullableString($data['thumbnail_url'] ?? null),
+            'desktop_banner_url' => AdCreative::normalizeAssetUrl($this->nullableString($data['desktop_banner_url'] ?? null)),
+            'mobile_banner_url' => AdCreative::normalizeAssetUrl($this->nullableString($data['mobile_banner_url'] ?? null)),
+            'thumbnail_url' => AdCreative::normalizeAssetUrl($this->nullableString($data['thumbnail_url'] ?? null)),
             'alt_text' => $this->nullableString($data['alt_text'] ?? null) ?: $campaign->name,
             'affiliate_brand_name' => $this->nullableString($data['affiliate_brand_name'] ?? null) ?: $campaign->advertiser_name,
             // Store affiliate tracking URL completely verbatim without mutation
@@ -225,5 +232,17 @@ class AdCampaignManager
         }
 
         return (int) $val;
+    }
+
+    protected function resolveValidTimezone(mixed $timezone): string
+    {
+        $fallback = (string) config('app.timezone', 'UTC');
+        if (!is_string($timezone) || trim($timezone) === '') {
+            return $fallback;
+        }
+
+        $tz = trim($timezone);
+
+        return in_array($tz, \DateTimeZone::listIdentifiers(), true) ? $tz : $fallback;
     }
 }

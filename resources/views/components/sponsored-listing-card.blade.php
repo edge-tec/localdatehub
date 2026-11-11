@@ -1,11 +1,19 @@
 @props(['ad'])
 
-<article class="group bg-white border-2 border-amber-200/90 hover:border-[#F20B65]/60 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative" data-ad-card="{{ $ad['campaign_id'] ?? $ad['legacy_id'] ?? 'ad' }}">
+<article
+    class="group bg-white border-2 border-amber-200/90 hover:border-[#F20B65]/60 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative"
+    data-ad-card="{{ $ad['campaign_id'] ?? $ad['legacy_id'] ?? 'ad' }}"
+    data-ad-campaign-uuid="{{ $ad['campaign_uuid'] ?? '' }}"
+    data-ad-creative-id="{{ $ad['creative_id'] ?? '' }}"
+    data-ad-slot="{{ $ad['slot'] ?? '' }}"
+>
     <div>
-        {{-- Creative Media Showcase (Hardware-Safe Full Uncut Image) --}}
+        {{-- Creative Media Showcase (Hardware-Safe Full Uncut Responsive Image) --}}
         <div class="relative h-72 sm:h-80 w-full overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 flex items-center justify-center isolate">
             @php
-                $displayImage = $ad['image_url'] ?? $ad['desktop_banner_url'] ?? $ad['thumbnail_url'] ?? $ad['mobile_banner_url'] ?? null;
+                $desktopCardImg = $ad['desktop_banner_url'] ?: ($ad['thumbnail_url'] ?: ($ad['image_url'] ?: $ad['mobile_banner_url']));
+                $mobileCardImg = $ad['mobile_banner_url'] ?: $desktopCardImg;
+                $displayImage = $desktopCardImg ?: $mobileCardImg;
             @endphp
 
             @if(!empty($ad['html_snippet']))
@@ -14,14 +22,26 @@
                 </div>
             @elseif($displayImage)
                 <a href="{{ $ad['click_url'] }}" target="_blank" rel="sponsored noopener noreferrer" class="w-full h-full flex items-center justify-center relative block">
-                    <img
-                        src="{{ $displayImage }}"
-                        alt="{{ $ad['alt_text'] ?? $ad['title'] }}"
-                        loading="lazy"
-                        decoding="async"
-                        onerror="this.onerror=null;this.src='{{ asset('images/featured-1.jpg') }}';"
-                        class="max-h-full max-w-full w-auto h-auto object-contain mx-auto block"
-                    />
+                    @if($desktopCardImg)
+                        <img
+                            src="{{ $desktopCardImg }}"
+                            alt="{{ $ad['alt_text'] ?? $ad['title'] }}"
+                            loading="lazy"
+                            decoding="async"
+                            onerror="this.onerror=null;this.src='{{ asset('images/featured-1.jpg') }}';"
+                            class="{{ $mobileCardImg && $mobileCardImg !== $desktopCardImg ? 'hidden md:block' : 'block' }} max-h-full max-w-full w-auto h-auto object-contain mx-auto"
+                        />
+                    @endif
+                    @if($mobileCardImg && $mobileCardImg !== $desktopCardImg)
+                        <img
+                            src="{{ $mobileCardImg }}"
+                            alt="{{ $ad['alt_text'] ?? $ad['title'] }}"
+                            loading="lazy"
+                            decoding="async"
+                            onerror="this.onerror=null;this.src='{{ asset('images/featured-1.jpg') }}';"
+                            class="block md:hidden max-h-full max-w-full w-auto h-auto object-contain mx-auto"
+                        />
+                    @endif
                 </a>
                 <div class="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-transparent pointer-events-none"></div>
             @else

@@ -424,8 +424,14 @@ Route::withoutMiddleware('web')->group(function () {
 Route::post('/webhooks/seo/google/indexing', [SitemapController::class, 'googleIndexingWebhook'])->name('webhooks.seo.google.indexing');
 
 // =========================================================================
-// Enterprise Advertising & Affiliate Campaign Tracking Routes
+// Enterprise Advertising & Affiliate Campaign Delivery & Tracking Routes
 // =========================================================================
+Route::get('/api/ads/serve', [\App\Http\Controllers\Advertising\AdDeliveryApiController::class, 'serve'])
+    ->middleware('throttle:240,1')
+    ->name('ads.api.serve');
+Route::get('/ads/serve', [\App\Http\Controllers\Advertising\AdDeliveryApiController::class, 'serve'])
+    ->middleware('throttle:240,1')
+    ->name('ads.serve');
 Route::get('/ads/click/{campaign:uuid}', [\App\Http\Controllers\Advertising\AdTrackingController::class, 'click'])
     ->middleware('throttle:60,1')
     ->name('ads.click');
@@ -435,6 +441,9 @@ Route::get('/ads/legacy-click/{placement}', [\App\Http\Controllers\Advertising\A
 Route::post('/ads/impression', [\App\Http\Controllers\Advertising\AdTrackingController::class, 'impression'])
     ->middleware('throttle:120,1')
     ->name('ads.impression');
+Route::post('/api/ads/impression', [\App\Http\Controllers\Advertising\AdTrackingController::class, 'impression'])
+    ->middleware('throttle:120,1')
+    ->name('ads.api.impression');
 Route::match(['get', 'post'], '/webhooks/ads/postback/{campaign:uuid}', [\App\Http\Controllers\Advertising\AdTrackingController::class, 'postback'])
     ->middleware('throttle:120,1')
     ->name('ads.postback');

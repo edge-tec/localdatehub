@@ -61,13 +61,35 @@ class AdCreative extends Model
         return $this->belongsTo(AdCampaign::class, 'campaign_id');
     }
 
-    public function resolvedImageUrl(string $deviceType = 'desktop'): ?string
+    public static function normalizeAssetUrl(?string $url): ?string
     {
-        if ($deviceType === 'mobile' && !empty($this->mobile_banner_url)) {
-            return $this->mobile_banner_url;
+        if ($url === null) {
+            return null;
         }
 
-        return $this->desktop_banner_url ?: $this->thumbnail_url ?: $this->mobile_banner_url;
+        $trimmed = trim($url);
+        if ($trimmed === '') {
+            return null;
+        }
+
+        if (str_starts_with($trimmed, 'storage/')) {
+            return '/' . $trimmed;
+        }
+
+        return $trimmed;
+    }
+
+    public function resolvedImageUrl(string $deviceType = 'desktop'): ?string
+    {
+        $desktop = self::normalizeAssetUrl($this->desktop_banner_url);
+        $mobile = self::normalizeAssetUrl($this->mobile_banner_url);
+        $thumb = self::normalizeAssetUrl($this->thumbnail_url);
+
+        if ($deviceType === 'mobile' && !empty($mobile)) {
+            return $mobile;
+        }
+
+        return $desktop ?: $thumb ?: $mobile;
     }
 
     public function resolvedTargetUrl(): ?string

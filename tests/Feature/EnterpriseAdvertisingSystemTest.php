@@ -563,5 +563,238 @@ class EnterpriseAdvertisingSystemTest extends TestCase
         $this->assertCount(1, $delivery->getAdsForSlot(AdCampaign::SLOT_SIDEBAR, ['state' => $secondState->code], 5, false));
         $this->assertCount(1, $delivery->getAdsForSlot(AdCampaign::SLOT_SIDEBAR, ['state' => $this->state->code], 5, false));
     }
+
+    public function test_active_banner_campaign_with_targeting_and_session_cap_delivers_across_all_placements_and_api(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('ad-banners/uber-desktop.jpg', 'fake-jpg');
+        Storage::disk('public')->put('ad-banners/uber-mobile.jpg', 'fake-jpg');
+
+        $otherState = State::where('is_active', true)->where('id', '!=', $this->state->id)->firstOrFail();
+
+        $manager = app(AdCampaignManager::class);
+        $campaign = $manager->saveCampaign([
+            'name' => 'Uberhorny',
+            'campaign_type' => AdCampaign::TYPE_BANNER,
+            'advertiser_name' => 'Uberhorny',
+            'creative_title' => 'Looking for Exciting New Connections?',
+            'creative_description' => 'Discover new people, explore exciting connections today!',
+            'cta_text' => 'Join Now',
+            'destination_url' => 'https://shroo.link/FcQEM',
+            'desktop_banner_url' => '/storage/ad-banners/uber-desktop.jpg',
+            'mobile_banner_url' => '/storage/ad-banners/uber-mobile.jpg',
+            'alt_text' => 'Uberhorny Banner',
+            'disclosure_label' => 'Sponsored',
+            'status' => AdCampaign::STATUS_ACTIVE,
+            'priority' => 10,
+            'weight' => 100,
+            'frequency_cap_per_session' => 2,
+            'starts_at' => now()->subHour()->toDateTimeString(),
+            'ends_at' => now()->addDays(14)->toDateTimeString(),
+            'placements' => [
+                AdCampaign::SLOT_BETWEEN_LISTINGS,
+                AdCampaign::SLOT_HOMEPAGE_FEATURED,
+                AdCampaign::SLOT_SIDEBAR,
+                AdCampaign::SLOT_LISTING_DETAIL,
+                AdCampaign::SLOT_CATEGORY_PAGE,
+                AdCampaign::SLOT_SEARCH_RESULTS,
+                AdCampaign::SLOT_LOCATION_PAGE,
+                AdCampaign::SLOT_HOMEPAGE_TOP,
+            ],
+            // 4 targeting rules mirroring real-world multi-dimension campaign targeting
+            'target_countries' => ['US'],
+            'target_states' => [$this->state->code],
+            'target_categories' => [(string) $this->category->id],
+            'target_devices' => ['desktop', 'mobile'],
+        ], null, $this->admin->id);
+
+        // Seed only 2 active listings (< default insert_every_n = 6) to also prove sparse feed injection works
+        $listing = null;
+        for ($i = 1; $i <= 2; $i++) {
+            $listing = Listing::create([
+                'user_id' => $this->regularUser->id,
+                'category_id' => $this->category->id,
+                'state_id' => $this->state->id,
+                'city_id' => $this->city->id,
+                'title' => "Local Verified Connection #{$i}",
+                'slug' => 'local-verified-' . $i . '-' . Str::random(6),
+                'description' => 'Authentic local singles connecting privately.',
+                'status' => Listing::STATUS_ACTIVE,
+                'is_featured' => true,
+                'poster_age' => 27,
+                'poster_gender' => 'woman',
+                'intent' => 'dating',
+                'published_at' => now(),
+            ]);
+        }
+
+        $browserHeaders = ['User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36'];
+
+        // 1. Public JSON API returns active banner without auth, with no-cache headers
+        $apiResponse = $this->withHeaders($browserHeaders)
+            ->getJson(route('ads.api.serve', [
+                'placement' => AdCampaign::SLOT_BETWEEN_LISTINGS,
+                'device' => 'desktop',
+            ]));
+        $apiResponse->assertOk()
+            ->assertJson([
+                'ok' => true,
+                'slot' => AdCampaign::SLOT_BETWEEN_LISTINGS,
+                'device' => 'desktop',
+                'count' => 1,
+            ])
+            ->assertJsonPath('ads.0.campaign_name', 'Uberhorny')
+            ->assertJsonPath('ads.0.desktop_banner_url', '/storage/ad-banners/uber-desktop.jpg')
+            ->assertJsonPath('ads.0.mobile_banner_url', '/storage/ad-banners/uber-mobile.jpg');
+
+        $cacheHeader = (string) $apiResponse->headers->get('Cache-Control');
+        $this->assertStringContainsString('no-store', $cacheHeader);
+        $this->assertStringContainsString('no-cache', $cacheHeader);
+
+        // Mobile device query selects mobile banner URL cleanly
+        $this->getJson(route('ads.api.serve', ['placement' => AdCampaign::SLOT_HOMEPAGE_TOP, 'device' => 'mobile']))
+            ->assertOk()
+            ->assertJsonPath('ads.0.image_url', '/storage/ad-banners/uber-mobile.jpg');
+
+        // Invalid slot returns structured 422 JSON (never 500)
+        $this->getJson(route('ads.api.serve', ['placement' => 'non_existent_slot']))
+            ->assertStatus(422)
+            ->assertJson(['ok' => false]);
+
+        // 2. Frontend pages render the banner publicly across Homepage, Category, Search, State/City, and Listing Detail
+        $this->withSession(['age_confirmed_18' => true])
+            ->withHeaders($browserHeaders)
+            ->get(route('home'))
+            ->assertOk()
+            ->assertSee('Looking for Exciting New Connections?')
+            ->assertSee('/storage/ad-banners/uber-desktop.jpg')
+            ->assertSee('/storage/ad-banners/uber-mobile.jpg');
+
+        // Page 2 in same session still serves (within 2/sess frequency cap)
+        $this->withSession(['age_confirmed_18' => true])
+            ->withHeaders($browserHeaders)
+            ->get(route('listings.show', $listing->slug))
+            ->assertOk()
+            ->assertSee('Looking for Exciting New Connections?');
+
+        // Page 3 in the SAME session hits the 2/sess cap and stops showing
+        $this->withHeaders($browserHeaders)
+            ->get(route('search.index'))
+            ->assertOk()
+            ->assertDontSee('Looking for Exciting New Connections?');
+
+        // Fresh visitor sessions verify delivery across Search, Category & State/City pages
+        $this->withSession(['age_confirmed_18' => true, 'ads_seen_counts' => []])
+            ->withHeaders($browserHeaders)
+            ->get(route('search.index'))
+            ->assertOk()
+            ->assertSee('Looking for Exciting New Connections?');
+
+        $this->withSession(['age_confirmed_18' => true, 'ads_seen_counts' => []])
+            ->withHeaders($browserHeaders)
+            ->get(route('categories.show', $this->category->slug))
+            ->assertOk()
+            ->assertSee('Looking for Exciting New Connections?');
+
+        $this->withSession(['age_confirmed_18' => true, 'ads_seen_counts' => []])
+            ->withHeaders($browserHeaders)
+            ->get(route('locations.state', ['stateCode' => $this->state->code]))
+            ->assertOk()
+            ->assertSee('Looking for Exciting New Connections?');
+
+        $this->withSession(['age_confirmed_18' => true, 'ads_seen_counts' => []])
+            ->withHeaders($browserHeaders)
+            ->get(route('locations.city', ['stateCode' => $this->state->code, 'citySlug' => $this->city->slug]))
+            ->assertOk()
+            ->assertSee('Looking for Exciting New Connections?');
+
+        // Mismatched state is strictly blocked when state context is present
+        $delivery = app(AdDeliveryService::class);
+        $this->assertCount(0, $delivery->getAdsForSlot(AdCampaign::SLOT_LOCATION_PAGE, ['state' => $otherState->code, 'device' => 'desktop'], 5, false));
+
+        // 3. Beacon impression & outbound click tracking work cleanly without CSRF blocks
+        $this->withHeaders($browserHeaders)
+            ->postJson(route('ads.impression'), [
+                'campaign_uuid' => $campaign->uuid,
+                'slot' => AdCampaign::SLOT_HOMEPAGE_FEATURED,
+                'state' => $this->state->code,
+            ])
+            ->assertOk()
+            ->assertJsonStructure(['recorded']);
+
+        $this->withHeaders($browserHeaders)
+            ->get(route('ads.click', ['campaign' => $campaign->uuid, 'slot' => AdCampaign::SLOT_HOMEPAGE_FEATURED]))
+            ->assertRedirect();
+
+        $fresh = $campaign->fresh();
+        $this->assertGreaterThanOrEqual(1, $fresh->total_impressions);
+        $this->assertSame(1, $fresh->total_clicks);
+    }
+
+    public function test_weighted_rotation_and_realtime_campaign_diagnostics_and_quick_fixes(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('ad-banners/heavy.jpg', 'fake-jpg');
+        Storage::disk('public')->put('ad-banners/light.jpg', 'fake-jpg');
+
+        $manager = app(AdCampaignManager::class);
+        $delivery = app(AdDeliveryService::class);
+
+        $heavy = $manager->saveCampaign([
+            'name' => 'Heavy Weight Banner',
+            'campaign_type' => 'banner',
+            'destination_url' => 'https://heavy.example.com',
+            'desktop_banner_url' => '/storage/ad-banners/heavy.jpg',
+            'status' => AdCampaign::STATUS_ACTIVE,
+            'priority' => 10,
+            'weight' => 90,
+            'placements' => [AdCampaign::SLOT_SIDEBAR],
+        ], null, $this->admin->id);
+
+        $light = $manager->saveCampaign([
+            'name' => 'Light Weight Banner',
+            'campaign_type' => 'banner',
+            'destination_url' => 'https://light.example.com',
+            'desktop_banner_url' => '/storage/ad-banners/light.jpg',
+            'status' => AdCampaign::STATUS_ACTIVE,
+            'priority' => 10,
+            'weight' => 10,
+            'placements' => [AdCampaign::SLOT_SIDEBAR],
+        ], null, $this->admin->id);
+
+        // Over 40 draws of 1 slot, both appear and heavy dominates significantly
+        $wins = [$heavy->id => 0, $light->id => 0];
+        for ($i = 0; $i < 40; $i++) {
+            $picked = $delivery->getAdsForSlot(AdCampaign::SLOT_SIDEBAR, ['device' => 'desktop'], 1, false);
+            $this->assertCount(1, $picked);
+            $wins[$picked->first()['campaign_id']]++;
+        }
+        $this->assertGreaterThan($wins[$light->id], $wins[$heavy->id]);
+
+        // Diagnostic check on live eligible campaign
+        $diagLive = $delivery->diagnoseCampaign($heavy);
+        $this->assertTrue($diagLive['eligible']);
+        $this->assertSame('ELIGIBLE', $diagLive['eligibility_label']);
+        $this->assertSame('LIVE DELIVERING', $diagLive['delivery_status']);
+        $this->assertTrue($diagLive['api_delivery']['overall_ok']);
+        $this->assertTrue($diagLive['creative']['desktop_file_ok']);
+
+        // Future starts_at + status active shows clear blocking reason & immediate fix button works in Admin UI
+        $heavy->update(['starts_at' => now()->addHours(4)]);
+        $diagFuture = $delivery->diagnoseCampaign($heavy->fresh(['creatives', 'placements', 'targetingRules']));
+        $this->assertFalse($diagFuture['eligible']);
+        $this->assertSame('NOT ELIGIBLE', $diagFuture['eligibility_label']);
+        $this->assertNotEmpty($diagFuture['blocking_reasons']);
+
+        Livewire::actingAs($this->admin)
+            ->test(AdminEnterpriseHub::class, ['initialTab' => 'ads'])
+            ->call('openDiagnosticModal', $heavy->id)
+            ->assertSet('showDiagnosticModal', true)
+            ->assertSee('Real-Time Ad Delivery Diagnostics')
+            ->assertSee('NOT ELIGIBLE')
+            ->call('startCampaignImmediately', $heavy->id)
+            ->assertSet('diagnosticData.eligible', true)
+            ->assertSet('diagnosticData.delivery_status', 'LIVE DELIVERING');
+    }
 }
 
