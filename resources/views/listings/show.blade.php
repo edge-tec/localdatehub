@@ -77,6 +77,90 @@
             }
         }"
     >
+        <!-- Unified Modern SVG Icon Sprite (Referenced via <use> for Crisp Zero-Request Rendering) -->
+        <svg width="0" height="0" aria-hidden="true" class="absolute w-0 h-0 overflow-hidden pointer-events-none">
+            <symbol id="ldh-icon-user-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/>
+            </symbol>
+            <symbol id="ldh-icon-calendar-days" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/>
+            </symbol>
+            <symbol id="ldh-icon-shield-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>
+            </symbol>
+            <symbol id="ldh-icon-shield-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/>
+            </symbol>
+            <symbol id="ldh-icon-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/>
+            </symbol>
+            <symbol id="ldh-icon-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>
+            </symbol>
+            <symbol id="ldh-icon-square-pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/>
+            </symbol>
+            <symbol id="ldh-icon-message-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/>
+            </symbol>
+            <symbol id="ldh-icon-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </symbol>
+            <symbol id="ldh-icon-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>
+            </symbol>
+            <symbol id="ldh-icon-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+            </symbol>
+            <symbol id="ldh-icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+            </symbol>
+            <symbol id="ldh-icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6 9 17l-5-5"/>
+            </symbol>
+            <symbol id="ldh-icon-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </symbol>
+            <symbol id="ldh-icon-at-sign" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/>
+            </symbol>
+            <symbol id="ldh-icon-quote" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8"/><path d="M8 13h5"/>
+            </symbol>
+            <symbol id="ldh-icon-map-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>
+            </symbol>
+            <symbol id="ldh-icon-radar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 6h.01"/><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"/><path d="M16.24 7.76A6 6 0 1 0 8.23 16.67"/><path d="M12 18h.01"/><path d="M17.99 11.66A6 6 0 0 1 15.77 16.67"/><circle cx="12" cy="12" r="2"/><path d="m13.41 10.59 5.66-5.66"/>
+            </symbol>
+            <symbol id="ldh-icon-compass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+            </symbol>
+            <symbol id="ldh-icon-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/>
+            </symbol>
+            <symbol id="ldh-icon-arrow-up-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 7h10v10"/><path d="M7 17 17 7"/>
+            </symbol>
+            <symbol id="ldh-icon-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>
+            </symbol>
+            <symbol id="ldh-icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>
+            </symbol>
+            <symbol id="ldh-icon-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>
+            </symbol>
+            <symbol id="ldh-icon-ban" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/>
+            </symbol>
+            <symbol id="ldh-icon-sparkles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+            </symbol>
+            <symbol id="ldh-icon-dashboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>
+            </symbol>
+        </svg>
         <!-- Modern Breadcrumbs Navigation -->
         <nav class="flex items-center text-xs font-semibold text-slate-500 overflow-x-auto whitespace-nowrap py-1 scrollbar-none" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1.5 sm:space-x-2">
@@ -483,133 +567,262 @@
 
             </div>
 
-            <!-- RIGHT COLUMN (4 COLS): Contact, Safety & Sidebar Ad Column -->
-            <div class="lg:col-span-4 min-w-0 space-y-6">
-                
-                <!-- 1. Advertiser Profile Card -->
-                <div class="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-xs space-y-5">
-                    <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
-                        <span class="text-xs font-black uppercase tracking-wider text-slate-500">Advertiser Profile</span>
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-[#F20B65] border border-rose-200/80">
-                            <svg class="w-3.5 h-3.5 text-[#F20B65] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.072 0a5 5 0 010 7.07M13 12a1 1 0 11-2 0 1 1 0 012 0z"/>
-                            </svg>
-                            <span>Active Now</span>
-                        </span>
-                    </div>
+            <!-- RIGHT COLUMN (4 COLS): Sticky Container-Aware Profile, Contact, Location & Safety Sidebar -->
+            @php
+                $posterUser = $listing->user;
+                $posterName = $posterUser?->name ?? 'Anonymous Poster';
+                $posterInitial = strtoupper(substr($posterName, 0, 1));
+                $posterAvatarUrl = $posterUser?->avatar_url;
+                $posterLastActive = $posterUser?->last_active_at;
+                $posterIsOnline = !$posterLastActive || $posterLastActive->gt(now()->subMinutes(30));
+                $posterActiveLabel = $posterIsOnline
+                    ? 'Active Now'
+                    : 'Active ' . $posterLastActive->diffForHumans(short: true);
+                $posterAdsCount = max(1, (int) ($posterActiveListingsCount ?? 1));
+                $isListingOwner = auth()->check() && (auth()->id() === $listing->user_id || auth()->user()->hasRole('admin'));
+                $cityBrowseUrl = ($listing->city?->slug && $listing->state?->code)
+                    ? route('locations.city', ['stateCode' => strtolower($listing->state->code), 'citySlug' => $listing->city->slug])
+                    : null;
+            @endphp
+            <aside class="lg:col-span-4 lg:sticky lg:top-24 min-w-0 space-y-5 ldh-sidebar" aria-label="Advertiser details and safety controls">
 
-                    <!-- Profile Header with Vibrant Guaranteed Avatar -->
-                    <div class="flex items-center gap-3.5">
-                        <div 
-                            class="w-14 h-14 rounded-2xl flex items-center justify-center font-black text-2xl shadow-md shrink-0 select-none"
-                            style="background: linear-gradient(135deg, #F20B65 0%, #D90858 50%, #9333EA 100%) !important; color: #ffffff !important; border: 2px solid rgba(255, 255, 255, 0.4);"
-                        >
-                            {{ strtoupper(substr($listing->user?->name ?? 'M', 0, 1)) }}
+                <!-- 1. Advertiser Profile Card -->
+                <article class="ldh-sidebar-card bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-[0_12px_32px_-16px_rgba(15,23,42,0.14)] hover:shadow-[0_18px_38px_-16px_rgba(15,23,42,0.18)] transition-shadow space-y-5 relative overflow-hidden">
+                    <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#F20B65] via-rose-500 to-purple-600" aria-hidden="true"></div>
+
+                    <header class="flex flex-wrap items-center justify-between gap-2 pb-3.5 border-b border-slate-100">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-50 to-pink-100/80 border border-rose-200/70 text-[#F20B65] flex items-center justify-center shrink-0 shadow-2xs">
+                                <svg class="w-4 h-4" aria-hidden="true"><use href="#ldh-icon-user-check"/></svg>
+                            </span>
+                            <span class="ldh-card-heading text-xs font-black uppercase tracking-wider text-slate-700">Advertiser Profile</span>
                         </div>
-                        <div class="min-w-0 flex-1">
-                            <h3 class="text-base font-black text-slate-900 truncate flex items-center gap-1.5">
-                                <span class="truncate">{{ $listing->user?->name ?? 'Anonymous Poster' }}</span>
+
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border {{ $posterIsOnline ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80' : 'bg-slate-50 text-slate-600 border-slate-200' }}">
+                            <span class="relative flex h-2 w-2 shrink-0" aria-hidden="true">
+                                @if($posterIsOnline)
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                @endif
+                                <span class="relative inline-flex rounded-full h-2 w-2 {{ $posterIsOnline ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
+                            </span>
+                            <span>{{ $posterActiveLabel }}</span>
+                        </span>
+                    </header>
+
+                    <!-- Member Identity & Avatar Row -->
+                    <div class="flex items-center gap-3.5 min-w-0">
+                        <div class="relative shrink-0">
+                            @if($posterAvatarUrl)
+                                <img
+                                    src="{{ $posterAvatarUrl }}"
+                                    alt="{{ $posterName }}"
+                                    loading="lazy"
+                                    decoding="async"
+                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                    class="w-14 h-14 rounded-2xl object-cover ring-2 ring-rose-100 shadow-md block"
+                                >
+                                <div
+                                    style="display:none; background: linear-gradient(135deg, #F20B65 0%, #D90858 52%, #9333EA 100%) !important; color: #ffffff !important;"
+                                    class="w-14 h-14 rounded-2xl items-center justify-center font-black text-2xl shadow-md select-none ring-2 ring-white"
+                                    aria-hidden="true"
+                                >
+                                    {{ $posterInitial }}
+                                </div>
+                            @else
+                                <div
+                                    class="w-14 h-14 rounded-2xl flex items-center justify-center font-black text-2xl shadow-md select-none ring-2 ring-rose-100"
+                                    style="background: linear-gradient(135deg, #F20B65 0%, #D90858 52%, #9333EA 100%) !important; color: #ffffff !important;"
+                                    aria-hidden="true"
+                                >
+                                    {{ $posterInitial }}
+                                </div>
+                            @endif
+                            <span
+                                class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white shadow-xs {{ $posterIsOnline ? 'bg-emerald-500' : 'bg-slate-400' }}"
+                                title="{{ $posterActiveLabel }}"
+                                aria-hidden="true"
+                            ></span>
+                        </div>
+
+                        <div class="min-w-0 flex-1 space-y-1">
+                            <h3 class="ldh-card-heading text-base sm:text-[17px] font-black text-slate-900 flex items-center gap-1.5 min-w-0">
+                                <span class="truncate">{{ $posterName }}</span>
                                 @if($posterVerified)
                                     <x-verified-badge variant="icon" size="w-4 h-4" title="Blue Verified Badge — Identity Verified" />
                                 @endif
                             </h3>
-                            <p class="text-xs font-medium text-slate-500 mt-0.5 flex items-center gap-1">
-                                <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                <span>Member since {{ $listing->user?->created_at?->format('M Y') ?? 'Nov 2026' }}</span>
+                            <p class="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" aria-hidden="true"><use href="#ldh-icon-calendar-days"/></svg>
+                                <span>Member since {{ $posterUser?->created_at?->format('M Y') ?? 'Nov 2026' }}</span>
                             </p>
                         </div>
                     </div>
 
-                    <!-- Trust & Assurance Badges -->
-                    <div class="pt-1 space-y-2.5 text-xs">
+                    <!-- Compact Activity & Trust Metrics Grid -->
+                    <div class="grid grid-cols-2 gap-2.5 text-xs">
+                        <div class="flex items-center gap-2.5 p-2.5 rounded-2xl bg-slate-50/90 border border-slate-200/75 min-w-0">
+                            <span class="w-8 h-8 rounded-xl bg-white border border-slate-200/80 text-[#F20B65] flex items-center justify-center shrink-0 shadow-2xs">
+                                <svg class="w-4 h-4" aria-hidden="true"><use href="#ldh-icon-layers"/></svg>
+                            </span>
+                            <div class="min-w-0">
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">Active Ads</span>
+                                <strong class="text-xs sm:text-sm font-black text-slate-900 tabular-nums block">{{ $posterAdsCount }} {{ \Illuminate\Support\Str::plural('Post', $posterAdsCount) }}</strong>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2.5 p-2.5 rounded-2xl bg-slate-50/90 border border-slate-200/75 min-w-0">
+                            <span class="w-8 h-8 rounded-xl bg-white border border-slate-200/80 text-sky-600 flex items-center justify-center shrink-0 shadow-2xs">
+                                <svg class="w-4 h-4" aria-hidden="true"><use href="#ldh-icon-eye"/></svg>
+                            </span>
+                            <div class="min-w-0">
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">Post Views</span>
+                                <strong class="text-xs sm:text-sm font-black text-slate-900 tabular-nums block">{{ number_format($listing->view_count) }}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Strict Identity Verification Status -->
+                    <div class="text-xs">
                         @if($posterVerified)
-                            <div class="flex items-center gap-2.5 p-3 rounded-xl bg-blue-50/90 border border-blue-200/90 text-blue-900 font-bold">
-                                <x-verified-badge variant="icon" size="w-4 h-4" title="Identity Verified Member" />
-                                <span>Blue Verified Identity Badge</span>
+                            <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-blue-50 to-sky-50/80 border border-blue-200/90 text-blue-950 shadow-2xs">
+                                <span class="w-9 h-9 rounded-xl bg-white border border-blue-200/80 flex items-center justify-center shrink-0 shadow-2xs">
+                                    <x-verified-badge variant="icon" size="w-5 h-5" title="Identity Verified Member" />
+                                </span>
+                                <div class="min-w-0 flex-1">
+                                    <strong class="block text-xs font-black text-blue-950">Blue Verified Identity Badge</strong>
+                                    <span class="block text-[11px] font-medium text-blue-800/85 mt-0.5">Official government ID reviewed &amp; approved</span>
+                                </div>
                             </div>
                         @else
-                            <div class="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-600 font-semibold">
-                                <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                                </svg>
-                                <span>Identity Not Yet Verified</span>
+                            <div class="flex items-center justify-between gap-2.5 p-3.5 rounded-2xl bg-slate-50/90 border border-slate-200/90 text-slate-700">
+                                <div class="flex items-center gap-2.5 min-w-0">
+                                    <span class="w-8 h-8 rounded-xl bg-white border border-slate-200 text-slate-500 flex items-center justify-center shrink-0 shadow-2xs">
+                                        <svg class="w-4 h-4" aria-hidden="true"><use href="#ldh-icon-shield-alert"/></svg>
+                                    </span>
+                                    <div class="min-w-0">
+                                        <strong class="block text-xs font-bold text-slate-800">Identity Not Yet Verified</strong>
+                                        <span class="block text-[11px] font-medium text-slate-500">ID badge requires admin ID approval</span>
+                                    </div>
+                                </div>
+                                @if(auth()->check() && auth()->id() === $listing->user_id)
+                                    <a
+                                        href="{{ route('account.verification.show') }}"
+                                        class="ldh-touch-target inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-blue-700 text-[11px] font-black transition shrink-0"
+                                    >
+                                        <span>Verify</span>
+                                        <svg class="w-3 h-3" aria-hidden="true"><use href="#ldh-icon-arrow-up-right"/></svg>
+                                    </a>
+                                @endif
                             </div>
                         @endif
                     </div>
-                </div>
+                </article>
 
-                <!-- 2. Author Controls (If Author or Admin) -->
-                @auth
-                    @if(auth()->id() === $listing->user_id || auth()->user()->hasRole('admin'))
-                        <div class="bg-gradient-to-br from-rose-50/90 via-pink-50/40 to-white border border-rose-200 rounded-3xl p-5 shadow-xs space-y-3.5">
-                            <div class="flex items-center justify-between gap-2">
-                                <span class="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-[#F20B65]">
-                                    <span class="w-6 h-6 rounded-lg bg-white border border-rose-200 flex items-center justify-center shrink-0">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                    </span>
-                                    <span>Listing Management</span>
+                <!-- 2. Author Controls (Owner or Admin Only) -->
+                @if($isListingOwner)
+                    <article class="ldh-sidebar-card bg-gradient-to-br from-rose-50/95 via-pink-50/50 to-white border border-rose-200/90 rounded-3xl p-5 sm:p-6 shadow-[0_12px_28px_-16px_rgba(242,11,101,0.22)] space-y-4">
+                        <header class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-rose-200/60">
+                            <span class="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-[#F20B65]">
+                                <span class="w-8 h-8 rounded-xl bg-white border border-rose-200/80 text-[#F20B65] flex items-center justify-center shrink-0 shadow-2xs">
+                                    <svg class="w-4 h-4" aria-hidden="true"><use href="#ldh-icon-sliders"/></svg>
                                 </span>
-                                @if($listing->activeBoost)
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold text-white shadow-2xs" style="background-color: #F20B65 !important;">
-                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/></svg>
-                                        <span>Boosted</span>
-                                    </span>
-                                @endif
-                            </div>
-                            <p class="text-xs text-slate-700 leading-relaxed font-semibold">
-                                Get 5x more responses! Spotlight your classified to the very top with instant crypto promotion.
-                            </p>
-                            <div class="flex items-center gap-2">
-                                <a 
-                                    href="{{ route('boost.checkout', $listing->id) }}" 
-                                    class="flex-1 py-3 px-3 text-white text-xs font-black rounded-xl shadow-md transition hover:opacity-95 active:scale-[0.98] inline-flex items-center justify-center gap-1.5 whitespace-nowrap"
-                                    style="background: linear-gradient(135deg, #F20B65 0%, #D90858 100%) !important; color: #ffffff !important;"
-                                >
-                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                    <span>Boost This Ad Now</span>
-                                </a>
-                                <a 
-                                    href="{{ route('listings.edit', $listing->id) }}" 
-                                    class="py-3 px-4 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 text-xs font-black rounded-xl transition shadow-2xs inline-flex items-center gap-1"
-                                >
-                                    <span>Edit</span>
-                                </a>
-                            </div>
-                        </div>
-                    @endif
-                @endauth
+                                <span class="ldh-card-heading">Listing Management</span>
+                            </span>
+                            @if($listing->activeBoost)
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold text-white shadow-2xs" style="background: linear-gradient(135deg, #F20B65 0%, #D90858 100%) !important;">
+                                    <svg class="w-3 h-3" aria-hidden="true"><use href="#ldh-icon-sparkles"/></svg>
+                                    <span>Boosted</span>
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-white border border-rose-200/80 text-rose-700">
+                                    <svg class="w-3 h-3" aria-hidden="true"><use href="#ldh-icon-check-circle"/></svg>
+                                    <span>Owner Tools</span>
+                                </span>
+                            @endif
+                        </header>
+
+                        <p class="ldh-card-prose text-xs text-slate-700 leading-relaxed font-semibold">
+                            Get 5x more responses! Spotlight your classified to the very top with instant crypto promotion.
+                        </p>
+
+                        <footer class="flex flex-wrap items-stretch gap-2.5">
+                            <a
+                                href="{{ route('boost.checkout', $listing->id) }}"
+                                class="ldh-touch-target flex-1 min-w-[175px] py-2.5 px-4 text-white text-xs font-black rounded-2xl shadow-md transition hover:opacity-95 active:scale-[0.99] inline-flex items-center justify-center gap-2"
+                                style="background: linear-gradient(135deg, #F20B65 0%, #D90858 100%) !important; color: #ffffff !important;"
+                            >
+                                <svg class="w-4 h-4 shrink-0" aria-hidden="true"><use href="#ldh-icon-zap"/></svg>
+                                <span>Boost This Ad Now</span>
+                            </a>
+                            <a
+                                href="{{ route('listings.edit', $listing->id) }}"
+                                class="ldh-touch-target py-2.5 px-3.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-800 text-xs font-black rounded-2xl transition shadow-2xs inline-flex items-center justify-center gap-1.5 shrink-0"
+                            >
+                                <svg class="w-3.5 h-3.5 text-slate-600 shrink-0" aria-hidden="true"><use href="#ldh-icon-square-pen"/></svg>
+                                <span>Edit</span>
+                            </a>
+                            <a
+                                href="{{ route('account.dashboard', ['tab' => 'listings']) }}"
+                                class="ldh-touch-target py-2.5 px-3 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-700 hover:text-[#F20B65] text-xs font-black rounded-2xl transition shadow-2xs inline-flex items-center justify-center gap-1.5 shrink-0"
+                                title="Open My Listings Dashboard"
+                                aria-label="Open My Listings Dashboard"
+                            >
+                                <svg class="w-3.5 h-3.5 shrink-0" aria-hidden="true"><use href="#ldh-icon-dashboard"/></svg>
+                            </a>
+                        </footer>
+                    </article>
+                @endif
 
                 <!-- 3. Contact Advertiser Card (GUARANTEED 100% VISIBLE CTA) -->
-                <div id="contact-member" class="scroll-mt-24 bg-white border border-slate-200/90 rounded-3xl p-6 shadow-xs space-y-4">
-                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                        <h2 class="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                            <span class="w-7 h-7 rounded-lg bg-rose-50 border border-rose-100 text-[#F20B65] flex items-center justify-center shrink-0">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                <article id="contact-member" class="ldh-sidebar-card scroll-mt-24 bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-[0_12px_32px_-16px_rgba(15,23,42,0.14)] space-y-4">
+                    <header class="flex flex-wrap items-center justify-between gap-2 pb-3.5 border-b border-slate-100">
+                        <h2 class="ldh-card-heading text-xs sm:text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                            <span class="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-50 to-pink-100/80 border border-rose-200/70 text-[#F20B65] flex items-center justify-center shrink-0 shadow-2xs">
+                                <svg class="w-4 h-4" aria-hidden="true"><use href="#ldh-icon-message-circle"/></svg>
                             </span>
                             <span>Contact Advertiser</span>
                         </h2>
-                        <span class="text-[11px] font-bold text-slate-500">Direct &amp; Safe</span>
-                    </div>
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-[11px] font-bold">
+                            <svg class="w-3 h-3 shrink-0" aria-hidden="true"><use href="#ldh-icon-shield-check"/></svg>
+                            <span>Direct &amp; Safe</span>
+                        </span>
+                    </header>
 
-                    <!-- Protected Platform Contact Form Trigger -->
+                    <!-- Primary Protected Platform Messenger / Contact Modal CTA -->
                     @auth
                         <a
                             href="{{ route('account.messages.index', ['listing' => $listing->id, 'user' => $listing->user_id]) }}"
-                            class="w-full py-3.5 px-5 rounded-2xl text-sm font-black transition-all flex items-center justify-center space-x-2 group hover:opacity-95 active:scale-[0.98] cursor-pointer"
-                            style="background: linear-gradient(135deg, #F20B65 0%, #D90858 100%) !important; color: #ffffff !important; box-shadow: 0 10px 25px -4px rgba(242, 11, 101, 0.45) !important;"
+                            class="ldh-touch-target w-full py-3.5 px-5 rounded-2xl text-sm font-black transition-all flex items-center justify-between gap-3 group hover:opacity-95 active:scale-[0.99] cursor-pointer"
+                            style="background: linear-gradient(135deg, #F20B65 0%, #D90858 100%) !important; color: #ffffff !important; box-shadow: 0 12px 26px -6px rgba(242, 11, 101, 0.45) !important;"
                         >
-                            <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                            <span class="text-white font-black text-sm tracking-wide">Chat on Messenger</span>
+                            <span class="flex items-center gap-2.5 min-w-0">
+                                <span class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
+                                    <svg class="w-5 h-5 text-white" aria-hidden="true"><use href="#ldh-icon-message-circle"/></svg>
+                                </span>
+                                <span class="text-left min-w-0">
+                                    <span class="text-white font-black text-sm tracking-wide block leading-tight">Chat on Messenger</span>
+                                    <span class="text-rose-100 text-[11px] font-semibold block leading-tight mt-0.5">Instant encrypted platform chat</span>
+                                </span>
+                            </span>
+                            <svg class="w-4 h-4 text-white/90 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true"><use href="#ldh-icon-arrow-up-right"/></svg>
                         </a>
                     @else
                         <button
                             type="button"
                             @click="$dispatch('open-modal', 'contact-modal')"
-                            class="w-full py-3.5 px-5 rounded-2xl text-sm font-black transition-all flex items-center justify-center space-x-2 group hover:opacity-95 active:scale-[0.98] cursor-pointer"
-                            style="background: linear-gradient(135deg, #F20B65 0%, #D90858 100%) !important; color: #ffffff !important; box-shadow: 0 10px 25px -4px rgba(242, 11, 101, 0.45) !important;"
+                            class="ldh-touch-target w-full py-3.5 px-5 rounded-2xl text-sm font-black transition-all flex items-center justify-between gap-3 group hover:opacity-95 active:scale-[0.99] cursor-pointer"
+                            style="background: linear-gradient(135deg, #F20B65 0%, #D90858 100%) !important; color: #ffffff !important; box-shadow: 0 12px 26px -6px rgba(242, 11, 101, 0.45) !important;"
                         >
-                            <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                            <span class="text-white font-black text-sm tracking-wide">Send Protected Message</span>
+                            <span class="flex items-center gap-2.5 min-w-0">
+                                <span class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
+                                    <svg class="w-5 h-5 text-white" aria-hidden="true"><use href="#ldh-icon-message-circle"/></svg>
+                                </span>
+                                <span class="text-left min-w-0">
+                                    <span class="text-white font-black text-sm tracking-wide block leading-tight">Send Protected Message</span>
+                                    <span class="text-rose-100 text-[11px] font-semibold block leading-tight mt-0.5">No account needed &bull; IP hidden</span>
+                                </span>
+                            </span>
+                            <svg class="w-4 h-4 text-white/90 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true"><use href="#ldh-icon-arrow-up-right"/></svg>
                         </button>
                     @endauth
 
@@ -619,51 +832,103 @@
                         $publicEmailAddress = $listing->contact?->preferred_email_encrypted ?: $listing->user?->email;
                     @endphp
                     @if($isEmailPublic && !empty($publicEmailAddress))
-                        <div class="p-3.5 bg-sky-50/70 border border-sky-200/80 rounded-2xl text-xs space-y-2" x-data="{ copiedEmail: false }">
+                        <div class="p-3.5 bg-sky-50/75 border border-sky-200/90 rounded-2xl text-xs space-y-2.5">
                             <div class="flex items-center justify-between gap-2">
-                                <span class="text-sky-950 font-black text-[11px] flex items-center gap-1.5">
-                                    <svg class="w-3.5 h-3.5 text-sky-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+                                <span class="text-sky-950 font-black text-[11px] flex items-center gap-1.5 min-w-0">
+                                    <span class="w-6 h-6 rounded-lg bg-white border border-sky-200 text-sky-600 flex items-center justify-center shrink-0">
+                                        <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#ldh-icon-globe"/></svg>
+                                    </span>
                                     <span>Direct Public Email:</span>
                                 </span>
-                                <button
-                                    type="button"
-                                    @click="navigator.clipboard.writeText('{{ $publicEmailAddress }}'); copiedEmail = true; setTimeout(() => copiedEmail = false, 2000)"
-                                    class="text-[11px] text-sky-700 hover:underline font-black cursor-pointer"
-                                    x-text="copiedEmail ? 'Copied!' : 'Copy Email'"
-                                >Copy Email</button>
+                                <span class="ldh-copy-wrap shrink-0">
+                                    <button
+                                        type="button"
+                                        class="ldh-copy-btn ldh-touch-target inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white hover:bg-sky-100/70 border border-sky-200 text-sky-700 text-[11px] font-black transition cursor-pointer"
+                                        command="--copy"
+                                        commandfor="ldh-public-email"
+                                        aria-label="Copy direct public email address"
+                                    >
+                                        <svg class="ldh-icon-copy w-3.5 h-3.5 shrink-0" aria-hidden="true"><use href="#ldh-icon-copy"/></svg>
+                                        <svg class="ldh-icon-check w-3.5 h-3.5 shrink-0" aria-hidden="true"><use href="#ldh-icon-check"/></svg>
+                                        <span>Copy Email</span>
+                                    </button>
+                                    <span class="ldh-copy-tip" role="status"></span>
+                                </span>
                             </div>
-                            <a href="mailto:{{ $publicEmailAddress }}?subject={{ rawurlencode('Regarding your LocalDateHub post: ' . $listing->title) }}" class="font-mono text-slate-900 hover:text-[#F20B65] text-xs font-black flex items-center gap-2 break-all select-all bg-white p-2.5 rounded-xl border border-sky-200/80 shadow-2xs transition">
-                                <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                <span>{{ $publicEmailAddress }}</span>
+                            <a
+                                href="mailto:{{ $publicEmailAddress }}?subject={{ rawurlencode('Regarding your LocalDateHub post: ' . $listing->title) }}"
+                                class="font-mono text-slate-900 hover:text-[#F20B65] text-xs font-black flex items-center gap-2 break-all bg-white p-2.5 rounded-xl border border-sky-200/80 shadow-2xs transition"
+                            >
+                                <svg class="w-4 h-4 text-sky-600 shrink-0" aria-hidden="true"><use href="#ldh-icon-mail"/></svg>
+                                <span id="ldh-public-email" class="select-all">{{ $publicEmailAddress }}</span>
                             </a>
-                            <span class="text-[11px] text-sky-900/80 font-medium block leading-tight">Advertiser has made their email public on this post for direct contact.</span>
+                            <p class="ldh-card-prose text-[11px] text-sky-900/85 font-medium leading-snug">Advertiser has made their email public on this post for direct contact.</p>
                         </div>
                     @elseif($listing->contact?->allow_email_relay && $listing->contact?->masked_relay_email)
-                        <div class="p-3.5 bg-slate-50/90 border border-slate-200/90 rounded-2xl text-xs space-y-2" x-data="{ copiedRelay: false }">
+                        <div class="p-3.5 bg-slate-50/90 border border-slate-200/90 rounded-2xl text-xs space-y-2.5">
                             <div class="flex items-center justify-between gap-2">
-                                <span class="text-slate-700 font-black text-[11px] flex items-center gap-1.5">
-                                    <svg class="w-3.5 h-3.5 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                <span class="text-slate-800 font-black text-[11px] flex items-center gap-1.5 min-w-0">
+                                    <span class="w-6 h-6 rounded-lg bg-white border border-slate-200 text-[#F20B65] flex items-center justify-center shrink-0 shadow-2xs">
+                                        <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#ldh-icon-lock"/></svg>
+                                    </span>
                                     <span>Encrypted Email Relay:</span>
                                 </span>
-                                <button
-                                    type="button"
-                                    @click="navigator.clipboard.writeText('{{ $listing->contact->masked_relay_email }}'); copiedRelay = true; setTimeout(() => copiedRelay = false, 2000)"
-                                    class="text-[11px] text-[#F20B65] hover:underline font-black cursor-pointer"
-                                    x-text="copiedRelay ? 'Copied!' : 'Copy'"
-                                >Copy</button>
+                                <span class="ldh-copy-wrap shrink-0">
+                                    <button
+                                        type="button"
+                                        class="ldh-copy-btn ldh-touch-target inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-[#F20B65] text-[11px] font-black transition cursor-pointer shadow-2xs"
+                                        command="--copy"
+                                        commandfor="ldh-relay-email"
+                                        aria-label="Copy encrypted relay email address"
+                                    >
+                                        <svg class="ldh-icon-copy w-3.5 h-3.5 shrink-0" aria-hidden="true"><use href="#ldh-icon-copy"/></svg>
+                                        <svg class="ldh-icon-check w-3.5 h-3.5 shrink-0" aria-hidden="true"><use href="#ldh-icon-check"/></svg>
+                                        <span>Copy</span>
+                                    </button>
+                                    <span class="ldh-copy-tip" role="status"></span>
+                                </span>
                             </div>
-                            <span class="font-mono text-slate-900 text-xs font-bold block break-all select-all bg-white p-2.5 rounded-xl border border-slate-200/90">
-                                {{ $listing->contact->masked_relay_email }}
-                            </span>
-                            <span class="text-[11px] text-slate-500 font-medium block leading-tight">Personal email is encrypted &amp; masked to protect advertiser privacy.</span>
+                            <a
+                                href="mailto:{{ $listing->contact->masked_relay_email }}?subject={{ rawurlencode('Inquiry: ' . $listing->title) }}"
+                                class="flex items-center justify-between gap-2 bg-white hover:border-rose-200 p-2.5 rounded-xl border border-slate-200/90 shadow-2xs transition group"
+                                title="Open email client with masked relay"
+                            >
+                                <span class="flex items-center gap-2 min-w-0">
+                                    <svg class="w-4 h-4 text-slate-400 group-hover:text-[#F20B65] shrink-0 transition-colors" aria-hidden="true"><use href="#ldh-icon-mail"/></svg>
+                                    <code id="ldh-relay-email" class="font-mono text-slate-900 text-xs font-bold break-all select-all">{{ $listing->contact->masked_relay_email }}</code>
+                                </span>
+                                <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-[#F20B65] shrink-0 transition-colors" aria-hidden="true"><use href="#ldh-icon-arrow-up-right"/></svg>
+                            </a>
+                            <p class="ldh-card-prose text-[11px] text-slate-500 font-medium leading-snug">Personal email is encrypted &amp; masked to protect advertiser privacy.</p>
                         </div>
                     @endif
 
                     <!-- External Phone Visibility (Only if explicitly enabled by poster) -->
                     @if($listing->contact?->show_phone && $listing->contact?->preferred_phone_encrypted)
-                        <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs space-y-1">
-                            <span class="text-slate-600 font-bold text-[11px]">Telephone / SMS:</span>
-                            <a href="tel:{{ $listing->contact->preferred_phone_encrypted }}" class="font-mono text-[#F20B65] hover:underline font-bold text-sm block">
+                        <div class="p-3.5 bg-slate-50/90 border border-slate-200/90 rounded-2xl text-xs space-y-2">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-slate-700 font-black text-[11px] flex items-center gap-1.5">
+                                    <span class="w-6 h-6 rounded-lg bg-white border border-slate-200 text-emerald-600 flex items-center justify-center shrink-0">
+                                        <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#ldh-icon-phone"/></svg>
+                                    </span>
+                                    <span>Telephone / SMS:</span>
+                                </span>
+                                <span class="ldh-copy-wrap shrink-0">
+                                    <button
+                                        type="button"
+                                        class="ldh-copy-btn ldh-touch-target inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-[11px] font-black transition cursor-pointer"
+                                        command="--copy"
+                                        commandfor="ldh-phone-number"
+                                        aria-label="Copy telephone number"
+                                    >
+                                        <svg class="ldh-icon-copy w-3.5 h-3.5 shrink-0" aria-hidden="true"><use href="#ldh-icon-copy"/></svg>
+                                        <svg class="ldh-icon-check w-3.5 h-3.5 shrink-0" aria-hidden="true"><use href="#ldh-icon-check"/></svg>
+                                        <span>Copy</span>
+                                    </button>
+                                    <span class="ldh-copy-tip" role="status"></span>
+                                </span>
+                            </div>
+                            <a href="tel:{{ $listing->contact->preferred_phone_encrypted }}" id="ldh-phone-number" class="font-mono text-[#F20B65] hover:underline font-bold text-sm block bg-white p-2.5 rounded-xl border border-slate-200/90">
                                 {{ $listing->contact->preferred_phone_encrypted }}
                             </a>
                         </div>
@@ -671,79 +936,148 @@
 
                     <!-- External Handle (e.g. Signal, Telegram) -->
                     @if($listing->contact?->external_handle_encrypted)
-                        <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs space-y-1">
-                            <span class="text-slate-600 font-bold text-[11px]">External Messenger:</span>
-                            <span class="font-mono text-purple-700 font-black text-xs block select-all">{{ $listing->contact->external_handle_encrypted }}</span>
+                        <div class="p-3.5 bg-slate-50/90 border border-slate-200/90 rounded-2xl text-xs space-y-2">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-slate-700 font-black text-[11px] flex items-center gap-1.5">
+                                    <span class="w-6 h-6 rounded-lg bg-white border border-slate-200 text-purple-600 flex items-center justify-center shrink-0">
+                                        <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#ldh-icon-at-sign"/></svg>
+                                    </span>
+                                    <span>External Messenger:</span>
+                                </span>
+                                <span class="ldh-copy-wrap shrink-0">
+                                    <button
+                                        type="button"
+                                        class="ldh-copy-btn ldh-touch-target inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white hover:bg-purple-50 border border-slate-200 text-purple-700 text-[11px] font-black transition cursor-pointer"
+                                        command="--copy"
+                                        commandfor="ldh-external-handle"
+                                        aria-label="Copy external messenger handle"
+                                    >
+                                        <svg class="ldh-icon-copy w-3.5 h-3.5 shrink-0" aria-hidden="true"><use href="#ldh-icon-copy"/></svg>
+                                        <svg class="ldh-icon-check w-3.5 h-3.5 shrink-0" aria-hidden="true"><use href="#ldh-icon-check"/></svg>
+                                        <span>Copy</span>
+                                    </button>
+                                    <span class="ldh-copy-tip" role="status"></span>
+                                </span>
+                            </div>
+                            <code id="ldh-external-handle" class="font-mono text-purple-700 font-black text-xs block select-all bg-white p-2.5 rounded-xl border border-slate-200/90 break-all">{{ $listing->contact->external_handle_encrypted }}</code>
                         </div>
                     @endif
 
                     <!-- Contact Instructions -->
                     @if($listing->contact?->contact_instructions)
-                        <div class="p-3.5 bg-slate-50/90 border border-slate-200/90 rounded-2xl text-xs text-slate-800">
-                            <strong class="text-slate-900 block mb-1 font-bold">Advertiser's Instructions:</strong>
-                            <p class="leading-relaxed font-medium text-slate-600">{{ $listing->contact->contact_instructions }}</p>
+                        <div class="p-3.5 bg-gradient-to-br from-slate-50 to-slate-100/60 border border-slate-200/90 rounded-2xl text-xs text-slate-800 space-y-1.5">
+                            <strong class="text-slate-900 font-black flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-[#F20B65] shrink-0" aria-hidden="true"><use href="#ldh-icon-quote"/></svg>
+                                <span>Advertiser's Instructions:</span>
+                            </strong>
+                            <p class="ldh-card-prose leading-relaxed font-medium text-slate-600">{{ $listing->contact->contact_instructions }}</p>
                         </div>
                     @endif
-                </div>
+                </article>
 
                 <!-- 4. Location & Anti-Triangulation Privacy Notice -->
-                <div class="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-xs space-y-3">
-                    <h3 class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                        <span class="w-7 h-7 rounded-lg bg-sky-50 border border-sky-100 text-sky-600 flex items-center justify-center shrink-0">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                        </span>
-                        <span>Location &amp; Anti-Stalking</span>
-                    </h3>
-                    <p class="text-xs text-slate-700 leading-relaxed font-bold">
-                        City: <strong class="text-slate-900">{{ $listing->city?->name }}, {{ $listing->state?->code }}</strong>
+                <article class="ldh-sidebar-card bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-[0_12px_32px_-16px_rgba(15,23,42,0.12)] space-y-3.5">
+                    <header class="flex items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                        <h3 class="ldh-card-heading text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                            <span class="w-8 h-8 rounded-xl bg-gradient-to-br from-sky-50 to-indigo-100/80 border border-sky-200/70 text-sky-600 flex items-center justify-center shrink-0 shadow-2xs">
+                                <svg class="w-4 h-4" aria-hidden="true"><use href="#ldh-icon-radar"/></svg>
+                            </span>
+                            <span>Location &amp; Anti-Stalking</span>
+                        </h3>
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-50 border border-sky-200/80 text-sky-700 text-[10px] font-extrabold uppercase tracking-wider">Fuzzed</span>
+                    </header>
+
+                    <div class="space-y-2 text-xs">
+                        <div class="flex items-center gap-2.5 p-2.5 rounded-2xl bg-slate-50/90 border border-slate-200/75">
+                            <span class="w-7 h-7 rounded-lg bg-white border border-slate-200 text-sky-600 flex items-center justify-center shrink-0">
+                                <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#ldh-icon-map-pin"/></svg>
+                            </span>
+                            <p class="text-slate-700 font-bold leading-snug">
+                                City: <strong class="text-slate-950 font-black">{{ $listing->city?->name }}, {{ $listing->state?->code }}</strong>
+                            </p>
+                        </div>
+
                         @if($listing->location?->neighborhood)
-                            <span class="block text-slate-600 mt-0.5 font-medium">Area / Neighborhood: {{ $listing->location->neighborhood }}</span>
+                            <div class="flex items-center gap-2.5 p-2.5 rounded-2xl bg-slate-50/90 border border-slate-200/75">
+                                <span class="w-7 h-7 rounded-lg bg-white border border-slate-200 text-indigo-600 flex items-center justify-center shrink-0">
+                                    <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#ldh-icon-compass"/></svg>
+                                </span>
+                                <p class="text-slate-600 font-medium leading-snug">
+                                    Area / Neighborhood: <strong class="text-slate-900 font-bold">{{ $listing->location->neighborhood }}</strong>
+                                </p>
+                            </div>
                         @endif
-                    </p>
-                    <div class="p-3 bg-sky-50/70 border border-sky-200/80 rounded-xl text-[11px] text-slate-700 font-medium flex items-start gap-2">
-                        <svg class="w-4 h-4 text-sky-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                        <span>GPS coordinates are fuzzed by 400–800m to prevent residential stalking &amp; protect user privacy.</span>
                     </div>
-                </div>
+
+                    <div class="p-3.5 bg-gradient-to-br from-sky-50/90 to-indigo-50/50 border border-sky-200/80 rounded-2xl text-[11px] text-slate-700 font-medium flex items-start gap-2.5">
+                        <span class="w-6 h-6 rounded-lg bg-white border border-sky-200 text-sky-600 flex items-center justify-center shrink-0 mt-0.5">
+                            <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#ldh-icon-lock"/></svg>
+                        </span>
+                        <span class="ldh-card-prose leading-relaxed">GPS coordinates are fuzzed by 400–800m to prevent residential stalking &amp; protect user privacy.</span>
+                    </div>
+
+                    @if($cityBrowseUrl)
+                        <footer class="pt-1">
+                            <a
+                                href="{{ $cityBrowseUrl }}"
+                                class="ldh-touch-target w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-200 text-slate-700 hover:text-sky-800 text-xs font-black transition"
+                            >
+                                <span>Browse More in {{ $listing->city->name }}</span>
+                                <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#ldh-icon-arrow-up-right"/></svg>
+                            </a>
+                        </footer>
+                    @endif
+                </article>
 
                 <!-- 5. Trust & Safety Guidelines & Report Link -->
-                <div class="bg-gradient-to-br from-rose-50/80 to-pink-50/40 border border-rose-200/90 rounded-3xl p-6 shadow-xs space-y-3.5">
-                    <h3 class="text-xs font-black text-[#F20B65] uppercase tracking-wider flex items-center gap-2">
-                        <span class="w-7 h-7 rounded-lg bg-white border border-rose-200 text-[#F20B65] flex items-center justify-center shrink-0">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        </span>
-                        <span>Safety First Guidelines</span>
-                    </h3>
+                <article class="ldh-sidebar-card bg-gradient-to-br from-rose-50/85 via-pink-50/40 to-white border border-rose-200/90 rounded-3xl p-5 sm:p-6 shadow-[0_12px_32px_-16px_rgba(242,11,101,0.14)] space-y-4">
+                    <header class="flex items-center justify-between gap-2 pb-3 border-b border-rose-200/60">
+                        <h3 class="ldh-card-heading text-xs font-black text-[#F20B65] uppercase tracking-wider flex items-center gap-2">
+                            <span class="w-8 h-8 rounded-xl bg-white border border-rose-200 text-[#F20B65] flex items-center justify-center shrink-0 shadow-2xs">
+                                <svg class="w-4 h-4" aria-hidden="true"><use href="#ldh-icon-shield-check"/></svg>
+                            </span>
+                            <span>Safety First Guidelines</span>
+                        </h3>
+                        <span class="px-2 py-0.5 rounded-full bg-white border border-rose-200 text-[#F20B65] text-[10px] font-black uppercase tracking-wider">18+ Safe</span>
+                    </header>
+
                     <ul class="text-xs text-slate-800 space-y-2.5 list-none font-semibold leading-relaxed">
-                        <li class="flex items-start gap-2">
-                            <svg class="w-4 h-4 text-sky-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M5 13l4 4L19 7"/></svg>
-                            <span>Always meet in busy public venues for first encounters.</span>
+                        <li class="flex items-start gap-2.5 p-2.5 rounded-2xl bg-white/80 border border-rose-100">
+                            <span class="w-6 h-6 rounded-lg bg-emerald-50 border border-emerald-200/80 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                                <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#ldh-icon-check-circle"/></svg>
+                            </span>
+                            <span class="ldh-card-prose">Always meet in busy public venues for first encounters.</span>
                         </li>
-                        <li class="flex items-start gap-2">
-                            <svg class="w-4 h-4 text-[#F20B65] shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M6 18L18 6M6 6l12 12"/></svg>
-                            <span>Never wire gift cards, cash, or crypto to any advertiser.</span>
+                        <li class="flex items-start gap-2.5 p-2.5 rounded-2xl bg-white/80 border border-rose-100">
+                            <span class="w-6 h-6 rounded-lg bg-amber-50 border border-amber-200/80 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
+                                <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#ldh-icon-shield-alert"/></svg>
+                            </span>
+                            <span class="ldh-card-prose">Never wire gift cards, cash, or crypto to any advertiser.</span>
                         </li>
-                        <li class="flex items-start gap-2">
-                            <svg class="w-4 h-4 text-[#F20B65] shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M6 18L18 6M6 6l12 12"/></svg>
-                            <span>Commercial sexual services &amp; prostitution are strictly prohibited.</span>
+                        <li class="flex items-start gap-2.5 p-2.5 rounded-2xl bg-white/80 border border-rose-100">
+                            <span class="w-6 h-6 rounded-lg bg-rose-50 border border-rose-200/80 text-[#F20B65] flex items-center justify-center shrink-0 mt-0.5">
+                                <svg class="w-3.5 h-3.5" aria-hidden="true"><use href="#ldh-icon-ban"/></svg>
+                            </span>
+                            <span class="ldh-card-prose">Commercial sexual services &amp; prostitution are strictly prohibited.</span>
                         </li>
                     </ul>
-                    <div class="pt-2 border-t border-rose-200/80">
+
+                    <footer class="pt-1 border-t border-rose-200/70">
                         <button
                             type="button"
                             @click="$dispatch('open-modal', 'report-modal')"
-                            class="text-xs text-[#F20B65] hover:text-rose-700 font-black inline-flex items-center gap-1.5 transition cursor-pointer"
+                            class="ldh-touch-target w-full py-2.5 px-3 rounded-2xl bg-white hover:bg-rose-50 border border-rose-200/90 text-xs text-[#F20B65] hover:text-rose-700 font-black inline-flex items-center justify-center gap-2 transition shadow-2xs cursor-pointer"
                         >
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
+                            <svg class="w-3.5 h-3.5 shrink-0" aria-hidden="true"><use href="#ldh-icon-flag"/></svg>
                             <span>Report Community Violation</span>
                         </button>
-                    </div>
-                </div>
+                    </footer>
+                </article>
 
                 <!-- 6. Sidebar Advertisement Slot -->
                 <x-ad-banner placement="sidebar" :context="$adContext ?? []" variant="sidebar" :limit="2" />
 
-            </div>
+            </aside>
 
         </div>
 
@@ -778,14 +1112,36 @@
             </div>
         @endif
 
-        <!-- Floating Mobile Contact Bar (Ultimate Mobile UX) -->
-        <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 flex items-center justify-between gap-3 shadow-2xl">
+        <!-- Floating Mobile Contact Bar (Safe-Area Padded Touch Bar) -->
+        <div class="ldh-mobile-bar lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 pt-3 pb-3 flex items-center justify-between gap-3 shadow-2xl">
             <div class="min-w-0 flex-1 flex items-center gap-2.5">
-                <div 
-                    class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0"
-                    style="background: linear-gradient(135deg, #F20B65 0%, #D90858 100%) !important; color: #ffffff !important;"
-                >
-                    {{ strtoupper(substr($listing->user?->name ?? 'M', 0, 1)) }}
+                <div class="relative shrink-0">
+                    @if($posterAvatarUrl)
+                        <img
+                            src="{{ $posterAvatarUrl }}"
+                            alt="{{ $posterName }}"
+                            loading="lazy"
+                            decoding="async"
+                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                            class="w-10 h-10 rounded-xl object-cover shadow-xs block"
+                        >
+                        <div
+                            style="display:none; background: linear-gradient(135deg, #F20B65 0%, #D90858 100%) !important; color: #ffffff !important;"
+                            class="w-10 h-10 rounded-xl items-center justify-center font-black text-sm"
+                            aria-hidden="true"
+                        >
+                            {{ $posterInitial }}
+                        </div>
+                    @else
+                        <div
+                            class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm"
+                            style="background: linear-gradient(135deg, #F20B65 0%, #D90858 100%) !important; color: #ffffff !important;"
+                            aria-hidden="true"
+                        >
+                            {{ $posterInitial }}
+                        </div>
+                    @endif
+                    <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white {{ $posterIsOnline ? 'bg-emerald-500' : 'bg-slate-400' }}" aria-hidden="true"></span>
                 </div>
                 <div class="min-w-0 flex-1">
                     <span class="text-xs font-black text-slate-900 block truncate">{{ $listing->title }}</span>
@@ -795,20 +1151,20 @@
             @auth
                 <a
                     href="{{ route('account.messages.index', ['listing' => $listing->id, 'user' => $listing->user_id]) }}"
-                    class="py-2.5 px-4 rounded-xl shadow-md shrink-0 flex items-center gap-1.5 font-black text-xs"
-                    style="background-color: #F20B65 !important; color: #ffffff !important;"
+                    class="ldh-touch-target py-2.5 px-4 rounded-xl shadow-md shrink-0 inline-flex items-center gap-1.5 font-black text-xs"
+                    style="background: linear-gradient(135deg, #F20B65 0%, #D90858 100%) !important; color: #ffffff !important;"
                 >
-                    <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                    <svg class="w-4 h-4 text-white shrink-0" aria-hidden="true"><use href="#ldh-icon-message-circle"/></svg>
                     <span class="text-white">Messenger</span>
                 </a>
             @else
                 <button
                     type="button"
                     @click="$dispatch('open-modal', 'contact-modal')"
-                    class="py-2.5 px-4 rounded-xl shadow-md shrink-0 flex items-center gap-1.5 font-black text-xs"
-                    style="background-color: #F20B65 !important; color: #ffffff !important;"
+                    class="ldh-touch-target py-2.5 px-4 rounded-xl shadow-md shrink-0 inline-flex items-center gap-1.5 font-black text-xs cursor-pointer"
+                    style="background: linear-gradient(135deg, #F20B65 0%, #D90858 100%) !important; color: #ffffff !important;"
                 >
-                    <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                    <svg class="w-4 h-4 text-white shrink-0" aria-hidden="true"><use href="#ldh-icon-message-circle"/></svg>
                     <span class="text-white">Message</span>
                 </button>
             @endauth
@@ -1017,4 +1373,83 @@
             </form>
         </x-modal>
     </div>
+
+    @once
+        <script>
+            (() => {
+                if (window.__ldhCopyInitialized) return;
+                window.__ldhCopyInitialized = true;
+
+                const timers = new WeakMap();
+                let lastMessage = '';
+
+                function legacyCopy(text) {
+                    const field = Object.assign(document.createElement('textarea'), { value: text });
+                    field.setAttribute('readonly', '');
+                    field.style.cssText = 'position:fixed;inset-block-start:0;opacity:0';
+                    document.body.append(field);
+                    field.select();
+                    try {
+                        return document.execCommand('copy');
+                    } finally {
+                        field.remove();
+                    }
+                }
+
+                function report(button, ok) {
+                    const tip = button.nextElementSibling;
+                    if (!tip) return;
+                    clearTimeout(timers.get(button));
+                    button.removeAttribute('data-copied');
+                    button.removeAttribute('data-failed');
+                    let message = ok ? 'Copied!' : 'Copy failed';
+                    if (message === lastMessage) message += '\u00A0';
+                    lastMessage = message;
+                    tip.textContent = '';
+                    void button.offsetWidth;
+                    button.setAttribute(ok ? 'data-copied' : 'data-failed', '');
+                    requestAnimationFrame(() => {
+                        tip.textContent = message;
+                    });
+                    timers.set(button, setTimeout(() => {
+                        button.removeAttribute('data-copied');
+                        button.removeAttribute('data-failed');
+                        tip.textContent = '';
+                    }, 2000));
+                }
+
+                async function copyFromTarget(button, target) {
+                    if (!button || !target) return;
+                    const text = target.matches('input, textarea')
+                        ? target.value.trim()
+                        : target.innerText.trim();
+                    if (!text) return;
+                    try {
+                        if (!navigator.clipboard?.writeText) {
+                            throw new Error('Clipboard unavailable');
+                        }
+                        await navigator.clipboard.writeText(text);
+                        report(button, true);
+                    } catch {
+                        report(button, legacyCopy(text));
+                    }
+                }
+
+                document.addEventListener('command', (event) => {
+                    if (event.command === '--copy') {
+                        copyFromTarget(event.source, event.target);
+                    }
+                }, true);
+
+                if (!('CommandEvent' in window)) {
+                    document.addEventListener('click', (event) => {
+                        const button = event.target.closest('button[command="--copy"]');
+                        if (!button) return;
+                        const target = document.getElementById(button.getAttribute('commandfor'));
+                        if (target) copyFromTarget(button, target);
+                    });
+                }
+            })();
+        </script>
+    @endonce
 </x-layouts.app>

@@ -68,3 +68,101 @@ dialog::backdrop {
     background: rgb(2 6 23 / 0.88);
     backdrop-filter: blur(8px);
 }
+
+/* ============================================================================
+   LocalDateHub Listing Detail Sidebar Cards, Icons & Copy Controls
+   ============================================================================ */
+.ldh-sidebar {
+    container: ldh-sidebar / inline-size;
+}
+
+.ldh-sidebar-card {
+    container: ldh-sidebar-card / inline-size;
+}
+
+.ldh-card-heading {
+    text-wrap: balance;
+}
+
+.ldh-card-prose {
+    text-wrap: pretty;
+    overflow-wrap: anywhere;
+}
+
+.ldh-touch-target {
+    min-inline-size: 24px;
+    min-block-size: 24px;
+}
+
+@media (pointer: coarse) {
+    .ldh-touch-target {
+        min-inline-size: 44px;
+        min-block-size: 44px;
+    }
+}
+
+.ldh-copy-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.ldh-copy-btn .ldh-icon-check,
+.ldh-copy-btn[data-copied] .ldh-icon-copy {
+    display: none;
+}
+
+.ldh-copy-btn[data-copied] .ldh-icon-check {
+    display: inline-block;
+}
+
+.ldh-copy-btn[data-copied] {
+    color: #059669;
+    border-color: #a7f3d0;
+    background-color: #ecfdf5;
+}
+
+.ldh-copy-btn[data-failed] {
+    color: #e11d48;
+    border-color: #fecdd3;
+    background-color: #fff1f2;
+}
+
+.ldh-copy-tip {
+    position: absolute;
+    inset-block-end: calc(100% + 6px);
+    inset-inline-end: 0;
+    padding: 0.25rem 0.55rem;
+    border-radius: 0.5rem;
+    background: #0f172a;
+    color: #ffffff;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(3px);
+    transition: opacity 0.16s ease, transform 0.16s ease;
+    box-shadow: 0 6px 16px -4px rgb(15 23 42 / 0.3);
+    z-index: 20;
+}
+
+.ldh-copy-btn[data-copied] + .ldh-copy-tip,
+.ldh-copy-btn[data-failed] + .ldh-copy-tip {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ldh-copy-tip {
+        transform: none;
+        transition: opacity 0.12s ease;
+    }
+}
+
+.ldh-mobile-bar {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
+}

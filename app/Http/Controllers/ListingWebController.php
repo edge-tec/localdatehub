@@ -42,13 +42,17 @@ class ListingWebController extends Controller
     public function show(string $slug, Request $request): View
     {
         $listing = Listing::where('slug', $slug)
-            ->with(['user.validIdentityVerification', 'ownerIdentityVerification', 'category.parent', 'state', 'city', 'zipCode', 'location', 'contact', 'attributes.selectedOption', 'approvedMedia'])
+            ->with(['user.profile', 'user.validIdentityVerification', 'ownerIdentityVerification', 'category.parent', 'state', 'city', 'zipCode', 'location', 'contact', 'attributes.selectedOption', 'approvedMedia'])
             ->firstOrFail();
 
         Gate::authorize('view', $listing);
 
         // Record privacy-conscious daily analytics view
         app(AnalyticsTrackingService::class)->recordListingView($listing, $request);
+
+        $posterActiveListingsCount = $listing->user
+            ? $listing->user->listings()->active()->count()
+            : 1;
 
         // Fetch similar listings in same category or city
         $similarListings = Listing::query()
@@ -87,6 +91,7 @@ class ListingWebController extends Controller
             'relatedFeedItems' => $relatedFeedItems,
             'adContext' => $adContext,
             'isFavorited' => $isFavorited,
+            'posterActiveListingsCount' => $posterActiveListingsCount,
             'seo' => $seo,
         ]);
     }
