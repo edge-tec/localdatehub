@@ -1,49 +1,68 @@
 @php
-    $card = 'bg-white rounded-2xl border border-slate-200/80 shadow-sm';
-    $btn = 'inline-flex items-center justify-center font-bold text-xs px-3.5 py-2 rounded-xl transition-all duration-200 shadow-sm focus:outline-none';
-    $btnPrimary = $btn . ' bg-[#F20B65] hover:bg-[#d90858] text-white shadow-md cursor-pointer';
-    $btnPrimaryStyle = 'background-color: #F20B65 !important; color: #ffffff !important; border: 1px solid #d90858 !important; box-shadow: 0 2px 8px rgba(242, 11, 101, 0.25) !important;';
-    $btnSecondary = $btn . ' bg-white hover:bg-slate-50 text-slate-800 border border-slate-200';
+    $card = 'bg-white/95 rounded-3xl border border-slate-200/80 shadow-[0_10px_30px_-14px_rgba(15,23,42,0.06)]';
+    $btn = 'inline-flex items-center justify-center font-extrabold text-xs px-4 py-2 rounded-2xl transition-all duration-200 focus:outline-none cursor-pointer';
+    $btnPrimary = $btn . ' bg-gradient-to-r from-[#F20B83] via-rose-600 to-fuchsia-600 hover:from-[#D00972] hover:via-rose-700 hover:to-fuchsia-700 text-white shadow-[0_8px_20px_-6px_rgba(242,11,131,0.45)] hover:-translate-y-0.5';
+    $btnPrimaryStyle = '';
+    $btnSecondary = $btn . ' bg-slate-50 hover:bg-white text-slate-800 border border-slate-200/90 shadow-xs hover:-translate-y-0.5';
     $m = $metrics ?? [];
+
+    $seoDateLabels = [
+        'today' => 'Today',
+        'yesterday' => 'Yesterday',
+        'last_7_days' => 'Last 7 Days',
+        'last_28_days' => 'Last 28 Days',
+        'last_3_months' => 'Last 3 Months',
+        'last_6_months' => 'Last 6 Months',
+        'last_12_months' => 'Last 12 Months',
+    ];
 @endphp
 
 <div class="space-y-6">
-    <!-- Header Ribbon & Sub-Nav -->
-    <div class="{{ $card }} p-5">
-        <div class="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 pb-5 border-b border-slate-100">
-            <div>
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-pink-50 border border-pink-200 text-pink-600 flex items-center justify-center font-black">
-                        <svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
-                    </div>
-                    <div>
-                        <h2 class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-                            <span>Enterprise SEO &amp; Google Indexing Suite</span>
-                            <span class="text-[11px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">Live Production</span>
-                        </h2>
-                        <p class="text-xs text-slate-600 font-medium">Full-cycle keyword intelligence, automated XML sitemaps, on-page optimization, and policy-compliant Google discovery.</p>
-                    </div>
+    <!-- Unified Action & Telemetry Ribbon -->
+    <div class="relative z-20 rounded-3xl bg-white/95 backdrop-blur-xl border border-slate-200/80 p-4 sm:p-5 shadow-[0_12px_34px_-16px_rgba(15,23,42,0.07)]">
+        <div class="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-rose-50 to-fuchsia-100/80 border border-rose-200/70 text-[#F20B83] flex items-center justify-center shrink-0 shadow-xs">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                </div>
+                <div>
+                    <h2 class="text-base sm:text-lg font-black text-slate-950 tracking-tight flex flex-wrap items-center gap-2">
+                        <span>Enterprise SEO &amp; Google Indexing Suite</span>
+                        <span class="inline-flex items-center gap-1 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span>Live Production</span>
+                        </span>
+                    </h2>
+                    <p class="text-xs text-slate-500 font-medium mt-0.5">Full-cycle keyword intelligence, automated XML sitemaps, on-page optimization, and policy-compliant Google discovery.</p>
                 </div>
             </div>
 
-            <!-- Date Range Filter & Quick Action Buttons -->
-            <div class="flex flex-wrap items-center gap-2">
-                <!-- Date Filter -->
-                <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
-                    <span class="text-xs font-bold text-slate-600">Range:</span>
-                    <select wire:model.live="seoDateRange" class="bg-transparent text-xs font-bold text-slate-900 border-none focus:ring-0 py-0 pl-1 pr-6 cursor-pointer">
-                        <option value="today">Today</option>
-                        <option value="yesterday">Yesterday</option>
-                        <option value="last_7_days">Last 7 Days</option>
-                        <option value="last_28_days">Last 28 Days</option>
-                        <option value="last_3_months">Last 3 Months</option>
-                        <option value="last_6_months">Last 6 Months</option>
-                        <option value="last_12_months">Last 12 Months</option>
-                    </select>
+            <!-- Date Range Custom Dropdown & Action Controls -->
+            <div class="flex flex-wrap items-center gap-2 w-full xl:w-auto xl:justify-end">
+                <div class="relative min-w-[165px]" x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false">
+                    <button type="button" @click="open = !open" aria-label="Filter analytics date range"
+                        class="w-full flex items-center justify-between gap-2 px-3.5 py-2 rounded-2xl bg-slate-50/90 hover:bg-white border text-xs font-bold text-slate-800 transition-all cursor-pointer"
+                        :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200/90'">
+                        <span class="flex items-center gap-2 truncate">
+                            <span class="w-2 h-2 rounded-full bg-[#F20B83] shrink-0"></span>
+                            <span class="truncate">{{ $seoDateLabels[$seoDateRange] ?? 'Last 28 Days' }}</span>
+                        </span>
+                        <svg class="w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-y-1 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 translate-y-1 scale-95"
+                        class="absolute left-0 right-0 mt-2 z-50 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-[0_20px_50px_-12px_rgba(15,23,42,0.22)] p-1.5 space-y-0.5">
+                        @foreach($seoDateLabels as $dKey => $dLabel)
+                            <button type="button" wire:click="$set('seoDateRange', '{{ $dKey }}')" @click="open = false"
+                                class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer {{ $seoDateRange === $dKey ? 'bg-rose-50 text-[#F20B83]' : 'text-slate-700 hover:bg-slate-50' }}">
+                                <span>{{ $dLabel }}</span>
+                                @if($seoDateRange === $dKey) <svg class="w-3.5 h-3.5 text-[#F20B83] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> @endif
+                            </button>
+                        @endforeach
+                    </div>
                 </div>
 
-                <!-- Action: Generate Sitemaps -->
-                <button wire:click="generateAllSitemaps" wire:loading.attr="disabled" class="{{ $btnSecondary }} text-slate-700">
+                <!-- Action: Build Sitemaps -->
+                <button type="button" wire:click="generateAllSitemaps" wire:loading.attr="disabled" class="{{ $btnSecondary }}">
                     <span wire:loading.remove wire:target="generateAllSitemaps" class="flex items-center gap-1.5">
                         <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                         <span>Build Sitemaps</span>
@@ -52,16 +71,16 @@
                 </button>
 
                 <!-- Action: Run Audit -->
-                <button wire:click="runTechnicalSeoAudit" wire:loading.attr="disabled" class="{{ $btnSecondary }} text-slate-700">
+                <button type="button" wire:click="runTechnicalSeoAudit" wire:loading.attr="disabled" class="{{ $btnSecondary }}">
                     <span wire:loading.remove wire:target="runTechnicalSeoAudit" class="flex items-center gap-1.5">
-                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         <span>Audit Site</span>
                     </span>
                     <span wire:loading wire:target="runTechnicalSeoAudit" class="text-xs">Scanning...</span>
                 </button>
 
                 <!-- Action: Process Queue -->
-                <button wire:click="processIndexingQueueNow" wire:loading.attr="disabled" class="{{ $btnPrimary }}" style="{{ $btnPrimaryStyle }}">
+                <button type="button" wire:click="processIndexingQueueNow" wire:loading.attr="disabled" class="{{ $btnPrimary }}">
                     <span wire:loading.remove wire:target="processIndexingQueueNow" class="flex items-center gap-1.5">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         <span>Dispatch Queue</span>
@@ -70,189 +89,60 @@
                 </button>
             </div>
         </div>
-
-        <!-- Sub Tabs Bar -->
-        <div class="flex items-center gap-2 overflow-x-auto pt-4 scrollbar-thin">
-            @php
-                $subTabs = [
-                    'overview' => ['Overview & 20 KPIs', 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'],
-                    'keywords' => ['Keyword Research', 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z'],
-                    'urls' => ['URL Inventory & SERP', 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1'],
-                    'sitemaps' => ['XML Sitemaps (8)', 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
-                    'indexing' => ['Indexing Queue', 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'],
-                    'gsc' => ['Search Console', 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
-                    'audit' => ['Technical Issues', 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'],
-                    'redirects' => ['Redirects & 410', 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'],
-                    'settings' => ['SEO & API Settings', 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z'],
-                ];
-            @endphp
-
-            @foreach($subTabs as $k => [$label, $svgD])
-                <button
-                    wire:click="setSeoSubTab('{{ $k }}')"
-                    class="px-3.5 py-2 text-xs font-bold rounded-xl whitespace-nowrap transition-all duration-150 flex items-center gap-2 {{ $seoSubTab === $k ? 'bg-pink-600 text-white shadow-sm shadow-pink-600/30 font-black' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}"
-                >
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $svgD }}"/></svg>
-                    <span>{{ $label }}</span>
-                </button>
-            @endforeach
-        </div>
     </div>
 
     <!-- ============================================================== -->
     <!-- SUB-TAB 1: OVERVIEW & 20 KPI METRICS (PHASE 1)                 -->
     <!-- ============================================================== -->
     @if($seoSubTab === 'overview')
-        <!-- 20 Complete Enterprise Metrics Grid -->
+        <!-- 20 Complete Enterprise Metrics Grid (Modern Bento Style) -->
         <div>
-            <div class="flex items-center justify-between mb-3">
-                <h3 class="text-sm font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <h3 class="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-[#F20B83]"></span>
                     <span>Platform Discovery &amp; Search Index Telemetry</span>
-                    <span class="text-[10px] font-bold text-slate-500 lowercase">(realtime database &amp; gsc state)</span>
+                    <span class="text-[10px] font-bold text-slate-400 lowercase">(realtime database &amp; gsc state)</span>
                 </h3>
-                <span class="text-xs font-semibold text-slate-500">Updated: {{ now()->format('M d, Y H:i:s') }}</span>
+                <span class="text-[11px] font-bold text-slate-500 px-3 py-1 rounded-full bg-white border border-slate-200/80">Updated: {{ now()->format('M d, Y H:i:s') }}</span>
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5">
-                <!-- 1. Total Website URLs -->
-                <div class="{{ $card }} p-4 border-l-4 border-l-slate-800">
-                    <p class="text-[11px] font-bold uppercase text-slate-500">1. Total URLs</p>
-                    <h4 class="text-xl font-black text-slate-900 mt-1">{{ number_format($m['total_website_urls'] ?? 0) }}</h4>
-                    <p class="text-[10px] text-slate-500 mt-0.5">Eligible public routes</p>
-                </div>
+                @php
+                    $overviewCards = [
+                        ['1. Total URLs', number_format($m['total_website_urls'] ?? 0), 'Eligible public routes', 'bg-slate-500 hover:border-slate-300'],
+                        ['2. Indexed URLs', number_format($m['total_indexed_urls'] ?? 0), 'Verified on Google', 'bg-emerald-500 hover:border-emerald-200'],
+                        ['3. Not Indexed', number_format($m['total_not_indexed_urls'] ?? 0), 'Discovered / Queued', 'bg-amber-500 hover:border-amber-200'],
+                        ['4. Pending Queue', number_format($m['pending_indexing_urls'] ?? 0), 'Awaiting worker ping', 'bg-violet-500 hover:border-violet-200'],
+                        ['5. Sitemap URLs', number_format($m['sitemap_urls'] ?? 0), 'Across 8 sitemaps', 'bg-fuchsia-500 hover:border-fuchsia-200'],
+                        ['6. Submitted', number_format($m['submitted_urls'] ?? 0), 'Dispatched to search', 'bg-teal-500 hover:border-teal-200'],
+                        ['7. Failed Requests', number_format($m['failed_indexing_requests'] ?? 0), 'Auto-retry active', 'bg-rose-500 hover:border-rose-200'],
+                        ['8. Organic Clicks', number_format($m['total_organic_clicks'] ?? 0), $seoDateLabels[$seoDateRange] ?? $seoDateRange, 'bg-[#F20B83] hover:border-rose-200'],
+                        ['9. Impressions', number_format($m['total_organic_impressions'] ?? 0), 'Search visibility', 'bg-purple-500 hover:border-purple-200'],
+                        ['10. Avg Position', ($m['average_google_position'] ?? 0) > 0 ? $m['average_google_position'] : '—', 'SERP rank average', 'bg-amber-500 hover:border-amber-200'],
+                        ['11. Avg CTR', ($m['average_ctr'] ?? 0) > 0 ? $m['average_ctr'] . '%' : '—', 'Click-through rate', 'bg-emerald-500 hover:border-emerald-200'],
+                        ['12. Keywords', number_format($m['total_targeted_keywords'] ?? 0), 'Tracked in database', 'bg-violet-500 hover:border-violet-200'],
+                        ['13. Top 100 Rank', number_format($m['ranking_keywords'] ?? 0), 'Ranking queries', 'bg-amber-500 hover:border-amber-200'],
+                        ['14. Health Score', ($m['seo_health_score'] ?? 100) . '%', 'Clean technical grade', 'bg-emerald-500 hover:border-emerald-200'],
+                        ['15. Tech Issues', number_format($m['technical_seo_issues'] ?? 0), 'Open findings', 'bg-rose-500 hover:border-rose-200'],
+                        ['16. Missing Titles', number_format($m['missing_meta_titles'] ?? 0), 'Tag check', 'bg-orange-500 hover:border-orange-200'],
+                        ['17. Missing Desc', number_format($m['missing_meta_descriptions'] ?? 0), 'Snippet check', 'bg-amber-500 hover:border-amber-200'],
+                        ['18. Duplicates', number_format($m['duplicate_content_warnings'] ?? 0), 'Title / desc duplicates', 'bg-rose-500 hover:border-rose-200'],
+                        ['19. Broken Links', number_format($m['broken_links'] ?? 0), '404 dead endpoints', 'bg-slate-500 hover:border-slate-300'],
+                        ['20. Crawl Errors', number_format($m['crawl_errors'] ?? 0), '5xx / HTTP blocks', 'bg-rose-600 hover:border-rose-200'],
+                    ];
+                @endphp
 
-                <!-- 2. Total Indexed URLs -->
-                <div class="{{ $card }} p-4 border-l-4 border-l-emerald-600">
-                    <p class="text-[11px] font-bold uppercase text-emerald-800">2. Indexed URLs</p>
-                    <h4 class="text-xl font-black text-emerald-950 mt-1">{{ number_format($m['total_indexed_urls'] ?? 0) }}</h4>
-                    <p class="text-[10px] text-emerald-700 mt-0.5">Verified on Google</p>
-                </div>
-
-                <!-- 3. Total Not Indexed URLs -->
-                <div class="{{ $card }} p-4 border-l-4 border-l-amber-600">
-                    <p class="text-[11px] font-bold uppercase text-amber-800">3. Not Indexed</p>
-                    <h4 class="text-xl font-black text-amber-950 mt-1">{{ number_format($m['total_not_indexed_urls'] ?? 0) }}</h4>
-                    <p class="text-[10px] text-amber-700 mt-0.5">Discovered / Queued</p>
-                </div>
-
-                <!-- 4. Pending Indexing URLs -->
-                <div class="{{ $card }} p-4 border-l-4 border-l-blue-600">
-                    <p class="text-[11px] font-bold uppercase text-blue-800">4. Pending Queue</p>
-                    <h4 class="text-xl font-black text-blue-950 mt-1">{{ number_format($m['pending_indexing_urls'] ?? 0) }}</h4>
-                    <p class="text-[10px] text-blue-700 mt-0.5">Awaiting worker ping</p>
-                </div>
-
-                <!-- 5. Sitemap URLs -->
-                <div class="{{ $card }} p-4 border-l-4 border-l-indigo-600">
-                    <p class="text-[11px] font-bold uppercase text-indigo-800">5. Sitemap URLs</p>
-                    <h4 class="text-xl font-black text-indigo-950 mt-1">{{ number_format($m['sitemap_urls'] ?? 0) }}</h4>
-                    <p class="text-[10px] text-indigo-700 mt-0.5">Across 8 sitemaps</p>
-                </div>
-
-                <!-- 6. Submitted URLs -->
-                <div class="{{ $card }} p-4 border-l-4 border-l-teal-600">
-                    <p class="text-[11px] font-bold uppercase text-teal-800">6. Submitted</p>
-                    <h4 class="text-xl font-black text-teal-950 mt-1">{{ number_format($m['submitted_urls'] ?? 0) }}</h4>
-                    <p class="text-[10px] text-teal-700 mt-0.5">Dispatched to search</p>
-                </div>
-
-                <!-- 7. Failed Indexing Requests -->
-                <div class="{{ $card }} p-4 border-l-4 border-l-red-600">
-                    <p class="text-[11px] font-bold uppercase text-red-800">7. Failed Requests</p>
-                    <h4 class="text-xl font-black text-red-950 mt-1">{{ number_format($m['failed_indexing_requests'] ?? 0) }}</h4>
-                    <p class="text-[10px] text-red-700 mt-0.5">Auto-retry active</p>
-                </div>
-
-                <!-- 8. Total Organic Clicks -->
-                <div class="{{ $card }} p-4 border-l-4 border-l-pink-600">
-                    <p class="text-[11px] font-bold uppercase text-pink-800">8. Organic Clicks</p>
-                    <h4 class="text-xl font-black text-pink-950 mt-1">{{ number_format($m['total_organic_clicks'] ?? 0) }}</h4>
-                    <p class="text-[10px] text-pink-700 mt-0.5">{{ $seoDateRange }}</p>
-                </div>
-
-                <!-- 9. Total Organic Impressions -->
-                <div class="{{ $card }} p-4 border-l-4 border-l-purple-600">
-                    <p class="text-[11px] font-bold uppercase text-purple-800">9. Impressions</p>
-                    <h4 class="text-xl font-black text-purple-950 mt-1">{{ number_format($m['total_organic_impressions'] ?? 0) }}</h4>
-                    <p class="text-[10px] text-purple-700 mt-0.5">Search visibility</p>
-                </div>
-
-                <!-- 10. Average Google Position -->
-                <div class="{{ $card }} p-4 border-l-4 border-l-cyan-600">
-                    <p class="text-[11px] font-bold uppercase text-cyan-800">10. Avg Position</p>
-                    <h4 class="text-xl font-black text-cyan-950 mt-1">{{ $m['average_google_position'] > 0 ? $m['average_google_position'] : '—' }}</h4>
-                    <p class="text-[10px] text-cyan-700 mt-0.5">SERP rank average</p>
-                </div>
-
-                <!-- 11. Average CTR -->
-                <div class="{{ $card }} p-4 border-l-4 border-l-emerald-500">
-                    <p class="text-[11px] font-bold uppercase text-emerald-800">11. Avg CTR</p>
-                    <h4 class="text-xl font-black text-emerald-950 mt-1">{{ $m['average_ctr'] > 0 ? $m['average_ctr'] . '%' : '—' }}</h4>
-                    <p class="text-[10px] text-emerald-700 mt-0.5">Click-through rate</p>
-                </div>
-
-                <!-- 12. Total Targeted Keywords -->
-                <div class="{{ $card }} p-4 border-l-4 border-l-violet-600">
-                    <p class="text-[11px] font-bold uppercase text-violet-800">12. Keywords</p>
-                    <h4 class="text-xl font-black text-violet-950 mt-1">{{ number_format($m['total_targeted_keywords'] ?? 0) }}</h4>
-                    <p class="text-[10px] text-violet-700 mt-0.5">Tracked in database</p>
-                </div>
-
-                <!-- 13. Ranking Keywords -->
-                <div class="{{ $card }} p-4 border-l-4 border-l-amber-500">
-                    <p class="text-[11px] font-bold uppercase text-amber-800">13. Top 100 Rank</p>
-                    <h4 class="text-xl font-black text-amber-950 mt-1">{{ number_format($m['ranking_keywords'] ?? 0) }}</h4>
-                    <p class="text-[10px] text-amber-700 mt-0.5">Ranking queries</p>
-                </div>
-
-                <!-- 14. SEO Health Score -->
-                <div class="{{ $card }} p-4 border-l-4 border-l-green-600 bg-gradient-to-br from-green-50/50 to-white">
-                    <p class="text-[11px] font-bold uppercase text-green-800">14. Health Score</p>
-                    <h4 class="text-xl font-black text-green-950 mt-1">{{ $m['seo_health_score'] ?? 100 }}%</h4>
-                    <p class="text-[10px] text-green-700 mt-0.5">Clean technical grade</p>
-                </div>
-
-                <!-- 15. Technical SEO Issues -->
-                <div class="{{ $card }} p-4 border-l-4 border-l-rose-600">
-                    <p class="text-[11px] font-bold uppercase text-rose-800">15. Tech Issues</p>
-                    <h4 class="text-xl font-black text-rose-950 mt-1">{{ number_format($m['technical_seo_issues'] ?? 0) }}</h4>
-                    <p class="text-[10px] text-rose-700 mt-0.5">Open findings</p>
-                </div>
-
-                <!-- 16. Missing Meta Titles -->
-                <div class="{{ $card }} p-4 border-l-4 border-l-orange-500">
-                    <p class="text-[11px] font-bold uppercase text-orange-800">16. Missing Titles</p>
-                    <h4 class="text-xl font-black text-orange-950 mt-1">{{ number_format($m['missing_meta_titles'] ?? 0) }}</h4>
-                    <p class="text-[10px] text-orange-700 mt-0.5">Tag check</p>
-                </div>
-
-                <!-- 17. Missing Meta Descriptions -->
-                <div class="{{ $card }} p-4 border-l-4 border-l-yellow-600">
-                    <p class="text-[11px] font-bold uppercase text-yellow-800">17. Missing Desc</p>
-                    <h4 class="text-xl font-black text-yellow-950 mt-1">{{ number_format($m['missing_meta_descriptions'] ?? 0) }}</h4>
-                    <p class="text-[10px] text-yellow-700 mt-0.5">Snippet check</p>
-                </div>
-
-                <!-- 18. Duplicate Content Warnings -->
-                <div class="{{ $card }} p-4 border-l-4 border-l-red-500">
-                    <p class="text-[11px] font-bold uppercase text-red-800">18. Duplicates</p>
-                    <h4 class="text-xl font-black text-red-950 mt-1">{{ number_format($m['duplicate_content_warnings'] ?? 0) }}</h4>
-                    <p class="text-[10px] text-red-700 mt-0.5">Title / desc duplicates</p>
-                </div>
-
-                <!-- 19. Broken Links -->
-                <div class="{{ $card }} p-4 border-l-4 border-l-stone-600">
-                    <p class="text-[11px] font-bold uppercase text-stone-700">19. Broken Links</p>
-                    <h4 class="text-xl font-black text-stone-900 mt-1">{{ number_format($m['broken_links'] ?? 0) }}</h4>
-                    <p class="text-[10px] text-stone-600 mt-0.5">404 dead endpoints</p>
-                </div>
-
-                <!-- 20. Crawl Errors -->
-                <div class="{{ $card }} p-4 border-l-4 border-l-rose-700">
-                    <p class="text-[11px] font-bold uppercase text-rose-800">20. Crawl Errors</p>
-                    <h4 class="text-xl font-black text-rose-950 mt-1">{{ number_format($m['crawl_errors'] ?? 0) }}</h4>
-                    <p class="text-[10px] text-rose-700 mt-0.5">5xx / HTTP blocks</p>
-                </div>
+                @foreach($overviewCards as [$ovTitle, $ovVal, $ovSub, $ovClasses])
+                    @php [$ovDot, $ovHoverBorder] = explode(' ', $ovClasses); @endphp
+                    <div class="group relative overflow-hidden rounded-2xl bg-white/95 border border-slate-200/80 p-4 shadow-[0_6px_22px_-12px_rgba(15,23,42,0.06)] hover:shadow-[0_14px_28px_-12px_rgba(15,23,42,0.12)] {{ $ovHoverBorder }} transition-all duration-150">
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="text-[10px] font-black uppercase tracking-wider text-slate-400 truncate">{{ $ovTitle }}</p>
+                            <span class="w-2 h-2 rounded-full {{ $ovDot }} shrink-0"></span>
+                        </div>
+                        <h4 class="text-xl font-black text-slate-950 tracking-tight tabular-nums mt-1.5">{{ $ovVal }}</h4>
+                        <p class="text-[11px] font-semibold text-slate-500 mt-0.5 truncate">{{ $ovSub }}</p>
+                    </div>
+                @endforeach
             </div>
         </div>
 
@@ -289,7 +179,7 @@
                         <span class="font-black text-emerald-700">Schema.org Valid</span>
                     </div>
                     <div class="w-full bg-slate-100 rounded-full h-2">
-                        <div class="bg-blue-500 h-2 rounded-full" style="width: 100%"></div>
+                        <div class="bg-gradient-to-r from-[#F20B83] to-fuchsia-500 h-2 rounded-full" style="width: 100%"></div>
                     </div>
 
                     <div class="flex items-center justify-between text-xs mt-2">
@@ -338,7 +228,7 @@
                                     <td class="py-2.5 text-slate-600">{{ $sm['frequency'] }}</td>
                                     <td class="py-2.5"><span class="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">{{ $sm['status'] }}</span></td>
                                     <td class="py-2.5 text-right">
-                                        <a href="{{ $sm['route'] }}" target="_blank" class="font-bold text-blue-600 hover:underline">XML ↗</a>
+                                        <a href="{{ $sm['route'] }}" target="_blank" class="font-bold text-[#F20B83] hover:underline">XML ↗</a>
                                     </td>
                                 </tr>
                             @endforeach
@@ -370,64 +260,99 @@
                 </div>
 
                 <!-- Add Keyword Form -->
+                @php
+                    $kwIntents = ['commercial' => 'Commercial', 'transactional' => 'Transactional', 'informational' => 'Informational', 'navigational' => 'Navigational'];
+                    $kwPriorities = ['critical' => 'Critical', 'high' => 'High', 'medium' => 'Medium', 'low' => 'Low'];
+                    $curKwIntent = $newKeywordForm['search_intent'] ?? 'commercial';
+                    $curKwPrio = $newKeywordForm['priority'] ?? 'high';
+                @endphp
                 <form wire:submit.prevent="saveNewKeyword" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 pt-4">
                     <div class="lg:col-span-2">
-                        <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Target Keyword *</label>
-                        <input type="text" wire:model="newKeywordForm.keyword" placeholder="e.g. adult personals miami" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-pink-500 focus:border-pink-500" required>
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Target Keyword *</label>
+                        <input type="text" wire:model="newKeywordForm.keyword" placeholder="e.g. adult personals miami" class="w-full px-3.5 py-2 text-xs font-semibold bg-slate-50/90 focus:bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#F20B83]/10 focus:border-[#F20B83] focus:outline-none transition" required>
+                    </div>
+
+                    <div class="relative" x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false">
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Search Intent</label>
+                        <button type="button" @click="open = !open" class="w-full flex items-center justify-between gap-2 px-3.5 py-2 text-xs font-bold text-slate-800 bg-slate-50/90 hover:bg-white border rounded-2xl transition cursor-pointer" :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200'">
+                            <span class="truncate">{{ $kwIntents[$curKwIntent] ?? 'Commercial' }}</span>
+                            <svg class="w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-cloak x-transition class="absolute left-0 right-0 mt-1.5 z-50 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200 shadow-xl p-1.5 space-y-0.5">
+                            @foreach($kwIntents as $ik => $il)
+                                <button type="button" wire:click="$set('newKeywordForm.search_intent', '{{ $ik }}')" @click="open = false" class="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer {{ $curKwIntent === $ik ? 'bg-rose-50 text-[#F20B83]' : 'text-slate-700 hover:bg-slate-50' }}">
+                                    <span>{{ $il }}</span>
+                                </button>
+                            @endforeach
+                        </div>
                     </div>
 
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Search Intent</label>
-                        <select wire:model="newKeywordForm.search_intent" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-pink-500 focus:border-pink-500">
-                            <option value="commercial">Commercial</option>
-                            <option value="transactional">Transactional</option>
-                            <option value="informational">Informational</option>
-                            <option value="navigational">Navigational</option>
-                        </select>
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Est. Volume / Mo</label>
+                        <input type="number" wire:model="newKeywordForm.search_volume" placeholder="1200" class="w-full px-3.5 py-2 text-xs font-semibold bg-slate-50/90 focus:bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#F20B83]/10 focus:border-[#F20B83] focus:outline-none transition">
                     </div>
 
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Est. Volume / Mo</label>
-                        <input type="number" wire:model="newKeywordForm.search_volume" placeholder="1200" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-pink-500 focus:border-pink-500">
-                    </div>
-
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Priority</label>
-                        <select wire:model="newKeywordForm.priority" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-pink-500 focus:border-pink-500">
-                            <option value="critical">Critical</option>
-                            <option value="high">High</option>
-                            <option value="medium">Medium</option>
-                            <option value="low">Low</option>
-                        </select>
+                    <div class="relative" x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false">
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Priority</label>
+                        <button type="button" @click="open = !open" class="w-full flex items-center justify-between gap-2 px-3.5 py-2 text-xs font-bold text-slate-800 bg-slate-50/90 hover:bg-white border rounded-2xl transition cursor-pointer" :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200'">
+                            <span class="truncate">{{ $kwPriorities[$curKwPrio] ?? 'High' }}</span>
+                            <svg class="w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-cloak x-transition class="absolute left-0 right-0 mt-1.5 z-50 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200 shadow-xl p-1.5 space-y-0.5">
+                            @foreach($kwPriorities as $pk => $pl)
+                                <button type="button" wire:click="$set('newKeywordForm.priority', '{{ $pk }}')" @click="open = false" class="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer {{ $curKwPrio === $pk ? 'bg-rose-50 text-[#F20B83]' : 'text-slate-700 hover:bg-slate-50' }}">
+                                    <span>{{ $pl }}</span>
+                                </button>
+                            @endforeach
+                        </div>
                     </div>
 
                     <div class="flex items-end">
-                        <button type="submit" class="{{ $btnPrimary }} w-full" style="{{ $btnPrimaryStyle }}">Add Keyword</button>
+                        <button type="submit" class="{{ $btnPrimary }} w-full">Add Keyword</button>
                     </div>
                 </form>
             </div>
 
             <!-- Keywords Table -->
-            <div class="{{ $card }} p-5">
+            <div class="{{ $card }} p-5 relative z-10">
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4">
-                    <div class="w-full sm:w-72">
-                        <input type="text" wire:model.live.debounce.300ms="seoKeywordSearch" placeholder="Search keywords..." class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-pink-500 focus:border-pink-500">
+                    <div class="w-full sm:w-72 relative group">
+                        <svg class="w-4 h-4 text-slate-400 group-focus-within:text-[#F20B83] transition absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <input type="text" wire:model.live.debounce.300ms="seoKeywordSearch" placeholder="Search keywords..." class="w-full pl-10 pr-4 py-2 text-xs font-semibold bg-slate-50/90 focus:bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#F20B83]/10 focus:border-[#F20B83] focus:outline-none transition">
                     </div>
 
-                    <div class="flex items-center gap-2 w-full sm:w-auto">
-                        <select wire:model.live="seoKeywordIntentFilter" class="px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white">
-                            <option value="all">All Intents</option>
-                            <option value="commercial">Commercial</option>
-                            <option value="transactional">Transactional</option>
-                            <option value="informational">Informational</option>
-                        </select>
+                    <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                        @php
+                            $kwIntentFilterLabels = ['all' => 'All Intents', 'commercial' => 'Commercial', 'transactional' => 'Transactional', 'informational' => 'Informational'];
+                            $kwPrioFilterLabels = ['all' => 'All Priorities', 'critical' => 'Critical', 'high' => 'High', 'medium' => 'Medium'];
+                        @endphp
+                        <div class="relative min-w-[140px]" x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false">
+                            <button type="button" @click="open = !open" class="w-full flex items-center justify-between gap-2 px-3.5 py-2 text-xs font-bold text-slate-800 bg-slate-50/90 hover:bg-white border rounded-2xl transition cursor-pointer" :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200'">
+                                <span class="truncate">{{ $kwIntentFilterLabels[$seoKeywordIntentFilter] ?? 'All Intents' }}</span>
+                                <svg class="w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div x-show="open" x-cloak x-transition class="absolute right-0 mt-1.5 w-44 z-50 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200 shadow-xl p-1.5 space-y-0.5">
+                                @foreach($kwIntentFilterLabels as $kifKey => $kifLbl)
+                                    <button type="button" wire:click="$set('seoKeywordIntentFilter', '{{ $kifKey }}')" @click="open = false" class="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer {{ $seoKeywordIntentFilter === $kifKey ? 'bg-rose-50 text-[#F20B83]' : 'text-slate-700 hover:bg-slate-50' }}">
+                                        <span>{{ $kifLbl }}</span>
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
 
-                        <select wire:model.live="seoKeywordPriorityFilter" class="px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white">
-                            <option value="all">All Priorities</option>
-                            <option value="critical">Critical</option>
-                            <option value="high">High</option>
-                            <option value="medium">Medium</option>
-                        </select>
+                        <div class="relative min-w-[140px]" x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false">
+                            <button type="button" @click="open = !open" class="w-full flex items-center justify-between gap-2 px-3.5 py-2 text-xs font-bold text-slate-800 bg-slate-50/90 hover:bg-white border rounded-2xl transition cursor-pointer" :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200'">
+                                <span class="truncate">{{ $kwPrioFilterLabels[$seoKeywordPriorityFilter] ?? 'All Priorities' }}</span>
+                                <svg class="w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div x-show="open" x-cloak x-transition class="absolute right-0 mt-1.5 w-44 z-50 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200 shadow-xl p-1.5 space-y-0.5">
+                                @foreach($kwPrioFilterLabels as $kpfKey => $kpfLbl)
+                                    <button type="button" wire:click="$set('seoKeywordPriorityFilter', '{{ $kpfKey }}')" @click="open = false" class="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer {{ $seoKeywordPriorityFilter === $kpfKey ? 'bg-rose-50 text-[#F20B83]' : 'text-slate-700 hover:bg-slate-50' }}">
+                                        <span>{{ $kpfLbl }}</span>
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -451,19 +376,19 @@
                                     <td class="py-3 font-black text-slate-900">
                                         {{ $kw->keyword }}
                                         @if($kw->target_url)
-                                            <a href="{{ $kw->target_url }}" target="_blank" class="block text-[10px] text-blue-600 font-normal hover:underline truncate max-w-xs">{{ $kw->target_url }}</a>
+                                            <a href="{{ $kw->target_url }}" target="_blank" class="block text-[10px] text-[#F20B83] font-normal hover:underline truncate max-w-xs">{{ $kw->target_url }}</a>
                                         @endif
                                     </td>
                                     <td class="py-3">
                                         @php
                                             $intentClasses = match($kw->search_intent) {
-                                                'commercial' => 'bg-blue-50 text-blue-800 border-blue-200',
+                                                'commercial' => 'bg-amber-50 text-amber-800 border-amber-200',
                                                 'transactional' => 'bg-purple-50 text-purple-800 border-purple-200',
                                                 'informational' => 'bg-emerald-50 text-emerald-800 border-emerald-200',
                                                 default => 'bg-slate-50 text-slate-700 border-slate-200',
                                             };
                                         @endphp
-                                        <span class="px-2 py-0.5 text-[10px] font-bold rounded-md border {{ $intentClasses }} uppercase">{{ $kw->search_intent }}</span>
+                                        <span class="px-2 py-0.5 text-[10px] font-bold rounded-full border {{ $intentClasses }} uppercase">{{ $kw->search_intent }}</span>
                                     </td>
                                     <td class="py-3 font-bold text-slate-800">
                                         @if($kw->search_volume > 0)
@@ -534,24 +459,52 @@
                     <p class="text-xs text-slate-600">Complete catalog of website URLs, canonical status, and indexing eligibility.</p>
                 </div>
 
+                @php
+                    $urlTypeLabels = [
+                        'all' => 'All URL Types',
+                        'listing' => 'Listing',
+                        'category' => 'Category',
+                        'location_state' => 'State Landing',
+                        'location_city' => 'City Landing',
+                        'cms_page' => 'CMS Page',
+                    ];
+                    $urlIndexLabels = [
+                        'all' => 'All Indexing States',
+                        'indexed' => 'Indexed',
+                        'discovered' => 'Discovered',
+                        'queued' => 'Queued',
+                        'submitted' => 'Submitted',
+                        'excluded' => 'Excluded / Noindex',
+                    ];
+                @endphp
                 <div class="flex flex-wrap items-center gap-2">
-                    <select wire:model.live="seoUrlTypeFilter" class="px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white">
-                        <option value="all">All URL Types</option>
-                        <option value="listing">Listing</option>
-                        <option value="category">Category</option>
-                        <option value="location_state">State Landing</option>
-                        <option value="location_city">City Landing</option>
-                        <option value="cms_page">CMS Page</option>
-                    </select>
+                    <div class="relative min-w-[145px]" x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false">
+                        <button type="button" @click="open = !open" class="w-full flex items-center justify-between gap-2 px-3.5 py-2 text-xs font-bold text-slate-800 bg-slate-50/90 hover:bg-white border rounded-2xl transition cursor-pointer" :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200'">
+                            <span class="truncate">{{ $urlTypeLabels[$seoUrlTypeFilter] ?? 'All URL Types' }}</span>
+                            <svg class="w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-cloak x-transition class="absolute right-0 mt-1.5 w-44 z-50 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200 shadow-xl p-1.5 space-y-0.5">
+                            @foreach($urlTypeLabels as $utKey => $utLbl)
+                                <button type="button" wire:click="$set('seoUrlTypeFilter', '{{ $utKey }}')" @click="open = false" class="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer {{ $seoUrlTypeFilter === $utKey ? 'bg-rose-50 text-[#F20B83]' : 'text-slate-700 hover:bg-slate-50' }}">
+                                    <span>{{ $utLbl }}</span>
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
 
-                    <select wire:model.live="seoUrlIndexingFilter" class="px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white">
-                        <option value="all">All Indexing States</option>
-                        <option value="indexed">Indexed</option>
-                        <option value="discovered">Discovered</option>
-                        <option value="queued">Queued</option>
-                        <option value="submitted">Submitted</option>
-                        <option value="excluded">Excluded / Noindex</option>
-                    </select>
+                    <div class="relative min-w-[160px]" x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false">
+                        <button type="button" @click="open = !open" class="w-full flex items-center justify-between gap-2 px-3.5 py-2 text-xs font-bold text-slate-800 bg-slate-50/90 hover:bg-white border rounded-2xl transition cursor-pointer" :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200'">
+                            <span class="truncate">{{ $urlIndexLabels[$seoUrlIndexingFilter] ?? 'All Indexing States' }}</span>
+                            <svg class="w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-cloak x-transition class="absolute right-0 mt-1.5 w-48 z-50 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200 shadow-xl p-1.5 space-y-0.5">
+                            @foreach($urlIndexLabels as $uiKey => $uiLbl)
+                                <button type="button" wire:click="$set('seoUrlIndexingFilter', '{{ $uiKey }}')" @click="open = false" class="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer {{ $seoUrlIndexingFilter === $uiKey ? 'bg-rose-50 text-[#F20B83]' : 'text-slate-700 hover:bg-slate-50' }}">
+                                    <span>{{ $uiLbl }}</span>
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -573,7 +526,7 @@
                             <tr class="hover:bg-slate-50/50">
                                 <td class="py-3 font-medium max-w-md">
                                     <span class="font-bold text-slate-900 block truncate">{{ $ur->meta_title ?: 'Untitled Route' }}</span>
-                                    <a href="{{ $ur->url }}" target="_blank" class="text-blue-600 text-[11px] hover:underline truncate block max-w-sm">{{ $ur->url }}</a>
+                                    <a href="{{ $ur->url }}" target="_blank" class="text-[#F20B83] text-[11px] hover:underline truncate block max-w-sm">{{ $ur->url }}</a>
                                 </td>
                                 <td class="py-3">
                                     <span class="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-slate-100 text-slate-700">{{ $ur->url_type }}</span>
@@ -589,7 +542,7 @@
                                         $statusClass = match($ur->indexing_status) {
                                             'indexed' => 'bg-emerald-100 text-emerald-900',
                                             'submitted' => 'bg-teal-100 text-teal-900',
-                                            'queued' => 'bg-blue-100 text-blue-900',
+                                            'queued' => 'bg-violet-100 text-violet-900',
                                             'discovered' => 'bg-amber-100 text-amber-900',
                                             default => 'bg-slate-100 text-slate-700',
                                         };
@@ -655,7 +608,7 @@
                                 <span class="font-bold text-slate-800">{{ $sm['frequency'] }}</span>
                             </div>
                             <div class="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between">
-                                <a href="{{ $sm['route'] }}" target="_blank" class="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1">
+                                <a href="{{ $sm['route'] }}" target="_blank" class="text-xs font-bold text-[#F20B83] hover:underline flex items-center gap-1">
                                     <span>Inspect Feed</span>
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                                 </a>
@@ -715,7 +668,7 @@
                                     <td class="py-3">{{ $item->attempts }} / {{ $item->max_attempts }}</td>
                                     <td class="py-3 text-slate-500">{{ $item->next_attempt_at?->diffForHumans() ?: 'Immediate' }}</td>
                                     <td class="py-3">
-                                        <span class="px-2 py-0.5 text-[10px] font-bold rounded-md uppercase {{ $item->status === 'submitted' ? 'bg-emerald-100 text-emerald-800' : ($item->status === 'failed' ? 'bg-rose-100 text-rose-800' : 'bg-blue-100 text-blue-800') }}">
+                                        <span class="px-2 py-0.5 text-[10px] font-bold rounded-full uppercase {{ $item->status === 'submitted' ? 'bg-emerald-100 text-emerald-800' : ($item->status === 'failed' ? 'bg-rose-100 text-rose-800' : 'bg-violet-100 text-violet-800') }}">
                                             {{ $item->status }}
                                         </span>
                                     </td>
@@ -813,7 +766,7 @@
                                 <tr class="hover:bg-slate-50/50">
                                     <td class="py-2.5 text-slate-500">{{ $row->date->format('Y-m-d') }}</td>
                                     <td class="py-2.5 font-bold text-slate-900">{{ $row->query ?: '—' }}</td>
-                                    <td class="py-2.5 text-blue-600 truncate max-w-xs">{{ $row->page_url }}</td>
+                                    <td class="py-2.5 text-[#F20B83] font-medium truncate max-w-xs">{{ $row->page_url }}</td>
                                     <td class="py-2.5 font-black text-pink-600">{{ number_format($row->clicks) }}</td>
                                     <td class="py-2.5 font-bold text-slate-700">{{ number_format($row->impressions) }}</td>
                                     <td class="py-2.5 text-slate-800">{{ number_format($row->ctr * 100, 2) }}%</td>
@@ -852,13 +805,23 @@
                 </div>
 
                 <!-- Filters -->
+                @php
+                    $issueSevLabels = ['all' => 'All Severities', 'critical' => 'Critical', 'warning' => 'Warning', 'notice' => 'Notice'];
+                @endphp
                 <div class="flex items-center gap-3 pt-4">
-                    <select wire:model.live="seoIssueSeverityFilter" class="px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white">
-                        <option value="all">All Severities</option>
-                        <option value="critical">Critical</option>
-                        <option value="warning">Warning</option>
-                        <option value="notice">Notice</option>
-                    </select>
+                    <div class="relative min-w-[155px]" x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false">
+                        <button type="button" @click="open = !open" class="w-full flex items-center justify-between gap-2 px-3.5 py-2 text-xs font-bold text-slate-800 bg-slate-50/90 hover:bg-white border rounded-2xl transition cursor-pointer" :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200'">
+                            <span class="truncate">{{ $issueSevLabels[$seoIssueSeverityFilter] ?? 'All Severities' }}</span>
+                            <svg class="w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-cloak x-transition class="absolute left-0 mt-1.5 w-44 z-50 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200 shadow-xl p-1.5 space-y-0.5">
+                            @foreach($issueSevLabels as $svKey => $svLbl)
+                                <button type="button" wire:click="$set('seoIssueSeverityFilter', '{{ $svKey }}')" @click="open = false" class="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer {{ $seoIssueSeverityFilter === $svKey ? 'bg-rose-50 text-[#F20B83]' : 'text-slate-700 hover:bg-slate-50' }}">
+                                    <span>{{ $svLbl }}</span>
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
 
                 <div class="overflow-x-auto mt-4">
@@ -877,12 +840,12 @@
                             @forelse($seoIssues as $issue)
                                 <tr class="hover:bg-slate-50/50">
                                     <td class="py-3">
-                                        <span class="px-2 py-0.5 text-[10px] font-black rounded-md uppercase {{ $issue->severity === 'critical' ? 'bg-red-100 text-red-900' : ($issue->severity === 'warning' ? 'bg-amber-100 text-amber-900' : 'bg-blue-100 text-blue-900') }}">
+                                        <span class="px-2 py-0.5 text-[10px] font-black rounded-full uppercase {{ $issue->severity === 'critical' ? 'bg-red-100 text-red-900' : ($issue->severity === 'warning' ? 'bg-amber-100 text-amber-900' : 'bg-violet-100 text-violet-900') }}">
                                             {{ $issue->severity }}
                                         </span>
                                     </td>
                                     <td class="py-3 font-mono font-bold text-[11px] text-slate-800">{{ $issue->issue_type }}</td>
-                                    <td class="py-3 text-blue-600 font-semibold truncate max-w-xs">{{ $issue->url }}</td>
+                                    <td class="py-3 text-[#F20B83] font-semibold truncate max-w-xs">{{ $issue->url }}</td>
                                     <td class="py-3 text-slate-700 max-w-sm">{{ $issue->description }}</td>
                                     <td class="py-3 text-slate-500 max-w-sm">{{ $issue->recommendation }}</td>
                                     <td class="py-3 text-right">
@@ -935,17 +898,27 @@
                         <input type="text" wire:model="newRedirectForm.target_url" placeholder="/listings/new-slug" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl">
                     </div>
 
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">HTTP Status</label>
-                        <select wire:model="newRedirectForm.status_code" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl">
-                            <option value="301">301 Moved Permanently</option>
-                            <option value="302">302 Found (Temporary)</option>
-                            <option value="410">410 Gone (Deleted Ad)</option>
-                        </select>
+                    @php
+                        $redirCodes = ['301' => '301 Moved Permanently', '302' => '302 Found (Temporary)', '410' => '410 Gone (Deleted Ad)'];
+                        $curRedirCode = (string) ($newRedirectForm['status_code'] ?? '301');
+                    @endphp
+                    <div class="relative" x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false">
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">HTTP Status</label>
+                        <button type="button" @click="open = !open" class="w-full flex items-center justify-between gap-2 px-3.5 py-2 text-xs font-bold text-slate-800 bg-slate-50/90 hover:bg-white border rounded-2xl transition cursor-pointer" :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200'">
+                            <span class="truncate">{{ $redirCodes[$curRedirCode] ?? '301 Moved Permanently' }}</span>
+                            <svg class="w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-cloak x-transition class="absolute left-0 right-0 mt-1.5 z-50 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200 shadow-xl p-1.5 space-y-0.5">
+                            @foreach($redirCodes as $rcKey => $rcLbl)
+                                <button type="button" wire:click="$set('newRedirectForm.status_code', '{{ $rcKey }}')" @click="open = false" class="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer {{ $curRedirCode === $rcKey ? 'bg-rose-50 text-[#F20B83]' : 'text-slate-700 hover:bg-slate-50' }}">
+                                    <span>{{ $rcLbl }}</span>
+                                </button>
+                            @endforeach
+                        </div>
                     </div>
 
                     <div class="flex items-end">
-                        <button type="submit" class="{{ $btnPrimary }} w-full" style="{{ $btnPrimaryStyle }}">Save Redirect Rule</button>
+                        <button type="submit" class="{{ $btnPrimary }} w-full">Save Redirect Rule</button>
                     </div>
                 </form>
             </div>
@@ -971,7 +944,7 @@
                                     <td class="py-3 font-mono font-bold text-slate-900">{{ $red->source_path }}</td>
                                     <td class="py-3 text-slate-700">{{ $red->target_url ?: '— (Resource Removed)' }}</td>
                                     <td class="py-3">
-                                        <span class="px-2 py-0.5 text-[10px] font-bold rounded font-mono {{ $red->status_code === 301 ? 'bg-blue-50 text-blue-800' : ($red->status_code === 410 ? 'bg-rose-50 text-rose-800' : 'bg-amber-50 text-amber-800') }}">
+                                        <span class="px-2 py-0.5 text-[10px] font-bold rounded-full font-mono {{ $red->status_code === 301 ? 'bg-violet-50 text-violet-800 border border-violet-200' : ($red->status_code === 410 ? 'bg-rose-50 text-rose-800 border border-rose-200' : 'bg-amber-50 text-amber-800 border border-amber-200') }}">
                                             {{ $red->status_code }}
                                         </span>
                                     </td>
@@ -1021,12 +994,26 @@
                         <input type="text" wire:model="gscForm.site_url" placeholder="https://localdatehub.com" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl" required>
                     </div>
 
-                    <div>
+                    @php
+                        $gscAuthModes = [
+                            'service_account' => 'Google Service Account (JSON / Private Key)',
+                            'oauth2' => 'OAuth 2.0 Web Application',
+                        ];
+                        $curAuthMode = $gscForm['auth_mode'] ?? 'service_account';
+                    @endphp
+                    <div class="relative" x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false">
                         <label class="block text-xs font-bold text-slate-700 mb-1">Authentication Mode</label>
-                        <select wire:model="gscForm.auth_mode" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl">
-                            <option value="service_account">Google Service Account (JSON / Private Key)</option>
-                            <option value="oauth2">OAuth 2.0 Web Application</option>
-                        </select>
+                        <button type="button" @click="open = !open" class="w-full flex items-center justify-between gap-2 px-3.5 py-2 text-xs font-bold text-slate-800 bg-slate-50/90 hover:bg-white border rounded-2xl transition cursor-pointer" :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200'">
+                            <span class="truncate">{{ $gscAuthModes[$curAuthMode] ?? 'Google Service Account (JSON / Private Key)' }}</span>
+                            <svg class="w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-cloak x-transition class="absolute left-0 right-0 mt-1.5 z-50 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200 shadow-xl p-1.5 space-y-0.5">
+                            @foreach($gscAuthModes as $amKey => $amLbl)
+                                <button type="button" wire:click="$set('gscForm.auth_mode', '{{ $amKey }}')" @click="open = false" class="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer {{ $curAuthMode === $amKey ? 'bg-rose-50 text-[#F20B83]' : 'text-slate-700 hover:bg-slate-50' }}">
+                                    <span>{{ $amLbl }}</span>
+                                </button>
+                            @endforeach
+                        </div>
                     </div>
 
                     <div>

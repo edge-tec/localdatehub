@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Livewire\AccountDashboard;
 use App\Livewire\Admin\AdminEnterpriseHub;
 use App\Models\User;
+use App\Modules\Advertising\Models\AdPlacementConfig;
+use App\Modules\Advertising\Services\AdDeliveryService;
 use App\Modules\Advertising\Services\AdTrackingService;
 use App\Modules\Categories\Models\Category;
 use App\Modules\Listings\Models\Listing;
@@ -15,6 +17,7 @@ use App\Modules\Payments\Crypto\Models\CryptoCurrency;
 use App\Modules\Payments\Crypto\Models\CryptoNetwork;
 use App\Modules\Payments\Crypto\Services\InHouse\CryptoInvoiceService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 use InvalidArgumentException;
 use Livewire\Livewire;
@@ -145,5 +148,18 @@ class SiteHealthAuditFixesTest extends TestCase
         $this->expectExceptionMessage('Deposit amount [$5] is outside permitted range ($10.00 - $5000.00).');
 
         app(CryptoInvoiceService::class)->createInvoice($user, 5, 'USDT', 'TRC20');
+    }
+
+    public function test_ad_delivery_service_recovers_from_invalid_cache_entries_without_type_error(): void
+    {
+        $slot = 'related_listings';
+        $incomplete = unserialize('O:16:"MissingStubModel":0:{}');
+        Cache::put('ads:slot_config_data:v1:' . $slot, $incomplete, 300);
+
+        $config = app(AdDeliveryService::class)->getPlacementConfig($slot);
+
+        $this->assertInstanceOf(AdPlacementConfig::class, $config);
+        $this->assertSame($slot, $config->slot);
+        $this->assertIsArray(Cache::get('ads:slot_config_data:v1:' . $slot));
     }
 }

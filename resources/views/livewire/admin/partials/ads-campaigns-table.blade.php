@@ -16,29 +16,53 @@
         'draft' => $enterpriseStats['draft_campaigns'] ?? 0,
         'expired' => $enterpriseStats['expired_campaigns'] ?? 0,
     ];
+
+    $typeLabels = [
+        'all' => ['All Formats', 'bg-slate-400'],
+        'banner' => ['Banner Ads', 'bg-amber-500'],
+        'affiliate' => ['Affiliate Offers', 'bg-purple-500'],
+        'hybrid' => ['Hybrid Format', 'bg-fuchsia-500'],
+    ];
+
+    $statusDotMap = [
+        'all' => 'bg-slate-400',
+        'active' => 'bg-emerald-500',
+        'scheduled' => 'bg-violet-500',
+        'paused' => 'bg-amber-500',
+        'draft' => 'bg-slate-400',
+        'expired' => 'bg-rose-500',
+        'archived' => 'bg-zinc-400',
+        'pending_approval' => 'bg-fuchsia-500',
+        'rejected' => 'bg-red-600',
+    ];
+
+    $activeSlotLabel = $campaignSlotFilter === 'all'
+        ? 'All 13 Placements'
+        : (\App\Modules\Advertising\Models\AdCampaign::SLOT_CATALOG[$campaignSlotFilter]['label'] ?? ucwords(str_replace('_', ' ', $campaignSlotFilter)));
 @endphp
 
 <div class="space-y-4">
-    <!-- Filter & Command Bar -->
-    <div class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3.5">
-        <!-- Quick Status Filter Pills -->
+    <!-- Futuristic Filter & Telemetry Console -->
+    <div class="relative z-20 rounded-3xl bg-white/95 backdrop-blur-xl border border-slate-200/80 p-4 sm:p-5 shadow-[0_12px_34px_-16px_rgba(15,23,42,0.07)] space-y-4">
+        <!-- Quick Status Dock -->
         <div class="flex flex-wrap items-center justify-between gap-3">
-            <div class="flex flex-wrap items-center gap-1.5">
+            <div class="inline-flex flex-wrap items-center gap-1.5 p-1 rounded-2xl bg-slate-100/85 border border-slate-200/70">
                 @foreach([
-                    'all' => 'All Campaigns',
-                    'active' => 'Active',
-                    'scheduled' => 'Scheduled',
-                    'paused' => 'Paused',
-                    'draft' => 'Draft',
-                    'expired' => 'Expired',
-                ] as $stKey => $stLabel)
+                    'all' => ['All Campaigns', 'bg-slate-400'],
+                    'active' => ['Active', 'bg-emerald-500'],
+                    'scheduled' => ['Scheduled', 'bg-violet-500'],
+                    'paused' => ['Paused', 'bg-amber-500'],
+                    'draft' => ['Draft', 'bg-slate-400'],
+                    'expired' => ['Expired', 'bg-rose-500'],
+                ] as $stKey => [$stLabel, $stDot])
                     <button
                         type="button"
                         wire:click="$set('campaignStatusFilter', '{{ $stKey }}')"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition cursor-pointer {{ $campaignStatusFilter === $stKey ? 'bg-slate-900 text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-150 cursor-pointer {{ $campaignStatusFilter === $stKey ? 'bg-slate-950 text-white shadow-sm' : 'text-slate-600 hover:text-slate-950 hover:bg-white/90' }}"
                     >
+                        <span class="w-1.5 h-1.5 rounded-full {{ $campaignStatusFilter === $stKey && $stKey === 'all' ? 'bg-[#F20B83]' : $stDot }}"></span>
                         <span>{{ $stLabel }}</span>
-                        <span class="px-1.5 py-0.2 rounded-full text-[10px] font-black {{ $campaignStatusFilter === $stKey ? 'bg-white/20 text-white' : 'bg-white text-slate-700' }}">
+                        <span class="px-1.5 py-0.2 rounded-full text-[10px] font-black tabular-nums {{ $campaignStatusFilter === $stKey ? 'bg-white/15 text-white' : 'bg-white text-slate-700 border border-slate-200/70' }}">
                             {{ number_format($statusCounts[$stKey] ?? 0) }}
                         </span>
                     </button>
@@ -49,69 +73,142 @@
                 <button
                     type="button"
                     wire:click="resetCampaignFilters"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition cursor-pointer"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-rose-50 hover:bg-rose-100 text-[#F20B83] border border-rose-200 transition cursor-pointer"
                 >
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                    <span>Reset Filters</span>
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    <span>Reset All</span>
                 </button>
             @endif
         </div>
 
-        <!-- Responsive Search & Dropdown Grid -->
+        <!-- Futuristic Search & Custom Dropdown Console -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5 items-center">
-            <!-- Search Input -->
-            <div class="sm:col-span-2 lg:col-span-4 relative">
-                <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <!-- Search Bar -->
+            <div class="sm:col-span-2 lg:col-span-5 relative group">
+                <svg class="w-4 h-4 text-slate-400 group-focus-within:text-[#F20B83] transition absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="campaignSearch"
-                    class="w-full rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900 pl-9 pr-3 py-2.5 focus:bg-white focus:border-[#F20B83] focus:ring-2 focus:ring-[#F20B83]/20 focus:outline-none transition"
+                    class="w-full rounded-2xl bg-slate-50/90 hover:bg-white focus:bg-white border border-slate-200/90 focus:border-[#F20B83] focus:ring-4 focus:ring-[#F20B83]/10 text-xs font-semibold text-slate-900 pl-10 pr-8 py-2.5 focus:outline-none transition-all"
                     placeholder="Search campaigns, brands, affiliate URLs..."
                 />
+                @if(trim($campaignSearch) !== '')
+                    <button type="button" wire:click="$set('campaignSearch', '')" aria-label="Clear campaign search" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-slate-200/80 hover:bg-rose-100 text-slate-500 hover:text-rose-600 flex items-center justify-center transition cursor-pointer">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                @endif
             </div>
 
-            <!-- Format Select -->
-            <div class="lg:col-span-2">
-                <select wire:model.live="campaignTypeFilter" aria-label="Filter by format" class="w-full rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-900 px-3 py-2.5 focus:bg-white focus:border-[#F20B83] focus:ring-2 focus:ring-[#F20B83]/20 focus:outline-none">
-                    <option value="all">All Formats</option>
-                    <option value="banner">Banner Ads</option>
-                    <option value="affiliate">Affiliate Offers</option>
-                    <option value="hybrid">Hybrid</option>
-                </select>
-            </div>
-
-            <!-- Status Select (All 8 Statuses) -->
-            <div class="lg:col-span-2">
-                <select wire:model.live="campaignStatusFilter" aria-label="Filter by status" class="w-full rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-900 px-3 py-2.5 focus:bg-white focus:border-[#F20B83] focus:ring-2 focus:ring-[#F20B83]/20 focus:outline-none">
-                    <option value="all">All 8 Statuses</option>
-                    @foreach(\App\Modules\Advertising\Models\AdCampaign::STATUSES as $st)
-                        <option value="{{ $st }}">{{ ucwords(str_replace('_', ' ', $st)) }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <!-- Placement Select -->
-            <div class="lg:col-span-2">
-                <select wire:model.live="campaignSlotFilter" aria-label="Filter by placement" class="w-full rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-900 px-3 py-2.5 focus:bg-white focus:border-[#F20B83] focus:ring-2 focus:ring-[#F20B83]/20 focus:outline-none">
-                    <option value="all">All 13 Placements</option>
-                    @foreach(\App\Modules\Advertising\Models\AdCampaign::SLOTS as $s)
-                        <option value="{{ $s }}">{{ \App\Modules\Advertising\Models\AdCampaign::SLOT_CATALOG[$s]['label'] ?? ucwords(str_replace('_', ' ', $s)) }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <!-- Create Campaign CTA -->
-            <div class="sm:col-span-2 lg:col-span-2">
-                <button
-                    type="button"
-                    wire:click="openCampaignModal"
-                    class="w-full px-4 py-2.5 rounded-xl bg-[#F20B83] hover:bg-[#D00972] text-white text-xs font-black transition shadow-sm hover:shadow flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                    <svg class="w-4 h-4 text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                    <span class="truncate">New Campaign</span>
+            <!-- Custom Format Dropdown -->
+            <div class="lg:col-span-2 relative" x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false">
+                <button type="button" @click="open = !open" aria-label="Filter by format"
+                    class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-2xl bg-slate-50/90 hover:bg-white border text-xs font-bold text-slate-800 transition-all cursor-pointer"
+                    :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200/90'">
+                    <span class="flex items-center gap-2 min-w-0 truncate">
+                        <span class="w-2 h-2 rounded-full shrink-0 {{ $typeLabels[$campaignTypeFilter][1] ?? 'bg-slate-400' }}"></span>
+                        <span class="truncate">{{ $typeLabels[$campaignTypeFilter][0] ?? 'All Formats' }}</span>
+                    </span>
+                    <svg class="w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                 </button>
+                <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-y-1 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 translate-y-1 scale-95"
+                    class="absolute left-0 right-0 mt-2 z-50 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-[0_20px_50px_-12px_rgba(15,23,42,0.22)] p-1.5 space-y-0.5">
+                    @foreach($typeLabels as $tKey => [$tText, $tDot])
+                        <button type="button" wire:click="$set('campaignTypeFilter', '{{ $tKey }}')" @click="open = false"
+                            class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer {{ $campaignTypeFilter === $tKey ? 'bg-rose-50 text-[#F20B83]' : 'text-slate-700 hover:bg-slate-50' }}">
+                            <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full {{ $tDot }}"></span><span>{{ $tText }}</span></span>
+                            @if($campaignTypeFilter === $tKey) <svg class="w-3.5 h-3.5 text-[#F20B83]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> @endif
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Custom Status Dropdown (All 8 Statuses) -->
+            <div class="lg:col-span-2 relative" x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false">
+                <button type="button" @click="open = !open" aria-label="Filter by status"
+                    class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-2xl bg-slate-50/90 hover:bg-white border text-xs font-bold text-slate-800 transition-all cursor-pointer"
+                    :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200/90'">
+                    <span class="flex items-center gap-2 min-w-0 truncate">
+                        <span class="w-2 h-2 rounded-full shrink-0 {{ $statusDotMap[$campaignStatusFilter] ?? 'bg-slate-400' }}"></span>
+                        <span class="truncate">{{ $campaignStatusFilter === 'all' ? 'All 8 Statuses' : ucwords(str_replace('_', ' ', $campaignStatusFilter)) }}</span>
+                    </span>
+                    <svg class="w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-y-1 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 translate-y-1 scale-95"
+                    class="absolute left-0 right-0 mt-2 z-50 max-h-64 overflow-y-auto rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-[0_20px_50px_-12px_rgba(15,23,42,0.22)] p-1.5 space-y-0.5">
+                    <button type="button" wire:click="$set('campaignStatusFilter', 'all')" @click="open = false"
+                        class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer {{ $campaignStatusFilter === 'all' ? 'bg-rose-50 text-[#F20B83]' : 'text-slate-700 hover:bg-slate-50' }}">
+                        <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-slate-400"></span><span>All 8 Statuses</span></span>
+                        @if($campaignStatusFilter === 'all') <svg class="w-3.5 h-3.5 text-[#F20B83]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> @endif
+                    </button>
+                    @foreach(\App\Modules\Advertising\Models\AdCampaign::STATUSES as $st)
+                        <button type="button" wire:click="$set('campaignStatusFilter', '{{ $st }}')" @click="open = false"
+                            class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer {{ $campaignStatusFilter === $st ? 'bg-rose-50 text-[#F20B83] font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
+                            <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full {{ $statusDotMap[$st] ?? 'bg-slate-400' }}"></span><span>{{ ucwords(str_replace('_', ' ', $st)) }}</span></span>
+                            @if($campaignStatusFilter === $st) <svg class="w-3.5 h-3.5 text-[#F20B83] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> @endif
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Custom Placement Dropdown -->
+            <div class="lg:col-span-3 relative" x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false">
+                <button type="button" @click="open = !open" aria-label="Filter by placement"
+                    class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-2xl bg-slate-50/90 hover:bg-white border text-xs font-bold text-slate-800 transition-all cursor-pointer"
+                    :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200/90'">
+                    <span class="flex items-center gap-2 min-w-0 truncate">
+                        <span class="w-2 h-2 rounded-full shrink-0 {{ $campaignSlotFilter === 'all' ? 'bg-slate-400' : 'bg-[#F20B83]' }}"></span>
+                        <span class="truncate">{{ $activeSlotLabel }}</span>
+                    </span>
+                    <svg class="w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-y-1 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 translate-y-1 scale-95"
+                    class="absolute left-0 right-0 mt-2 z-50 max-h-72 overflow-y-auto rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-[0_20px_50px_-12px_rgba(15,23,42,0.22)] p-1.5 space-y-0.5">
+                    <button type="button" wire:click="$set('campaignSlotFilter', 'all')" @click="open = false"
+                        class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer {{ $campaignSlotFilter === 'all' ? 'bg-rose-50 text-[#F20B83]' : 'text-slate-700 hover:bg-slate-50' }}">
+                        <span>All 13 Placements</span>
+                        @if($campaignSlotFilter === 'all') <svg class="w-3.5 h-3.5 text-[#F20B83]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> @endif
+                    </button>
+                    @foreach(\App\Modules\Advertising\Models\AdCampaign::SLOTS as $s)
+                        @php $slotName = \App\Modules\Advertising\Models\AdCampaign::SLOT_CATALOG[$s]['label'] ?? ucwords(str_replace('_', ' ', $s)); @endphp
+                        <button type="button" wire:click="$set('campaignSlotFilter', '{{ $s }}')" @click="open = false"
+                            class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer {{ $campaignSlotFilter === $s ? 'bg-rose-50 text-[#F20B83] font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
+                            <span class="truncate">{{ $slotName }}</span>
+                            @if($campaignSlotFilter === $s) <svg class="w-3.5 h-3.5 text-[#F20B83] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> @endif
+                        </button>
+                    @endforeach
+                </div>
             </div>
         </div>
+
+        @if($hasActiveFilters)
+            <div class="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100 text-[11px]">
+                <span class="font-black uppercase tracking-wider text-slate-400 mr-1">Active Filters:</span>
+                @if(trim($campaignSearch) !== '')
+                    <button type="button" wire:click="$set('campaignSearch', '')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900 text-white font-bold cursor-pointer hover:bg-slate-800">
+                        <span>Query: &ldquo;{{ Str::limit($campaignSearch, 24) }}&rdquo;</span>
+                        <span class="text-rose-300">&times;</span>
+                    </button>
+                @endif
+                @if($campaignTypeFilter !== 'all')
+                    <button type="button" wire:click="$set('campaignTypeFilter', 'all')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-200 font-bold cursor-pointer hover:bg-amber-100">
+                        <span>Format: {{ $typeLabels[$campaignTypeFilter][0] ?? ucfirst($campaignTypeFilter) }}</span>
+                        <span>&times;</span>
+                    </button>
+                @endif
+                @if($campaignStatusFilter !== 'all')
+                    <button type="button" wire:click="$set('campaignStatusFilter', 'all')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-900 border border-emerald-200 font-bold cursor-pointer hover:bg-emerald-100">
+                        <span>Status: {{ ucwords(str_replace('_', ' ', $campaignStatusFilter)) }}</span>
+                        <span>&times;</span>
+                    </button>
+                @endif
+                @if($campaignSlotFilter !== 'all')
+                    <button type="button" wire:click="$set('campaignSlotFilter', 'all')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-50 text-rose-900 border border-rose-200 font-bold cursor-pointer hover:bg-rose-100">
+                        <span>Slot: {{ $activeSlotLabel }}</span>
+                        <span>&times;</span>
+                    </button>
+                @endif
+            </div>
+        @endif
 
         <!-- Bulk Selection Action Bar -->
         @if(!empty($selectedCampaignIds))
@@ -162,8 +259,8 @@
                         $thumb = $creative?->resolvedImageUrl('desktop');
                         $statusStyles = [
                             'active' => ['pill' => 'bg-emerald-50 text-emerald-800 border-emerald-200', 'dot' => 'bg-emerald-500'],
-                            'scheduled' => ['pill' => 'bg-blue-50 text-blue-800 border-blue-200', 'dot' => 'bg-blue-500'],
-                            'pending_approval' => ['pill' => 'bg-indigo-50 text-indigo-800 border-indigo-200', 'dot' => 'bg-indigo-500'],
+                            'scheduled' => ['pill' => 'bg-violet-50 text-violet-800 border-violet-200', 'dot' => 'bg-violet-500'],
+                            'pending_approval' => ['pill' => 'bg-fuchsia-50 text-fuchsia-800 border-fuchsia-200', 'dot' => 'bg-fuchsia-500'],
                             'paused' => ['pill' => 'bg-amber-50 text-amber-800 border-amber-200', 'dot' => 'bg-amber-500'],
                             'draft' => ['pill' => 'bg-slate-100 text-slate-700 border-slate-300', 'dot' => 'bg-slate-400'],
                             'expired' => ['pill' => 'bg-rose-50 text-rose-800 border-rose-200', 'dot' => 'bg-rose-500'],
@@ -200,7 +297,7 @@
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-1.5 flex-wrap">
                                         <span class="font-black text-slate-950 text-xs truncate max-w-[180px]">{{ $camp->name }}</span>
-                                        <span class="px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase {{ $camp->campaign_type === 'affiliate' ? 'bg-purple-100 text-purple-900' : ($camp->campaign_type === 'hybrid' ? 'bg-indigo-100 text-indigo-900' : 'bg-blue-100 text-blue-900') }}">
+                                        <span class="px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase {{ $camp->campaign_type === 'affiliate' ? 'bg-purple-100 text-purple-900' : ($camp->campaign_type === 'hybrid' ? 'bg-fuchsia-100 text-fuchsia-900' : 'bg-amber-100 text-amber-900') }}">
                                             {{ $camp->campaign_type }}
                                         </span>
                                     </div>
@@ -336,7 +433,7 @@
                 $creative = $camp->creatives->first();
                 $thumb = $creative?->resolvedImageUrl('mobile');
             @endphp
-            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs space-y-3" wire:key="camp-card-{{ $camp->id }}">
+            <div class="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-3xl p-4 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.06)] space-y-3" wire:key="camp-card-{{ $camp->id }}">
                 <div class="flex items-start justify-between gap-3">
                     <div class="flex items-center gap-3 min-w-0">
                         <input
@@ -346,57 +443,58 @@
                             class="rounded border-slate-300 text-[#F20B83] focus:ring-[#F20B83]"
                         />
                         @if($thumb)
-                            <img src="{{ $thumb }}" alt="{{ $camp->name }}" class="w-11 h-11 rounded-xl object-cover border border-slate-200 shrink-0" />
+                            <img src="{{ $thumb }}" alt="{{ $camp->name }}" class="w-11 h-11 rounded-2xl object-cover border border-slate-200 shrink-0" />
                         @endif
                         <div class="min-w-0">
                             <div class="font-black text-slate-950 text-sm truncate">{{ $camp->name }}</div>
                             <div class="text-[11px] font-semibold text-slate-500 truncate">{{ $creative?->affiliate_brand_name ?: ($camp->advertiser_name ?: 'Direct Partner') }} · {{ ucfirst($camp->campaign_type) }}</div>
                         </div>
                     </div>
-                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-slate-100 text-slate-800 border border-slate-200 shrink-0">
-                        {{ str_replace('_', ' ', $camp->status) }}
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-slate-100 text-slate-800 border border-slate-200 shrink-0">
+                        <span class="w-1.5 h-1.5 rounded-full {{ $statusDotMap[$camp->status] ?? 'bg-slate-400' }}"></span>
+                        <span>{{ str_replace('_', ' ', $camp->status) }}</span>
                     </span>
                 </div>
 
-                <div class="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs">
+                <div class="grid grid-cols-3 gap-2 p-3 rounded-2xl bg-slate-50/90 border border-slate-200/70 text-center text-xs">
                     <div>
-                        <div class="text-[10px] font-bold text-slate-500 uppercase">Impr.</div>
-                        <div class="font-black text-slate-900">{{ number_format($camp->total_impressions) }}</div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Impr.</div>
+                        <div class="font-black text-slate-900 tabular-nums">{{ number_format($camp->total_impressions) }}</div>
                     </div>
                     <div>
-                        <div class="text-[10px] font-bold text-slate-500 uppercase">Clicks</div>
-                        <div class="font-black text-slate-900">{{ number_format($camp->total_clicks) }}</div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Clicks</div>
+                        <div class="font-black text-slate-900 tabular-nums">{{ number_format($camp->total_clicks) }}</div>
                     </div>
                     <div>
-                        <div class="text-[10px] font-bold text-slate-500 uppercase">CTR</div>
-                        <div class="font-black text-[#F20B83]">{{ $camp->clickThroughRate() }}%</div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">CTR</div>
+                        <div class="font-black text-[#F20B83] tabular-nums">{{ $camp->clickThroughRate() }}%</div>
                     </div>
                 </div>
 
-                <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100">
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
                     @if($camp->status === 'active')
-                        <button type="button" wire:click="updateCampaignStatus({{ $camp->id }}, 'paused')" class="px-3 py-1.5 rounded-lg bg-amber-50 text-amber-900 text-xs font-bold border border-amber-200">Pause</button>
+                        <button type="button" wire:click="updateCampaignStatus({{ $camp->id }}, 'paused')" class="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold border border-amber-200 transition cursor-pointer">Pause</button>
                     @else
-                        <button type="button" wire:click="updateCampaignStatus({{ $camp->id }}, 'active')" class="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-900 text-xs font-bold border border-emerald-200">Activate</button>
+                        <button type="button" wire:click="updateCampaignStatus({{ $camp->id }}, 'active')" class="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 text-xs font-bold border border-emerald-200 transition cursor-pointer">Activate</button>
                     @endif
                     <div class="flex items-center gap-1.5">
-                        <button type="button" wire:click="openPreviewCampaignModal({{ $camp->id }})" class="px-2.5 py-1.5 rounded-lg bg-pink-50 text-[#F20B83] text-xs font-bold border border-pink-200">Preview</button>
-                        <button type="button" wire:click="openCampaignModal({{ $camp->id }})" class="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-800 text-xs font-bold border border-slate-300">Edit</button>
-                        <button type="button" wire:click="duplicateCampaign({{ $camp->id }})" class="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-800 text-xs font-bold border border-slate-300">Clone</button>
-                        <button type="button" wire:click="confirmDeleteCampaign({{ $camp->id }})" class="px-2.5 py-1.5 rounded-lg bg-rose-50 text-rose-700 text-xs font-bold border border-rose-200">Delete</button>
+                        <button type="button" wire:click="openPreviewCampaignModal({{ $camp->id }})" class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-[#F20B83] text-xs font-bold border border-rose-200 transition cursor-pointer">Preview</button>
+                        <button type="button" wire:click="openCampaignModal({{ $camp->id }})" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold border border-slate-200 transition cursor-pointer">Edit</button>
+                        <button type="button" wire:click="duplicateCampaign({{ $camp->id }})" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold border border-slate-200 transition cursor-pointer">Clone</button>
+                        <button type="button" wire:click="confirmDeleteCampaign({{ $camp->id }})" class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold border border-rose-200 transition cursor-pointer">Delete</button>
                     </div>
                 </div>
             </div>
         @empty
-            <div class="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-3">
+            <div class="bg-white/95 border border-slate-200/80 rounded-3xl p-8 text-center space-y-3 shadow-xs">
                 <p class="text-sm font-black text-slate-900">
                     {{ $hasActiveFilters ? 'No Campaigns Match Filters' : 'No Campaigns Created Yet' }}
                 </p>
                 <div class="flex flex-wrap justify-center gap-2">
                     @if($hasActiveFilters)
-                        <button type="button" wire:click="resetCampaignFilters" class="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold">Reset Filters</button>
+                        <button type="button" wire:click="resetCampaignFilters" class="px-4 py-2 rounded-2xl bg-slate-950 text-white text-xs font-bold cursor-pointer">Reset Filters</button>
                     @endif
-                    <button type="button" wire:click="openCampaignModal" class="px-4 py-2 rounded-xl bg-[#F20B83] text-white text-xs font-bold">Create Campaign</button>
+                    <button type="button" wire:click="openCampaignModal" class="px-4 py-2 rounded-2xl bg-gradient-to-r from-[#F20B83] to-rose-600 text-white text-xs font-bold cursor-pointer">Create Campaign</button>
                 </div>
             </div>
         @endforelse

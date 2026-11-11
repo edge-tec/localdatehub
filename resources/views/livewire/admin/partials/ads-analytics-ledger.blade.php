@@ -70,7 +70,7 @@
         <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
             <div class="flex items-center justify-between">
                 <p class="text-[11px] font-black uppercase text-slate-500">Impressions</p>
-                <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                <svg class="w-4 h-4 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
             </div>
             <div class="text-2xl font-black text-slate-950 mt-1">{{ number_format($sum['impressions'] ?? 0) }}</div>
             <p class="text-[11px] font-semibold text-slate-500 mt-0.5">{{ number_format($sum['unique_impressions'] ?? 0) }} unique views</p>
@@ -117,7 +117,7 @@
                 <p class="text-xs text-slate-500 font-medium">Relative daily volume of ad impressions and click-throughs across the selected period.</p>
             </div>
             <div class="flex items-center gap-3 text-[11px] font-bold">
-                <span class="inline-flex items-center gap-1.5 text-slate-700"><span class="w-2.5 h-2.5 rounded-sm bg-blue-500"></span>Impressions</span>
+                <span class="inline-flex items-center gap-1.5 text-slate-700"><span class="w-2.5 h-2.5 rounded-sm bg-violet-500"></span>Impressions</span>
                 <span class="inline-flex items-center gap-1.5 text-slate-700"><span class="w-2.5 h-2.5 rounded-sm bg-[#F20B83]"></span>Clicks</span>
             </div>
         </div>
@@ -130,7 +130,7 @@
                     @endphp
                     <div class="flex flex-col items-center gap-1 h-full justify-end group min-w-[36px]" title="{{ $d->date }}: {{ number_format($d->impressions) }} impr / {{ number_format($d->clicks) }} clicks ({{ $d->ctr }}% CTR)">
                         <div class="w-full flex items-end justify-center gap-1 h-24">
-                            <div class="w-2.5 sm:w-3 rounded-t-md bg-blue-500/85 group-hover:bg-blue-600 transition-all" style="height: {{ $imprPct }}%"></div>
+                            <div class="w-2.5 sm:w-3 rounded-t-md bg-gradient-to-t from-violet-600 to-fuchsia-400 group-hover:from-violet-700 group-hover:to-fuchsia-500 transition-all" style="height: {{ $imprPct }}%"></div>
                             <div class="w-2 sm:w-2.5 rounded-t-md bg-[#F20B83] group-hover:bg-[#D00972] transition-all" style="height: {{ max(4, $clkPct) }}%"></div>
                         </div>
                         <span class="text-[9px] font-bold text-slate-500 truncate">{{ \Illuminate\Support\Carbon::parse($d->date)->format('M j') }}</span>
@@ -224,7 +224,7 @@
                             <span class="font-black text-slate-900">{{ $devRow->ctr }}% CTR</span>
                         </div>
                         <div class="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                            <div class="h-full bg-blue-600 rounded-full" style="width: {{ $pct }}%"></div>
+                            <div class="h-full bg-gradient-to-r from-violet-600 to-fuchsia-500 rounded-full" style="width: {{ $pct }}%"></div>
                         </div>
                         <div class="text-[10px] text-slate-500">{{ number_format($devRow->impressions) }} impr · {{ number_format($devRow->clicks) }} clicks</div>
                     </div>

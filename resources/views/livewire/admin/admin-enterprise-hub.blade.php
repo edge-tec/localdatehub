@@ -5059,35 +5059,43 @@
                 $kpiCtr = $enterpriseStats['global_ctr'] ?? ($adStats['global_ctr'] ?? 0);
                 $kpiS2sRev = (float) ($enterpriseStats['conversion_revenue_usd'] ?? 0);
                 $kpiPipelineRev = (float) ($enterpriseStats['pipeline_value_usd'] ?? ($adStats['total_revenue_usd'] ?? 0));
+                $activeSharePct = $kpiTotalCampaigns > 0 ? min(100, round(($kpiActiveCampaigns / $kpiTotalCampaigns) * 100)) : 0;
             @endphp
 
-            <!-- Command Hero Header -->
-            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-950 via-slate-900 to-fuchsia-950 p-5 sm:p-6 mb-5 shadow-md border border-slate-800">
-                <div class="absolute -right-12 -top-12 w-56 h-56 rounded-full bg-pink-500/15 blur-2xl pointer-events-none"></div>
-                <div class="relative flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                    <div class="min-w-0">
-                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-pink-500/20 border border-pink-400/30 text-pink-200 text-[11px] font-black uppercase tracking-wider mb-2">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <!-- Light Architectural Glass Command Header -->
+            <div class="relative overflow-hidden rounded-3xl bg-white/95 backdrop-blur-xl p-5 sm:p-7 mb-5 border border-slate-200/80 shadow-[0_14px_40px_-16px_rgba(15,23,42,0.08)]">
+                <div class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[#F20B83] via-fuchsia-500 to-amber-400 opacity-85"></div>
+                <div class="absolute -right-16 -top-16 w-72 h-72 rounded-full bg-gradient-to-br from-[#F20B83]/12 via-fuchsia-400/10 to-amber-300/10 blur-3xl pointer-events-none"></div>
+                <div class="absolute left-1/3 -bottom-20 w-56 h-56 rounded-full bg-violet-500/8 blur-3xl pointer-events-none"></div>
+
+                <div class="relative flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+                    <div class="min-w-0 space-y-2">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50/90 border border-rose-200/80 text-rose-700 text-[11px] font-black uppercase tracking-widest">
+                            <span class="relative flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                            </span>
                             <span>Ad Server &amp; Affiliate Monetization</span>
                         </div>
-                        <h2 class="text-lg sm:text-xl font-black text-white tracking-tight">Advertising &amp; Revenue Command Hub</h2>
-                        <p class="text-xs sm:text-sm text-slate-300 font-medium mt-0.5 max-w-2xl">
+                        <h2 class="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">Advertising &amp; Revenue Command Hub</h2>
+                        <p class="text-xs sm:text-sm text-slate-500 font-medium max-w-2xl leading-relaxed">
                             Manage geo-targeted banners, S2S affiliate offers, 13 responsive ad placements, frequency caps, and real-time conversion telemetry.
                         </p>
                     </div>
+
                     <div class="flex flex-wrap items-center gap-2.5 shrink-0">
                         <button
                             type="button"
                             wire:click="openAdModal"
-                            class="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 text-xs font-black transition inline-flex items-center gap-2"
+                            class="px-4 py-2.5 rounded-2xl bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200/90 text-xs font-extrabold transition-all duration-200 hover:-translate-y-0.5 shadow-xs inline-flex items-center gap-2 cursor-pointer"
                         >
-                            <svg class="w-4 h-4 text-pink-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+                            <svg class="w-4 h-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
                             <span>New Legacy Slot</span>
                         </button>
                         <button
                             type="button"
                             wire:click="openCampaignModal"
-                            class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#F20B83] to-rose-600 hover:from-[#D00972] hover:to-rose-700 text-white text-xs font-black transition shadow-sm inline-flex items-center gap-2"
+                            class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#F20B83] via-rose-600 to-fuchsia-600 hover:from-[#D00972] hover:via-rose-700 hover:to-fuchsia-700 text-white text-xs font-black transition-all duration-200 hover:-translate-y-0.5 shadow-[0_10px_24px_-8px_rgba(242,11,131,0.55)] inline-flex items-center gap-2 cursor-pointer"
                         >
                             <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                             <span>New Campaign</span>
@@ -5096,118 +5104,136 @@
                 </div>
             </div>
 
-            <!-- Advertising Command Ribbon (4 KPI Cards) -->
+            <!-- 2026 Bento Telemetry Grid (4 KPI Cards — Zero Blue Accents) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
                 <!-- Card 1: Total Campaigns -->
-                <div class="{{ $card }} p-5 border-l-4 border-l-purple-600 hover:shadow-md transition">
-                    <div class="flex items-start justify-between gap-3">
+                <div class="group relative overflow-hidden rounded-3xl bg-white border border-slate-200/80 p-5 shadow-[0_8px_28px_-14px_rgba(15,23,42,0.07)] hover:shadow-[0_18px_36px_-14px_rgba(168,85,247,0.18)] hover:border-purple-200 transition-all duration-200">
+                    <div class="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-purple-500/8 blur-2xl group-hover:bg-purple-500/15 transition"></div>
+                    <div class="relative flex items-start justify-between gap-3">
                         <div class="min-w-0">
-                            <p class="text-[11px] font-black uppercase tracking-wider text-slate-600">Total Campaigns</p>
-                            <h3 class="text-2xl font-black text-slate-950 mt-1">{{ number_format($kpiTotalCampaigns) }}</h3>
-                            <p class="text-xs font-semibold text-slate-600 mt-1 truncate">
+                            <p class="text-[11px] font-black uppercase tracking-widest text-slate-400">Total Campaigns</p>
+                            <h3 class="text-3xl font-black text-slate-950 tracking-tight tabular-nums mt-1.5">{{ number_format($kpiTotalCampaigns) }}</h3>
+                            <p class="text-xs font-semibold text-slate-500 mt-1 truncate">
                                 {{ $enterpriseStats['enterprise_campaigns'] ?? 0 }} enterprise · {{ $enterpriseStats['scheduled_campaigns'] ?? 0 }} scheduled
                             </p>
                         </div>
-                        <div class="w-11 h-11 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 flex items-center justify-center shrink-0">
+                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-50 to-fuchsia-100/80 text-purple-700 border border-purple-200/70 flex items-center justify-center shrink-0 shadow-xs">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
                         </div>
                     </div>
-                    <div class="mt-3 flex items-center gap-1.5 text-[11px] font-bold text-purple-900 bg-purple-50 border border-purple-200/80 px-2.5 py-1 rounded-lg">
-                        <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
-                        <span>{{ $enterpriseStats['draft_campaigns'] ?? 0 }} drafts · {{ $enterpriseStats['expired_campaigns'] ?? 0 }} expired</span>
+                    <div class="relative mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-purple-800 bg-purple-50/90 border border-purple-200/70 px-2.5 py-0.5 rounded-full">
+                            <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
+                            <span>{{ $enterpriseStats['draft_campaigns'] ?? 0 }} drafts · {{ $enterpriseStats['expired_campaigns'] ?? 0 }} expired</span>
+                        </span>
+                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Inventory</span>
                     </div>
                 </div>
 
                 <!-- Card 2: Active Delivery -->
-                <div class="{{ $card }} p-5 border-l-4 border-l-emerald-600 hover:shadow-md transition">
-                    <div class="flex items-start justify-between gap-3">
+                <div class="group relative overflow-hidden rounded-3xl bg-white border border-slate-200/80 p-5 shadow-[0_8px_28px_-14px_rgba(15,23,42,0.07)] hover:shadow-[0_18px_36px_-14px_rgba(16,185,129,0.18)] hover:border-emerald-200 transition-all duration-200">
+                    <div class="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-emerald-500/8 blur-2xl group-hover:bg-emerald-500/15 transition"></div>
+                    <div class="relative flex items-start justify-between gap-3">
                         <div class="min-w-0">
-                            <p class="text-[11px] font-black uppercase tracking-wider text-slate-600">Active Delivery</p>
-                            <h3 class="text-2xl font-black text-emerald-800 mt-1">{{ number_format($kpiActiveCampaigns) }}</h3>
-                            <p class="text-xs font-semibold text-slate-600 mt-1 truncate">
+                            <p class="text-[11px] font-black uppercase tracking-widest text-slate-400">Active Delivery</p>
+                            <h3 class="text-3xl font-black text-emerald-700 tracking-tight tabular-nums mt-1.5">{{ number_format($kpiActiveCampaigns) }}</h3>
+                            <p class="text-xs font-semibold text-slate-500 mt-1 truncate">
                                 {{ $enterpriseStats['paused_campaigns'] ?? 0 }} paused across 13 slots
                             </p>
                         </div>
-                        <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center shrink-0">
+                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-100/80 text-emerald-700 border border-emerald-200/70 flex items-center justify-center shrink-0 shadow-xs">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
                     </div>
-                    <div class="mt-3 flex items-center gap-1.5 text-[11px] font-bold text-emerald-900 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-lg">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span>Weighted Ad Rotation Live</span>
+                    <div class="relative mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-800 bg-emerald-50/90 border border-emerald-200/70 px-2.5 py-0.5 rounded-full">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span>Weighted Ad Rotation Live</span>
+                        </span>
+                        <span class="text-[10px] font-black tabular-nums text-emerald-600">{{ $activeSharePct }}%</span>
                     </div>
                 </div>
 
-                <!-- Card 3: Impressions & Clicks -->
-                <div class="{{ $card }} p-5 border-l-4 border-l-blue-600 hover:shadow-md transition">
-                    <div class="flex items-start justify-between gap-3">
+                <!-- Card 3: Verified Impressions (Amber/Gold Accent — No Blue) -->
+                <div class="group relative overflow-hidden rounded-3xl bg-white border border-slate-200/80 p-5 shadow-[0_8px_28px_-14px_rgba(15,23,42,0.07)] hover:shadow-[0_18px_36px_-14px_rgba(245,158,11,0.18)] hover:border-amber-200 transition-all duration-200">
+                    <div class="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-amber-500/8 blur-2xl group-hover:bg-amber-500/15 transition"></div>
+                    <div class="relative flex items-start justify-between gap-3">
                         <div class="min-w-0">
-                            <p class="text-[11px] font-black uppercase tracking-wider text-slate-600">Verified Impressions</p>
-                            <h3 class="text-2xl font-black text-slate-950 mt-1">{{ number_format($kpiImpressions) }}</h3>
-                            <p class="text-xs font-semibold text-slate-600 mt-1 truncate">
+                            <p class="text-[11px] font-black uppercase tracking-widest text-slate-400">Verified Impressions</p>
+                            <h3 class="text-3xl font-black text-slate-950 tracking-tight tabular-nums mt-1.5">{{ number_format($kpiImpressions) }}</h3>
+                            <p class="text-xs font-semibold text-slate-500 mt-1 truncate">
                                 {{ number_format($kpiClicks) }} clicks · {{ number_format($kpiConversions) }} conversions
                             </p>
                         </div>
-                        <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 flex items-center justify-center shrink-0">
+                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-100/80 text-amber-700 border border-amber-200/70 flex items-center justify-center shrink-0 shadow-xs">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                         </div>
                     </div>
-                    <div class="mt-3 flex items-center gap-1.5 text-[11px] font-bold text-blue-900 bg-blue-50 border border-blue-200/80 px-2.5 py-1 rounded-lg">
-                        <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
-                        <span>Anti-Fraud Click Guard Enabled</span>
+                    <div class="relative mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-900 bg-amber-50/90 border border-amber-200/70 px-2.5 py-0.5 rounded-full">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                            <span>Anti-Fraud Click Guard Enabled</span>
+                        </span>
+                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Shield</span>
                     </div>
                 </div>
 
-                <!-- Card 4: Global CTR & Revenue -->
-                <div class="{{ $card }} p-5 border-l-4 border-l-pink-600 hover:shadow-md transition">
-                    <div class="flex items-start justify-between gap-3">
+                <!-- Card 4: Global CTR & S2S Revenue -->
+                <div class="group relative overflow-hidden rounded-3xl bg-white border border-slate-200/80 p-5 shadow-[0_8px_28px_-14px_rgba(15,23,42,0.07)] hover:shadow-[0_18px_36px_-14px_rgba(242,11,131,0.2)] hover:border-rose-200 transition-all duration-200">
+                    <div class="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-[#F20B83]/8 blur-2xl group-hover:bg-[#F20B83]/15 transition"></div>
+                    <div class="relative flex items-start justify-between gap-3">
                         <div class="min-w-0">
-                            <p class="text-[11px] font-black uppercase tracking-wider text-slate-600">CTR &amp; S2S Revenue</p>
-                            <h3 class="text-2xl font-black text-pink-700 mt-1">{{ $kpiCtr }}%</h3>
-                            <p class="text-xs font-semibold text-slate-600 mt-1 truncate">
+                            <p class="text-[11px] font-black uppercase tracking-widest text-slate-400">CTR &amp; S2S Revenue</p>
+                            <h3 class="text-3xl font-black text-[#F20B83] tracking-tight tabular-nums mt-1.5">{{ $kpiCtr }}%</h3>
+                            <p class="text-xs font-semibold text-slate-500 mt-1 truncate">
                                 ${{ number_format($kpiS2sRev, 2) }} S2S · ${{ number_format($kpiPipelineRev, 2) }} total
                             </p>
                         </div>
-                        <div class="w-11 h-11 rounded-xl bg-pink-50 text-pink-700 border border-pink-200 flex items-center justify-center shrink-0">
+                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-rose-50 to-pink-100/80 text-[#F20B83] border border-rose-200/70 flex items-center justify-center shrink-0 shadow-xs">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
                     </div>
-                    <div class="mt-3 flex items-center gap-1.5 text-[11px] font-bold text-pink-900 bg-pink-50 border border-pink-200/80 px-2.5 py-1 rounded-lg">
-                        <span class="w-1.5 h-1.5 rounded-full bg-pink-600"></span>
-                        <span>{{ number_format($kpiClicks) }} Verified Engagements</span>
+                    <div class="relative mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-rose-800 bg-rose-50/90 border border-rose-200/70 px-2.5 py-0.5 rounded-full">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#F20B83]"></span>
+                            <span>{{ number_format($kpiClicks) }} Verified Engagements</span>
+                        </span>
+                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Yield</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Ad Monetization Sub-Navigation -->
-            <div class="flex flex-wrap items-center gap-2 mb-5 bg-white p-2 rounded-2xl border border-slate-200/80 shadow-xs">
-                <button type="button" wire:click="setAdSubTab('campaigns')"
-                    class="px-3.5 py-2 rounded-xl text-xs font-black transition inline-flex items-center gap-2 {{ $adSubTab === 'campaigns' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100/80 hover:bg-slate-200 text-slate-700' }}">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
-                    <span>Campaigns</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-[10px] {{ $adSubTab === 'campaigns' ? 'bg-white/25 text-white' : 'bg-slate-200 text-slate-800' }}">{{ $enterpriseStats['enterprise_campaigns'] ?? 0 }}</span>
-                </button>
+            <!-- Frosted Segmented Sub-Navigation Dock -->
+            <div class="mb-5">
+                <div class="inline-flex flex-wrap items-center gap-1.5 p-1.5 rounded-2xl bg-slate-100/90 backdrop-blur-md border border-slate-200/80 shadow-xs w-full sm:w-auto">
+                    <button type="button" wire:click="setAdSubTab('campaigns')"
+                        class="flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black transition-all duration-200 inline-flex items-center justify-center gap-2 cursor-pointer {{ $adSubTab === 'campaigns' ? 'bg-slate-950 text-white shadow-[0_6px_16px_-6px_rgba(15,23,42,0.45)]' : 'text-slate-600 hover:text-slate-950 hover:bg-white/80' }}">
+                        <svg class="w-4 h-4 {{ $adSubTab === 'campaigns' ? 'text-[#F20B83]' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+                        <span>Campaigns</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-[10px] tabular-nums {{ $adSubTab === 'campaigns' ? 'bg-[#F20B83] text-white' : 'bg-white text-slate-700 border border-slate-200/80' }}">{{ $enterpriseStats['enterprise_campaigns'] ?? 0 }}</span>
+                    </button>
 
-                <button type="button" wire:click="setAdSubTab('inventory')"
-                    class="px-3.5 py-2 rounded-xl text-xs font-black transition inline-flex items-center gap-2 {{ $adSubTab === 'inventory' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100/80 hover:bg-slate-200 text-slate-700' }}">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
-                    <span>Slot Architecture</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-[10px] {{ $adSubTab === 'inventory' ? 'bg-white/25 text-white' : 'bg-slate-200 text-slate-800' }}">13 Slots</span>
-                </button>
+                    <button type="button" wire:click="setAdSubTab('inventory')"
+                        class="flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black transition-all duration-200 inline-flex items-center justify-center gap-2 cursor-pointer {{ $adSubTab === 'inventory' ? 'bg-slate-950 text-white shadow-[0_6px_16px_-6px_rgba(15,23,42,0.45)]' : 'text-slate-600 hover:text-slate-950 hover:bg-white/80' }}">
+                        <svg class="w-4 h-4 {{ $adSubTab === 'inventory' ? 'text-emerald-400' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+                        <span>Slot Architecture</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-[10px] tabular-nums {{ $adSubTab === 'inventory' ? 'bg-white/15 text-white' : 'bg-white text-slate-700 border border-slate-200/80' }}">13 Slots</span>
+                    </button>
 
-                <button type="button" wire:click="setAdSubTab('analytics')"
-                    class="px-3.5 py-2 rounded-xl text-xs font-black transition inline-flex items-center gap-2 {{ $adSubTab === 'analytics' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100/80 hover:bg-slate-200 text-slate-700' }}">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                    <span>Analytics &amp; Reports</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-[10px] {{ $adSubTab === 'analytics' ? 'bg-white/25 text-white' : 'bg-slate-200 text-slate-800' }}">{{ $kpiCtr }}% CTR</span>
-                </button>
+                    <button type="button" wire:click="setAdSubTab('analytics')"
+                        class="flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black transition-all duration-200 inline-flex items-center justify-center gap-2 cursor-pointer {{ $adSubTab === 'analytics' ? 'bg-slate-950 text-white shadow-[0_6px_16px_-6px_rgba(15,23,42,0.45)]' : 'text-slate-600 hover:text-slate-950 hover:bg-white/80' }}">
+                        <svg class="w-4 h-4 {{ $adSubTab === 'analytics' ? 'text-amber-400' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                        <span>Analytics &amp; Reports</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-[10px] tabular-nums {{ $adSubTab === 'analytics' ? 'bg-white/15 text-white' : 'bg-white text-slate-700 border border-slate-200/80' }}">{{ $kpiCtr }}% CTR</span>
+                    </button>
 
-                <button type="button" wire:click="setAdSubTab('legacy')"
-                    class="px-3.5 py-2 rounded-xl text-xs font-black transition inline-flex items-center gap-2 {{ $adSubTab === 'legacy' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100/80 hover:bg-slate-200 text-slate-700' }}">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                    <span>Legacy Slots</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-[10px] {{ $adSubTab === 'legacy' ? 'bg-white/25 text-white' : 'bg-slate-200 text-slate-800' }}">{{ $adStats['total_campaigns'] ?? 0 }}</span>
-                </button>
+                    <button type="button" wire:click="setAdSubTab('legacy')"
+                        class="flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black transition-all duration-200 inline-flex items-center justify-center gap-2 cursor-pointer {{ $adSubTab === 'legacy' ? 'bg-slate-950 text-white shadow-[0_6px_16px_-6px_rgba(15,23,42,0.45)]' : 'text-slate-600 hover:text-slate-950 hover:bg-white/80' }}">
+                        <svg class="w-4 h-4 {{ $adSubTab === 'legacy' ? 'text-fuchsia-400' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                        <span>Legacy Slots</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-[10px] tabular-nums {{ $adSubTab === 'legacy' ? 'bg-white/15 text-white' : 'bg-white text-slate-700 border border-slate-200/80' }}">{{ $adStats['total_campaigns'] ?? 0 }}</span>
+                    </button>
+                </div>
             </div>
 
             {{-- SUB-TAB 1: ENTERPRISE CAMPAIGNS --}}
@@ -5227,40 +5253,80 @@
 
             {{-- SUB-TAB 4: LEGACY QUICK SLOT PLACEMENTS --}}
             @if($adSubTab === 'legacy')
-                <div class="{{ $card }} p-4 mb-4">
+                <div class="relative z-20 rounded-3xl bg-white/95 backdrop-blur-xl border border-slate-200/80 p-4 sm:p-5 mb-4 shadow-[0_10px_30px_-14px_rgba(15,23,42,0.06)]">
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-                        <div class="md:col-span-5 relative">
+                        <!-- Search Pill -->
+                        <div class="md:col-span-5 relative group">
+                            <svg class="w-4 h-4 text-slate-400 group-focus-within:text-[#F20B83] transition absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                             <input
                                 type="text"
                                 wire:model.live.debounce.300ms="adSearch"
-                                class="{{ $input }} pl-9 text-xs font-bold text-slate-900"
+                                class="w-full rounded-2xl bg-slate-50/90 hover:bg-white focus:bg-white border border-slate-200/90 focus:border-[#F20B83] focus:ring-4 focus:ring-[#F20B83]/10 text-xs font-semibold text-slate-900 pl-10 pr-8 py-2.5 focus:outline-none transition-all"
                                 placeholder="Search legacy placements, advertisers, URLs..."
                             />
-                            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            @if(trim($adSearch) !== '')
+                                <button type="button" wire:click="$set('adSearch', '')" aria-label="Clear search" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-slate-200/80 hover:bg-rose-100 text-slate-500 hover:text-rose-600 flex items-center justify-center transition cursor-pointer">
+                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            @endif
                         </div>
 
-                        <div class="md:col-span-3">
-                            <select wire:model.live="adSlotFilter" class="{{ $input }} text-xs font-bold text-slate-900">
-                                <option value="all">All Placement Slots</option>
+                        <!-- Futuristic Legacy Slot Dropdown -->
+                        <div class="md:col-span-3 relative" x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false">
+                            <button type="button" @click="open = !open" aria-label="Filter legacy slots"
+                                class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-2xl bg-slate-50/90 hover:bg-white border text-xs font-bold text-slate-800 transition-all cursor-pointer"
+                                :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200/90'">
+                                <span class="flex items-center gap-2 min-w-0 truncate">
+                                    <span class="w-2 h-2 rounded-full shrink-0 {{ $adSlotFilter === 'all' ? 'bg-slate-400' : 'bg-[#F20B83]' }}"></span>
+                                    <span class="truncate">{{ $adSlotFilter === 'all' ? 'All Placement Slots' : ucwords(str_replace('_', ' ', $adSlotFilter)) }}</span>
+                                </span>
+                                <svg class="w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-y-1 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 translate-y-1 scale-95"
+                                class="absolute left-0 right-0 mt-2 z-50 max-h-64 overflow-y-auto rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-[0_20px_50px_-12px_rgba(15,23,42,0.22)] p-1.5 space-y-0.5">
+                                <button type="button" wire:click="$set('adSlotFilter', 'all')" @click="open = false"
+                                    class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer {{ $adSlotFilter === 'all' ? 'bg-rose-50 text-[#F20B83]' : 'text-slate-700 hover:bg-slate-50' }}">
+                                    <span>All Placement Slots</span>
+                                    @if($adSlotFilter === 'all') <svg class="w-3.5 h-3.5 text-[#F20B83]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> @endif
+                                </button>
                                 @foreach(\App\Modules\Admin\Models\AdPlacement::SLOTS as $s)
-                                    <option value="{{ $s }}">{{ ucwords(str_replace('_', ' ', $s)) }}</option>
+                                    <button type="button" wire:click="$set('adSlotFilter', '{{ $s }}')" @click="open = false"
+                                        class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer {{ $adSlotFilter === $s ? 'bg-rose-50 text-[#F20B83] font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
+                                        <span class="truncate">{{ ucwords(str_replace('_', ' ', $s)) }}</span>
+                                        @if($adSlotFilter === $s) <svg class="w-3.5 h-3.5 text-[#F20B83] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> @endif
+                                    </button>
                                 @endforeach
-                            </select>
+                            </div>
                         </div>
 
-                        <div class="md:col-span-2">
-                            <select wire:model.live="adStatusFilter" class="{{ $input }} text-xs font-bold text-slate-900">
-                                <option value="all">All Statuses</option>
-                                <option value="active">Active Only</option>
-                                <option value="paused">Paused Only</option>
-                            </select>
+                        <!-- Futuristic Legacy Status Dropdown -->
+                        <div class="md:col-span-2 relative" x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false">
+                            <button type="button" @click="open = !open" aria-label="Filter legacy status"
+                                class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-2xl bg-slate-50/90 hover:bg-white border text-xs font-bold text-slate-800 transition-all cursor-pointer"
+                                :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200/90'">
+                                <span class="flex items-center gap-2 min-w-0 truncate">
+                                    <span class="w-2 h-2 rounded-full shrink-0 {{ $adStatusFilter === 'active' ? 'bg-emerald-500' : ($adStatusFilter === 'paused' ? 'bg-amber-500' : 'bg-slate-400') }}"></span>
+                                    <span class="truncate">{{ $adStatusFilter === 'active' ? 'Active Only' : ($adStatusFilter === 'paused' ? 'Paused Only' : 'All Statuses') }}</span>
+                                </span>
+                                <svg class="w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-y-1 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 translate-y-1 scale-95"
+                                class="absolute left-0 right-0 mt-2 z-50 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-[0_20px_50px_-12px_rgba(15,23,42,0.22)] p-1.5 space-y-0.5">
+                                @foreach(['all' => ['All Statuses', 'bg-slate-400'], 'active' => ['Active Only', 'bg-emerald-500'], 'paused' => ['Paused Only', 'bg-amber-500']] as $stKey => [$stText, $stDot])
+                                    <button type="button" wire:click="$set('adStatusFilter', '{{ $stKey }}')" @click="open = false"
+                                        class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer {{ $adStatusFilter === $stKey ? 'bg-rose-50 text-[#F20B83]' : 'text-slate-700 hover:bg-slate-50' }}">
+                                        <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full {{ $stDot }}"></span><span>{{ $stText }}</span></span>
+                                        @if($adStatusFilter === $stKey) <svg class="w-3.5 h-3.5 text-[#F20B83]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> @endif
+                                    </button>
+                                @endforeach
+                            </div>
                         </div>
 
                         <div class="md:col-span-2 flex justify-end">
                             <button
                                 type="button"
                                 wire:click="openAdModal"
-                                class="w-full px-3.5 py-2.5 rounded-xl bg-[#F20B83] hover:bg-[#D00972] text-white text-xs font-black transition shadow-xs inline-flex items-center justify-center gap-1.5"
+                                class="w-full px-4 py-2.5 rounded-2xl bg-slate-950 hover:bg-[#F20B83] text-white text-xs font-black transition-all duration-200 shadow-xs inline-flex items-center justify-center gap-1.5 cursor-pointer"
                             >
                                 <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                                 <span>New Placement</span>
@@ -5490,190 +5556,180 @@
 
         {{-- ================= 14. SEO & MARKETING ================= --}}
         @if($tab === 'seo')
-            <!-- SEO & Marketing Command Ribbon -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <!-- Card 1: Indexable URLs -->
-                <div class="{{ $card }} p-5 border-l-4 border-l-emerald-600">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-black uppercase tracking-wider text-slate-700">Indexed Footprint</p>
-                            <h3 class="text-2xl font-black text-slate-950 mt-1">{{ number_format($seoStats['indexable_routes'] ?? 0) }}</h3>
-                            <p class="text-xs font-semibold text-slate-600 mt-0.5">{{ $seoStats['sitemaps_count'] ?? 5 }} XML Sitemaps Active</p>
-                        </div>
-                        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-300 flex items-center justify-center font-black text-xl">
-                            <svg class="w-6 h-6 text-emerald-700" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
-                        </div>
-                    </div>
-                    <div class="mt-3 flex items-center gap-1.5 text-xs font-bold text-emerald-900 bg-emerald-50/70 border border-emerald-200 px-2 py-1 rounded-md">
-                        <span>●</span><span>100% Crawlable Search Engine Ready</span>
-                    </div>
-                </div>
+            @php
+                $seoTabsMeta = [
+                    ['overview', 'Overview & 20 KPIs', 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z', null],
+                    ['metadata', 'Page Metadata & Overrides', 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z', $seoMetas->total() ?? count($seoMetas)],
+                    ['keywords', 'Keyword Research', 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z', null],
+                    ['urls', 'URL Inventory', 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1', null],
+                    ['sitemaps', 'XML Sitemaps Engine', 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z', null],
+                    ['indexing', 'Indexing Queue', 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10', null],
+                    ['gsc', 'Search Console', 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', null],
+                    ['audit', 'Technical Issues', 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z', null],
+                    ['redirects', 'Redirects & 410', 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4', null],
+                    ['settings', 'SEO Settings', 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z', null],
+                    ['robots', 'Robots.txt & Crawlers', 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', null],
+                    ['serp', 'Live Google SERP Simulator', 'M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z', null],
+                    ['marketing', 'Tracking Pixels & Tags', 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', null],
+                    ['trends', 'Organic Search Trends', 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6', $searchTrends->count()],
+                ];
 
-                <!-- Card 2: SERP Metadata Health -->
-                <div class="{{ $card }} p-5 border-l-4 border-l-blue-600">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-black uppercase tracking-wider text-slate-700">SERP Health Score</p>
-                            <h3 class="text-2xl font-black text-slate-950 mt-1">{{ $seoStats['health_score'] ?? 98 }}%</h3>
-                            <p class="text-xs font-semibold text-slate-600 mt-0.5">{{ $seoStats['total_overrides'] ?? 0 }} Route Overrides Configured</p>
-                        </div>
-                        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-800 border border-blue-300 flex items-center justify-center font-black text-xl">
-                            <svg class="w-6 h-6 text-blue-700" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </div>
-                    </div>
-                    <div class="mt-3 flex items-center gap-1.5 text-xs font-bold text-blue-900 bg-blue-50/70 border border-blue-200 px-2 py-1 rounded-md">
-                        <span>✓</span><span>OpenGraph &amp; Twitter Cards Active</span>
-                    </div>
-                </div>
+                $robotsOptions = [
+                    'all' => ['All Robots Directives', 'bg-slate-400'],
+                    'index, follow' => ['index, follow (Indexed)', 'bg-emerald-500'],
+                    'noindex, follow' => ['noindex, follow (Follow Links Only)', 'bg-amber-500'],
+                    'index, nofollow' => ['index, nofollow (Index No Pass)', 'bg-purple-500'],
+                    'noindex, nofollow' => ['noindex, nofollow (Blocked)', 'bg-rose-500'],
+                ];
+            @endphp
 
-                <!-- Card 3: Robots & Crawlers Directives -->
-                <div class="{{ $card }} p-5 border-l-4 border-l-amber-600">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-black uppercase tracking-wider text-slate-700">Crawl Directives</p>
-                            <h3 class="text-2xl font-black text-slate-950 mt-1">{{ $seoStats['index_follow_count'] ?? 0 }} / {{ $seoStats['total_overrides'] ?? 0 }}</h3>
-                            <p class="text-xs font-semibold text-slate-600 mt-0.5">Index, Follow Enabled</p>
+            <!-- Light Architectural Glass SEO Header -->
+            <div class="relative overflow-hidden rounded-3xl bg-white/95 backdrop-blur-xl p-5 sm:p-6 mb-5 border border-slate-200/80 shadow-[0_14px_40px_-16px_rgba(15,23,42,0.08)]">
+                <div class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[#F20B83] via-fuchsia-500 to-emerald-400 opacity-85"></div>
+                <div class="absolute -right-14 -top-14 w-64 h-64 rounded-full bg-gradient-to-br from-[#F20B83]/10 via-fuchsia-400/10 to-emerald-300/10 blur-3xl pointer-events-none"></div>
+                <div class="relative flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div class="min-w-0 space-y-1.5">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50/90 border border-rose-200/80 text-rose-700 text-[11px] font-black uppercase tracking-widest">
+                            <span class="relative flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                            </span>
+                            <span>Search Engine Intelligence &amp; Schema</span>
                         </div>
-                        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-900 border border-amber-300 flex items-center justify-center font-black text-xl">
-                            <svg class="w-6 h-6 text-amber-700" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-                        </div>
+                        <h2 class="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">SEO Meta, Sitemaps &amp; SERP Command Hub</h2>
+                        <p class="text-xs sm:text-sm text-slate-500 font-medium max-w-2xl">
+                            Control canonical metadata overrides, 8 XML sitemap feeds, robots directives, indexing queue, and real-time search demand.
+                        </p>
                     </div>
-                    <div class="mt-3 flex items-center gap-1.5 text-xs font-bold text-amber-950 bg-amber-50/70 border border-amber-200 px-2 py-1 rounded-md">
-                        <span>●</span><span>/robots.txt Live Directives Serving</span>
-                    </div>
-                </div>
-
-                <!-- Card 4: Organic Search Trends Demand -->
-                <div class="{{ $card }} p-5 border-l-4 border-l-purple-600">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-black uppercase tracking-wider text-slate-700">Organic Search Hits</p>
-                            <h3 class="text-2xl font-black text-slate-950 mt-1">{{ number_format($searchTrends->sum('hits') ?? 0) }}</h3>
-                            <p class="text-xs font-semibold text-slate-600 mt-0.5">{{ $searchTrends->count() }} Keyword Trends Logged</p>
-                        </div>
-                        <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-900 border border-purple-300 flex items-center justify-center font-black text-xl">
-                            <svg class="w-6 h-6 text-purple-700" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-                        </div>
-                    </div>
-                    <div class="mt-3 flex items-center gap-1.5 text-xs font-bold text-purple-950 bg-purple-50/70 border border-purple-200 px-2 py-1 rounded-md">
-                        <span>★</span><span>Geo Search Demand Intel Active</span>
+                    <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                        <button
+                            type="button"
+                            wire:click="generateDefaultSeoMetas"
+                            class="px-4 py-2.5 rounded-2xl bg-slate-50 hover:bg-purple-50 text-slate-800 hover:text-purple-900 border border-slate-200/90 hover:border-purple-200 text-xs font-extrabold transition-all duration-200 hover:-translate-y-0.5 shadow-xs inline-flex items-center gap-2 cursor-pointer"
+                        >
+                            <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            <span>Generate Default Baselines</span>
+                        </button>
+                        <button
+                            type="button"
+                            wire:click="openSeoModal"
+                            class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#F20B83] via-rose-600 to-fuchsia-600 hover:from-[#D00972] hover:via-rose-700 hover:to-fuchsia-700 text-white text-xs font-black transition-all duration-200 hover:-translate-y-0.5 shadow-[0_10px_24px_-8px_rgba(242,11,131,0.55)] inline-flex items-center gap-2 cursor-pointer"
+                        >
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                            <span>New SEO Override</span>
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- SEO & Marketing Segmented Sub-Tabs Bar -->
-            <div class="flex items-center gap-2 overflow-x-auto pb-2 mb-6 border-b border-slate-200">
-                <button 
-                    wire:click="setSeoSubTab('overview')" 
-                    class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'overview' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-                    <span>Overview &amp; 20 KPIs</span>
-                </button>
+            <!-- 2026 Bento Telemetry Grid (4 KPI Cards — Zero Blue Accents) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+                <!-- Card 1: Indexed Footprint -->
+                <div class="group relative overflow-hidden rounded-3xl bg-white border border-slate-200/80 p-5 shadow-[0_8px_28px_-14px_rgba(15,23,42,0.07)] hover:shadow-[0_18px_36px_-14px_rgba(16,185,129,0.18)] hover:border-emerald-200 transition-all duration-200">
+                    <div class="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-emerald-500/8 blur-2xl group-hover:bg-emerald-500/15 transition"></div>
+                    <div class="relative flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-[11px] font-black uppercase tracking-widest text-slate-400">Indexed Footprint</p>
+                            <h3 class="text-3xl font-black text-slate-950 tracking-tight tabular-nums mt-1.5">{{ number_format($seoStats['indexable_routes'] ?? 0) }}</h3>
+                            <p class="text-xs font-semibold text-slate-500 mt-1 truncate">{{ $seoStats['sitemaps_count'] ?? 5 }} XML Sitemaps Active</p>
+                        </div>
+                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-100/80 text-emerald-700 border border-emerald-200/70 flex items-center justify-center shrink-0 shadow-xs">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+                        </div>
+                    </div>
+                    <div class="relative mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-800 bg-emerald-50/90 border border-emerald-200/70 px-2.5 py-0.5 rounded-full">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span>100% Crawlable Search Ready</span>
+                        </span>
+                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Index</span>
+                    </div>
+                </div>
 
-                <button 
-                    wire:click="setSeoSubTab('metadata')" 
-                    class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'metadata' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                    <span>Page Metadata &amp; Overrides ({{ $seoMetas->total() ?? count($seoMetas) }})</span>
-                </button>
+                <!-- Card 2: SERP Health Score (Signature Rose — Zero Blue) -->
+                <div class="group relative overflow-hidden rounded-3xl bg-white border border-slate-200/80 p-5 shadow-[0_8px_28px_-14px_rgba(15,23,42,0.07)] hover:shadow-[0_18px_36px_-14px_rgba(242,11,131,0.2)] hover:border-rose-200 transition-all duration-200">
+                    <div class="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-[#F20B83]/8 blur-2xl group-hover:bg-[#F20B83]/15 transition"></div>
+                    <div class="relative flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-[11px] font-black uppercase tracking-widest text-slate-400">SERP Health Score</p>
+                            <h3 class="text-3xl font-black text-[#F20B83] tracking-tight tabular-nums mt-1.5">{{ $seoStats['health_score'] ?? 98 }}%</h3>
+                            <p class="text-xs font-semibold text-slate-500 mt-1 truncate">{{ $seoStats['total_overrides'] ?? 0 }} Route Overrides Configured</p>
+                        </div>
+                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-rose-50 to-pink-100/80 text-[#F20B83] border border-rose-200/70 flex items-center justify-center shrink-0 shadow-xs">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                    </div>
+                    <div class="relative mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-rose-800 bg-rose-50/90 border border-rose-200/70 px-2.5 py-0.5 rounded-full">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#F20B83]"></span>
+                            <span>OpenGraph &amp; Twitter Cards Active</span>
+                        </span>
+                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">SERP</span>
+                    </div>
+                </div>
 
-                <button 
-                    wire:click="setSeoSubTab('keywords')" 
-                    class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'keywords' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                    <span>Keyword Research</span>
-                </button>
+                <!-- Card 3: Crawl Directives -->
+                <div class="group relative overflow-hidden rounded-3xl bg-white border border-slate-200/80 p-5 shadow-[0_8px_28px_-14px_rgba(15,23,42,0.07)] hover:shadow-[0_18px_36px_-14px_rgba(245,158,11,0.18)] hover:border-amber-200 transition-all duration-200">
+                    <div class="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-amber-500/8 blur-2xl group-hover:bg-amber-500/15 transition"></div>
+                    <div class="relative flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-[11px] font-black uppercase tracking-widest text-slate-400">Crawl Directives</p>
+                            <h3 class="text-3xl font-black text-slate-950 tracking-tight tabular-nums mt-1.5">{{ $seoStats['index_follow_count'] ?? 0 }} / {{ $seoStats['total_overrides'] ?? 0 }}</h3>
+                            <p class="text-xs font-semibold text-slate-500 mt-1 truncate">Index, Follow Enabled</p>
+                        </div>
+                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-100/80 text-amber-700 border border-amber-200/70 flex items-center justify-center shrink-0 shadow-xs">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                        </div>
+                    </div>
+                    <div class="relative mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-900 bg-amber-50/90 border border-amber-200/70 px-2.5 py-0.5 rounded-full">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                            <span>/robots.txt Live Directives Serving</span>
+                        </span>
+                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Bots</span>
+                    </div>
+                </div>
 
-                <button 
-                    wire:click="setSeoSubTab('urls')" 
-                    class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'urls' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-                    <span>URL Inventory</span>
-                </button>
+                <!-- Card 4: Organic Search Hits -->
+                <div class="group relative overflow-hidden rounded-3xl bg-white border border-slate-200/80 p-5 shadow-[0_8px_28px_-14px_rgba(15,23,42,0.07)] hover:shadow-[0_18px_36px_-14px_rgba(168,85,247,0.18)] hover:border-purple-200 transition-all duration-200">
+                    <div class="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-purple-500/8 blur-2xl group-hover:bg-purple-500/15 transition"></div>
+                    <div class="relative flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-[11px] font-black uppercase tracking-widest text-slate-400">Organic Search Hits</p>
+                            <h3 class="text-3xl font-black text-slate-950 tracking-tight tabular-nums mt-1.5">{{ number_format($searchTrends->sum('hits') ?? 0) }}</h3>
+                            <p class="text-xs font-semibold text-slate-500 mt-1 truncate">{{ $searchTrends->count() }} Keyword Trends Logged</p>
+                        </div>
+                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-50 to-fuchsia-100/80 text-purple-700 border border-purple-200/70 flex items-center justify-center shrink-0 shadow-xs">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                        </div>
+                    </div>
+                    <div class="relative mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-purple-800 bg-purple-50/90 border border-purple-200/70 px-2.5 py-0.5 rounded-full">
+                            <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
+                            <span>Geo Search Demand Intel Active</span>
+                        </span>
+                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Trends</span>
+                    </div>
+                </div>
+            </div>
 
-                <button 
-                    wire:click="setSeoSubTab('sitemaps')" 
-                    class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'sitemaps' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-                    <span>XML Sitemaps Engine</span>
-                </button>
-
-                <button 
-                    wire:click="setSeoSubTab('indexing')" 
-                    class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'indexing' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                    <span>Indexing Queue</span>
-                </button>
-
-                <button 
-                    wire:click="setSeoSubTab('gsc')" 
-                    class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'gsc' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                    <span>Search Console</span>
-                </button>
-
-                <button 
-                    wire:click="setSeoSubTab('audit')" 
-                    class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'audit' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    <span>Technical Issues</span>
-                </button>
-
-                <button 
-                    wire:click="setSeoSubTab('redirects')" 
-                    class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'redirects' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
-                    <span>Redirects &amp; 410</span>
-                </button>
-
-                <button 
-                    wire:click="setSeoSubTab('settings')" 
-                    class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'settings' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
-                    <span>SEO Settings</span>
-                </button>
-
-                <button 
-                    wire:click="setSeoSubTab('robots')" 
-                    class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'robots' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    <span>Robots.txt &amp; Crawlers</span>
-                </button>
-
-                <button 
-                    wire:click="setSeoSubTab('serp')" 
-                    class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'serp' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                    <span>Live Google SERP Simulator</span>
-                </button>
-
-                <button 
-                    wire:click="setSeoSubTab('marketing')" 
-                    class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'marketing' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                    <span>Tracking Pixels &amp; Tags</span>
-                </button>
-
-                <button 
-                    wire:click="setSeoSubTab('trends')" 
-                    class="px-4 py-2 rounded-xl font-black text-xs transition flex items-center gap-2 whitespace-nowrap {{ $seoSubTab === 'trends' ? 'bg-[#F20B65] text-white shadow-md' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200' }}"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-                    <span>Organic Search Trends ({{ $searchTrends->count() }})</span>
-                </button>
+            <!-- Responsive Frosted Segmented Sub-Tab Navigation (No Overflow Scrollbar) -->
+            <div class="mb-5 p-1.5 rounded-2xl bg-slate-100/90 backdrop-blur-md border border-slate-200/80 shadow-xs">
+                <div class="flex flex-wrap items-center gap-1.5">
+                    @foreach($seoTabsMeta as [$stKey, $stLabel, $stIcon, $stBadge])
+                        <button
+                            type="button"
+                            wire:click="setSeoSubTab('{{ $stKey }}')"
+                            class="px-3 py-1.5 rounded-xl font-black text-[11px] transition-all duration-150 inline-flex items-center gap-1.5 cursor-pointer {{ $seoSubTab === $stKey ? 'bg-slate-950 text-white shadow-[0_6px_16px_-6px_rgba(15,23,42,0.45)]' : 'text-slate-600 hover:text-slate-950 hover:bg-white/90' }}"
+                        >
+                            <svg class="w-3.5 h-3.5 shrink-0 {{ $seoSubTab === $stKey ? 'text-[#F20B83]' : 'text-slate-400' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $stIcon }}"/></svg>
+                            <span>{{ $stLabel }}</span>
+                            @if($stBadge !== null)
+                                <span class="px-1.5 py-0.2 rounded-full text-[10px] tabular-nums {{ $seoSubTab === $stKey ? 'bg-[#F20B83] text-white' : 'bg-white text-slate-700 border border-slate-200/80' }}">{{ $stBadge }}</span>
+                            @endif
+                        </button>
+                    @endforeach
+                </div>
             </div>
 
             {{-- ENTERPRISE SEO SUITE VIEWS --}}
@@ -5683,88 +5739,116 @@
 
             {{-- 1. SUB-TAB: METADATA & OPENGRAPH OVERRIDES --}}
             @if($seoSubTab === 'metadata')
-                <!-- Toolbar & Actions -->
-                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
-                        <!-- Search Input -->
-                        <div class="relative flex-1 max-w-md">
-                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                            </span>
-                            <input 
-                                type="text" 
-                                wire:model.live.debounce.300ms="seoSearch" 
-                                placeholder="Search route path, meta title, keywords..." 
-                                class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#F20B65] focus:border-[#F20B65] shadow-xs"
+                <!-- Futuristic Filter Console -->
+                <div class="relative z-20 rounded-3xl bg-white/95 backdrop-blur-xl border border-slate-200/80 p-4 sm:p-5 mb-4 shadow-[0_12px_34px_-16px_rgba(15,23,42,0.07)] space-y-3">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                        <!-- Search Pill -->
+                        <div class="md:col-span-6 relative group">
+                            <svg class="w-4 h-4 text-slate-400 group-focus-within:text-[#F20B83] transition absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="seoSearch"
+                                placeholder="Search route path, meta title, keywords..."
+                                class="w-full rounded-2xl bg-slate-50/90 hover:bg-white focus:bg-white border border-slate-200/90 focus:border-[#F20B83] focus:ring-4 focus:ring-[#F20B83]/10 text-xs font-semibold text-slate-900 pl-10 pr-8 py-2.5 focus:outline-none transition-all"
                             >
+                            @if(trim((string) $seoSearch) !== '')
+                                <button type="button" wire:click="$set('seoSearch', '')" aria-label="Clear SEO search" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-slate-200/80 hover:bg-rose-100 text-slate-500 hover:text-rose-600 flex items-center justify-center transition cursor-pointer">
+                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            @endif
                         </div>
 
-                        <!-- Robots Directive Filter -->
-                        <select 
-                            wire:model.live="seoRobotsFilter" 
-                            class="px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#F20B65] shadow-xs"
-                        >
-                            <option value="all">All Robots Directives</option>
-                            <option value="index, follow">index, follow (Indexed)</option>
-                            <option value="noindex, follow">noindex, follow (Follow Links Only)</option>
-                            <option value="index, nofollow">index, nofollow (Index No Pass)</option>
-                            <option value="noindex, nofollow">noindex, nofollow (Blocked)</option>
-                        </select>
-
-                        @if($seoSearch || $seoRobotsFilter !== 'all')
-                            <button 
-                                wire:click="resetSeoFilters" 
-                                class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-800 border border-slate-300 transition"
-                            >
-                                Reset
+                        <!-- Futuristic Custom Robots Directive Dropdown -->
+                        <div class="md:col-span-4 relative" x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false">
+                            <button type="button" @click="open = !open" aria-label="Filter by robots directive"
+                                class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-2xl bg-slate-50/90 hover:bg-white border text-xs font-bold text-slate-800 transition-all cursor-pointer"
+                                :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200/90'">
+                                <span class="flex items-center gap-2 min-w-0 truncate">
+                                    <span class="w-2 h-2 rounded-full shrink-0 {{ $robotsOptions[$seoRobotsFilter][1] ?? 'bg-slate-400' }}"></span>
+                                    <span class="truncate">{{ $robotsOptions[$seoRobotsFilter][0] ?? 'All Robots Directives' }}</span>
+                                </span>
+                                <svg class="w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                             </button>
-                        @endif
+                            <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-y-1 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 translate-y-1 scale-95"
+                                class="absolute left-0 right-0 mt-2 z-50 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-[0_20px_50px_-12px_rgba(15,23,42,0.22)] p-1.5 space-y-0.5">
+                                @foreach($robotsOptions as $robKey => [$robLabel, $robDot])
+                                    <button type="button" wire:click="$set('seoRobotsFilter', '{{ $robKey }}')" @click="open = false"
+                                        class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer {{ $seoRobotsFilter === $robKey ? 'bg-rose-50 text-[#F20B83]' : 'text-slate-700 hover:bg-slate-50' }}">
+                                        <span class="flex items-center gap-2 truncate"><span class="w-2 h-2 rounded-full shrink-0 {{ $robDot }}"></span><span class="truncate">{{ $robLabel }}</span></span>
+                                        @if($seoRobotsFilter === $robKey) <svg class="w-3.5 h-3.5 text-[#F20B83] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> @endif
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <!-- Quick Reset / Baseline Trigger -->
+                        <div class="md:col-span-2 flex items-center justify-end gap-2">
+                            @if($seoSearch || $seoRobotsFilter !== 'all')
+                                <button
+                                    type="button"
+                                    wire:click="resetSeoFilters"
+                                    class="w-full px-3.5 py-2.5 rounded-2xl bg-rose-50 hover:bg-rose-100 text-xs font-extrabold text-[#F20B83] border border-rose-200 transition cursor-pointer inline-flex items-center justify-center gap-1.5"
+                                >
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    <span>Reset Filters</span>
+                                </button>
+                            @else
+                                <button
+                                    type="button"
+                                    wire:click="openSeoModal"
+                                    class="w-full px-3.5 py-2.5 rounded-2xl bg-slate-950 hover:bg-[#F20B83] text-white text-xs font-black transition-all duration-200 shadow-xs inline-flex items-center justify-center gap-1.5 cursor-pointer"
+                                >
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                                    <span>Add Override</span>
+                                </button>
+                            @endif
+                        </div>
                     </div>
 
-                    <!-- Right Buttons: Baseline Generator & + New SEO Entry -->
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <button 
-                            wire:click="generateDefaultSeoMetas" 
-                            class="px-4 py-2.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-950 border border-purple-300 text-xs font-black transition flex items-center gap-1.5 shadow-xs"
-                        >
-                            <svg class="w-4 h-4 text-purple-700" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                            <span>⚡ Generate Default Baselines</span>
-                        </button>
-
-                        <button 
-                            wire:click="openSeoModal" 
-                            class="px-4 py-2.5 rounded-xl bg-[#F20B65] hover:bg-[#d90858] text-white text-xs font-black transition flex items-center gap-1.5 shadow-md shadow-pink-500/20"
-                        >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                            <span>+ New SEO Override</span>
-                        </button>
-                    </div>
+                    @if($seoSearch || $seoRobotsFilter !== 'all')
+                        <div class="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100 text-[11px]">
+                            <span class="font-black uppercase tracking-wider text-slate-400 mr-1">Active Filters:</span>
+                            @if(trim((string) $seoSearch) !== '')
+                                <button type="button" wire:click="$set('seoSearch', '')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900 text-white font-bold cursor-pointer hover:bg-slate-800">
+                                    <span>Query: &ldquo;{{ Str::limit($seoSearch, 24) }}&rdquo;</span>
+                                    <span class="text-rose-300">&times;</span>
+                                </button>
+                            @endif
+                            @if($seoRobotsFilter !== 'all')
+                                <button type="button" wire:click="$set('seoRobotsFilter', 'all')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-900 border border-emerald-200 font-bold cursor-pointer hover:bg-emerald-100">
+                                    <span>Robots: {{ $seoRobotsFilter }}</span>
+                                    <span>&times;</span>
+                                </button>
+                            @endif
+                        </div>
+                    @endif
                 </div>
 
-                <!-- Overrides Table -->
-                <div class="{{ $card }} overflow-x-auto shadow-md">
-                    <table class="min-w-full divide-y divide-slate-200">
-                        <thead class="bg-slate-50">
+                <!-- Overrides Desktop Table (hidden md:block) -->
+                <div class="hidden md:block rounded-3xl bg-white/95 border border-slate-200/80 overflow-x-auto shadow-[0_10px_30px_-14px_rgba(15,23,42,0.06)]">
+                    <table class="min-w-full divide-y divide-slate-200/80">
+                        <thead class="bg-slate-50/90">
                             <tr>
                                 <th class="{{ $th }}">Route / Canonical</th>
                                 <th class="{{ $th }}">Meta Title &amp; Description</th>
                                 <th class="{{ $th }}">Robots Directive</th>
                                 <th class="{{ $th }}">Social Card / Assets</th>
-                                <th class="{{ $th }} text-right">Actions</th>
+                                <th class="{{ $th }} text-right pr-5">Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-200 bg-white">
+                        <tbody class="divide-y divide-slate-100 bg-white">
                         @forelse($seoMetas as $m)
-                            <tr class="hover:bg-slate-50/80 transition" wire:key="seo-row-{{ $m->id }}">
+                            <tr class="hover:bg-rose-50/25 transition-colors" wire:key="seo-row-{{ $m->id }}">
                                 <!-- Route & Canonical -->
                                 <td class="{{ $td }} align-top">
                                     <div class="flex items-center gap-2">
-                                        <span class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-900 border border-blue-200 font-mono text-xs font-black">
-                                            {{ $m->page_route ?? (class_basename($m->model_type) . ' #' . $m->model_id) }}
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 text-slate-900 border border-slate-200/90 font-mono text-xs font-black">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-[#F20B83]"></span>
+                                            <span>{{ $m->page_route ?? (class_basename($m->model_type) . ' #' . $m->model_id) }}</span>
                                         </span>
                                     </div>
                                     @if($m->canonical_url)
-                                        <p class="text-[11px] font-mono text-slate-600 mt-1 truncate max-w-xs flex items-center gap-1">
+                                        <p class="text-[11px] font-mono text-slate-500 mt-1.5 truncate max-w-xs flex items-center gap-1">
                                             <span class="text-slate-400">rel="canonical":</span>
                                             <span class="truncate">{{ $m->canonical_url }}</span>
                                         </p>
@@ -5775,17 +5859,17 @@
                                 <td class="{{ $td }} align-top max-w-md">
                                     <div class="font-black text-sm text-slate-950 flex items-center gap-2">
                                         <span>{{ $m->meta_title }}</span>
-                                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded {{ strlen($m->meta_title) <= 60 ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200' }}">
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 {{ strlen($m->meta_title) <= 60 ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200' }}">
                                             {{ strlen($m->meta_title) }} chars
                                         </span>
                                     </div>
-                                    <p class="text-xs font-semibold text-slate-700 mt-1 line-clamp-2">
+                                    <p class="text-xs font-medium text-slate-600 mt-1 line-clamp-2 leading-relaxed">
                                         {{ $m->meta_description ?: 'No meta description configured for this route.' }}
                                     </p>
                                     @if($m->meta_keywords)
-                                        <div class="flex flex-wrap gap-1 mt-1.5">
+                                        <div class="flex flex-wrap gap-1 mt-2">
                                             @foreach(array_slice(explode(',', $m->meta_keywords), 0, 4) as $kw)
-                                                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                                                <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100/90 text-slate-700 border border-slate-200/80">
                                                     {{ trim($kw) }}
                                                 </span>
                                             @endforeach
@@ -5796,12 +5880,12 @@
                                 <!-- Robots Directive -->
                                 <td class="{{ $td }} align-top whitespace-nowrap">
                                     @if(str_contains($m->robots_directive, 'noindex'))
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black bg-rose-50 text-rose-900 border border-rose-300">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-rose-50 text-rose-800 border border-rose-200">
                                             <span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
                                             <span>{{ $m->robots_directive }}</span>
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-900 border border-emerald-300">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-800 border border-emerald-200">
                                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
                                             <span>{{ $m->robots_directive }}</span>
                                         </span>
@@ -5812,35 +5896,38 @@
                                 <td class="{{ $td }} align-top">
                                     @if($m->og_image_url)
                                         <div class="flex items-center gap-2">
-                                            <img src="{{ $m->og_image_url }}" alt="OG Preview" class="w-12 h-8 object-cover rounded border border-slate-200 shadow-2xs">
+                                            <img src="{{ $m->og_image_url }}" alt="OG Preview" class="w-12 h-8 object-cover rounded-lg border border-slate-200 shadow-2xs">
                                             <span class="text-[10px] font-bold text-slate-700 truncate max-w-[120px]">OG Image Active</span>
                                         </div>
                                     @else
-                                        <span class="text-xs font-semibold text-slate-500">Default Brand Card</span>
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200/80 text-[11px] font-semibold text-slate-500">Default Brand Card</span>
                                     @endif
                                 </td>
 
-                                <!-- Actions -->
-                                <td class="{{ $td }} align-top text-right whitespace-nowrap space-x-1.5">
-                                    <button 
-                                        wire:click="selectSerpPreview({{ $m->id }})" 
-                                        class="px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-900 text-xs font-black border border-blue-200 transition"
+                                <!-- Actions (Zero Blue Buttons) -->
+                                <td class="{{ $td }} align-top text-right pr-5 whitespace-nowrap space-x-1.5">
+                                    <button
+                                        type="button"
+                                        wire:click="selectSerpPreview({{ $m->id }})"
+                                        class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-[#F20B83] text-xs font-black border border-rose-200 transition cursor-pointer"
                                         title="Simulate Google Search Snippet"
                                     >
                                         SERP Preview
                                     </button>
 
-                                    <button 
-                                        wire:click="openSeoModal({{ $m->id }})" 
-                                        class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-900 text-xs font-black border border-slate-300 transition"
+                                    <button
+                                        type="button"
+                                        wire:click="openSeoModal({{ $m->id }})"
+                                        class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 text-xs font-black border border-slate-200 transition cursor-pointer"
                                     >
                                         Edit
                                     </button>
 
-                                    <button 
-                                        wire:click="deleteSeo({{ $m->id }})" 
-                                        wire:confirm="Are you sure you want to delete this SEO metadata override?" 
-                                        class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-900 text-xs font-black border border-rose-200 transition"
+                                    <button
+                                        type="button"
+                                        wire:click="deleteSeo({{ $m->id }})"
+                                        wire:confirm="Are you sure you want to delete this SEO metadata override?"
+                                        class="px-3 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 text-xs font-black border border-red-200 transition cursor-pointer"
                                     >
                                         Delete
                                     </button>
@@ -5850,13 +5937,13 @@
                             <tr>
                                 <td colspan="5" class="{{ $td }} text-center py-12">
                                     <div class="max-w-md mx-auto text-center space-y-3">
-                                        <div class="w-12 h-12 rounded-2xl bg-rose-50 text-[#F20B65] border border-rose-200 flex items-center justify-center mx-auto text-xl font-black">
-                                            🔍
+                                        <div class="w-12 h-12 rounded-2xl bg-rose-50 text-[#F20B83] border border-rose-200 flex items-center justify-center mx-auto">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                                         </div>
                                         <h4 class="text-base font-black text-slate-900">No SEO Overrides Match Filter</h4>
-                                        <p class="text-xs font-semibold text-slate-600">Generate default baseline metadata for your core pages or create targeted SEO overrides.</p>
-                                        <button wire:click="generateDefaultSeoMetas" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-black transition shadow-xs">
-                                            ⚡ Generate Baseline SEO Overrides Now
+                                        <p class="text-xs font-semibold text-slate-500">Generate default baseline metadata for your core pages or create targeted SEO overrides.</p>
+                                        <button type="button" wire:click="generateDefaultSeoMetas" class="px-4 py-2 rounded-2xl bg-slate-950 hover:bg-[#F20B83] text-white text-xs font-black transition shadow-xs cursor-pointer">
+                                            Generate Baseline SEO Overrides Now
                                         </button>
                                     </div>
                                 </td>
@@ -5866,10 +5953,41 @@
                     </table>
 
                     @if($seoMetas instanceof \Illuminate\Pagination\LengthAwarePaginator && $seoMetas->hasPages())
-                        <div class="p-4 border-t border-slate-200 bg-slate-50">
+                        <div class="p-4 border-t border-slate-100 bg-slate-50/70">
                             {{ $seoMetas->links() }}
                         </div>
                     @endif
+                </div>
+
+                <!-- Mobile SEO Overrides Feed (md:hidden) -->
+                <div class="md:hidden space-y-3">
+                    @forelse($seoMetas as $m)
+                        <div class="rounded-3xl bg-white/95 border border-slate-200/80 p-4 shadow-xs space-y-3" wire:key="seo-mobile-{{ $m->id }}">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 text-slate-900 border border-slate-200 font-mono text-xs font-black">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-[#F20B83]"></span>
+                                    <span>{{ $m->page_route ?? (class_basename($m->model_type) . ' #' . $m->model_id) }}</span>
+                                </span>
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black {{ str_contains($m->robots_directive, 'noindex') ? 'bg-rose-50 text-rose-800 border border-rose-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200' }}">
+                                    {{ $m->robots_directive }}
+                                </span>
+                            </div>
+                            <div>
+                                <div class="font-black text-sm text-slate-950">{{ $m->meta_title }}</div>
+                                <p class="text-xs text-slate-600 mt-1 line-clamp-2">{{ $m->meta_description ?: 'No meta description configured.' }}</p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100">
+                                <button type="button" wire:click="selectSerpPreview({{ $m->id }})" class="px-3 py-1.5 rounded-xl bg-rose-50 text-[#F20B83] text-xs font-black border border-rose-200">SERP Preview</button>
+                                <button type="button" wire:click="openSeoModal({{ $m->id }})" class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-900 text-xs font-black border border-slate-200">Edit</button>
+                                <button type="button" wire:click="deleteSeo({{ $m->id }})" wire:confirm="Are you sure you want to delete this SEO metadata override?" class="px-3 py-1.5 rounded-xl bg-red-50 text-red-700 text-xs font-black border border-red-200">Delete</button>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="rounded-3xl bg-white border border-slate-200 p-8 text-center space-y-3">
+                            <p class="text-sm font-black text-slate-900">No SEO Overrides Match Filter</p>
+                            <button type="button" wire:click="generateDefaultSeoMetas" class="px-4 py-2 rounded-2xl bg-slate-950 text-white text-xs font-black">Generate Baseline SEO</button>
+                        </div>
+                    @endforelse
                 </div>
             @endif
 

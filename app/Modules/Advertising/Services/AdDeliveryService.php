@@ -59,11 +59,31 @@ class AdDeliveryService
 
     public function getPlacementConfig(string $slot): AdPlacementConfig
     {
-        $version = Cache::get(self::CACHE_VERSION_KEY, 1);
+        $version = (int) Cache::get(self::CACHE_VERSION_KEY, 1);
+        $cacheKey = "ads:slot_config_data:v{$version}:{$slot}";
 
-        return Cache::remember("ads:slot_config:v{$version}:{$slot}", 300, function () use ($slot) {
-            return AdPlacementConfig::forSlot($slot);
-        });
+        try {
+            $cached = Cache::get($cacheKey);
+            if (is_array($cached) && isset($cached['slot'])) {
+                $model = new AdPlacementConfig();
+                $model->forceFill($cached);
+                $model->exists = isset($cached['id']);
+
+                return $model;
+            }
+        } catch (\Throwable) {
+            Cache::forget($cacheKey);
+        }
+
+        $config = AdPlacementConfig::forSlot($slot);
+
+        try {
+            Cache::put($cacheKey, $config->attributesToArray(), 300);
+        } catch (\Throwable) {
+            // Safe fallback if cache store is unavailable
+        }
+
+        return $config;
     }
 
     /**
@@ -263,17 +283,47 @@ class AdDeliveryService
      */
     protected function getCachedSlotCandidates(string $slot): Collection
     {
-        $version = Cache::get(self::CACHE_VERSION_KEY, 1);
+        $version = (int) Cache::get(self::CACHE_VERSION_KEY, 1);
+        $cacheKey = "ads:slot_candidate_ids:v{$version}:{$slot}";
 
-        return Cache::remember("ads:slot_candidates:v{$version}:{$slot}", 120, function () use ($slot) {
-            return AdCampaign::query()
-                ->with(['creatives' => fn ($q) => $q->where('is_active', true), 'placements', 'targetingRules'])
+        $ids = null;
+        try {
+            $cached = Cache::get($cacheKey);
+            if (is_array($cached)) {
+                $ids = array_values(array_filter(array_map('intval', $cached)));
+            }
+        } catch (\Throwable) {
+            Cache::forget($cacheKey);
+        }
+
+        if ($ids === null) {
+            $ids = AdCampaign::query()
                 ->eligibleForDelivery()
                 ->whereHas('placements', fn ($q) => $q->where('placement_slot', $slot)->where('is_active', true))
                 ->orderByDesc('priority')
                 ->orderByDesc('weight')
-                ->get();
-        });
+                ->pluck('id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
+
+            try {
+                Cache::put($cacheKey, $ids, 120);
+            } catch (\Throwable) {
+                // Safe fallback if cache store is unavailable
+            }
+        }
+
+        if ($ids === []) {
+            return collect();
+        }
+
+        return AdCampaign::query()
+            ->with(['creatives' => fn ($q) => $q->where('is_active', true), 'placements', 'targetingRules'])
+            ->whereIn('id', $ids)
+            ->eligibleForDelivery()
+            ->orderByDesc('priority')
+            ->orderByDesc('weight')
+            ->get();
     }
 
     /**
