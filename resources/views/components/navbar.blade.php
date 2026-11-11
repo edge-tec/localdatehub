@@ -139,8 +139,8 @@
                 <a href="{{ route('pages.contact') }}" class="px-3 py-2 rounded-md hover:text-[#F20B65] transition">Contact</a>
             </nav>
 
-            <!-- Right: Account Controls, Login, Register & Post Ad -->
-            <div class="hidden sm:flex items-center space-x-2.5">
+            <!-- Right: Account Controls, Login, Register & Post Ad (Desktop Only) -->
+            <div class="hidden lg:flex items-center space-x-2.5">
                 @guest
                     <!-- Create Account Button -->
                     <a href="{{ route('register') }}" class="border border-[#F20B65]/40 hover:border-[#F20B65] bg-rose-50/60 hover:bg-rose-50 text-[#F20B65] px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 text-xs font-bold transition shadow-2xs">
@@ -307,10 +307,10 @@
                 </a>
             </div>
 
-            <!-- Mobile Header Actions (Messenger Icon + Hamburger) -->
+            <!-- Mobile & Tablet Header Actions (Clean, Zero Duplication) -->
             <div class="flex items-center gap-2 lg:hidden">
                 @auth
-                    <a href="{{ route('account.messages.index') }}" class="w-9 h-9 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-700 hover:text-[#F20B65] transition relative shadow-xs" title="Messenger">
+                    <a href="{{ route('account.messages.index') }}" class="w-10 h-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-700 hover:text-[#F20B65] transition relative shadow-2xs" title="Messenger">
                         <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
                             <path d="M12 2C6.477 2 2 6.145 2 11.258c0 2.91 1.455 5.518 3.736 7.208V22l3.418-1.874c.91.252 1.872.388 2.846.388 5.523 0 10-4.145 10-9.258C22 6.145 17.523 2 12 2zm1.05 12.443l-2.625-2.8-5.125 2.8 5.637-5.986 2.688 2.8 5.062-2.8-5.637 5.986z"/>
                         </svg>
@@ -322,55 +322,256 @@
                     </a>
                 @endauth
 
-                <button @click="mobileMenuOpen = !mobileMenuOpen" class="text-slate-700 hover:text-slate-900 p-2 rounded-md focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path x-show="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path x-show="mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                <button 
+                    @click="mobileMenuOpen = !mobileMenuOpen" 
+                    class="w-10 h-10 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 flex items-center justify-center transition shadow-2xs focus:outline-none"
+                    aria-label="Toggle navigation menu"
+                >
+                    <svg class="w-5 h-5 transition-transform duration-200" :class="{ 'rotate-90': mobileMenuOpen }" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                        <path x-show="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        <path x-show="mobileMenuOpen" x-cloak stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Mobile Drawer Menu -->
-    <div x-show="mobileMenuOpen" x-cloak class="lg:hidden bg-white border-t border-slate-200 px-4 pt-3 pb-6 space-y-2">
-        <a href="{{ route('home') }}" class="block px-3 py-2 rounded-md text-sm font-semibold bg-[#F20B65] text-white">Home</a>
-        <a href="{{ route('categories.index') }}" class="block px-3 py-2 rounded-md text-sm text-slate-700 hover:bg-slate-50">Browse Categories</a>
-        <a href="{{ route('locations.index') }}" class="block px-3 py-2 rounded-md text-sm text-slate-700 hover:bg-slate-50">All US States</a>
-        <a href="{{ route('search.index') }}" class="block px-3 py-2 rounded-md text-sm text-slate-700 hover:bg-slate-50">Search Personals</a>
-        <a href="{{ route('pages.about') }}" class="block px-3 py-2 rounded-md text-sm text-slate-700 hover:bg-slate-50">About</a>
-        <a href="{{ route('pages.contact') }}" class="block px-3 py-2 rounded-md text-sm text-slate-700 hover:bg-slate-50">Contact</a>
-        <div class="pt-3 border-t border-slate-200 flex flex-col gap-2">
-            @guest
-                <div class="flex items-center space-x-2">
-                    <a href="{{ route('login') }}" class="flex-1 text-center py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 bg-white">Login</a>
-                    <a href="{{ route('register') }}" class="flex-1 text-center py-2.5 rounded-xl bg-rose-50 text-[#F20B65] border border-rose-200 text-xs font-bold">Create Account</a>
-                </div>
-                <div class="text-center pt-1">
-                    <a href="{{ route('password.request') }}" class="text-xs font-semibold text-slate-500 hover:text-[#F20B65]">Forgot Password?</a>
-                </div>
-            @else
-                <a href="{{ route('account.messages.index') }}" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold bg-pink-50/70 text-[#F20B65] border border-pink-100">
-                    <span class="flex items-center gap-2">
-                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.145 2 11.258c0 2.91 1.455 5.518 3.736 7.208V22l3.418-1.874c.91.252 1.872.388 2.846.388 5.523 0 10-4.145 10-9.258C22 6.145 17.523 2 12 2zm1.05 12.443l-2.625-2.8-5.125 2.8 5.637-5.986 2.688 2.8 5.062-2.8-5.637 5.986z"/></svg>
-                        <span>Messenger</span>
-                    </span>
-                    @if(($navUnreadMessages ?? 0) > 0)
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#F20B65] text-white">
-                            {{ $navUnreadMessages }} unread
-                        </span>
-                    @endif
-                </a>
+    <!-- Mobile Drawer Menu (Slide-down & Fully Responsive, Zero Duplication) -->
+    <div 
+        x-show="mobileMenuOpen" 
+        x-cloak 
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 -translate-y-2"
+        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 -translate-y-2"
+        class="lg:hidden bg-white border-t border-slate-200 px-4 py-5 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto"
+    >
+        <!-- 1. Quick Search Box -->
+        <form method="GET" action="{{ route('search.index') }}" class="relative w-full">
+            <input 
+                type="text" 
+                name="q" 
+                placeholder="Search personals, cities, categories..." 
+                class="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#F20B65] focus:bg-white transition"
+            />
+            <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+        </form>
 
-                <div class="flex items-center space-x-2">
-                    <a href="{{ route('account.dashboard') }}" class="flex-1 text-center py-2.5 rounded-xl bg-white border border-slate-300 text-xs font-bold text-slate-700">Account Dashboard</a>
-                    <form method="POST" action="{{ route('logout') }}" class="flex-1">
-                        @csrf
-                        <button type="submit" class="w-full text-center py-2.5 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-xs font-bold">Logout</button>
-                    </form>
+        <!-- 2. Account Status Card (Guest or Member - Appears Only Once) -->
+        @guest
+            <div class="p-4 rounded-2xl bg-gradient-to-br from-rose-50/70 via-pink-50/40 to-slate-50 border border-pink-100 shadow-2xs">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <div class="text-xs font-black text-slate-900">Welcome to LocalDateHub</div>
+                        <div class="text-[11px] font-medium text-slate-500">Connect with local verified members</div>
+                    </div>
+                    <span class="w-7 h-7 rounded-full bg-pink-100 text-[#F20B65] flex items-center justify-center text-xs font-black">
+                        ♥
+                    </span>
                 </div>
-            @endguest
-            <a href="{{ route('listings.create') }}" class="w-full text-center py-2.5 rounded-xl bg-[#F20B65] text-xs font-bold text-white shadow-md shadow-[#F20B65]/20">+ Post Free Classified Ad</a>
+                <div class="grid grid-cols-2 gap-2">
+                    <a href="{{ route('login') }}" class="py-2.5 px-3 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 font-bold text-xs text-center transition shadow-2xs flex items-center justify-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-slate-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                        </svg>
+                        <span>Login</span>
+                    </a>
+                    <a href="{{ route('register') }}" class="py-2.5 px-3 rounded-xl bg-[#F20B65] hover:bg-[#d90858] text-white font-bold text-xs text-center transition shadow-xs flex items-center justify-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                        </svg>
+                        <span>Create Account</span>
+                    </a>
+                </div>
+                <div class="text-center mt-2.5">
+                    <a href="{{ route('password.request') }}" class="text-[11px] font-semibold text-slate-400 hover:text-[#F20B65] transition">Forgot your password?</a>
+                </div>
+            </div>
+        @else
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 shadow-2xs">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="w-10 h-10 rounded-full bg-rose-100 text-[#F20B65] flex items-center justify-center font-black text-sm shrink-0 overflow-hidden border border-rose-200">
+                        @if(Auth::user()->avatar_url)
+                            <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name }}" class="w-full h-full object-cover">
+                        @else
+                            {{ strtoupper(substr(Auth::user()->name ?: 'U', 0, 1)) }}
+                        @endif
+                    </span>
+                    <div class="min-w-0 flex-1">
+                        <div class="text-xs font-black text-slate-900 truncate">
+                            {{ Auth::user()->profile?->display_name ?: (Auth::user()->name ?: 'Member') }}
+                        </div>
+                        <div class="text-[11px] font-medium text-slate-500 truncate">
+                            {{ Auth::user()->email }}
+                        </div>
+                    </div>
+                    @if(Auth::user()->is_admin ?? false)
+                        <span class="px-2 py-0.5 rounded-md text-[10px] font-black bg-purple-100 text-purple-700">Admin</span>
+                    @endif
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-xs font-bold">
+                    <a href="{{ route('account.dashboard') }}" class="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-slate-300 text-slate-700 flex items-center gap-2 transition">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="{{ route('account.messages.index') }}" class="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-slate-300 text-slate-700 flex items-center justify-between transition">
+                        <span class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-[#F20B65]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.145 2 11.258c0 2.91 1.455 5.518 3.736 7.208V22l3.418-1.874c.91.252 1.872.388 2.846.388 5.523 0 10-4.145 10-9.258C22 6.145 17.523 2 12 2zm1.05 12.443l-2.625-2.8-5.125 2.8 5.637-5.986 2.688 2.8 5.062-2.8-5.637 5.986z"/></svg>
+                            <span>Messages</span>
+                        </span>
+                        @if(($navUnreadMessages ?? 0) > 0)
+                            <span class="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-[#F20B65] text-white">
+                                {{ $navUnreadMessages }}
+                            </span>
+                        @endif
+                    </a>
+                </div>
+            </div>
+        @endguest
+
+        <!-- 3. Navigation Links List (With Modern Vector Icons & Accordions) -->
+        <div class="space-y-1">
+            <!-- Home -->
+            <a href="{{ route('home') }}" class="flex items-center justify-between p-2.5 rounded-2xl hover:bg-slate-50 transition group">
+                <div class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-pink-50 text-[#F20B65] flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                        </svg>
+                    </span>
+                    <div>
+                        <div class="text-xs font-black text-slate-900 group-hover:text-[#F20B65] transition">Home</div>
+                        <div class="text-[10px] text-slate-500 font-medium">Explore local advertisements</div>
+                    </div>
+                </div>
+                <svg class="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            </a>
+
+            <!-- Browse Categories (With Smooth Expandable Accordion) -->
+            <div x-data="{ openCat: false }" class="rounded-2xl transition" :class="openCat ? 'bg-slate-50/80 p-1.5' : ''">
+                <button @click="openCat = !openCat" type="button" class="w-full flex items-center justify-between p-2.5 rounded-2xl hover:bg-slate-50 transition text-left cursor-pointer">
+                    <div class="flex items-center gap-3">
+                        <span class="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
+                        </span>
+                        <div>
+                            <div class="text-xs font-black text-slate-900">Browse Categories</div>
+                            <div class="text-[10px] text-slate-500 font-medium">Personal, Dating &amp; Community</div>
+                        </div>
+                    </div>
+                    <svg class="w-4 h-4 text-slate-400 transition-transform" :class="openCat ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                </button>
+                <div x-show="openCat" x-cloak class="pt-2 pl-12 pr-2 space-y-1.5 pb-2">
+                    @foreach($navCategories as $cat)
+                        <a href="{{ route('categories.show', $cat->slug) }}" class="block text-xs font-semibold text-slate-600 hover:text-[#F20B65] py-1 transition">
+                            {{ $cat->name }}
+                        </a>
+                    @endforeach
+                    <a href="{{ route('categories.index') }}" class="block text-xs font-bold text-[#F20B65] hover:underline pt-1">
+                        View All Categories →
+                    </a>
+                </div>
+            </div>
+
+            <!-- Locations / States (With Smooth Expandable Accordion) -->
+            <div x-data="{ openStates: false }" class="rounded-2xl transition" :class="openStates ? 'bg-slate-50/80 p-1.5' : ''">
+                <button @click="openStates = !openStates" type="button" class="w-full flex items-center justify-between p-2.5 rounded-2xl hover:bg-slate-50 transition text-left cursor-pointer">
+                    <div class="flex items-center gap-3">
+                        <span class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+                        </span>
+                        <div>
+                            <div class="text-xs font-black text-slate-900">US States &amp; Cities</div>
+                            <div class="text-[10px] text-slate-500 font-medium">Browse ads across 50 US States</div>
+                        </div>
+                    </div>
+                    <svg class="w-4 h-4 text-slate-400 transition-transform" :class="openStates ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                </button>
+                <div x-show="openStates" x-cloak class="pt-2 pl-12 pr-2 pb-2">
+                    <div class="grid grid-cols-2 gap-1.5 mb-2">
+                        @foreach($navStates->take(8) as $st)
+                            <a href="{{ route('locations.state', strtolower($st->code)) }}" class="px-2 py-1 text-xs text-slate-600 hover:text-[#F20B65] hover:bg-pink-50 rounded transition">
+                                {{ $st->name }}
+                            </a>
+                        @endforeach
+                    </div>
+                    <a href="{{ route('locations.index') }}" class="block text-xs font-bold text-[#F20B65] hover:underline pt-1">
+                        View All 50 States &amp; Cities →
+                    </a>
+                </div>
+            </div>
+
+            <!-- Search Personals -->
+            <a href="{{ route('search.index') }}" class="flex items-center justify-between p-2.5 rounded-2xl hover:bg-slate-50 transition group">
+                <div class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                    </span>
+                    <div>
+                        <div class="text-xs font-black text-slate-900 group-hover:text-emerald-600 transition">Search Personals</div>
+                        <div class="text-[10px] text-slate-500 font-medium">Filter by age, photo, distance</div>
+                    </div>
+                </div>
+                <svg class="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            </a>
+
+            <!-- Safety Standards -->
+            <a href="{{ route('pages.safety') }}" class="flex items-center justify-between p-2.5 rounded-2xl hover:bg-slate-50 transition group">
+                <div class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                    </span>
+                    <div>
+                        <div class="text-xs font-black text-slate-900 group-hover:text-amber-600 transition">Safety &amp; Compliance</div>
+                        <div class="text-[10px] text-slate-500 font-medium">100% 18+ verified platform standards</div>
+                    </div>
+                </div>
+                <svg class="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            </a>
+
+            <!-- Contact & Support -->
+            <a href="{{ route('pages.contact') }}" class="flex items-center justify-between p-2.5 rounded-2xl hover:bg-slate-50 transition group">
+                <div class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
+                    </span>
+                    <div>
+                        <div class="text-xs font-black text-slate-900 group-hover:text-indigo-600 transition">Help &amp; Support</div>
+                        <div class="text-[10px] text-slate-500 font-medium">24/7 dedicated support &amp; inquiries</div>
+                    </div>
+                </div>
+                <svg class="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            </a>
+        </div>
+
+        @auth
+            <!-- Sign Out (Authenticated) -->
+            <div class="pt-2 border-t border-slate-100">
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="w-full py-2.5 px-4 rounded-xl text-rose-600 hover:bg-rose-50 font-bold text-xs transition flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        <span>Sign Out of Account</span>
+                    </button>
+                </form>
+            </div>
+        @endauth
+
+        <!-- 4. Prominent Post Ad Primary CTA (Shown Exactly Once) -->
+        <div class="pt-2">
+            <a 
+                href="{{ route('listings.create') }}" 
+                class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-[#F20B65] to-[#d90858] hover:from-[#d90858] hover:to-[#be074e] text-white font-black text-sm text-center shadow-lg shadow-[#F20B65]/25 flex items-center justify-center gap-2 transition transform active:scale-98"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                <span>Post Free Classified Ad</span>
+            </a>
         </div>
     </div>
 </header>
