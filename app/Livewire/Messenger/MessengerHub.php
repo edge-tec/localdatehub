@@ -420,13 +420,31 @@ class MessengerHub extends Component
             $originalName = $this->attachment->getClientOriginalName();
             $mime = $this->attachment->getMimeType();
             $size = $this->attachment->getSize();
-            $isImage = str_starts_with($mime, 'image/');
+            $isSanitizableImage = in_array($mime, ['image/jpeg', 'image/png', 'image/webp'], true);
+            $isImage = $isSanitizableImage || str_starts_with((string) $mime, 'image/');
 
-            $storedPath = $this->attachment->store('attachments', 'public');
-            $attachmentPath = $storedPath;
+            if ($isSanitizableImage) {
+                try {
+                    $stored = app(\App\Support\Storage\MediaStorageService::class)->storeSanitizedPhoto(
+                        $this->attachment,
+                        'attachments',
+                        'public',
+                        1600,
+                        1600
+                    );
+                    $attachmentPath = $stored['path'];
+                    $attachmentSize = $stored['size'];
+                } catch (\Throwable $e) {
+                    $this->addError('attachment', 'The uploaded image is corrupted or invalid. Please choose a valid JPG, PNG, or WebP.');
+                    return;
+                }
+            } else {
+                $attachmentPath = $this->attachment->store('attachments', 'public');
+                $attachmentSize = $size;
+            }
+
             $attachmentType = $isImage ? 'image' : 'file';
             $attachmentName = $originalName;
-            $attachmentSize = $size;
         }
 
         $subject = $this->activeListing

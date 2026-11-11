@@ -2,30 +2,24 @@
 
 <article class="group bg-white border border-slate-200 hover:border-slate-300 rounded-2xl overflow-hidden transition-all duration-200 flex flex-col justify-between shadow-xs hover:shadow-lg hover:-translate-y-0.5">
     <div>
-        <!-- Photo Container: 100% Full Uncut Photo with Ambient Backdrop -->
-        <div class="relative aspect-[4/4.8] sm:aspect-[4/4.5] bg-slate-950 overflow-hidden flex items-center justify-center">
+        <!-- Photo Container: Hardware-Safe Uncropped Photo Frame -->
+        <div class="relative aspect-[4/4.8] sm:aspect-[4/4.5] bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 overflow-hidden flex items-center justify-center isolate">
             @php
                 $cardPhoto = $listing->primaryPhoto ?: $listing->allMedia->first();
             @endphp
             @if($cardPhoto)
                 <a href="{{ route('listings.show', $listing->slug) }}" class="w-full h-full flex items-center justify-center relative block">
-                    <!-- Ambient blurred backdrop matching the photo's colors so no empty bars -->
-                    <img 
-                        src="{{ $cardPhoto->url }}" 
-                        alt="" 
-                        aria-hidden="true"
-                        class="absolute inset-0 w-full h-full object-cover filter blur-lg scale-110 opacity-50 select-none pointer-events-none"
-                    />
-                    <!-- 100% Full Image visible, never cut or cropped -->
                     <img
-                        src="{{ $cardPhoto->url }}"
+                        src="{{ $cardPhoto->thumbnail_url }}"
                         alt="{{ $listing->title }}"
                         loading="lazy"
-                        class="relative z-10 max-h-full max-w-full w-auto h-auto object-contain mx-auto transition duration-300 group-hover:scale-[1.02]"
+                        decoding="async"
+                        onerror="this.onerror=null;this.src='{{ asset('images/featured-1.jpg') }}';"
+                        class="max-h-full max-w-full w-auto h-auto object-contain mx-auto block"
                     >
                 </a>
                 <!-- Photo Bottom Scrim for Readability -->
-                <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-950/80 via-slate-950/30 to-transparent pointer-events-none z-10"></div>
+                <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-950/80 via-slate-950/30 to-transparent pointer-events-none"></div>
             @else
                 <div class="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-100/60">
                     <svg class="w-10 h-10 mb-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

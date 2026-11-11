@@ -5,87 +5,90 @@ namespace App\Support\Storage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use RuntimeException;
 
 class MediaStorageService
 {
     protected string $defaultDisk;
 
-    public function __construct()
+    protected ImageProcessor $processor;
+
+    public function __construct(?ImageProcessor $processor = null)
     {
         $this->defaultDisk = config('filesystems.default', 'local');
+        $this->processor = $processor ?? new ImageProcessor();
     }
 
     /**
-     * Store an uploaded photo after stripping EXIF and re-encoding to protect user location privacy.
+     * Validate, normalize EXIF orientation, strip metadata, resize if needed, and atomically store clean WebP.
      *
-     * @param  UploadedFile  $file
-     * @param  string  $directory
-     * @param  string|null  $disk
-     * @return array{path: string, url: string, filename: string, disk: string, size: int}
+     * @return array{path: string, url: string, filename: string, disk: string, size: int, width: int, height: int, mime_type: string}
      */
-    public function storeSanitizedPhoto(UploadedFile $file, string $directory = 'photos', ?string $disk = null): array
-    {
+    public function storeSanitizedPhoto(
+        UploadedFile $file,
+        string $directory = 'photos',
+        ?string $disk = null,
+        int $maxWidth = 1600,
+        int $maxHeight = 1600,
+        int $quality = 85
+    ): array {
         $targetDisk = $disk ?? $this->defaultDisk;
-        $maxSize = config('localdatehub.safety.max_photo_size_kb', 8192) * 1024;
+        $maxSize = (int) config('localdatehub.safety.max_photo_size_kb', 8192) * 1024;
+        $realPath = $file->getRealPath();
 
-        if ($file->getSize() > $maxSize) {
-            throw new RuntimeException("Uploaded file exceeds the maximum allowed size of {$maxSize} bytes.");
+        if (!$realPath) {
+            throw new InvalidArgumentException('Uploaded photo is unreadable.');
         }
 
-        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
-        if (!in_array($file->getMimeType(), $allowedMimes)) {
-            throw new RuntimeException('Invalid image format. Allowed formats: JPEG, PNG, WebP.');
-        }
+        $meta = $this->processor->validateFile(
+            $realPath,
+            $maxSize,
+            6000,
+            ImageProcessor::ALLOWED_PHOTO_MIMES
+        );
+
+        $image = $this->processor->loadNormalizedImage($realPath, $meta['mime']);
+        $resized = $this->processor->resizeKeepingAspect($image, $maxWidth, $maxHeight);
+        $cleanBinary = $this->processor->encodeWebpBytes($resized, $quality);
 
         $filename = Str::uuid()->toString() . '.webp';
         $relativeDir = trim($directory, '/');
-        $fullPath = $relativeDir . '/' . $filename;
+        $fullPath = $relativeDir !== '' ? "{$relativeDir}/{$filename}" : $filename;
 
-        // Re-encode image using GD to strip EXIF GPS data and normalize to WebP
-        $cleanBinary = $this->stripExifAndReencode($file);
-
-        Storage::disk($targetDisk)->put($fullPath, $cleanBinary);
+        $diskInstance = Storage::disk($targetDisk);
+        if (config("filesystems.disks.{$targetDisk}.driver") === 'local') {
+            $diskPath = $diskInstance->path($fullPath);
+            $dir = dirname($diskPath);
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0755, true);
+            }
+            $tmpPath = $diskPath . '.tmp.' . Str::random(10);
+            try {
+                file_put_contents($tmpPath, $cleanBinary);
+                @chmod($tmpPath, 0644);
+                if (!@rename($tmpPath, $diskPath)) {
+                    throw new RuntimeException("Failed to commit sanitized photo: {$fullPath}");
+                }
+            } finally {
+                if (is_file($tmpPath)) {
+                    @unlink($tmpPath);
+                }
+            }
+        } else {
+            $diskInstance->put($fullPath, $cleanBinary);
+        }
 
         return [
             'path' => $fullPath,
-            'url' => Storage::disk($targetDisk)->url($fullPath),
+            'url' => $diskInstance->url($fullPath),
             'filename' => $filename,
             'disk' => $targetDisk,
             'size' => strlen($cleanBinary),
+            'width' => imagesx($resized),
+            'height' => imagesy($resized),
+            'mime_type' => 'image/webp',
         ];
-    }
-
-    /**
-     * Re-encodes an image through GD to strip all EXIF metadata and output clean WebP.
-     */
-    protected function stripExifAndReencode(UploadedFile $file): string
-    {
-        $mime = $file->getMimeType();
-        $sourcePath = $file->getRealPath();
-
-        $image = match ($mime) {
-            'image/jpeg' => @imagecreatefromjpeg($sourcePath),
-            'image/png' => @imagecreatefrompng($sourcePath),
-            'image/webp' => @imagecreatefromwebp($sourcePath),
-            default => null,
-        };
-
-        if (!$image) {
-            // Fallback: return file contents directly if GD fails
-            return file_get_contents($sourcePath);
-        }
-
-        // Enable alpha blending and save alpha
-        imagealphablending($image, true);
-        imagesavealpha($image, true);
-
-        ob_start();
-        imagewebp($image, null, 85);
-        $webpData = ob_get_clean();
-        imagedestroy($image);
-
-        return $webpData ?: file_get_contents($sourcePath);
     }
 
     /**

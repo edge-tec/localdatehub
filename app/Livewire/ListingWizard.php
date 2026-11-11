@@ -161,8 +161,8 @@ class ListingWizard extends Component
 
         $this->uploadedMedia = $listing->media->map(fn ($m) => [
             'id' => $m->id,
-            'url' => asset('storage/' . $m->file_path),
-            'thumb' => asset('storage/' . ($m->thumbnail_path ?: $m->file_path)),
+            'url' => $m->url,
+            'thumb' => $m->thumbnail_url,
             'is_primary' => $m->is_primary,
             'status' => $m->moderation_status,
         ])->all();
@@ -240,8 +240,8 @@ class ListingWizard extends Component
     {
         $this->uploadedMedia = $listing->media()->get()->map(fn ($m) => [
             'id' => $m->id,
-            'url' => asset('storage/' . $m->file_path),
-            'thumb' => asset('storage/' . ($m->thumbnail_path ?: $m->file_path)),
+            'url' => $m->url,
+            'thumb' => $m->thumbnail_url,
             'is_primary' => $m->is_primary,
             'status' => $m->moderation_status,
         ])->all();

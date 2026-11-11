@@ -612,25 +612,20 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             @forelse($featuredListings as $listing)
                                 <div class="bg-white rounded-xl border border-[#E8E4EC] overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col group">
-                                    <!-- Image Thumbnail: 100% Full Uncut Photo with Ambient Backdrop -->
-                                    <div class="relative h-72 sm:h-80 overflow-hidden bg-slate-950 flex items-center justify-center">
+                                    <!-- Image Thumbnail: Hardware-Safe Uncropped Photo Frame -->
+                                    <div class="relative h-72 sm:h-80 overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 flex items-center justify-center isolate">
                                         <a href="{{ route('listings.show', $listing->slug) }}" class="w-full h-full flex items-center justify-center relative block">
-                                            <!-- Ambient blurred backdrop matching the photo's colors so no empty bars -->
                                             <img 
-                                                src="{{ $listing->primary_photo_url }}" 
-                                                alt="" 
-                                                aria-hidden="true"
-                                                class="absolute inset-0 w-full h-full object-cover filter blur-lg scale-110 opacity-50 select-none pointer-events-none"
-                                            />
-                                            <!-- 100% Full Image visible, never cut or cropped -->
-                                            <img 
-                                                src="{{ $listing->primary_photo_url }}" 
+                                                src="{{ $listing->primary_thumbnail_url }}" 
                                                 alt="{{ $listing->title }}" 
-                                                class="relative z-10 max-h-full max-w-full w-auto h-auto object-contain mx-auto transition duration-300 group-hover:scale-[1.02]"
+                                                loading="lazy"
+                                                decoding="async"
+                                                onerror="this.onerror=null;this.src='{{ asset('images/featured-1.jpg') }}';"
+                                                class="max-h-full max-w-full w-auto h-auto object-contain mx-auto block"
                                             />
                                         </a>
                                         <!-- Featured Badge (Pink Pill) -->
-                                        <span class="absolute top-2.5 left-2.5 z-20 bg-[#F20B65] text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-md tracking-wide">
+                                        <span class="absolute top-2.5 left-2.5 bg-[#F20B65] text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-md tracking-wide pointer-events-none">
                                             Featured
                                         </span>
                                     </div>
@@ -817,24 +812,19 @@
                     @else
                         @php $listing = $feedItem['listing']; @endphp
                         <div class="bg-white rounded-xl border border-[#E8E4EC] overflow-hidden shadow-xs hover:shadow-lg transition-all flex flex-col group">
-                            <!-- Image Container: 100% Full Uncut Photo with Ambient Backdrop -->
-                            <div class="relative h-72 sm:h-80 overflow-hidden bg-slate-950 flex items-center justify-center">
+                            <!-- Image Container: Hardware-Safe Uncropped Photo Frame -->
+                            <div class="relative h-72 sm:h-80 overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 flex items-center justify-center isolate">
                                 <a href="{{ route('listings.show', $listing->slug) }}" class="w-full h-full flex items-center justify-center relative block">
-                                    <!-- Ambient blurred backdrop matching the photo's colors so no empty bars -->
                                     <img 
-                                        src="{{ $listing->primary_photo_url }}" 
-                                        alt="" 
-                                        aria-hidden="true"
-                                        class="absolute inset-0 w-full h-full object-cover filter blur-lg scale-110 opacity-50 select-none pointer-events-none"
-                                    />
-                                    <!-- 100% Full Image visible, never cut or cropped -->
-                                    <img 
-                                        src="{{ $listing->primary_photo_url }}" 
+                                        src="{{ $listing->primary_thumbnail_url }}" 
                                         alt="{{ $listing->title }}" 
-                                        class="relative z-10 max-h-full max-w-full w-auto h-auto object-contain mx-auto transition duration-300 group-hover:scale-[1.02]"
+                                        loading="lazy"
+                                        decoding="async"
+                                        onerror="this.onerror=null;this.src='{{ asset('images/featured-1.jpg') }}';"
+                                        class="max-h-full max-w-full w-auto h-auto object-contain mx-auto block"
                                     />
                                 </a>
-                                <span class="absolute bottom-2 left-2 z-20 bg-black/75 backdrop-blur-xs text-white text-[10px] font-semibold px-2 py-0.5 rounded shadow">
+                                <span class="absolute bottom-2 left-2 bg-black/75 text-white text-[10px] font-semibold px-2 py-0.5 rounded shadow pointer-events-none">
                                     {{ $listing->city?->name ?? 'Austin' }}, {{ $listing->city?->state?->code ?? 'TX' }}
                                 </span>
                             </div>

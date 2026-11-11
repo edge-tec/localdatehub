@@ -231,13 +231,17 @@
                 </div>
 
                 <!-- 3. Photo Gallery (ALWAYS VISIBLE: displays user photos or curated verified model showcase) -->
+                @php
+                    $displayPhotos = $listing->allMedia->where('moderation_status', '!=', 'rejected')->values();
+                    $galleryCount = $displayPhotos->isNotEmpty() ? $displayPhotos->count() : 1;
+                @endphp
                 <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
                     <div class="flex items-center justify-between pb-2 border-b border-slate-100">
                         <h2 class="text-base font-black text-slate-900 tracking-tight flex items-center gap-2">
                             <svg class="w-5 h-5 text-[#F20B65]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             <span>{{ ($listing->user?->is_identity_verified || $listing->is_verified_poster) ? 'Verified Member Photo Gallery' : 'Member Photo Gallery' }}</span>
                             <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-[#F20B65] text-xs font-black">
-                                {{ $listing->approvedMedia->isNotEmpty() ? $listing->approvedMedia->count() : '1' }} Photos
+                                {{ $galleryCount }} {{ \Illuminate\Support\Str::plural('Photo', $galleryCount) }}
                             </span>
                         </h2>
                         <span class="text-xs text-slate-600 font-bold hidden sm:inline-flex items-center gap-1">
@@ -246,39 +250,29 @@
                         </span>
                     </div>
 
-                    @php
-                        $displayPhotos = $listing->allMedia->where('moderation_status', '!=', 'rejected');
-                    @endphp
-
                     @if($displayPhotos->isNotEmpty())
-                        <!-- User Uploaded Photos: 100% Full Uncut Photo with Ambient Backdrop -->
+                        <!-- User Uploaded Photos: Single Hardware-Safe Uncropped Photo Frame -->
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3.5">
                             @foreach($displayPhotos as $photo)
                                 <div
-                                    class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-950 aspect-[4/4.5] sm:aspect-[4/4.2] relative group cursor-pointer shadow-2xs hover:shadow-md transition-all duration-300 flex items-center justify-center"
+                                    class="rounded-2xl overflow-hidden border border-slate-200 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 aspect-[4/4.5] sm:aspect-[4/4.2] relative group cursor-pointer shadow-2xs hover:shadow-md transition-shadow duration-300 flex items-center justify-center isolate"
                                     @click="activePhotoUrl = '{{ $photo->url }}'; lightboxOpen = true"
                                 >
-                                    <!-- Ambient blurred backdrop -->
-                                    <img 
-                                        src="{{ $photo->url }}" 
-                                        alt="" 
-                                        aria-hidden="true"
-                                        class="absolute inset-0 w-full h-full object-cover filter blur-lg scale-110 opacity-50 select-none pointer-events-none"
-                                    />
-                                    <!-- 100% Full Image visible, never cut or cropped -->
                                     <img
-                                        src="{{ $photo->url }}"
+                                        src="{{ $photo->thumbnail_url }}"
                                         alt="{{ $listing->title }}"
-                                        class="relative z-10 max-h-full max-w-full w-auto h-auto object-contain mx-auto transition duration-500 group-hover:scale-105"
                                         loading="lazy"
+                                        decoding="async"
+                                        onerror="this.onerror=null;this.src='{{ asset('images/featured-1.jpg') }}';"
+                                        class="max-h-full max-w-full w-auto h-auto object-contain mx-auto block"
                                     >
-                                    <div class="absolute inset-0 z-10 bg-slate-900/0 group-hover:bg-slate-900/20 transition-colors flex items-center justify-center">
+                                    <div class="hidden sm:flex absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/20 transition-colors items-center justify-center pointer-events-none">
                                         <span class="w-10 h-10 rounded-full bg-white text-slate-800 flex items-center justify-center opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition duration-300 shadow-lg font-bold">
                                             🔍
                                         </span>
                                     </div>
                                     @if($photo->is_primary)
-                                        <span class="absolute top-2.5 left-2.5 z-20 px-2 py-0.5 rounded-md text-white text-[10px] font-black uppercase tracking-wider shadow" style="background-color: #F20B65 !important;">
+                                        <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-white text-[10px] font-black uppercase tracking-wider shadow pointer-events-none" style="background-color: #F20B65 !important;">
                                             Primary
                                         </span>
                                     @endif
@@ -292,24 +286,17 @@
                             $showcaseImg = asset('images/featured-' . $showcaseIndex . '.jpg');
                         @endphp
                         <div
-                            class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-950 relative group cursor-pointer shadow-sm hover:shadow-md transition-all duration-300 h-[360px] sm:h-[460px] flex items-center justify-center"
+                            class="rounded-2xl overflow-hidden border border-slate-200 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 relative group cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 h-[360px] sm:h-[460px] flex items-center justify-center isolate"
                             @click="activePhotoUrl = '{{ $showcaseImg }}'; lightboxOpen = true"
                         >
-                            <!-- Ambient blurred backdrop -->
-                            <img 
-                                src="{{ $showcaseImg }}" 
-                                alt="" 
-                                aria-hidden="true"
-                                class="absolute inset-0 w-full h-full object-cover filter blur-lg scale-110 opacity-50 select-none pointer-events-none"
-                            />
-                            <!-- 100% Full Image visible, never cut or cropped -->
                             <img
                                 src="{{ $showcaseImg }}"
                                 alt="{{ $listing->title }}"
-                                class="relative z-10 max-h-full max-w-full w-auto h-auto object-contain mx-auto transition duration-500 group-hover:scale-105"
                                 loading="lazy"
+                                decoding="async"
+                                class="max-h-full max-w-full w-auto h-auto object-contain mx-auto block"
                             >
-                            <div class="absolute inset-0 z-10 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-5 sm:p-6 pointer-events-none">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-5 sm:p-6 pointer-events-none">
                                 <div class="flex items-center justify-between w-full text-white">
                                     <div>
                                         <span class="px-3 py-1 rounded-lg text-white text-xs font-black uppercase tracking-wider shadow" style="background-color: #F20B65 !important;">

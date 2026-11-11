@@ -50,18 +50,33 @@ class ListingMedia extends Model
 
     public function getUrlAttribute(): string
     {
-        if (empty($this->file_path)) {
+        return $this->resolveAssetUrl($this->file_path);
+    }
+
+    public function getThumbnailUrlAttribute(): string
+    {
+        return $this->resolveAssetUrl($this->thumbnail_path ?: $this->file_path);
+    }
+
+    /**
+     * Normalize relative, rooted, and absolute media paths into a consistent public URL.
+     */
+    protected function resolveAssetUrl(?string $path): string
+    {
+        $trimmed = trim((string) $path);
+        if ($trimmed === '') {
             return asset('images/featured-1.jpg');
         }
-        if (str_starts_with($this->file_path, 'http://') || str_starts_with($this->file_path, 'https://')) {
-            return $this->file_path;
+        if (str_starts_with($trimmed, 'http://') || str_starts_with($trimmed, 'https://')) {
+            return $trimmed;
         }
-        if (str_starts_with($this->file_path, '/')) {
-            return asset(ltrim($this->file_path, '/'));
+        if (str_starts_with($trimmed, '/')) {
+            return asset(ltrim($trimmed, '/'));
         }
-        if (str_starts_with($this->file_path, 'images/')) {
-            return asset($this->file_path);
+        if (str_starts_with($trimmed, 'images/')) {
+            return asset($trimmed);
         }
-        return asset('storage/' . $this->file_path);
+
+        return asset('storage/' . ltrim($trimmed, '/'));
     }
 }

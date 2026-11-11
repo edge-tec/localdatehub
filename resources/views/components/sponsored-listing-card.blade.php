@@ -2,8 +2,8 @@
 
 <article class="group bg-white border-2 border-amber-200/90 hover:border-[#F20B65]/60 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative" data-ad-card="{{ $ad['campaign_id'] ?? $ad['legacy_id'] ?? 'ad' }}">
     <div>
-        {{-- Creative Media Showcase (Full Uncut Image + Ambient Blur matching Listing Card style) --}}
-        <div class="relative h-72 sm:h-80 w-full overflow-hidden bg-slate-950 flex items-center justify-center">
+        {{-- Creative Media Showcase (Hardware-Safe Full Uncut Image) --}}
+        <div class="relative h-72 sm:h-80 w-full overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 flex items-center justify-center isolate">
             @php
                 $displayImage = $ad['image_url'] ?? $ad['desktop_banner_url'] ?? $ad['thumbnail_url'] ?? $ad['mobile_banner_url'] ?? null;
             @endphp
@@ -16,18 +16,14 @@
                 <a href="{{ $ad['click_url'] }}" target="_blank" rel="sponsored noopener noreferrer" class="w-full h-full flex items-center justify-center relative block">
                     <img
                         src="{{ $displayImage }}"
-                        alt=""
-                        aria-hidden="true"
-                        class="absolute inset-0 w-full h-full object-cover filter blur-lg scale-110 opacity-45 select-none pointer-events-none"
-                    />
-                    <img
-                        src="{{ $displayImage }}"
                         alt="{{ $ad['alt_text'] ?? $ad['title'] }}"
                         loading="lazy"
-                        class="relative z-10 max-h-full max-w-full w-auto h-auto object-contain mx-auto transition duration-300 group-hover:scale-[1.02]"
+                        decoding="async"
+                        onerror="this.onerror=null;this.src='{{ asset('images/featured-1.jpg') }}';"
+                        class="max-h-full max-w-full w-auto h-auto object-contain mx-auto block"
                     />
                 </a>
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-transparent pointer-events-none z-10"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-transparent pointer-events-none"></div>
             @else
                 <a href="{{ $ad['click_url'] }}" target="_blank" rel="sponsored noopener noreferrer" class="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-amber-50 via-white to-pink-50">
                     <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-black uppercase tracking-wider mb-3">

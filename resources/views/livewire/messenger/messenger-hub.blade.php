@@ -298,10 +298,12 @@
                     <!-- Associated Listing Mini-Thumb -->
                     @if($listing && $listing->primaryPhoto)
                         <img 
-                            src="{{ $listing->primaryPhoto->url }}" 
+                            src="{{ $listing->primaryPhoto->thumbnail_url }}" 
                             alt="{{ $listing->title }}" 
-                            class="w-10 h-10 rounded-xl object-cover shrink-0 border border-slate-200" 
-                            style="object-position: center top;"
+                            loading="lazy"
+                            decoding="async"
+                            onerror="this.onerror=null;this.src='{{ asset('images/featured-1.jpg') }}';"
+                            class="w-10 h-10 rounded-xl object-contain bg-slate-900 shrink-0 border border-slate-200" 
                         />
                     @endif
                 </div>
@@ -432,10 +434,12 @@
                     <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
                         @if($activeListing->primaryPhoto)
                             <img 
-                                src="{{ $activeListing->primaryPhoto->url }}" 
+                                src="{{ $activeListing->primaryPhoto->thumbnail_url }}" 
                                 alt="{{ $activeListing->title }}" 
-                                class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl object-cover shrink-0 border border-slate-200" 
-                                style="object-position: center top;"
+                                loading="lazy"
+                                decoding="async"
+                                onerror="this.onerror=null;this.src='{{ asset('images/featured-1.jpg') }}';"
+                                class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl object-contain bg-slate-900 shrink-0 border border-slate-200" 
                             />
                         @else
                             <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 shrink-0 font-black text-xs">
@@ -515,7 +519,9 @@
                                             <img 
                                                 src="{{ $message->attachment_url }}" 
                                                 alt="{{ $message->attachment_name }}" 
-                                                class="rounded-xl max-h-60 w-auto object-cover cursor-pointer hover:opacity-95 transition border {{ $isOutgoing ? 'border-pink-400' : 'border-slate-200' }}"
+                                                loading="lazy"
+                                                decoding="async"
+                                                class="rounded-xl max-h-64 max-w-full w-auto object-contain cursor-pointer hover:opacity-95 transition border {{ $isOutgoing ? 'border-pink-400' : 'border-slate-200' }}"
                                                 @click="lightboxUrl = '{{ $message->attachment_url }}'"
                                             />
                                         @else
@@ -986,7 +992,7 @@
                     <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Active Advertisement Context</span>
                     <div class="rounded-xl border border-slate-200 p-2.5 bg-slate-50 flex items-center gap-2.5">
                         @if($activeListing->primaryPhoto)
-                            <img src="{{ $activeListing->primaryPhoto->url }}" alt="{{ $activeListing->title }}" class="w-12 h-12 rounded-lg object-cover shrink-0" style="object-position: center top;" />
+                            <img src="{{ $activeListing->primaryPhoto->thumbnail_url }}" alt="{{ $activeListing->title }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/featured-1.jpg') }}';" class="w-12 h-12 rounded-lg object-contain bg-slate-900 shrink-0" />
                         @endif
                         <div class="min-w-0 flex-1">
                             <span class="text-xs font-bold text-slate-900 truncate block">{{ $activeListing->title }}</span>

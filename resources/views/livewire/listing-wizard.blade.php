@@ -469,8 +469,8 @@
             @if(count($uploadedMedia) > 0)
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     @foreach($uploadedMedia as $m)
-                        <div class="relative rounded-2xl overflow-hidden border border-slate-200 shadow group aspect-square bg-slate-100">
-                            <img src="{{ $m['thumb'] }}" alt="Photo" class="w-full h-full object-cover">
+                        <div class="relative rounded-2xl overflow-hidden border border-slate-200 shadow group aspect-square bg-slate-900 flex items-center justify-center isolate">
+                            <img src="{{ $m['thumb'] }}" alt="Photo" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/featured-1.jpg') }}';" class="max-w-full max-h-full w-auto h-auto object-contain">
                             <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center space-x-2">
                                 @if(!$m['is_primary'])
                                     <button 

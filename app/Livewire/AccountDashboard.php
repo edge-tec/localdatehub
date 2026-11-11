@@ -866,7 +866,14 @@ class AccountDashboard extends Component
         $profile->zip_code = $this->zipCode;
 
         if ($this->avatar) {
-            $path = $this->avatar->store('avatars', 'public');
+            $stored = app(\App\Support\Storage\MediaStorageService::class)->storeSanitizedPhoto(
+                $this->avatar,
+                'avatars',
+                'public',
+                800,
+                800
+            );
+            $path = $stored['path'];
             $profile->avatar_path = $path;
             $user->avatar = $path;
             $user->save();
@@ -892,7 +899,14 @@ class AccountDashboard extends Component
 
         /** @var User $user */
         $user = Auth::user();
-        $path = $this->avatar->store('avatars', 'public');
+        $stored = app(\App\Support\Storage\MediaStorageService::class)->storeSanitizedPhoto(
+            $this->avatar,
+            'avatars',
+            'public',
+            800,
+            800
+        );
+        $path = $stored['path'];
 
         $profile = $user->profile ?? new UserProfile(['user_id' => $user->id]);
         $profile->avatar_path = $path;

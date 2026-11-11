@@ -1135,7 +1135,14 @@ class AdminEnterpriseHub extends Component
 
             // Handle Admin Avatar Upload
             if ($this->editUserAvatar) {
-                $path = $this->editUserAvatar->store('avatars', 'public');
+                $stored = app(\App\Support\Storage\MediaStorageService::class)->storeSanitizedPhoto(
+                    $this->editUserAvatar,
+                    'avatars',
+                    'public',
+                    800,
+                    800
+                );
+                $path = $stored['path'];
                 $user->avatar = $path;
                 $profile->avatar_path = $path;
             }

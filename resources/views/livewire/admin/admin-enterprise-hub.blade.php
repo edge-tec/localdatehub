@@ -730,9 +730,8 @@
                                     <!-- Full Uncropped Image Showcase -->
                                     <div class="relative w-full bg-slate-100/90 border-b border-slate-100 overflow-hidden">
                                         @if($rListing->primary_photo_url)
-                                            <a href="{{ route('listings.show', $rListing->slug) }}" target="_blank" class="relative block w-full bg-slate-950/5">
-                                                <img src="{{ $rListing->primary_photo_url }}" alt="" aria-hidden="true" class="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-25 pointer-events-none" />
-                                                <img src="{{ $rListing->primary_photo_url }}" alt="{{ $rListing->title }}" class="relative z-10 w-full h-auto max-h-[420px] object-contain mx-auto block transition-transform duration-300 group-hover:scale-[1.02]" />
+                                            <a href="{{ route('listings.show', $rListing->slug) }}" target="_blank" class="relative block w-full bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900">
+                                                <img src="{{ $rListing->primary_thumbnail_url }}" alt="{{ $rListing->title }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/featured-1.jpg') }}';" class="w-full h-auto max-h-[420px] object-contain mx-auto block" />
                                             </a>
                                         @else
                                             <a href="{{ route('listings.show', $rListing->slug) }}" target="_blank" class="w-full min-h-[200px] flex flex-col items-center justify-center bg-slate-100 text-slate-400 p-6">
@@ -1544,8 +1543,8 @@
                                 <td class="{{ $td }}">
                                     <div class="flex items-start gap-3">
                                         @if($l->media && $l->media->isNotEmpty())
-                                            <div class="w-12 h-12 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 shrink-0">
-                                                <img src="{{ $l->media->first()->url }}" alt="Preview" class="w-full h-full object-cover">
+                                            <div class="w-12 h-12 rounded-xl overflow-hidden border border-slate-200 bg-slate-900 shrink-0 flex items-center justify-center">
+                                                <img src="{{ $l->media->first()->thumbnail_url }}" alt="Preview" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/featured-1.jpg') }}';" class="w-full h-full object-contain">
                                             </div>
                                         @else
                                             <div class="w-12 h-12 rounded-xl border border-slate-200 bg-slate-100 shrink-0 flex items-center justify-center text-slate-400 font-bold text-xs">

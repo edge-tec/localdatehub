@@ -158,6 +158,21 @@ class Listing extends Model
         return asset("images/featured-{$index}.jpg");
     }
 
+    public function getPrimaryThumbnailUrlAttribute(): string
+    {
+        if ($this->primaryPhoto && $this->primaryPhoto->thumbnail_url) {
+            return $this->primaryPhoto->thumbnail_url;
+        }
+
+        $fallback = $this->allMedia->where('moderation_status', '!=', 'rejected')->first();
+        if ($fallback && $fallback->thumbnail_url) {
+            return $fallback->thumbnail_url;
+        }
+
+        $index = (($this->id - 1) % 4) + 1;
+        return asset("images/featured-{$index}.jpg");
+    }
+
     public function contact(): HasOne
     {
         return $this->hasOne(ListingContact::class);
