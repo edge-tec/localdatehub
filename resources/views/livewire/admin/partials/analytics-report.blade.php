@@ -271,8 +271,8 @@
                         <div>
                             <h2 class="text-sm font-extrabold text-slate-900 mb-3">🍩 Posts by Status</h2>
                             <div class="flex flex-col sm:flex-row items-center justify-center gap-6 my-auto py-2">
-                                <div class="relative w-32 h-32 sm:w-36 sm:h-36 shrink-0 flex items-center justify-center">
-                                    <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
+                                <div class="relative w-32 sm:w-36 aspect-square max-w-full shrink-0 flex items-center justify-center">
+                                    <svg viewBox="-2 -2 40 40" class="w-full h-full -rotate-90 overflow-visible block">
                                         <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#F1F5F9" stroke-width="4.5"/>
                                         @foreach($listingsByStatus as $status => $total)
                                             @php $p = round(($total / $statusTotal) * 100, 2); @endphp
@@ -280,8 +280,8 @@
                                             @php $offset += $p; @endphp
                                         @endforeach
                                     </svg>
-                                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                        <span class="text-base font-black text-slate-900 leading-none">{{ number_format($statusTotal) }}</span>
+                                    <div class="absolute inset-4 flex flex-col items-center justify-center text-center pointer-events-none">
+                                        <span class="text-base font-black text-slate-900 leading-none tabular-nums">{{ number_format($statusTotal) }}</span>
                                         <span class="text-[9px] uppercase font-bold text-slate-400 mt-0.5">Posts</span>
                                     </div>
                                 </div>
@@ -376,8 +376,8 @@
                                 @endphp
                                 <div class="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 flex flex-col items-center">
                                     <div class="text-[10px] uppercase tracking-wider text-slate-500 font-black mb-3 self-start">🍩 Country Share Graph</div>
-                                    <div class="relative w-36 h-36 flex items-center justify-center my-1">
-                                        <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
+                                    <div class="relative w-36 sm:w-40 aspect-square max-w-full shrink-0 flex items-center justify-center my-1">
+                                        <svg viewBox="-2 -2 40 40" class="w-full h-full -rotate-90 overflow-visible block">
                                             <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#E2E8F0" stroke-width="5"/>
                                             @foreach(array_slice($countryReport, 0, 8) as $c)
                                                 @php $p = round((($showGross ? $c['hits'] : $c['unique_visitors']) / $cTotal) * 100, 2); @endphp
@@ -385,8 +385,8 @@
                                                 @php $cOffset += $p; @endphp
                                             @endforeach
                                         </svg>
-                                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                            <span class="text-sm font-black text-slate-900 leading-none">{{ number_format($cTotal) }}</span>
+                                        <div class="absolute inset-5 flex flex-col items-center justify-center text-center pointer-events-none">
+                                            <span class="text-sm font-black text-slate-900 leading-none tabular-nums">{{ number_format($cTotal) }}</span>
                                             <span class="text-[9px] uppercase font-bold text-slate-400 mt-0.5">{{ $showGross ? 'Hits' : 'Visitors' }}</span>
                                         </div>
                                     </div>
@@ -473,15 +473,17 @@
                 @endphp
                 @if($showGraph)
                     <div class="flex justify-center mb-4">
-                        <svg viewBox="0 0 36 36" class="w-36 h-36 -rotate-90">
-                            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#F1F5F9" stroke-width="5"/>
-                            @foreach($deviceReport as $d)
-                                @if($d[$dKey] > 0)
-                                    <circle cx="18" cy="18" r="15.9155" fill="none" stroke="{{ $dColors[$d['device']] }}" stroke-width="5" stroke-dasharray="{{ $d[$dKey] }} {{ 100 - $d[$dKey] }}" stroke-dashoffset="-{{ $dOffset }}"/>
-                                    @php $dOffset += $d[$dKey]; @endphp
-                                @endif
-                            @endforeach
-                        </svg>
+                        <div class="w-36 aspect-square max-w-full shrink-0 flex items-center justify-center">
+                            <svg viewBox="-2 -2 40 40" class="w-full h-full -rotate-90 overflow-visible block">
+                                <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#F1F5F9" stroke-width="5"/>
+                                @foreach($deviceReport as $d)
+                                    @if($d[$dKey] > 0)
+                                        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="{{ $dColors[$d['device']] }}" stroke-width="5" stroke-dasharray="{{ $d[$dKey] }} {{ 100 - $d[$dKey] }}" stroke-dashoffset="-{{ $dOffset }}"/>
+                                        @php $dOffset += $d[$dKey]; @endphp
+                                    @endif
+                                @endforeach
+                            </svg>
+                        </div>
                     </div>
                 @endif
                 <div class="space-y-2.5">

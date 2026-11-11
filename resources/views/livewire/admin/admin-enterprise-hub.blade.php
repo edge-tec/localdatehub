@@ -629,8 +629,8 @@
                                     All Ads →
                                 </a>
                             </div>
-                            <div class="relative w-36 h-36 mx-auto my-3 flex items-center justify-center">
-                                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                            <div class="relative w-36 aspect-square max-w-full shrink-0 mx-auto my-3 flex items-center justify-center">
+                                <svg class="w-full h-full transform -rotate-90 overflow-visible block" viewBox="-2 -2 40 40">
                                     <!-- Background Circle -->
                                     <path class="text-slate-100" stroke-width="4.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                     <!-- Published (Teal/Emerald) -->
@@ -640,8 +640,8 @@
                                     <!-- Rejected (Pink) -->
                                     <path class="text-[#F20B65] transition-all duration-500" stroke-width="4.5" stroke-dasharray="{{ $statusCounts['rejPct'] }}, 100" stroke-dashoffset="-{{ ($statusCounts['pubPct'] + $statusCounts['penPct']) }}" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                 </svg>
-                                <a href="{{ route('admin.dashboard', ['tab' => 'listings']) }}" wire:click.prevent="setListingStatusFilter('all')" class="absolute text-center group cursor-pointer" title="View All Listings">
-                                    <div class="text-xs font-black text-slate-900 group-hover:text-[#F20B65] transition">{{ number_format($statusCounts['total']) }}</div>
+                                <a href="{{ route('admin.dashboard', ['tab' => 'listings']) }}" wire:click.prevent="setListingStatusFilter('all')" class="absolute inset-4 flex flex-col items-center justify-center text-center group cursor-pointer" title="View All Listings">
+                                    <div class="text-xs font-black text-slate-900 tabular-nums group-hover:text-[#F20B65] transition">{{ number_format($statusCounts['total']) }}</div>
                                     <div class="text-[9px] font-bold text-slate-400 group-hover:text-[#F20B65] transition uppercase">Total</div>
                                 </a>
                             </div>
@@ -918,51 +918,51 @@
                                 <h2 class="text-sm font-extrabold text-slate-900">System Health</h2>
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">Optimal</span>
                             </div>
-                            <div class="grid grid-cols-4 gap-2 text-center mb-4">
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-2 text-center mb-4">
                                 <!-- Server Gauge -->
                                 <div>
-                                    <div class="relative w-12 h-12 mx-auto">
-                                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                    <div class="relative w-12 aspect-square max-w-full shrink-0 mx-auto">
+                                        <svg class="w-full h-full transform -rotate-90 overflow-visible block" viewBox="-2 -2 40 40">
                                             <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                             <path class="text-emerald-500" stroke-width="3" stroke-dasharray="{{ $health['serverPct'] ?? 98 }}, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                         </svg>
-                                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">{{ $health['serverPct'] ?? 98 }}%</span>
+                                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900 tabular-nums">{{ $health['serverPct'] ?? 98 }}%</span>
                                     </div>
                                     <div class="text-[10px] font-bold text-slate-500 mt-1">Server</div>
                                 </div>
 
                                 <!-- Database Gauge -->
                                 <div>
-                                    <div class="relative w-12 h-12 mx-auto">
-                                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                    <div class="relative w-12 aspect-square max-w-full shrink-0 mx-auto">
+                                        <svg class="w-full h-full transform -rotate-90 overflow-visible block" viewBox="-2 -2 40 40">
                                             <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                             <path class="{{ ($health['dbPct'] ?? 100) >= 80 ? 'text-emerald-500' : 'text-rose-500' }}" stroke-width="3" stroke-dasharray="{{ $health['dbPct'] ?? 100 }}, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                         </svg>
-                                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">{{ $health['dbPct'] ?? 100 }}%</span>
+                                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900 tabular-nums">{{ $health['dbPct'] ?? 100 }}%</span>
                                     </div>
                                     <div class="text-[10px] font-bold text-slate-500 mt-1">Database</div>
                                 </div>
 
                                 <!-- Queue Gauge -->
                                 <div>
-                                    <div class="relative w-12 h-12 mx-auto">
-                                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                    <div class="relative w-12 aspect-square max-w-full shrink-0 mx-auto">
+                                        <svg class="w-full h-full transform -rotate-90 overflow-visible block" viewBox="-2 -2 40 40">
                                             <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                             <path class="text-emerald-500" stroke-width="3" stroke-dasharray="{{ $health['queuePct'] ?? 100 }}, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                         </svg>
-                                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">{{ $health['queuePct'] ?? 100 }}%</span>
+                                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900 tabular-nums">{{ $health['queuePct'] ?? 100 }}%</span>
                                     </div>
                                     <div class="text-[10px] font-bold text-slate-500 mt-1">Queue</div>
                                 </div>
 
                                 <!-- Cache Gauge -->
                                 <div>
-                                    <div class="relative w-12 h-12 mx-auto">
-                                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                    <div class="relative w-12 aspect-square max-w-full shrink-0 mx-auto">
+                                        <svg class="w-full h-full transform -rotate-90 overflow-visible block" viewBox="-2 -2 40 40">
                                             <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                             <path class="{{ ($health['cachePct'] ?? 100) >= 80 ? 'text-emerald-500' : 'text-rose-500' }}" stroke-width="3" stroke-dasharray="{{ $health['cachePct'] ?? 100 }}, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                         </svg>
-                                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900">{{ $health['cachePct'] ?? 100 }}%</span>
+                                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-900 tabular-nums">{{ $health['cachePct'] ?? 100 }}%</span>
                                     </div>
                                     <div class="text-[10px] font-bold text-slate-500 mt-1">Cache</div>
                                 </div>
