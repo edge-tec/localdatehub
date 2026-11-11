@@ -81,10 +81,20 @@ class EnterprisePostingMonetizationTest extends TestCase
         $price1 = $pricingService->calculatePostingPrice($user, $category->id);
         $this->assertEquals(15, $price1['price_credits']);
 
-        // 2. Account-type default override (5 credits for verified)
-        $user->is_identity_verified = true;
-        $user->save();
-        $price2 = $pricingService->calculatePostingPrice($user, $category->id);
+        // 2. Account-type default override (5 credits for verified via real ID approval)
+        $reviewer = User::factory()->create(['role' => 'admin', 'account_status' => 'active']);
+        IdentityVerification::create([
+            'user_id' => $user->id,
+            'document_type' => 'passport',
+            'document_front_path' => 'verifications/front.jpg',
+            'selfie_path' => 'verifications/selfie.jpg',
+            'status' => IdentityVerification::STATUS_VERIFIED,
+            'reviewer_id' => $reviewer->id,
+            'submitted_at' => now()->subDay(),
+            'reviewed_at' => now(),
+        ]);
+        app(IdentityVerificationService::class)->syncUserBadgeState($user->fresh());
+        $price2 = $pricingService->calculatePostingPrice($user->fresh(), $category->id);
         $this->assertEquals(5, $price2['price_credits']);
 
         // 3. Category-specific rule override (25 credits)
@@ -148,8 +158,21 @@ class EnterprisePostingMonetizationTest extends TestCase
     public function test_listing_creation_debits_wallet_and_auto_approves_verified_user(): void
     {
         $user = User::factory()->create([
-            'is_identity_verified' => true,
+            'is_identity_verified' => false,
         ]);
+        $reviewer = User::factory()->create(['role' => 'admin', 'account_status' => 'active']);
+        IdentityVerification::create([
+            'user_id' => $user->id,
+            'document_type' => 'passport',
+            'document_front_path' => 'verifications/front.jpg',
+            'selfie_path' => 'verifications/selfie.jpg',
+            'status' => IdentityVerification::STATUS_VERIFIED,
+            'reviewer_id' => $reviewer->id,
+            'submitted_at' => now()->subDay(),
+            'reviewed_at' => now(),
+        ]);
+        app(IdentityVerificationService::class)->syncUserBadgeState($user);
+        $user = $user->fresh();
 
         $city = City::first();
         $state = $city->state;

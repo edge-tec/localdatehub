@@ -18,16 +18,26 @@
         </div>
 
         <!-- Verification Status Cards -->
-        @if($user->is_identity_verified)
+        @php
+            $status = $canonicalStatus ?? ($user->identityVerificationStatus());
+            $verified = $isVerified ?? $user->hasVerifiedIdentity();
+        @endphp
+
+        @if($verified)
             <div class="bg-gradient-to-r from-blue-50 to-emerald-50/50 border border-blue-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
                 <div class="flex items-center space-x-4">
                     <div class="w-14 h-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-2xl font-black shadow-md shrink-0">
                         ✓
                     </div>
                     <div>
-                        <span class="text-[10px] font-black uppercase tracking-wider text-blue-700">Verified Member</span>
+                        <span class="text-[10px] font-black uppercase tracking-wider text-blue-700">Approved &amp; Verified Member</span>
                         <h2 class="text-xl font-black text-slate-900">Your Account is Identity-Verified</h2>
-                        <p class="text-xs text-slate-600 mt-0.5">Verified on {{ $verification?->reviewed_at?->format('M d, Y') ?? 'Confirmed' }}</p>
+                        <p class="text-xs text-slate-600 mt-0.5">
+                            Verified on {{ $verification?->reviewed_at?->format('M d, Y') ?? 'Confirmed' }}
+                            @if($verification?->expires_at)
+                                &bull; Valid until {{ $verification->expires_at->format('M d, Y') }}
+                            @endif
+                        </p>
                     </div>
                 </div>
 
@@ -38,7 +48,7 @@
                     </div>
                     <div class="bg-white/80 p-3 rounded-xl border border-blue-100 flex items-center space-x-2">
                         <span class="text-blue-600 font-bold">✓</span>
-                        <span>Verified Poster Badge</span>
+                        <span>Blue Verified Badge Active</span>
                     </div>
                     <div class="bg-white/80 p-3 rounded-xl border border-blue-100 flex items-center space-x-2">
                         <span class="text-blue-600 font-bold">⚡</span>
@@ -46,33 +56,69 @@
                     </div>
                 </div>
             </div>
-        @elseif($verification && $verification->isPending())
+        @elseif(in_array($status, [\App\Modules\Verification\Models\IdentityVerification::STATUS_PENDING, \App\Modules\Verification\Models\IdentityVerification::STATUS_UNDER_REVIEW], true))
             <div class="bg-amber-50 border border-amber-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-3">
                 <div class="flex items-center space-x-4">
                     <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-xl font-black shrink-0">
                         ⏳
                     </div>
                     <div>
-                        <span class="text-[10px] font-black uppercase tracking-wider text-amber-800">Under Review</span>
-                        <h2 class="text-lg font-black text-slate-900">Verification Application Pending</h2>
-                        <p class="text-xs text-slate-600 mt-0.5">Submitted on {{ $verification->submitted_at?->format('M d, Y · h:i A') }}</p>
+                        <span class="text-[10px] font-black uppercase tracking-wider text-amber-800">
+                            {{ $status === 'under_review' ? 'Under Active Review' : 'Pending Administrator Review' }}
+                        </span>
+                        <h2 class="text-lg font-black text-slate-900">
+                            {{ $status === 'under_review' ? 'Identity Verification Is Under Review' : 'Verification Application Pending' }}
+                        </h2>
+                        <p class="text-xs text-slate-600 mt-0.5">Submitted on {{ $verification?->submitted_at?->format('M d, Y · h:i A') }}</p>
                     </div>
                 </div>
                 <p class="text-xs text-slate-700 leading-relaxed pt-2 border-t border-amber-200/80">
-                    Your government-issued document and selfie have been securely encrypted and placed into the administrator review queue. Verification reviews are typically completed within 1 to 12 hours.
+                    Your government-issued document and selfie have been securely encrypted and are being reviewed by an authorized compliance administrator. Your Blue Verified Badge will only activate after formal approval.
                 </p>
             </div>
         @else
-            @if($verification && $verification->status === 'rejected')
+            @if($status === \App\Modules\Verification\Models\IdentityVerification::STATUS_REJECTED && $verification)
                 <div class="bg-rose-50 border border-rose-200 rounded-3xl p-5 shadow-sm space-y-2">
                     <div class="flex items-center space-x-2 text-rose-800 font-bold text-sm">
                         <span>⚠️</span>
-                        <span>Previous Application Declined</span>
+                        <span>Verification Application Rejected</span>
                     </div>
                     <p class="text-xs text-rose-700">
                         <strong>Reason:</strong> {{ $verification->rejection_reason }}
                     </p>
                     <p class="text-[11px] text-slate-500">Please review the guidelines below and re-submit clear, valid documents.</p>
+                </div>
+            @elseif($status === \App\Modules\Verification\Models\IdentityVerification::STATUS_RESUBMISSION_REQUIRED && $verification)
+                <div class="bg-orange-50 border border-orange-200 rounded-3xl p-5 shadow-sm space-y-2">
+                    <div class="flex items-center space-x-2 text-orange-800 font-bold text-sm">
+                        <span>↻</span>
+                        <span>Resubmission Required</span>
+                    </div>
+                    <p class="text-xs text-orange-700">
+                        <strong>Reviewer Note:</strong> {{ $verification->rejection_reason ?: $verification->admin_notes }}
+                    </p>
+                    <p class="text-[11px] text-slate-600">Please upload a clearer photo of your ID document and selfie below.</p>
+                </div>
+            @elseif($status === \App\Modules\Verification\Models\IdentityVerification::STATUS_REVOKED && $verification)
+                <div class="bg-slate-100 border border-slate-300 rounded-3xl p-5 shadow-sm space-y-2">
+                    <div class="flex items-center space-x-2 text-slate-800 font-bold text-sm">
+                        <span>⛔</span>
+                        <span>Verification Revoked</span>
+                    </div>
+                    <p class="text-xs text-slate-700">
+                        <strong>Details:</strong> {{ $verification->rejection_reason ?: 'Previously approved verification was revoked by an administrator.' }}
+                    </p>
+                    <p class="text-[11px] text-slate-600">You may submit new verification documents below for fresh compliance review.</p>
+                </div>
+            @elseif($status === \App\Modules\Verification\Models\IdentityVerification::STATUS_EXPIRED && $verification)
+                <div class="bg-amber-50 border border-amber-200 rounded-3xl p-5 shadow-sm space-y-2">
+                    <div class="flex items-center space-x-2 text-amber-800 font-bold text-sm">
+                        <span>⌛</span>
+                        <span>Verification Expired</span>
+                    </div>
+                    <p class="text-xs text-amber-700">
+                        Your previous identity verification expired on {{ $verification->expires_at?->format('M d, Y') }}. Please submit fresh verification documents below to restore your Blue Verified Badge.
+                    </p>
                 </div>
             @endif
 

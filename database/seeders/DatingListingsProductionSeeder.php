@@ -67,7 +67,6 @@ class DatingListingsProductionSeeder extends Seeder
                         'role' => 'user',
                         'account_status' => 'active',
                         'is_age_verified' => true,
-                        'is_identity_verified' => true,
                         'email_verified_at' => now(),
                     ]
                 );
@@ -88,7 +87,6 @@ class DatingListingsProductionSeeder extends Seeder
                         'intent' => $item['intent'],
                         'status' => 'active',
                         'is_featured' => $item['is_featured'],
-                        'is_verified_poster' => true,
                         'has_photos' => true,
                         'view_count' => $item['view_count'],
                         'published_at' => $item['published_at'],

@@ -20,11 +20,44 @@ class AccountVerificationController extends Controller
     public function show()
     {
         $user = Auth::user();
-        $latestVerification = $user->latestVerification;
+        $latestVerification = $user->verifications()
+            ->with('reviewer')
+            ->latest('id')
+            ->first();
 
         return view('account.verification.show', [
             'user' => $user,
             'verification' => $latestVerification,
+            'canonicalStatus' => $user->identityVerificationStatus(),
+            'statusLabel' => $latestVerification?->statusLabel() ?? 'Not Submitted',
+            'isVerified' => $user->hasVerifiedIdentity(),
+        ]);
+    }
+
+    /**
+     * Return authoritative identity verification status for the authenticated user.
+     */
+    public function status()
+    {
+        $user = Auth::user();
+        $latestVerification = $user->verifications()->latest('id')->first();
+        $canonicalStatus = $user->identityVerificationStatus();
+        $isVerified = $user->hasVerifiedIdentity();
+
+        return response()->json([
+            'user_id' => $user->id,
+            'is_identity_verified' => $isVerified,
+            'status' => $canonicalStatus,
+            'status_label' => $latestVerification?->statusLabel() ?? 'Not Submitted',
+            'document_type' => $latestVerification?->document_type,
+            'reviewed_at' => $latestVerification?->reviewed_at?->toIso8601String(),
+            'verified_at' => $isVerified ? ($user->identity_verified_at?->toIso8601String() ?? $latestVerification?->reviewed_at?->toIso8601String()) : null,
+            'expires_at' => $latestVerification?->expires_at?->toIso8601String(),
+            'rejection_reason' => $latestVerification?->rejection_reason,
+            'resubmit_allowed' => !$isVerified && !in_array($canonicalStatus, [
+                IdentityVerification::STATUS_PENDING,
+                IdentityVerification::STATUS_UNDER_REVIEW,
+            ], true),
         ]);
     }
 
@@ -35,13 +68,13 @@ class AccountVerificationController extends Controller
     {
         $user = Auth::user();
 
-        // Check if already verified or pending
-        if ($user->is_identity_verified) {
+        // Check if already validly verified via an approved non-expired ID record
+        if ($user->hasVerifiedIdentity()) {
             return back()->with('status', 'Your account is already identity-verified.');
         }
 
-        $latest = $user->latestVerification;
-        if ($latest && $latest->isPending()) {
+        $latest = $user->verifications()->latest('id')->first();
+        if ($latest && ($latest->isPending() || $latest->isUnderReview())) {
             return back()->with('error', 'You already have an identity verification application under review.');
         }
 

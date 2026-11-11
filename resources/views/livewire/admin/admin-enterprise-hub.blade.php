@@ -1081,7 +1081,7 @@
                                     <div class="min-w-0">
                                         <div class="font-black text-slate-950 truncate flex items-center gap-1">
                                             <span class="truncate">{{ $u->name }}</span>
-                                            @if($u->is_identity_verified)
+                                            @if($u->hasVerifiedIdentity())
                                                 <x-verified-badge variant="icon" size="w-3.5 h-3.5" title="Blue Verified Badge Active" />
                                             @endif
                                         </div>
@@ -8232,6 +8232,24 @@
                                 @endif
                             </div>
                             <div>
+                                <span class="text-slate-500 font-bold block text-[10px] uppercase">ID Verification (Blue Badge):</span>
+                                @if(!empty($viewUserData['is_identity_verified']))
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <x-verified-badge variant="pill" size="xs" />
+                                        @if(!empty($viewUserData['identity_verified_at']))
+                                            <span class="text-[10px] text-slate-500">Approved {{ $viewUserData['identity_verified_at'] }}</span>
+                                        @endif
+                                    </div>
+                                @else
+                                    <span class="text-xs font-bold text-slate-700">{{ $viewUserData['identity_verification_label'] ?? 'Not Submitted' }}</span>
+                                @endif
+                                <div class="mt-1">
+                                    <a href="{{ !empty($viewUserData['latest_verification_id']) ? route('admin.verifications.show', $viewUserData['latest_verification_id']) : route('admin.verifications.index') }}" class="text-[10px] font-bold text-blue-600 hover:underline">
+                                        Review ID Verification Queue &rarr;
+                                    </a>
+                                </div>
+                            </div>
+                            <div>
                                 <span class="text-slate-500 font-bold block text-[10px] uppercase">Wallet Credits Balance:</span>
                                 <span class="font-mono font-black text-indigo-700 text-sm">{{ $viewUserData['wallet_balance'] }} cr</span>
                                 <span class="text-[10px] text-slate-500">({{ $viewUserData['wallet_purchased'] }} purchased, {{ $viewUserData['wallet_spent'] }} spent)</span>
@@ -8420,16 +8438,22 @@
                             @error('editUserPassword')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
                         </div>
 
-                        <div class="flex flex-wrap items-center gap-5 pt-1">
+                        <div class="flex flex-wrap items-center justify-between gap-4 pt-1">
                             <label for="editIsAgeVerified" class="inline-flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer">
                                 <input type="checkbox" id="editIsAgeVerified" wire:model="editUserIsAgeVerified" class="rounded border-slate-300 text-[#F20B83] focus:ring-[#F20B83]">
                                 <span>18+ Age Verified Status</span>
                             </label>
-                            <label for="editIsIdentityVerified" class="inline-flex items-center gap-2 text-xs font-bold text-blue-700 cursor-pointer">
-                                <input type="checkbox" id="editIsIdentityVerified" wire:model="editUserIsIdentityVerified" class="rounded border-slate-300 text-blue-600 focus:ring-blue-600">
-                                <span>Blue Verified Badge (ID Verified)</span>
-                            </label>
+                            <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs">
+                                <span class="font-bold text-slate-600">Blue ID Badge:</span>
+                                @if($editUserIsIdentityVerified)
+                                    <x-verified-badge variant="pill" size="xs" />
+                                @else
+                                    <span class="font-bold text-slate-500">Not ID Verified</span>
+                                @endif
+                                <a href="{{ route('admin.verifications.index') }}" class="font-bold text-blue-600 hover:underline ml-1">Review ID Docs &rarr;</a>
+                            </div>
                         </div>
+                        <p class="text-[11px] text-slate-500 -mt-1">Blue Verified Badges can only be activated or revoked through official ID document review in the Verification Queue.</p>
 
                         <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
                             <button type="button" wire:click="closeModals" class="px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 rounded-xl transition">

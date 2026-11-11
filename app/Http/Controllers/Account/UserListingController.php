@@ -24,7 +24,7 @@ class UserListingController extends Controller
         $user = $request->user();
 
         $query = Listing::where('user_id', $user->id)
-            ->with(['category', 'city', 'state', 'primaryPhoto'])
+            ->with(['category', 'city', 'state', 'primaryPhoto', 'ownerIdentityVerification'])
             ->latest();
 
         $status = $request->input('status');

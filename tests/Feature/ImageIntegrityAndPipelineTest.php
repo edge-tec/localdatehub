@@ -9,6 +9,8 @@ use App\Modules\Listings\Models\ListingMedia;
 use App\Modules\Listings\Services\ListingManagementService;
 use App\Modules\Listings\Services\ListingMediaService;
 use App\Modules\Locations\Models\City;
+use App\Modules\Verification\Models\IdentityVerification;
+use App\Modules\Verification\Services\IdentityVerificationService;
 use App\Support\Storage\ImageProcessor;
 use App\Support\Storage\MediaStorageService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -203,7 +205,20 @@ class ImageIntegrityAndPipelineTest extends TestCase
 
     public function test_listing_gallery_and_homepage_render_single_clean_images_without_gpu_blur_backdrops(): void
     {
-        $user = User::factory()->create(['is_age_verified' => true, 'is_identity_verified' => true]);
+        $user = User::factory()->create(['is_age_verified' => true, 'is_identity_verified' => false]);
+        $reviewer = User::factory()->create(['role' => 'admin', 'account_status' => 'active']);
+        IdentityVerification::create([
+            'user_id' => $user->id,
+            'document_type' => 'passport',
+            'document_front_path' => 'verifications/front.jpg',
+            'selfie_path' => 'verifications/selfie.jpg',
+            'status' => IdentityVerification::STATUS_VERIFIED,
+            'reviewer_id' => $reviewer->id,
+            'submitted_at' => now()->subDay(),
+            'reviewed_at' => now(),
+        ]);
+        app(IdentityVerificationService::class)->syncUserBadgeState($user);
+        $user = $user->fresh();
         $listing = $this->createSampleListing($user);
         app(ListingMediaService::class)->processAndStorePhoto(
             $listing,

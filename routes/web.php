@@ -487,6 +487,8 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     // Identity Verification
     Route::get('/account/verification', [\App\Http\Controllers\Account\AccountVerificationController::class, 'show'])->name('account.verification.show');
+    Route::get('/account/verification/status', [\App\Http\Controllers\Account\AccountVerificationController::class, 'status'])->name('account.verification.status');
+    Route::get('/api/account/verification', [\App\Http\Controllers\Account\AccountVerificationController::class, 'status'])->name('api.account.verification.status');
     Route::post('/account/verification', [\App\Http\Controllers\Account\AccountVerificationController::class, 'store'])->name('account.verification.store');
 });
 
@@ -533,13 +535,16 @@ Route::middleware(['auth', 'admin.rbac'])->group(function () {
         Route::post('/adjustment', [\App\Http\Controllers\Admin\AdminWalletController::class, 'manualAdjustment'])->name('adjustment');
     });
 
-    // Identity Verification Queue
-    Route::prefix('admin/verifications')->name('admin.verifications.')->group(function () {
+    // Identity Verification Queue (strictly requires verification.manage permission)
+    Route::middleware('admin.rbac:verification.manage')->prefix('admin/verifications')->name('admin.verifications.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\AdminVerificationController::class, 'index'])->name('index');
         Route::get('/{verification}', [\App\Http\Controllers\Admin\AdminVerificationController::class, 'show'])->name('show');
         Route::get('/{verification}/document/{type}', [\App\Http\Controllers\Admin\AdminVerificationController::class, 'downloadDocument'])->name('document');
+        Route::post('/{verification}/under-review', [\App\Http\Controllers\Admin\AdminVerificationController::class, 'markUnderReview'])->name('under-review');
         Route::post('/{verification}/approve', [\App\Http\Controllers\Admin\AdminVerificationController::class, 'approve'])->name('approve');
         Route::post('/{verification}/reject', [\App\Http\Controllers\Admin\AdminVerificationController::class, 'reject'])->name('reject');
+        Route::post('/{verification}/resubmit', [\App\Http\Controllers\Admin\AdminVerificationController::class, 'requestResubmission'])->name('resubmit');
+        Route::post('/{verification}/revoke', [\App\Http\Controllers\Admin\AdminVerificationController::class, 'revoke'])->name('revoke');
         Route::post('/{verification}/suspend', [\App\Http\Controllers\Admin\AdminVerificationController::class, 'suspend'])->name('suspend');
     });
 });

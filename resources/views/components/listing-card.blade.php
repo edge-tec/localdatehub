@@ -35,11 +35,8 @@
                     <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-white/95 text-[#F20B65] border border-slate-200/80 shadow-xs backdrop-blur-xs">
                         {{ $listing->category?->name ?: 'Personal' }}
                     </span>
-                    @if($listing->is_verified_poster)
-                        <span class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-blue-600 text-white shadow-xs backdrop-blur-xs flex items-center gap-1" title="Identity Verified Poster">
-                            <svg class="w-3 h-3 text-white fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span>Verified</span>
-                        </span>
+                    @if($listing->hasVerifiedPoster())
+                        <x-verified-badge variant="pill" label="Verified" size="xs" title="Identity Verified Poster" />
                     @endif
                 </div>
                 @if($listing->is_featured)

@@ -249,8 +249,8 @@
                                 <span class="text-xs font-black text-slate-900 truncate {{ $hasUnread ? 'font-black' : 'font-bold' }}">
                                     {{ $peer?->name ?? 'Classified Member' }}
                                 </span>
-                                @if($peer?->is_identity_verified)
-                                    <svg class="w-3.5 h-3.5 text-blue-500 fill-current shrink-0" viewBox="0 0 20 20" title="Verified Member"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                @if($peer?->hasVerifiedIdentity())
+                                    <x-verified-badge variant="icon" size="w-3.5 h-3.5" title="Verified Member" />
                                 @endif
                             </div>
                             <span class="text-[10px] font-semibold text-slate-400 shrink-0">
@@ -355,8 +355,8 @@
                             <h3 class="text-sm font-black text-slate-900 tracking-tight leading-none">
                                 {{ $activePeer->name }}
                             </h3>
-                            @if($activePeer->is_identity_verified)
-                                <svg class="w-3.5 h-3.5 text-blue-500 fill-current" viewBox="0 0 20 20" title="Verified Member"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                            @if($activePeer->hasVerifiedIdentity())
+                                <x-verified-badge variant="icon" size="w-3.5 h-3.5" title="Verified Member" />
                             @endif
                             @if($this->isStarred)
                                 <svg class="w-3.5 h-3.5 text-amber-500 fill-amber-500" viewBox="0 0 24 24" title="Starred"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -938,8 +938,8 @@
 
                 <div class="flex items-center gap-1.5 justify-center">
                     <h4 class="text-base font-black text-slate-900 tracking-tight">{{ $activePeer->name }}</h4>
-                    @if($activePeer->is_identity_verified)
-                        <svg class="w-4 h-4 text-blue-500 fill-current" viewBox="0 0 20 20" title="Verified Member"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    @if($activePeer->hasVerifiedIdentity())
+                        <x-verified-badge variant="icon" size="w-4 h-4" title="Verified Member" />
                     @endif
                 </div>
                 <span class="text-xs font-semibold text-slate-400">@ {{ $activePeer->username ?? 'member' }}</span>

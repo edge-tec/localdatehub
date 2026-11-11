@@ -90,10 +90,8 @@ class ListingApprovalService
             $listing->published_at = $listing->published_at ?: now();
             $listing->expires_at = now()->addDays(30);
 
-            // Inherit verification status if poster is verified
-            if ($listing->user && $listing->user->is_identity_verified) {
-                $listing->is_verified_poster = true;
-            }
+            // Sync verification status strictly from validated ID verification
+            $listing->is_verified_poster = $listing->user ? $listing->user->hasVerifiedIdentity() : false;
 
             $listing->save();
 

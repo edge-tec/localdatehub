@@ -21,20 +21,56 @@ class AdminVerificationController extends Controller
      */
     public function index(Request $request)
     {
-        $status = $request->input('status', 'pending');
+        $status = (string) $request->input('status', 'pending');
 
-        $query = IdentityVerification::with(['user', 'reviewer'])->latest();
+        $query = IdentityVerification::with(['user', 'reviewer'])->latest('id');
 
-        if ($status !== 'all') {
-            $query->where('status', $status);
-        }
+        match ($status) {
+            'pending' => $query->where('status', IdentityVerification::STATUS_PENDING),
+            'under_review' => $query->where('status', IdentityVerification::STATUS_UNDER_REVIEW),
+            'approved', 'verified' => $query->validApproved(),
+            'rejected' => $query->where('status', IdentityVerification::STATUS_REJECTED),
+            'resubmission_required', 'additional_info_required' => $query->whereIn('status', [
+                IdentityVerification::STATUS_RESUBMISSION_REQUIRED,
+                IdentityVerification::STATUS_ADDITIONAL_INFO_REQUIRED,
+            ]),
+            'revoked', 'suspended' => $query->whereIn('status', [
+                IdentityVerification::STATUS_REVOKED,
+                IdentityVerification::STATUS_SUSPENDED,
+            ]),
+            'expired' => $query->where(function ($q) {
+                $q->where('status', IdentityVerification::STATUS_EXPIRED)
+                  ->orWhere(function ($sub) {
+                      $sub->whereIn('status', IdentityVerification::APPROVED_STATUSES)
+                          ->whereNotNull('expires_at')
+                          ->where('expires_at', '<=', now());
+                  });
+            }),
+            default => null,
+        };
 
         $verifications = $query->paginate(20)->withQueryString();
 
         $counts = [
             'pending' => IdentityVerification::where('status', IdentityVerification::STATUS_PENDING)->count(),
-            'verified' => IdentityVerification::where('status', IdentityVerification::STATUS_VERIFIED)->count(),
+            'under_review' => IdentityVerification::where('status', IdentityVerification::STATUS_UNDER_REVIEW)->count(),
+            'verified' => IdentityVerification::validApproved()->count(),
+            'approved' => IdentityVerification::validApproved()->count(),
             'rejected' => IdentityVerification::where('status', IdentityVerification::STATUS_REJECTED)->count(),
+            'resubmission_required' => IdentityVerification::whereIn('status', [
+                IdentityVerification::STATUS_RESUBMISSION_REQUIRED,
+                IdentityVerification::STATUS_ADDITIONAL_INFO_REQUIRED,
+            ])->count(),
+            'revoked' => IdentityVerification::whereIn('status', [
+                IdentityVerification::STATUS_REVOKED,
+                IdentityVerification::STATUS_SUSPENDED,
+            ])->count(),
+            'expired' => IdentityVerification::where('status', IdentityVerification::STATUS_EXPIRED)
+                ->orWhere(function ($sub) {
+                    $sub->whereIn('status', IdentityVerification::APPROVED_STATUSES)
+                        ->whereNotNull('expires_at')
+                        ->where('expires_at', '<=', now());
+                })->count(),
             'all' => IdentityVerification::count(),
         ];
 
@@ -86,12 +122,35 @@ class AdminVerificationController extends Controller
     }
 
     /**
+     * Move verification request into active review.
+     */
+    public function markUnderReview(IdentityVerification $verification)
+    {
+        $this->verificationService->markUnderReview($verification, Auth::user());
+
+        return back()->with('status', "Verification for {$verification->user->name} marked as under review.");
+    }
+
+    /**
      * Approve verification request.
      */
     public function approve(Request $request, IdentityVerification $verification)
     {
-        $notes = $request->input('admin_notes');
-        $this->verificationService->approve($verification, Auth::user(), $notes);
+        $validated = $request->validate([
+            'admin_notes' => 'nullable|string|max:1000',
+            'expires_at' => 'nullable|date|after:now',
+        ]);
+
+        $expiresAt = !empty($validated['expires_at'])
+            ? \Illuminate\Support\Carbon::parse($validated['expires_at'])
+            : null;
+
+        $this->verificationService->approve(
+            $verification,
+            Auth::user(),
+            $validated['admin_notes'] ?? null,
+            $expiresAt
+        );
 
         return redirect()->route('admin.verifications.index')
             ->with('status', "Identity verification approved for {$verification->user->name}. Verified badge activated.");
@@ -113,7 +172,37 @@ class AdminVerificationController extends Controller
     }
 
     /**
-     * Suspend verification.
+     * Request resubmission of identity documents.
+     */
+    public function requestResubmission(Request $request, IdentityVerification $verification)
+    {
+        $validated = $request->validate([
+            'reason' => 'required|string|max:500',
+        ]);
+
+        $this->verificationService->requestResubmission($verification, Auth::user(), $validated['reason']);
+
+        return redirect()->route('admin.verifications.index')
+            ->with('status', "Resubmission requested for {$verification->user->name}.");
+    }
+
+    /**
+     * Revoke previously approved verification and strip Blue Verified badge immediately.
+     */
+    public function revoke(Request $request, IdentityVerification $verification)
+    {
+        $validated = $request->validate([
+            'reason' => 'required|string|max:500',
+        ]);
+
+        $this->verificationService->revoke($verification, Auth::user(), $validated['reason']);
+
+        return redirect()->route('admin.verifications.index')
+            ->with('status', "Verification revoked and badge removed for {$verification->user->name}.");
+    }
+
+    /**
+     * Suspend verification (alias to revoke).
      */
     public function suspend(Request $request, IdentityVerification $verification)
     {
@@ -121,10 +210,10 @@ class AdminVerificationController extends Controller
             'reason' => 'required|string|max:500',
         ]);
 
-        $this->verificationService->suspend($verification, Auth::user(), $validated['reason']);
+        $this->verificationService->revoke($verification, Auth::user(), $validated['reason']);
 
         return redirect()->route('admin.verifications.index')
-            ->with('status', "Verification suspended and badge revoked for {$verification->user->name}.");
+            ->with('status', "Verification revoked and badge removed for {$verification->user->name}.");
     }
 }
 

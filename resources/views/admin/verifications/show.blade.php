@@ -1,5 +1,5 @@
 <x-layouts.app title="Review Verification #{{ $verification->id }} — Admin">
-    <div class="py-8 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8" x-data="{ rejectModal: false, suspendModal: false }">
+    <div class="py-8 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8" x-data="{ rejectModal: false, resubmitModal: false, suspendModal: false }">
 
         <!-- Breadcrumb & Header -->
         <nav class="flex items-center space-x-2 text-xs font-semibold text-slate-500">
@@ -17,32 +17,59 @@
                         Review: {{ $verification->user?->name }}
                     </h1>
                     @php
-                        $badge = match($verification->status) {
-                            'verified' => 'bg-blue-100 text-blue-800 border-blue-200',
-                            'pending', 'under_review' => 'bg-amber-100 text-amber-800 border-amber-200 animate-pulse',
+                        $canonical = $verification->canonicalStatus();
+                        $badge = match($canonical) {
+                            'approved' => 'bg-blue-100 text-blue-800 border-blue-200',
+                            'pending' => 'bg-amber-100 text-amber-800 border-amber-200 animate-pulse',
+                            'under_review' => 'bg-indigo-100 text-indigo-800 border-indigo-200',
+                            'resubmission_required' => 'bg-orange-100 text-orange-800 border-orange-200',
                             'rejected' => 'bg-rose-100 text-rose-800 border-rose-200',
-                            'suspended' => 'bg-purple-100 text-purple-800 border-purple-200',
+                            'revoked' => 'bg-purple-100 text-purple-800 border-purple-200',
+                            'expired' => 'bg-amber-50 text-amber-800 border-amber-200',
                             default => 'bg-slate-100 text-slate-600 border-slate-200',
                         };
                     @endphp
                     <span class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border {{ $badge }}">
-                        {{ str_replace('_', ' ', $verification->status) }}
+                        {{ $verification->statusLabel() }}
                     </span>
                 </div>
                 <p class="text-xs text-slate-500 mt-1">
                     Submitted: {{ $verification->submitted_at?->format('M d, Y · h:i A') }} · User Email: {{ $verification->user?->email }}
+                    @if($verification->reviewer)
+                        · Reviewer: {{ $verification->reviewer->name }}
+                    @endif
+                    @if($verification->expires_at)
+                        · Expires: {{ $verification->expires_at->format('M d, Y') }}
+                    @endif
                 </p>
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex items-center space-x-3">
-                @if($verification->status !== 'verified')
+            <div class="flex flex-wrap items-center gap-2">
+                @if(!$verification->isVerified())
+                    @if($verification->isPending())
+                        <form action="{{ route('admin.verifications.under-review', $verification) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-xs transition">
+                                Mark Under Review
+                            </button>
+                        </form>
+                    @endif
+
                     <form action="{{ route('admin.verifications.approve', $verification) }}" method="POST" onsubmit="return confirm('Approve verification and grant Blue Verified Badge?');">
                         @csrf
                         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-xs transition flex items-center space-x-1.5">
                             <span>✓ Approve &amp; Verify (Blue Badge)</span>
                         </button>
                     </form>
+
+                    <button 
+                        type="button" 
+                        @click="resubmitModal = true"
+                        class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-xs transition"
+                    >
+                        ↻ Request Resubmission
+                    </button>
 
                     <button 
                         type="button" 
@@ -57,7 +84,7 @@
                         @click="suspendModal = true"
                         class="bg-amber-600 hover:bg-amber-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-xs transition"
                     >
-                        Suspend / Revoke Badge
+                        Revoke Blue Badge
                     </button>
                 @endif
             </div>
@@ -208,32 +235,63 @@
             </div>
         </div>
 
-        <!-- Suspend Modal -->
+        <!-- Request Resubmission Modal -->
+        <div 
+            x-show="resubmitModal" 
+            x-cloak 
+            class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-4"
+        >
+            <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4">
+                <h3 class="text-lg font-black text-slate-900">Request Document Resubmission</h3>
+                <p class="text-xs text-slate-600">Ask the user to upload a clearer ID card photo or live selfie before approval.</p>
+
+                <form action="{{ route('admin.verifications.resubmit', $verification) }}" method="POST" class="space-y-4">
+                    @csrf
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Instructions for User *:</label>
+                        <textarea 
+                            name="reason" 
+                            rows="3" 
+                            required 
+                            placeholder="e.g. Please upload a brighter photo showing all 4 corners of your ID..."
+                            class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs"
+                        ></textarea>
+                    </div>
+
+                    <div class="flex items-center justify-end space-x-2 pt-2">
+                        <button type="button" @click="resubmitModal = false" class="px-4 py-2 text-xs font-bold text-slate-600">Cancel</button>
+                        <button type="submit" class="bg-orange-500 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-xs">Request Resubmission</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Revoke / Suspend Modal -->
         <div 
             x-show="suspendModal" 
             x-cloak 
             class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-4"
         >
             <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4">
-                <h3 class="text-lg font-black text-slate-900">Suspend &amp; Revoke Verified Status</h3>
-                <p class="text-xs text-slate-600">This will remove the verified poster badge from all of this user's listings and revert their account tier.</p>
+                <h3 class="text-lg font-black text-slate-900">Revoke Blue Verified Badge</h3>
+                <p class="text-xs text-slate-600">This will immediately revoke identity verification and remove the Blue Verified badge across all listings and profile views.</p>
 
-                <form action="{{ route('admin.verifications.suspend', $verification) }}" method="POST" class="space-y-4">
+                <form action="{{ route('admin.verifications.revoke', $verification) }}" method="POST" class="space-y-4">
                     @csrf
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Suspension Reason *:</label>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Revocation Reason *:</label>
                         <textarea 
                             name="reason" 
                             rows="3" 
                             required 
-                            placeholder="e.g. User account flagged for suspicious activity; report received..."
+                            placeholder="e.g. Verification expired, invalid ID discovered, or policy violation..."
                             class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs"
                         ></textarea>
                     </div>
 
                     <div class="flex items-center justify-end space-x-2 pt-2">
                         <button type="button" @click="suspendModal = false" class="px-4 py-2 text-xs font-bold text-slate-600">Cancel</button>
-                        <button type="submit" class="bg-amber-600 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-xs">Revoke Verification</button>
+                        <button type="submit" class="bg-amber-600 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-xs">Confirm Revoke</button>
                     </div>
                 </form>
             </div>

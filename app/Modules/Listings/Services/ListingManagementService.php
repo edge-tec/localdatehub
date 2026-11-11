@@ -208,10 +208,8 @@ class ListingManagementService
             $listing->rejection_reason = null;
             $listing->content_hash = $listing->computeContentHash();
 
-            // Set verified poster badge if user is identity verified
-            if ($user->is_identity_verified) {
-                $listing->is_verified_poster = true;
-            }
+            // Set verified poster badge strictly from validated ID verification
+            $listing->is_verified_poster = $user->hasVerifiedIdentity();
 
             if ($initialStatus === Listing::STATUS_ACTIVE) {
                 $listing->published_at = $listing->published_at ?: now();

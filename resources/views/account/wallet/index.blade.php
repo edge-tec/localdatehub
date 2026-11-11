@@ -95,22 +95,26 @@
             </div>
 
             <!-- 3. Identity Verification & Priority -->
+            @php
+                $walletUserVerified = $user->hasVerifiedIdentity();
+                $walletVerificationLabel = $user->latestVerification?->statusLabel() ?? 'Unverified';
+            @endphp
             <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-black uppercase tracking-wider text-slate-500">Trust &amp; Verification</span>
-                    @if($user->is_identity_verified)
+                    @if($walletUserVerified)
                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-100 text-blue-700 flex items-center gap-1">
                             ✓ Verified
                         </span>
                     @else
                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-600">
-                            Unverified
+                            {{ $walletVerificationLabel }}
                         </span>
                     @endif
                 </div>
 
                 <div class="my-4">
-                    @if($user->is_identity_verified)
+                    @if($walletUserVerified)
                         <div class="text-sm font-bold text-slate-800 flex items-center gap-2">
                             <span class="text-blue-600">★</span>
                             <span>Verified Poster Priority Active</span>
@@ -133,7 +137,7 @@
                         href="{{ route('account.verification.show') }}" 
                         class="text-xs font-bold text-[#F20B83] hover:underline flex items-center justify-between"
                     >
-                        <span>{{ $user->is_identity_verified ? 'Manage Identity Verification' : 'Verify My Account Now' }}</span>
+                        <span>{{ $walletUserVerified ? 'Manage Identity Verification' : 'Verify My Account Now' }}</span>
                         <span>→</span>
                     </a>
                 </div>

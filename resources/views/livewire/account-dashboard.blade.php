@@ -28,26 +28,48 @@
             </div>
 
             <div class="space-y-1.5 min-w-0">
+                @php
+                    $authUser = Auth::user();
+                    $isIdentityVerified = $authUser?->hasVerifiedIdentity() ?? false;
+                    $idVerificationStatus = $latestVerification?->canonicalStatus()
+                        ?? ($isIdentityVerified
+                            ? \App\Modules\Verification\Models\IdentityVerification::STATUS_APPROVED
+                            : \App\Modules\Verification\Models\IdentityVerification::STATUS_NOT_SUBMITTED);
+                @endphp
                 <div class="flex items-center gap-2.5 flex-wrap">
                     <h1 class="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight truncate">
                         {{ Auth::user()->profile?->display_name ?: (Auth::user()->name ?: 'Valued Member') }}
                     </h1>
 
-                    @if(Auth::user()->is_identity_verified)
+                    @if($isIdentityVerified)
                         <x-verified-badge variant="pill" label="Verified" title="Blue Verified Badge — Identity Verified by Admin" />
-                    @elseif($latestVerification && $latestVerification->isPending())
+                    @elseif($idVerificationStatus === \App\Modules\Verification\Models\IdentityVerification::STATUS_PENDING)
                         <a href="{{ route('account.verification.show') }}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100 transition shadow-2xs" title="Your ID card submission is awaiting admin verification">
                             <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             <span>ID Pending Review</span>
                         </a>
-                    @elseif($latestVerification && $latestVerification->status === \App\Modules\Verification\Models\IdentityVerification::STATUS_REJECTED)
+                    @elseif($idVerificationStatus === \App\Modules\Verification\Models\IdentityVerification::STATUS_UNDER_REVIEW)
+                        <a href="{{ route('account.verification.show') }}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-indigo-50 text-indigo-900 border border-indigo-300 hover:bg-indigo-100 transition shadow-2xs" title="An administrator is actively reviewing your ID document">
+                            <svg class="w-3.5 h-3.5 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            <span>ID Under Review</span>
+                        </a>
+                    @elseif($idVerificationStatus === \App\Modules\Verification\Models\IdentityVerification::STATUS_RESUBMISSION_REQUIRED)
+                        <a href="{{ route('account.verification.show') }}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-orange-50 text-orange-900 border border-orange-300 hover:bg-orange-100 transition shadow-2xs" title="Administrator requested a clearer ID document or selfie">
+                            <svg class="w-3.5 h-3.5 text-orange-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            <span>Resubmission Required</span>
+                        </a>
+                    @elseif($idVerificationStatus === \App\Modules\Verification\Models\IdentityVerification::STATUS_REJECTED)
                         <a href="{{ route('account.verification.show') }}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-rose-50 text-rose-800 border border-rose-300 hover:bg-rose-100 transition shadow-2xs" title="Previous ID verification was declined. Click to resubmit.">
                             <svg class="w-3.5 h-3.5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                             <span>ID Rejected — Resubmit</span>
                         </a>
-                    @elseif($latestVerification && $latestVerification->status === \App\Modules\Verification\Models\IdentityVerification::STATUS_SUSPENDED)
-                        <a href="{{ route('account.verification.show') }}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200 transition shadow-2xs" title="Verification badge is currently suspended">
-                            <span>Verification Suspended</span>
+                    @elseif($idVerificationStatus === \App\Modules\Verification\Models\IdentityVerification::STATUS_REVOKED)
+                        <a href="{{ route('account.verification.show') }}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200 transition shadow-2xs" title="Identity verification badge has been revoked">
+                            <span>Verification Revoked</span>
+                        </a>
+                    @elseif($idVerificationStatus === \App\Modules\Verification\Models\IdentityVerification::STATUS_EXPIRED)
+                        <a href="{{ route('account.verification.show') }}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100 transition shadow-2xs" title="Identity verification has expired. Click to renew.">
+                            <span>Verification Expired — Renew</span>
                         </a>
                     @else
                         <a href="{{ route('account.verification.show') }}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition shadow-2xs" title="Submit your government ID card to unlock the Blue Verified Badge">
@@ -329,7 +351,7 @@
                     >
                         <svg class="w-4 h-4 {{ $isAccountGroupActive ? 'text-[#F20B65]' : 'text-slate-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                         <span>Account &amp; Trust</span>
-                        @if(auth()->user()?->is_identity_verified)
+                        @if($isIdentityVerified)
                             <x-verified-badge variant="icon" size="w-4 h-4" />
                         @endif
                         <svg class="w-3.5 h-3.5 transition-transform duration-200 text-slate-500" :class="{ 'rotate-180': activeMenu === 'account' }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
@@ -381,10 +403,12 @@
                                         <div class="text-[10px] text-slate-400 font-normal">Official verified trust badge</div>
                                     </div>
                                 </div>
-                                @if(auth()->user()?->is_identity_verified)
+                                @if($isIdentityVerified)
                                     <span class="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-[10px] font-black">✓ VERIFIED</span>
+                                @elseif($latestVerification)
+                                    <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold">{{ $latestVerification->statusLabel() }}</span>
                                 @else
-                                    <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold">Unverified</span>
+                                    <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold">Not Submitted</span>
                                 @endif
                             </a>
 

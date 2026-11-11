@@ -232,6 +232,7 @@
 
                 <!-- 3. Photo Gallery (ALWAYS VISIBLE: displays user photos or curated verified model showcase) -->
                 @php
+                    $posterVerified = $listing->hasVerifiedPoster();
                     $displayPhotos = $listing->allMedia->where('moderation_status', '!=', 'rejected')->values();
                     $galleryCount = $displayPhotos->isNotEmpty() ? $displayPhotos->count() : 1;
                 @endphp
@@ -239,7 +240,7 @@
                     <div class="flex items-center justify-between pb-2 border-b border-slate-100">
                         <h2 class="text-base font-black text-slate-900 tracking-tight flex items-center gap-2">
                             <svg class="w-5 h-5 text-[#F20B65]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            <span>{{ ($listing->user?->is_identity_verified || $listing->is_verified_poster) ? 'Verified Member Photo Gallery' : 'Member Photo Gallery' }}</span>
+                            <span>{{ $posterVerified ? 'Verified Member Photo Gallery' : 'Member Photo Gallery' }}</span>
                             <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-[#F20B65] text-xs font-black">
                                 {{ $galleryCount }} {{ \Illuminate\Support\Str::plural('Photo', $galleryCount) }}
                             </span>
@@ -300,7 +301,7 @@
                                 <div class="flex items-center justify-between w-full text-white">
                                     <div>
                                         <span class="px-3 py-1 rounded-lg text-white text-xs font-black uppercase tracking-wider shadow" style="background-color: #F20B65 !important;">
-                                            Verified Profile Photo
+                                            {{ $posterVerified ? 'Verified Profile Photo' : 'Profile Photo Preview' }}
                                         </span>
                                         <p class="text-xs sm:text-sm text-white font-bold mt-2 drop-shadow">
                                             {{ $listing->city?->name }}, {{ $listing->state?->code }} &bull; {{ $listing->poster_age }} Years
@@ -383,7 +384,7 @@
                         <div class="min-w-0 flex-1">
                             <h3 class="text-base font-black text-slate-900 truncate flex items-center gap-1.5">
                                 <span class="truncate">{{ $listing->user?->name ?? 'Anonymous Poster' }}</span>
-                                @if($listing->user?->is_identity_verified || $listing->is_verified_poster)
+                                @if($posterVerified)
                                     <x-verified-badge variant="icon" size="w-4 h-4" title="Blue Verified Badge — Identity Verified" />
                                 @endif
                             </h3>
@@ -395,7 +396,7 @@
 
                     <!-- Trust & Assurance Badges -->
                     <div class="pt-2 space-y-2.5 text-xs">
-                        @if($listing->user?->is_identity_verified || $listing->is_verified_poster)
+                        @if($posterVerified)
                             <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 font-bold">
                                 <x-verified-badge variant="icon" size="w-4 h-4" title="Identity Verified Member" />
                                 <span>Blue Verified Identity Badge</span>

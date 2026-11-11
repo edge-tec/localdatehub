@@ -13,16 +13,20 @@ use App\Modules\Billing\Models\PaymentTransaction;
 use App\Modules\Billing\Models\Subscription;
 use App\Modules\Contact\Models\ContactMessage;
 use App\Modules\Listings\Models\Listing;
+use App\Modules\Verification\Models\IdentityVerification;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cache;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -38,7 +42,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'role',
         'account_status',
         'is_age_verified',
-        'is_identity_verified',
         'two_factor_enabled',
         'two_factor_secret',
         'phone_verified_at',
@@ -55,6 +58,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'remember_token',
         'two_factor_secret',
+        'validIdentityVerification',
+        'latestVerification',
+        'verifications',
     ];
 
     protected function casts(): array
@@ -62,12 +68,28 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'phone_verified_at' => 'datetime',
+            'identity_verified_at' => 'datetime',
             'last_active_at' => 'datetime',
             'password' => 'hashed',
             'is_age_verified' => 'boolean',
             'is_identity_verified' => 'boolean',
             'two_factor_enabled' => 'boolean',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(function (self $user): void {
+            if ($user->id) {
+                self::clearVerificationCache((int) $user->id);
+            }
+        });
+
+        static::deleted(function (self $user): void {
+            if ($user->id) {
+                self::clearVerificationCache((int) $user->id);
+            }
+        });
     }
 
     // Relationships
@@ -168,12 +190,143 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function verifications(): HasMany
     {
-        return $this->hasMany(\App\Modules\Verification\Models\IdentityVerification::class);
+        return $this->hasMany(IdentityVerification::class);
     }
 
     public function latestVerification(): HasOne
     {
-        return $this->hasOne(\App\Modules\Verification\Models\IdentityVerification::class)->latestOfMany();
+        return $this->hasOne(IdentityVerification::class)->latestOfMany();
+    }
+
+    public function validIdentityVerification(): HasOne
+    {
+        return $this->hasOne(IdentityVerification::class)
+            ->validApproved()
+            ->latestOfMany();
+    }
+
+    public function verifiedByVerification(): BelongsTo
+    {
+        return $this->belongsTo(IdentityVerification::class, 'verified_by_verification_id');
+    }
+
+    public static function verificationCacheKey(int $userId): string
+    {
+        return "user:{$userId}:identity_verified";
+    }
+
+    public static function clearVerificationCache(int $userId): void
+    {
+        Cache::forget(self::verificationCacheKey($userId));
+    }
+
+    /**
+     * Authoritative check whether a user ID qualifies for the Blue Verified Badge.
+     */
+    public static function isUserIdentityVerified(int $userId): bool
+    {
+        if ($userId <= 0) {
+            return false;
+        }
+
+        $cacheKey = self::verificationCacheKey($userId);
+        $cached = Cache::remember($cacheKey, now()->addMinutes(5), static function () use ($userId): array {
+            $valid = IdentityVerification::query()
+                ->where('user_id', $userId)
+                ->validApproved()
+                ->latest('id')
+                ->first();
+
+            if ($valid === null) {
+                return ['verified' => false, 'expires_at' => null];
+            }
+
+            $latest = IdentityVerification::query()
+                ->where('user_id', $userId)
+                ->latest('id')
+                ->first(['id', 'status']);
+
+            if ($latest && ($latest->isRevoked() || $latest->status === IdentityVerification::STATUS_REJECTED) && $latest->id >= $valid->id) {
+                return ['verified' => false, 'expires_at' => null];
+            }
+
+            return [
+                'verified' => true,
+                'expires_at' => $valid->expires_at?->timestamp,
+            ];
+        });
+
+        if (empty($cached['verified'])) {
+            return false;
+        }
+
+        if (!empty($cached['expires_at']) && (int) $cached['expires_at'] <= now()->timestamp) {
+            self::clearVerificationCache($userId);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Authoritative check whether this user has an approved, non-revoked, non-expired ID verification.
+     */
+    public function hasVerifiedIdentity(): bool
+    {
+        if (!$this->exists || empty($this->id)) {
+            return false;
+        }
+
+        if ($this->relationLoaded('validIdentityVerification')) {
+            $valid = $this->getRelation('validIdentityVerification');
+            if ($valid === null || (int) $valid->user_id !== (int) $this->id || !$valid->isVerified()) {
+                return false;
+            }
+
+            if ($this->relationLoaded('latestVerification')) {
+                $latest = $this->getRelation('latestVerification');
+                if ($latest && ($latest->isRevoked() || $latest->status === IdentityVerification::STATUS_REJECTED) && $latest->id >= $valid->id) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        if ($this->relationLoaded('latestVerification')) {
+            $latest = $this->getRelation('latestVerification');
+            if ($latest !== null && (int) $latest->user_id === (int) $this->id && $latest->isVerified()) {
+                return true;
+            }
+        }
+
+        return self::isUserIdentityVerified((int) $this->id);
+    }
+
+    /**
+     * Authoritative Blue Verified Badge accessor derived from ID verification records only.
+     */
+    protected function isIdentityVerified(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): bool => $this->hasVerifiedIdentity(),
+        );
+    }
+
+    /**
+     * Resolve the canonical identity verification status string for UI & APIs.
+     */
+    public function identityVerificationStatus(): string
+    {
+        $latest = $this->relationLoaded('latestVerification')
+            ? $this->getRelation('latestVerification')
+            : $this->latestVerification()->first();
+
+        if ($latest === null) {
+            return IdentityVerification::STATUS_NOT_SUBMITTED;
+        }
+
+        return $latest->canonicalStatus();
     }
 
     public function getAvatarUrlAttribute(): ?string
@@ -209,7 +362,7 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($this->subscriptions()->where('status', 'active')->where('ends_at', '>', now())->exists()) {
             return 'premium';
         }
-        if ($this->is_identity_verified) {
+        if ($this->hasVerifiedIdentity()) {
             return 'verified';
         }
         if ($this->created_at && $this->created_at->gt(now()->subDays(14))) {

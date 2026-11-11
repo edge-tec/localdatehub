@@ -39,13 +39,13 @@ class HomeController extends Controller
         if (Schema::hasTable('listings')) {
             $featuredListings = Listing::active()
                 ->featured()
-                ->with(['category', 'city.state', 'state', 'primaryPhoto'])
+                ->with(['category', 'city.state', 'state', 'primaryPhoto', 'ownerIdentityVerification'])
                 ->latest('published_at')
                 ->take(4)
                 ->get();
 
             $latestListings = Listing::active()
-                ->with(['category', 'city.state', 'state', 'primaryPhoto'])
+                ->with(['category', 'city.state', 'state', 'primaryPhoto', 'ownerIdentityVerification'])
                 ->latest('published_at')
                 ->take(8)
                 ->get();
@@ -86,7 +86,7 @@ class HomeController extends Controller
         }
 
         if (Schema::hasTable('users')) {
-            $stats['verifiedMembers'] = User::where('is_age_verified', true)->count();
+            $stats['verifiedMembers'] = User::whereHas('validIdentityVerification')->count();
         }
 
         // Ordered Top Categories for horizontal card row matching reference design

@@ -28,12 +28,11 @@ class DemoListingSeeder extends Seeder
                 'role' => 'admin',
                 'account_status' => 'active',
                 'is_age_verified' => true,
-                'is_identity_verified' => true,
                 'email_verified_at' => now(),
             ]
         );
 
-        // Create Verified Demo Users
+        // Create Demo Users (ID verification remains false until approved ID documents exist)
         $demoUsersData = [
             [
                 'name' => 'Alex Miller',
@@ -88,7 +87,6 @@ class DemoListingSeeder extends Seeder
                     'role' => 'user',
                     'account_status' => 'active',
                     'is_age_verified' => true,
-                    'is_identity_verified' => true,
                     'email_verified_at' => now(),
                 ]
             );
@@ -185,7 +183,6 @@ class DemoListingSeeder extends Seeder
                     'intent' => $sl['intent'],
                     'status' => 'active',
                     'is_featured' => $sl['is_featured'],
-                    'is_verified_poster' => true,
                     'has_photos' => false,
                     'view_count' => app()->environment('testing') ? rand(25, 180) : 0,
                     'reply_count' => app()->environment('testing') ? rand(1, 12) : 0,

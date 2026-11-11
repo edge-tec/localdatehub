@@ -1025,8 +1025,16 @@ class AdminEnterpriseHub extends Component
 
     public function openViewUserModal(int $userId): void
     {
-        $user = User::with(['profile', 'wallet', 'listings' => fn($q) => $q->latest()->take(5), 'suspensions'])->findOrFail($userId);
+        $user = User::with([
+            'profile',
+            'wallet',
+            'validIdentityVerification.reviewer',
+            'latestVerification.reviewer',
+            'listings' => fn($q) => $q->latest()->take(5),
+            'suspensions',
+        ])->findOrFail($userId);
         $this->viewUserId = $userId;
+        $isIdentityVerified = $user->hasVerifiedIdentity();
         $this->viewUserData = [
             'id' => $user->id,
             'name' => $user->name,
@@ -1037,6 +1045,13 @@ class AdminEnterpriseHub extends Component
             'role' => $user->role,
             'account_status' => $user->account_status,
             'is_age_verified' => (bool) $user->is_age_verified,
+            'is_identity_verified' => $isIdentityVerified,
+            'identity_verification_status' => $user->identityVerificationStatus(),
+            'identity_verification_label' => $user->latestVerification?->statusLabel() ?? 'Not Submitted',
+            'identity_verified_at' => $isIdentityVerified
+                ? ($user->identity_verified_at?->format('M j, Y H:i') ?? $user->validIdentityVerification?->reviewed_at?->format('M j, Y H:i'))
+                : null,
+            'latest_verification_id' => $user->latestVerification?->id,
             'email_verified_at' => $user->email_verified_at?->format('M j, Y H:i') ?: 'Unverified',
             'created_at' => $user->created_at?->format('M j, Y (h:i A)') ?: '—',
             'last_active_at' => $user->last_active_at?->diffForHumans() ?: 'Never',
@@ -1076,7 +1091,7 @@ class AdminEnterpriseHub extends Component
         $this->editUserRole = $user->role ?: 'user';
         $this->editUserAccountStatus = $user->account_status ?: 'active';
         $this->editUserIsAgeVerified = (bool) $user->is_age_verified;
-        $this->editUserIsIdentityVerified = (bool) $user->is_identity_verified;
+        $this->editUserIsIdentityVerified = $user->hasVerifiedIdentity();
         $this->editUserCredits = $user->wallet?->balance ?? 0;
         $this->editUserAvatarUrl = $user->avatar_url;
         $this->editUserAvatar = null;
@@ -1096,7 +1111,6 @@ class AdminEnterpriseHub extends Component
             'editUserRole' => ['required', 'string', Rule::in(array_merge(['user', 'advertiser'], self::STAFF_ROLES))],
             'editUserAccountStatus' => ['required', 'string', Rule::in(['active', 'pending_verification', 'suspended', 'closed'])],
             'editUserIsAgeVerified' => ['boolean'],
-            'editUserIsIdentityVerified' => ['boolean'],
             'editUserCredits' => ['integer', 'min:0', 'max:100000'],
             'editUserAvatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
@@ -1124,7 +1138,6 @@ class AdminEnterpriseHub extends Component
             $user->role = $this->editUserRole;
             $user->account_status = $this->editUserAccountStatus;
             $user->is_age_verified = $this->editUserIsAgeVerified;
-            $user->is_identity_verified = $this->editUserIsIdentityVerified;
             if (!empty($this->editUserPassword)) {
                 $user->password = Hash::make($this->editUserPassword);
             }
@@ -1150,9 +1163,8 @@ class AdminEnterpriseHub extends Component
             $user->save();
             $profile->save();
 
-            Listing::where('user_id', $user->id)->update([
-                'is_verified_poster' => (bool) $user->is_identity_verified,
-            ]);
+            // Enforce strict ID-based badge state rather than manual user editing
+            app(\App\Modules\Verification\Services\IdentityVerificationService::class)->syncUserBadgeState($user);
 
             // Roles sync
             $role = Role::where('slug', $this->editUserRole)->first();
@@ -1459,7 +1471,7 @@ class AdminEnterpriseHub extends Component
         $this->editListingPosterGender = $listing->poster_gender;
         $this->editListingIntent = $listing->intent;
         $this->editListingIsFeatured = (bool) $listing->is_featured;
-        $this->editListingIsVerifiedPoster = (bool) $listing->is_verified_poster;
+        $this->editListingIsVerifiedPoster = $listing->hasVerifiedPoster();
 
         $this->resetValidation();
         $this->showEditListingModal = true;
@@ -1485,10 +1497,9 @@ class AdminEnterpriseHub extends Component
             'editListingPosterGender' => ['nullable', 'string', 'max:50'],
             'editListingIntent' => ['nullable', 'string', 'max:100'],
             'editListingIsFeatured' => ['boolean'],
-            'editListingIsVerifiedPoster' => ['boolean'],
         ]);
 
-        $listing = Listing::findOrFail($this->editListingId);
+        $listing = Listing::with('user.validIdentityVerification')->findOrFail($this->editListingId);
 
         $before = [
             'title' => $listing->title,
@@ -1516,7 +1527,7 @@ class AdminEnterpriseHub extends Component
             $listing->poster_gender = $this->editListingPosterGender;
             $listing->intent = $this->editListingIntent;
             $listing->is_featured = $this->editListingIsFeatured;
-            $listing->is_verified_poster = $this->editListingIsVerifiedPoster;
+            $listing->is_verified_poster = $listing->user ? $listing->user->hasVerifiedIdentity() : false;
 
             if ($this->editListingStatus === Listing::STATUS_ACTIVE && !$listing->published_at) {
                 $listing->published_at = now();
@@ -5615,7 +5626,7 @@ class AdminEnterpriseHub extends Component
 
     protected function dataUsers(): array
     {
-        $query = User::query()->latest();
+        $query = User::query()->with(['validIdentityVerification', 'latestVerification'])->latest();
         if ($this->userSearch !== '') {
             $term = '%' . $this->userSearch . '%';
             $query->where(fn ($q) => $q->where('name', 'like', $term)->orWhere('email', 'like', $term));
@@ -5632,7 +5643,7 @@ class AdminEnterpriseHub extends Component
 
     protected function dataListings(): array
     {
-        $query = Listing::query()->with(['category', 'city', 'user'])->latest();
+        $query = Listing::query()->with(['category', 'city', 'user', 'ownerIdentityVerification'])->latest();
         if ($this->listingSearch !== '') {
             $query->where('title', 'like', '%' . $this->listingSearch . '%');
         }

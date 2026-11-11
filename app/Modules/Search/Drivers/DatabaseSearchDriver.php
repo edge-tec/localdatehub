@@ -31,7 +31,7 @@ class DatabaseSearchDriver implements SearchDriverInterface
     {
         $query = Listing::query()
             ->active()
-            ->with(['category.parent', 'city.state', 'state', 'primaryPhoto', 'location']);
+            ->with(['category.parent', 'city.state', 'state', 'primaryPhoto', 'location', 'ownerIdentityVerification']);
 
         // 1. Text Keyword Search (title & description)
         if (!empty($filter->query)) {
@@ -156,9 +156,10 @@ class DatabaseSearchDriver implements SearchDriverInterface
             $query->where('has_photos', true);
         }
 
-        // 11. Poster Verification Status
+        // 11. Poster Verification Status (enforces approved ID verification record)
         if ($filter->verifiedOnly) {
-            $query->where('is_verified_poster', true);
+            $query->where('is_verified_poster', true)
+                  ->whereHas('ownerIdentityVerification');
         }
 
         // 12. Poster Age Boundaries

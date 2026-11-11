@@ -143,7 +143,6 @@ class DatingListingGeneratorService
                         'role' => 'user',
                         'account_status' => 'active',
                         'is_age_verified' => true,
-                        'is_identity_verified' => true,
                         'email_verified_at' => now(),
                     ]);
 
@@ -166,7 +165,6 @@ class DatingListingGeneratorService
                         'intent' => 'dating',
                         'status' => Listing::STATUS_ACTIVE,
                         'is_featured' => (rand(1, 6) === 1),
-                        'is_verified_poster' => true,
                         'has_photos' => true,
                         'view_count' => rand(1, 15),
                         'published_at' => now()->subMinutes(rand(5, 720)),

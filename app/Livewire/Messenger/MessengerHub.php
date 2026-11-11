@@ -110,7 +110,14 @@ class MessengerHub extends Component
                 $q->where('sender_id', $authId)
                   ->orWhere('recipient_id', $authId);
             })
-            ->with(['sender.profile', 'recipient.profile', 'listing.primaryPhoto'])
+            ->with([
+                'sender.profile',
+                'sender.validIdentityVerification',
+                'recipient.profile',
+                'recipient.validIdentityVerification',
+                'listing.primaryPhoto',
+                'listing.ownerIdentityVerification',
+            ])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -209,7 +216,7 @@ class MessengerHub extends Component
      */
     public function getActivePeerProperty(): ?User
     {
-        return $this->activePeerId ? User::find($this->activePeerId) : null;
+        return $this->activePeerId ? User::with('validIdentityVerification')->find($this->activePeerId) : null;
     }
 
     /**
@@ -217,7 +224,7 @@ class MessengerHub extends Component
      */
     public function getActiveListingProperty(): ?Listing
     {
-        return $this->activeListingId ? Listing::with('primaryPhoto', 'city', 'state')->find($this->activeListingId) : null;
+        return $this->activeListingId ? Listing::with(['primaryPhoto', 'city', 'state', 'ownerIdentityVerification'])->find($this->activeListingId) : null;
     }
 
     /**

@@ -52,7 +52,7 @@ class ListingApiController extends Controller
         $perPage = min((int) $request->query('per_page', 15), 50);
         $query = $city->listings()
             ->active()
-            ->with(['category', 'state', 'primaryPhoto'])
+            ->with(['category', 'state', 'primaryPhoto', 'ownerIdentityVerification'])
             ->latest('published_at');
 
         if ($categoryId = $request->query('category_id')) {
@@ -141,7 +141,7 @@ class ListingApiController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
         ]);
 
-        $listing = Listing::create([
+        $listing = new Listing([
             'user_id' => $user->id,
             'category_id' => $validated['category_id'],
             'state_id' => $validated['state_id'],
@@ -156,10 +156,12 @@ class ListingApiController extends Controller
             'published_at' => now(),
             'expires_at' => now()->addDays((int) config('localdatehub.listings.default_expiration_days', 30)),
         ]);
+        $listing->is_verified_poster = $user->hasVerifiedIdentity();
+        $listing->save();
 
         return ApiResponse::created([
             'message' => 'Listing created successfully.',
-            'listing' => $listing->load(['state', 'city', 'category']),
+            'listing' => $listing->load(['state', 'city', 'category', 'ownerIdentityVerification']),
         ], 'Listing created successfully.');
     }
 }

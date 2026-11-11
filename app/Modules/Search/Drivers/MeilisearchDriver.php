@@ -142,7 +142,7 @@ class MeilisearchDriver implements SearchDriverInterface
             // Hydrate models in matching order with eager loading
             $models = Listing::query()
                 ->active()
-                ->with(['category.parent', 'city.state', 'state', 'primaryPhoto', 'location'])
+                ->with(['category.parent', 'city.state', 'state', 'primaryPhoto', 'location', 'ownerIdentityVerification'])
                 ->whereIn('id', $ids)
                 ->get()
                 ->keyBy('id');

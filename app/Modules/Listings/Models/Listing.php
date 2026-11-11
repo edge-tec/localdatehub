@@ -8,7 +8,9 @@ use App\Modules\Contact\Models\ContactMessage;
 use App\Modules\Locations\Models\City;
 use App\Modules\Locations\Models\State;
 use App\Modules\Locations\Models\ZipCode;
+use App\Modules\Verification\Models\IdentityVerification;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -49,7 +51,6 @@ class Listing extends Model
         'is_autosaved',
         'is_featured',
         'promoted_until',
-        'is_verified_poster',
         'has_photos',
         'view_count',
         'reply_count',
@@ -58,6 +59,10 @@ class Listing extends Model
         'expires_at',
         'renewed_at',
         'bumped_at',
+    ];
+
+    protected $hidden = [
+        'ownerIdentityVerification',
     ];
 
     protected function casts(): array
@@ -84,6 +89,43 @@ class Listing extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function ownerIdentityVerification(): HasOne
+    {
+        return $this->hasOne(IdentityVerification::class, 'user_id', 'user_id')
+            ->validApproved()
+            ->latestOfMany();
+    }
+
+    /**
+     * Authoritative identity verification check for listing owner.
+     */
+    public function hasVerifiedPoster(): bool
+    {
+        if (!$this->user_id) {
+            return false;
+        }
+
+        if ($this->relationLoaded('ownerIdentityVerification')) {
+            return $this->getRelation('ownerIdentityVerification')?->isVerified() ?? false;
+        }
+
+        if ($this->relationLoaded('user') && $this->user) {
+            return $this->user->hasVerifiedIdentity();
+        }
+
+        return User::isUserIdentityVerified((int) $this->user_id);
+    }
+
+    /**
+     * Strictly derive is_verified_poster from validated ID verification rather than stale flags.
+     */
+    protected function isVerifiedPoster(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->hasVerifiedPoster(),
+        );
     }
 
     public function category(): BelongsTo

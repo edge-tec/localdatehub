@@ -18,10 +18,10 @@
             </div>
 
             <!-- Status Tabs -->
-            <div class="flex items-center space-x-1 bg-slate-100 p-1 rounded-2xl text-xs font-bold text-slate-700">
+            <div class="flex flex-wrap items-center gap-1 bg-slate-100 p-1 rounded-2xl text-xs font-bold text-slate-700">
                 <a 
                     href="{{ route('admin.verifications.index', ['status' => 'pending']) }}"
-                    class="px-4 py-2 rounded-xl transition flex items-center space-x-1.5 {{ $currentStatus === 'pending' ? 'bg-white shadow-xs text-slate-900' : 'text-slate-500 hover:text-slate-800' }}"
+                    class="px-3 py-2 rounded-xl transition flex items-center space-x-1.5 {{ $currentStatus === 'pending' ? 'bg-white shadow-xs text-slate-900' : 'text-slate-500 hover:text-slate-800' }}"
                 >
                     <span>Pending</span>
                     <span class="px-1.5 py-0.2 rounded-full text-[10px] {{ $counts['pending'] > 0 ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-700' }}">
@@ -30,28 +30,68 @@
                 </a>
 
                 <a 
-                    href="{{ route('admin.verifications.index', ['status' => 'verified']) }}"
-                    class="px-4 py-2 rounded-xl transition flex items-center space-x-1.5 {{ $currentStatus === 'verified' ? 'bg-white shadow-xs text-slate-900' : 'text-slate-500 hover:text-slate-800' }}"
+                    href="{{ route('admin.verifications.index', ['status' => 'under_review']) }}"
+                    class="px-3 py-2 rounded-xl transition flex items-center space-x-1.5 {{ $currentStatus === 'under_review' ? 'bg-white shadow-xs text-slate-900' : 'text-slate-500 hover:text-slate-800' }}"
                 >
-                    <span>Verified</span>
-                    <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 text-slate-700">
+                    <span>Under Review</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-indigo-100 text-indigo-800">
+                        {{ $counts['under_review'] ?? 0 }}
+                    </span>
+                </a>
+
+                <a 
+                    href="{{ route('admin.verifications.index', ['status' => 'verified']) }}"
+                    class="px-3 py-2 rounded-xl transition flex items-center space-x-1.5 {{ in_array($currentStatus, ['verified', 'approved'], true) ? 'bg-white shadow-xs text-slate-900' : 'text-slate-500 hover:text-slate-800' }}"
+                >
+                    <span>Approved</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-blue-100 text-blue-800">
                         {{ $counts['verified'] }}
                     </span>
                 </a>
 
                 <a 
+                    href="{{ route('admin.verifications.index', ['status' => 'resubmission_required']) }}"
+                    class="px-3 py-2 rounded-xl transition flex items-center space-x-1.5 {{ $currentStatus === 'resubmission_required' ? 'bg-white shadow-xs text-slate-900' : 'text-slate-500 hover:text-slate-800' }}"
+                >
+                    <span>Resubmit</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-orange-100 text-orange-800">
+                        {{ $counts['resubmission_required'] ?? 0 }}
+                    </span>
+                </a>
+
+                <a 
                     href="{{ route('admin.verifications.index', ['status' => 'rejected']) }}"
-                    class="px-4 py-2 rounded-xl transition flex items-center space-x-1.5 {{ $currentStatus === 'rejected' ? 'bg-white shadow-xs text-slate-900' : 'text-slate-500 hover:text-slate-800' }}"
+                    class="px-3 py-2 rounded-xl transition flex items-center space-x-1.5 {{ $currentStatus === 'rejected' ? 'bg-white shadow-xs text-slate-900' : 'text-slate-500 hover:text-slate-800' }}"
                 >
                     <span>Rejected</span>
-                    <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 text-slate-700">
+                    <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-rose-100 text-rose-800">
                         {{ $counts['rejected'] }}
                     </span>
                 </a>
 
                 <a 
+                    href="{{ route('admin.verifications.index', ['status' => 'revoked']) }}"
+                    class="px-3 py-2 rounded-xl transition flex items-center space-x-1.5 {{ in_array($currentStatus, ['revoked', 'suspended'], true) ? 'bg-white shadow-xs text-slate-900' : 'text-slate-500 hover:text-slate-800' }}"
+                >
+                    <span>Revoked</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 text-slate-700">
+                        {{ $counts['revoked'] ?? 0 }}
+                    </span>
+                </a>
+
+                <a 
+                    href="{{ route('admin.verifications.index', ['status' => 'expired']) }}"
+                    class="px-3 py-2 rounded-xl transition flex items-center space-x-1.5 {{ $currentStatus === 'expired' ? 'bg-white shadow-xs text-slate-900' : 'text-slate-500 hover:text-slate-800' }}"
+                >
+                    <span>Expired</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 text-slate-700">
+                        {{ $counts['expired'] ?? 0 }}
+                    </span>
+                </a>
+
+                <a 
                     href="{{ route('admin.verifications.index', ['status' => 'all']) }}"
-                    class="px-4 py-2 rounded-xl transition {{ $currentStatus === 'all' ? 'bg-white shadow-xs text-slate-900' : 'text-slate-500 hover:text-slate-800' }}"
+                    class="px-3 py-2 rounded-xl transition {{ $currentStatus === 'all' ? 'bg-white shadow-xs text-slate-900' : 'text-slate-500 hover:text-slate-800' }}"
                 >
                     All ({{ $counts['all'] }})
                 </a>
@@ -90,16 +130,20 @@
                                 </td>
                                 <td class="px-5 py-4">
                                     @php
-                                        $badge = match($v->status) {
-                                            'verified' => 'bg-blue-100 text-blue-800 border-blue-200',
-                                            'pending', 'under_review' => 'bg-amber-100 text-amber-800 border-amber-200 animate-pulse',
+                                        $canonical = $v->canonicalStatus();
+                                        $badge = match($canonical) {
+                                            'approved' => 'bg-blue-100 text-blue-800 border-blue-200',
+                                            'pending' => 'bg-amber-100 text-amber-800 border-amber-200 animate-pulse',
+                                            'under_review' => 'bg-indigo-100 text-indigo-800 border-indigo-200',
+                                            'resubmission_required' => 'bg-orange-100 text-orange-800 border-orange-200',
                                             'rejected' => 'bg-rose-100 text-rose-800 border-rose-200',
-                                            'suspended' => 'bg-purple-100 text-purple-800 border-purple-200',
+                                            'revoked' => 'bg-purple-100 text-purple-800 border-purple-200',
+                                            'expired' => 'bg-amber-50 text-amber-800 border-amber-200',
                                             default => 'bg-slate-100 text-slate-600 border-slate-200',
                                         };
                                     @endphp
                                     <span class="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border {{ $badge }}">
-                                        {{ str_replace('_', ' ', $v->status) }}
+                                        {{ $v->statusLabel() }}
                                     </span>
                                 </td>
                                 <td class="px-5 py-4">
