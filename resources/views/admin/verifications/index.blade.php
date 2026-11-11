@@ -91,7 +91,7 @@
                                 <td class="px-5 py-4">
                                     @php
                                         $badge = match($v->status) {
-                                            'verified' => 'bg-emerald-100 text-emerald-800 border-emerald-200',
+                                            'verified' => 'bg-blue-100 text-blue-800 border-blue-200',
                                             'pending', 'under_review' => 'bg-amber-100 text-amber-800 border-amber-200 animate-pulse',
                                             'rejected' => 'bg-rose-100 text-rose-800 border-rose-200',
                                             'suspended' => 'bg-purple-100 text-purple-800 border-purple-200',

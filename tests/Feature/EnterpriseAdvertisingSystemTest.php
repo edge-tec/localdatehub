@@ -447,5 +447,90 @@ class EnterpriseAdvertisingSystemTest extends TestCase
         $this->artisan('ads:sync-lifecycle')->assertExitCode(0);
         $this->assertSame(AdCampaign::STATUS_EXPIRED, $campaign->fresh()->status);
     }
+
+    public function test_admin_advertising_hub_bulk_actions_filters_slots_and_csv_export(): void
+    {
+        $manager = app(AdCampaignManager::class);
+
+        $first = $manager->saveCampaign([
+            'name' => 'Hub Bulk Alpha',
+            'campaign_type' => 'banner',
+            'title' => 'Alpha Banner',
+            'destination_url' => 'https://example.com/alpha',
+            'status' => AdCampaign::STATUS_ACTIVE,
+            'placements' => [AdCampaign::SLOT_HOMEPAGE_FEATURED],
+        ], null, $this->admin->id);
+
+        $second = $manager->saveCampaign([
+            'name' => 'Hub Bulk Beta',
+            'campaign_type' => 'affiliate',
+            'affiliate_brand_name' => 'BetaBrand',
+            'affiliate_tracking_url' => 'https://example.com/beta',
+            'status' => AdCampaign::STATUS_DRAFT,
+            'placements' => [AdCampaign::SLOT_SIDEBAR],
+        ], null, $this->admin->id);
+
+        $hub = Livewire::actingAs($this->admin)
+            ->test(AdminEnterpriseHub::class, ['initialTab' => 'ads'])
+            ->assertSee('Advertising &amp; Revenue Command Hub', false)
+            ->assertSee('Hub Bulk Alpha')
+            ->assertSee('Hub Bulk Beta');
+
+        // Filter and resetCampaignFilters
+        $hub->set('campaignSearch', 'Alpha')
+            ->set('campaignStatusFilter', AdCampaign::STATUS_ACTIVE)
+            ->set('campaignTypeFilter', 'banner')
+            ->set('campaignSlotFilter', AdCampaign::SLOT_HOMEPAGE_FEATURED)
+            ->call('resetCampaignFilters')
+            ->assertSet('campaignSearch', '')
+            ->assertSet('campaignStatusFilter', 'all')
+            ->assertSet('campaignTypeFilter', 'all')
+            ->assertSet('campaignSlotFilter', 'all');
+
+        // Bulk status update
+        $hub->call('toggleSelectAllCampaigns', [$first->id, $second->id])
+            ->assertSet('selectedCampaignIds', [$first->id, $second->id])
+            ->call('bulkUpdateCampaignStatus', AdCampaign::STATUS_PAUSED)
+            ->assertSet('selectedCampaignIds', []);
+
+        $this->assertSame(AdCampaign::STATUS_PAUSED, $first->fresh()->status);
+        $this->assertSame(AdCampaign::STATUS_PAUSED, $second->fresh()->status);
+
+        // Placement group selection & clearCampaignMedia inside modal
+        $hub->call('openCampaignModal', $first->id)
+            ->call('selectPlacementGroup', 'all')
+            ->assertSet('campaignForm.placements', AdCampaign::SLOTS)
+            ->call('selectPlacementGroup', 'feeds')
+            ->set('campaignForm.desktop_banner_url', 'https://example.com/temp.png')
+            ->call('clearCampaignMedia', 'desktop_banner_url')
+            ->assertSet('campaignForm.desktop_banner_url', '');
+
+        // Save all placement configs
+        $hub->call('setAdSubTab', 'inventory')
+            ->set('placementConfigsForm.' . AdCampaign::SLOT_HOMEPAGE_FEATURED . '.insert_every_n', 4)
+            ->call('saveAllPlacementConfigs')
+            ->assertHasNoErrors();
+
+        $this->assertSame(4, AdPlacementConfig::where('slot', AdCampaign::SLOT_HOMEPAGE_FEATURED)->value('insert_every_n'));
+
+        // Switch to Analytics & export CSV
+        $hub->call('setAdSubTab', 'analytics')
+            ->call('exportAdAnalyticsCsv')
+            ->assertFileDownloaded();
+
+        // Switch to Legacy tab
+        $hub->call('setAdSubTab', 'legacy')
+            ->assertSet('adSubTab', 'legacy')
+            ->assertSee('New Placement');
+
+        // Bulk delete selected campaigns
+        $hub->call('setAdSubTab', 'campaigns')
+            ->set('selectedCampaignIds', [$second->id])
+            ->call('bulkDeleteCampaigns')
+            ->assertSet('selectedCampaignIds', []);
+
+        $this->assertNull(AdCampaign::find($second->id));
+        $this->assertNotNull(AdCampaign::find($first->id));
+    }
 }
 

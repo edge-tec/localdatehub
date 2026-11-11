@@ -222,6 +222,7 @@ class AdminEnterpriseHub extends Component
     public string $editUserRole = 'user';
     public string $editUserAccountStatus = 'active';
     public bool $editUserIsAgeVerified = false;
+    public bool $editUserIsIdentityVerified = false;
     public int $editUserCredits = 0;
     public $editUserAvatar = null;
     public ?string $editUserAvatarUrl = null;
@@ -1073,6 +1074,7 @@ class AdminEnterpriseHub extends Component
         $this->editUserRole = $user->role ?: 'user';
         $this->editUserAccountStatus = $user->account_status ?: 'active';
         $this->editUserIsAgeVerified = (bool) $user->is_age_verified;
+        $this->editUserIsIdentityVerified = (bool) $user->is_identity_verified;
         $this->editUserCredits = $user->wallet?->balance ?? 0;
         $this->editUserAvatarUrl = $user->avatar_url;
         $this->editUserAvatar = null;
@@ -1092,6 +1094,7 @@ class AdminEnterpriseHub extends Component
             'editUserRole' => ['required', 'string', Rule::in(array_merge(['user', 'advertiser'], self::STAFF_ROLES))],
             'editUserAccountStatus' => ['required', 'string', Rule::in(['active', 'pending_verification', 'suspended', 'closed'])],
             'editUserIsAgeVerified' => ['boolean'],
+            'editUserIsIdentityVerified' => ['boolean'],
             'editUserCredits' => ['integer', 'min:0', 'max:100000'],
             'editUserAvatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
@@ -1109,6 +1112,7 @@ class AdminEnterpriseHub extends Component
             'role' => $user->role,
             'status' => $user->account_status,
             'is_age_verified' => $user->is_age_verified,
+            'is_identity_verified' => $user->is_identity_verified,
         ];
 
         DB::transaction(function () use ($user) {
@@ -1118,6 +1122,7 @@ class AdminEnterpriseHub extends Component
             $user->role = $this->editUserRole;
             $user->account_status = $this->editUserAccountStatus;
             $user->is_age_verified = $this->editUserIsAgeVerified;
+            $user->is_identity_verified = $this->editUserIsIdentityVerified;
             if (!empty($this->editUserPassword)) {
                 $user->password = Hash::make($this->editUserPassword);
             }
@@ -1135,6 +1140,10 @@ class AdminEnterpriseHub extends Component
 
             $user->save();
             $profile->save();
+
+            Listing::where('user_id', $user->id)->update([
+                'is_verified_poster' => (bool) $user->is_identity_verified,
+            ]);
 
             // Roles sync
             $role = Role::where('slug', $this->editUserRole)->first();
@@ -1170,6 +1179,7 @@ class AdminEnterpriseHub extends Component
             'role' => $user->role,
             'status' => $user->account_status,
             'is_age_verified' => $user->is_age_verified,
+            'is_identity_verified' => $user->is_identity_verified,
         ]);
 
         $this->showEditUserModal = false;
@@ -4141,7 +4151,7 @@ class AdminEnterpriseHub extends Component
 
     public function setAdSubTab(string $subTab): void
     {
-        $this->adSubTab = in_array($subTab, ['campaigns', 'inventory', 'analytics'], true)
+        $this->adSubTab = in_array($subTab, ['campaigns', 'inventory', 'analytics', 'legacy'], true)
             ? $subTab
             : 'campaigns';
     }

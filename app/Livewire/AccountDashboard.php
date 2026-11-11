@@ -18,6 +18,7 @@ use App\Modules\Contact\Models\ContactMessage;
 use App\Modules\Listings\Models\Listing;
 use App\Modules\Listings\Models\ListingAnalytics;
 use App\Modules\Notifications\Models\NotificationLog;
+use App\Modules\Verification\Models\IdentityVerification;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -999,7 +1000,7 @@ class AccountDashboard extends Component
             ],
         ]);
 
-        session()->flash('success', 'Age verification confirmed! You now carry the 18+ Age Verified badge.');
+        session()->flash('success', 'Age compliance confirmed! Submit your government ID in Identity Verification to earn the Blue Verified Badge.');
     }
 
     /*
@@ -1330,6 +1331,7 @@ class AccountDashboard extends Component
             'billingTransactions' => $billingTransactions,
             'blockedUsers' => $blockedUsers,
             'categories' => $categories,
+            'latestVerification' => $userId ? IdentityVerification::where('user_id', $userId)->latest('id')->first() : null,
         ]);
     }
 }

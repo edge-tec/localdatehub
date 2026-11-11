@@ -7,6 +7,17 @@ use App\Modules\Listings\Models\Listing;
 
 class ListingPolicy
 {
+    protected function canModerateListings(User $user): bool
+    {
+        return in_array($user->role, [
+            'super_admin',
+            'admin',
+            'moderator',
+            'senior_moderator',
+            'listing_moderator',
+        ], true) || $user->hasPermission('listings.moderate');
+    }
+
     /**
      * Determine whether the user can view the listing.
      */
@@ -20,7 +31,7 @@ class ListingPolicy
             return false;
         }
 
-        return $user->id === $listing->user_id || in_array($user->role, ['admin', 'moderator'], true);
+        return $user->id === $listing->user_id || $this->canModerateListings($user);
     }
 
     /**
@@ -36,7 +47,7 @@ class ListingPolicy
      */
     public function update(User $user, Listing $listing): bool
     {
-        if (in_array($user->role, ['admin', 'moderator'], true)) {
+        if ($this->canModerateListings($user)) {
             return true;
         }
 
@@ -48,7 +59,7 @@ class ListingPolicy
      */
     public function delete(User $user, Listing $listing): bool
     {
-        if (in_array($user->role, ['admin', 'moderator'], true)) {
+        if ($this->canModerateListings($user)) {
             return true;
         }
 
@@ -60,7 +71,7 @@ class ListingPolicy
      */
     public function renew(User $user, Listing $listing): bool
     {
-        if (in_array($user->role, ['admin', 'moderator'], true)) {
+        if ($this->canModerateListings($user)) {
             return true;
         }
 
@@ -72,7 +83,7 @@ class ListingPolicy
      */
     public function moderate(User $user, Listing $listing): bool
     {
-        return in_array($user->role, ['admin', 'moderator'], true);
+        return $this->canModerateListings($user);
     }
 }
 

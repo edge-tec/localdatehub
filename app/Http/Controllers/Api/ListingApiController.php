@@ -89,23 +89,14 @@ class ListingApiController extends Controller
      */
     public function search(Request $request): JsonResponse
     {
-        $filter = new SearchFilterDTO(
-            query: $request->query('q'),
-            categorySlug: $request->query('category'),
-            subcategorySlug: $request->query('subcategory'),
-            stateCode: $request->query('state'),
-            cityName: $request->query('city'),
-            zipCode: $request->query('zip'),
-            radiusMiles: (float) $request->query('radius', 0),
-            minPrice: $request->query('min_price') ? (float) $request->query('min_price') : null,
-            maxPrice: $request->query('max_price') ? (float) $request->query('max_price') : null,
-            listingType: $request->query('type'),
-            hasPhotosOnly: (bool) $request->query('photos_only', false),
-            verifiedPosterOnly: (bool) $request->query('verified_only', false),
-            sortBy: $request->query('sort', 'newest')
-        );
+        $input = $request->query();
+        if (!isset($input['with_photos']) && isset($input['photos_only'])) {
+            $input['with_photos'] = $input['photos_only'];
+        }
 
-        $perPage = min((int) $request->query('per_page', 15), 50);
+        $filter = SearchFilterDTO::fromArray($input);
+
+        $perPage = min(max((int) $request->query('per_page', 15), 1), 50);
         $results = $this->searchService->searchListings($filter, $perPage);
 
         return ApiResponse::success([
@@ -129,6 +120,9 @@ class ListingApiController extends Controller
         if (!$user) {
             return ApiResponse::error('Authentication required to create listings.', 401, 'UNAUTHORIZED');
         }
+        if ($user->isSuspended()) {
+            return ApiResponse::error('Suspended accounts cannot create listings.', 403, 'ACCOUNT_SUSPENDED');
+        }
 
         $validated = $request->validate([
             'title' => ['required', 'string', 'min:5', 'max:100'],
@@ -140,8 +134,9 @@ class ListingApiController extends Controller
                 'integer',
                 Rule::exists('cities', 'id')->where('state_id', $request->input('state_id')),
             ],
-            'price' => ['nullable', 'numeric', 'min:0'],
-            'listing_type' => ['nullable', 'string', 'in:offered,wanted,service'],
+            'poster_age' => ['nullable', 'integer', 'min:18', 'max:99'],
+            'poster_gender' => ['nullable', 'string', 'max:30'],
+            'intent' => ['nullable', 'string', 'max:50'],
             'contact_preference' => ['nullable', 'string', 'in:chat,email,phone'],
             'phone' => ['nullable', 'string', 'max:20'],
         ]);
@@ -154,18 +149,18 @@ class ListingApiController extends Controller
             'title' => $validated['title'],
             'slug' => \Illuminate\Support\Str::slug($validated['title']) . '-' . \Illuminate\Support\Str::random(6),
             'description' => $validated['description'],
-            'price' => $validated['price'] ?? null,
-            'listing_type' => $validated['listing_type'] ?? 'offered',
-            'contact_preference' => $validated['contact_preference'] ?? 'chat',
-            'phone' => $validated['phone'] ?? null,
-            'status' => 'active',
+            'poster_age' => $validated['poster_age'] ?? 18,
+            'poster_gender' => $validated['poster_gender'] ?? 'Unspecified',
+            'intent' => $validated['intent'] ?? 'dating',
+            'status' => Listing::STATUS_ACTIVE,
             'published_at' => now(),
+            'expires_at' => now()->addDays((int) config('localdatehub.listings.default_expiration_days', 30)),
         ]);
 
-        return ApiResponse::success([
+        return ApiResponse::created([
             'message' => 'Listing created successfully.',
             'listing' => $listing->load(['state', 'city', 'category']),
-        ], 201);
+        ], 'Listing created successfully.');
     }
 }
 

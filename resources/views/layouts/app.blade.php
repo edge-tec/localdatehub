@@ -5,19 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $seo->title ?? $title ?? 'LocalAdZone — USA Adult Personal Classifieds' }}</title>
-    <meta name="description" content="{{ $seo->description ?? $description ?? 'LocalAdZone is the privacy-conscious local adult personal classifieds platform across all 50 US states.' }}">
+    <title>{{ $seo->title ?? $title ?? 'LocalDateHub — USA Adult Personal Classifieds' }}</title>
+    <meta name="description" content="{{ $seo->description ?? $description ?? 'LocalDateHub is the privacy-conscious local adult personal classifieds platform across all 50 US states.' }}">
     <meta name="robots" content="{{ $seo->robots ?? 'index, follow' }}">
     @if(!empty($seo?->canonicalUrl))
         <link rel="canonical" href="{{ $seo->canonicalUrl }}">
     @endif
 
     <!-- Open Graph & Social Cards -->
-    <meta property="og:title" content="{{ $seo->title ?? $title ?? 'LocalAdZone' }}">
+    <meta property="og:title" content="{{ $seo->title ?? $title ?? 'LocalDateHub' }}">
     <meta property="og:description" content="{{ $seo->description ?? $description ?? 'Adult Personal Classifieds' }}">
     <meta property="og:url" content="{{ $seo->canonicalUrl ?? url()->current() }}">
     <meta property="og:type" content="{{ $seo->ogType ?? 'website' }}">
-    <meta property="og:image" content="{{ $seo->ogImage ?? asset('images/og-localadzone.jpg') }}">
+    <meta property="og:image" content="{{ $seo->ogImage ?? asset('images/promo-banner.jpg') }}">
     <meta name="twitter:card" content="summary_large_image">
 
     @if(!empty($seo?->structuredData))

@@ -78,9 +78,9 @@ class ListingWizard extends Component
             $this->preferred_email = (string) $user->email;
             $this->show_email = (bool) ($user->preferences?->show_public_email ?? false);
         }
-        if ($user && $user->posterProfile) {
-            $this->poster_age = $user->posterProfile->age ?: 25;
-            $this->poster_gender = $user->posterProfile->gender ?: 'Male';
+        if ($user && $user->profile) {
+            $this->poster_age = $user->profile->age ?: 25;
+            $this->poster_gender = $user->profile->gender ?: 'Male';
         }
 
         if ($listingId) {

@@ -45,7 +45,7 @@ class CryptoInvoiceService
         $usd = (float) $usdAmount;
         if ($usd < (float) $currency->min_deposit_usd || $usd > (float) $currency->max_deposit_usd) {
             throw new InvalidArgumentException(
-                "Deposit amount [${$usd}] is outside permitted range (${$currency->min_deposit_usd} - ${$currency->max_deposit_usd})."
+                "Deposit amount [\${$usd}] is outside permitted range (\${$currency->min_deposit_usd} - \${$currency->max_deposit_usd})."
             );
         }
 

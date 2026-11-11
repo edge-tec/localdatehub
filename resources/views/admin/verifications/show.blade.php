@@ -18,7 +18,7 @@
                     </h1>
                     @php
                         $badge = match($verification->status) {
-                            'verified' => 'bg-emerald-100 text-emerald-800 border-emerald-200',
+                            'verified' => 'bg-blue-100 text-blue-800 border-blue-200',
                             'pending', 'under_review' => 'bg-amber-100 text-amber-800 border-amber-200 animate-pulse',
                             'rejected' => 'bg-rose-100 text-rose-800 border-rose-200',
                             'suspended' => 'bg-purple-100 text-purple-800 border-purple-200',
@@ -37,10 +37,10 @@
             <!-- Action Buttons -->
             <div class="flex items-center space-x-3">
                 @if($verification->status !== 'verified')
-                    <form action="{{ route('admin.verifications.approve', $verification) }}" method="POST" onsubmit="return confirm('Approve verification and grant verified poster badge?');">
+                    <form action="{{ route('admin.verifications.approve', $verification) }}" method="POST" onsubmit="return confirm('Approve verification and grant Blue Verified Badge?');">
                         @csrf
-                        <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-xs transition flex items-center space-x-1.5">
-                            <span>✓ Approve &amp; Verify</span>
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-xs transition flex items-center space-x-1.5">
+                            <span>✓ Approve &amp; Verify (Blue Badge)</span>
                         </button>
                     </form>
 

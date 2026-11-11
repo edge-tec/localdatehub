@@ -1064,7 +1064,12 @@
                                         @endif
                                     </div>
                                     <div class="min-w-0">
-                                        <div class="font-black text-slate-950 truncate">{{ $u->name }}</div>
+                                        <div class="font-black text-slate-950 truncate flex items-center gap-1">
+                                            <span class="truncate">{{ $u->name }}</span>
+                                            @if($u->is_identity_verified)
+                                                <x-verified-badge variant="icon" size="w-3.5 h-3.5" title="Blue Verified Badge Active" />
+                                            @endif
+                                        </div>
                                         <div class="text-xs font-semibold text-slate-600 font-mono truncate">{{ $u->email }}</div>
                                     </div>
                                 </div>
@@ -5045,154 +5050,289 @@
 
         {{-- ================= 16. ADVERTISEMENTS ================= --}}
         @if($tab === 'ads')
+            @php
+                $kpiTotalCampaigns = (int) ($enterpriseStats['total_campaigns'] ?? ($adStats['total_campaigns'] ?? 0));
+                $kpiActiveCampaigns = (int) ($enterpriseStats['active_campaigns'] ?? ($adStats['active_campaigns'] ?? 0));
+                $kpiImpressions = (int) ($enterpriseStats['total_impressions'] ?? ($adStats['total_impressions'] ?? 0));
+                $kpiClicks = (int) ($enterpriseStats['total_clicks'] ?? ($adStats['total_clicks'] ?? 0));
+                $kpiConversions = (int) ($enterpriseStats['total_conversions'] ?? 0);
+                $kpiCtr = $enterpriseStats['global_ctr'] ?? ($adStats['global_ctr'] ?? 0);
+                $kpiS2sRev = (float) ($enterpriseStats['conversion_revenue_usd'] ?? 0);
+                $kpiPipelineRev = (float) ($enterpriseStats['pipeline_value_usd'] ?? ($adStats['total_revenue_usd'] ?? 0));
+            @endphp
+
+            <!-- Command Hero Header -->
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-950 via-slate-900 to-fuchsia-950 p-5 sm:p-6 mb-5 shadow-md border border-slate-800">
+                <div class="absolute -right-12 -top-12 w-56 h-56 rounded-full bg-pink-500/15 blur-2xl pointer-events-none"></div>
+                <div class="relative flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div class="min-w-0">
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-pink-500/20 border border-pink-400/30 text-pink-200 text-[11px] font-black uppercase tracking-wider mb-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span>Ad Server &amp; Affiliate Monetization</span>
+                        </div>
+                        <h2 class="text-lg sm:text-xl font-black text-white tracking-tight">Advertising &amp; Revenue Command Hub</h2>
+                        <p class="text-xs sm:text-sm text-slate-300 font-medium mt-0.5 max-w-2xl">
+                            Manage geo-targeted banners, S2S affiliate offers, 13 responsive ad placements, frequency caps, and real-time conversion telemetry.
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                        <button
+                            type="button"
+                            wire:click="openAdModal"
+                            class="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 text-xs font-black transition inline-flex items-center gap-2"
+                        >
+                            <svg class="w-4 h-4 text-pink-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+                            <span>New Legacy Slot</span>
+                        </button>
+                        <button
+                            type="button"
+                            wire:click="openCampaignModal"
+                            class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#F20B83] to-rose-600 hover:from-[#D00972] hover:to-rose-700 text-white text-xs font-black transition shadow-sm inline-flex items-center gap-2"
+                        >
+                            <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                            <span>New Campaign</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Advertising Command Ribbon (4 KPI Cards) -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
                 <!-- Card 1: Total Campaigns -->
-                <div class="{{ $card }} p-5 border-l-4 border-l-purple-600">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-black uppercase tracking-wider text-slate-700">Total Campaigns</p>
-                            <h3 class="text-2xl font-black text-slate-950 mt-1">{{ number_format($adStats['total_campaigns'] ?? 0) }}</h3>
-                            <p class="text-xs font-semibold text-slate-600 mt-0.5">{{ $adStats['active_campaigns'] ?? 0 }} Currently Active · {{ $adStats['paused_campaigns'] ?? 0 }} Paused</p>
+                <div class="{{ $card }} p-5 border-l-4 border-l-purple-600 hover:shadow-md transition">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-[11px] font-black uppercase tracking-wider text-slate-600">Total Campaigns</p>
+                            <h3 class="text-2xl font-black text-slate-950 mt-1">{{ number_format($kpiTotalCampaigns) }}</h3>
+                            <p class="text-xs font-semibold text-slate-600 mt-1 truncate">
+                                {{ $enterpriseStats['enterprise_campaigns'] ?? 0 }} enterprise · {{ $enterpriseStats['scheduled_campaigns'] ?? 0 }} scheduled
+                            </p>
                         </div>
-                        <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-800 border border-purple-300 flex items-center justify-center font-black text-xl">
-                            📢
-                        </div>
-                    </div>
-                    <div class="mt-3 flex items-center gap-1.5 text-xs font-bold text-purple-900 bg-purple-50/70 border border-purple-200 px-2 py-1 rounded-md">
-                        <span>●</span><span>Full Multi-Slot Inventory</span>
-                    </div>
-                </div>
-
-                <!-- Card 2: Active Placements -->
-                <div class="{{ $card }} p-5 border-l-4 border-l-emerald-600">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-black uppercase tracking-wider text-slate-700">Active Slots</p>
-                            <h3 class="text-2xl font-black text-emerald-900 mt-1">{{ number_format($adStats['active_campaigns'] ?? 0) }}</h3>
-                            <p class="text-xs font-semibold text-slate-600 mt-0.5">Live Delivery Across Network</p>
-                        </div>
-                        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-300 flex items-center justify-center font-black text-xl">
-                            ✓
+                        <div class="w-11 h-11 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
                         </div>
                     </div>
-                    <div class="mt-3 flex items-center gap-1.5 text-xs font-bold text-emerald-900 bg-emerald-50/70 border border-emerald-200 px-2 py-1 rounded-md">
-                        <span>●</span><span>Real-Time Ad Serving Enabled</span>
+                    <div class="mt-3 flex items-center gap-1.5 text-[11px] font-bold text-purple-900 bg-purple-50 border border-purple-200/80 px-2.5 py-1 rounded-lg">
+                        <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
+                        <span>{{ $enterpriseStats['draft_campaigns'] ?? 0 }} drafts · {{ $enterpriseStats['expired_campaigns'] ?? 0 }} expired</span>
                     </div>
                 </div>
 
-                <!-- Card 3: Total Impressions -->
-                <div class="{{ $card }} p-5 border-l-4 border-l-blue-600">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-black uppercase tracking-wider text-slate-700">Total Impressions</p>
-                            <h3 class="text-2xl font-black text-slate-950 mt-1">{{ number_format($adStats['total_impressions'] ?? 0) }}</h3>
-                            <p class="text-xs font-semibold text-slate-600 mt-0.5">Verified Ad Views</p>
+                <!-- Card 2: Active Delivery -->
+                <div class="{{ $card }} p-5 border-l-4 border-l-emerald-600 hover:shadow-md transition">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-[11px] font-black uppercase tracking-wider text-slate-600">Active Delivery</p>
+                            <h3 class="text-2xl font-black text-emerald-800 mt-1">{{ number_format($kpiActiveCampaigns) }}</h3>
+                            <p class="text-xs font-semibold text-slate-600 mt-1 truncate">
+                                {{ $enterpriseStats['paused_campaigns'] ?? 0 }} paused across 13 slots
+                            </p>
                         </div>
-                        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-800 border border-blue-300 flex items-center justify-center font-black text-xl">
-                            👁️
+                        <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
                     </div>
-                    <div class="mt-3 flex items-center gap-1.5 text-xs font-bold text-blue-900 bg-blue-50/70 border border-blue-200 px-2 py-1 rounded-md">
-                        <span>●</span><span>High-Impact Placements</span>
+                    <div class="mt-3 flex items-center gap-1.5 text-[11px] font-bold text-emerald-900 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-lg">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>Weighted Ad Rotation Live</span>
                     </div>
                 </div>
 
-                <!-- Card 4: Global Clicks & CTR -->
-                <div class="{{ $card }} p-5 border-l-4 border-l-pink-600">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-black uppercase tracking-wider text-slate-700">Avg. CTR & Revenue</p>
-                            <h3 class="text-2xl font-black text-pink-900 mt-1">{{ $adStats['global_ctr'] ?? 0 }}%</h3>
-                            <p class="text-xs font-semibold text-slate-600 mt-0.5">${{ number_format($adStats['total_revenue_usd'] ?? 0, 2) }} Pipeline Value</p>
+                <!-- Card 3: Impressions & Clicks -->
+                <div class="{{ $card }} p-5 border-l-4 border-l-blue-600 hover:shadow-md transition">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-[11px] font-black uppercase tracking-wider text-slate-600">Verified Impressions</p>
+                            <h3 class="text-2xl font-black text-slate-950 mt-1">{{ number_format($kpiImpressions) }}</h3>
+                            <p class="text-xs font-semibold text-slate-600 mt-1 truncate">
+                                {{ number_format($kpiClicks) }} clicks · {{ number_format($kpiConversions) }} conversions
+                            </p>
                         </div>
-                        <div class="w-12 h-12 rounded-xl bg-pink-50 text-pink-800 border border-pink-300 flex items-center justify-center font-black text-xl">
-                            🎯
+                        <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                         </div>
                     </div>
-                    <div class="mt-3 flex items-center gap-1.5 text-xs font-bold text-pink-900 bg-pink-50/70 border border-pink-200 px-2 py-1 rounded-md">
-                        <span>●</span><span>{{ number_format($adStats['total_clicks'] ?? 0) }} Total Clicks Generated</span>
+                    <div class="mt-3 flex items-center gap-1.5 text-[11px] font-bold text-blue-900 bg-blue-50 border border-blue-200/80 px-2.5 py-1 rounded-lg">
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                        <span>Anti-Fraud Click Guard Enabled</span>
+                    </div>
+                </div>
+
+                <!-- Card 4: Global CTR & Revenue -->
+                <div class="{{ $card }} p-5 border-l-4 border-l-pink-600 hover:shadow-md transition">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-[11px] font-black uppercase tracking-wider text-slate-600">CTR &amp; S2S Revenue</p>
+                            <h3 class="text-2xl font-black text-pink-700 mt-1">{{ $kpiCtr }}%</h3>
+                            <p class="text-xs font-semibold text-slate-600 mt-1 truncate">
+                                ${{ number_format($kpiS2sRev, 2) }} S2S · ${{ number_format($kpiPipelineRev, 2) }} total
+                            </p>
+                        </div>
+                        <div class="w-11 h-11 rounded-xl bg-pink-50 text-pink-700 border border-pink-200 flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-center gap-1.5 text-[11px] font-bold text-pink-900 bg-pink-50 border border-pink-200/80 px-2.5 py-1 rounded-lg">
+                        <span class="w-1.5 h-1.5 rounded-full bg-pink-600"></span>
+                        <span>{{ number_format($kpiClicks) }} Verified Engagements</span>
                     </div>
                 </div>
             </div>
 
             <!-- Ad Monetization Sub-Navigation -->
-            <div class="flex items-center gap-2 mb-5 border-b border-slate-200 pb-3">
+            <div class="flex flex-wrap items-center gap-2 mb-5 bg-white p-2 rounded-2xl border border-slate-200/80 shadow-xs">
                 <button type="button" wire:click="setAdSubTab('campaigns')"
-                    class="px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 {{ $adSubTab === 'campaigns' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
-                    <span>Active Campaigns</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-[10px] {{ $adSubTab === 'campaigns' ? 'bg-white/30 text-white' : 'bg-slate-300 text-slate-800' }}">{{ $enterpriseStats['total_campaigns'] ?? ($adStats['total_campaigns'] ?? 0) }}</span>
+                    class="px-3.5 py-2 rounded-xl text-xs font-black transition inline-flex items-center gap-2 {{ $adSubTab === 'campaigns' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100/80 hover:bg-slate-200 text-slate-700' }}">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+                    <span>Campaigns</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px] {{ $adSubTab === 'campaigns' ? 'bg-white/25 text-white' : 'bg-slate-200 text-slate-800' }}">{{ $enterpriseStats['enterprise_campaigns'] ?? 0 }}</span>
                 </button>
+
                 <button type="button" wire:click="setAdSubTab('inventory')"
-                    class="px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 {{ $adSubTab === 'inventory' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
-                    <span>Slot Architecture & Inventory</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-[10px] {{ $adSubTab === 'inventory' ? 'bg-white/30 text-white' : 'bg-slate-300 text-slate-800' }}">13 Slots</span>
+                    class="px-3.5 py-2 rounded-xl text-xs font-black transition inline-flex items-center gap-2 {{ $adSubTab === 'inventory' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100/80 hover:bg-slate-200 text-slate-700' }}">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+                    <span>Slot Architecture</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px] {{ $adSubTab === 'inventory' ? 'bg-white/25 text-white' : 'bg-slate-200 text-slate-800' }}">13 Slots</span>
                 </button>
+
                 <button type="button" wire:click="setAdSubTab('analytics')"
-                    class="px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 {{ $adSubTab === 'analytics' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
-                    <span>Performance Analytics</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-[10px] {{ $adSubTab === 'analytics' ? 'bg-white/30 text-white' : 'bg-slate-300 text-slate-800' }}">{{ $enterpriseStats['global_ctr'] ?? ($adStats['global_ctr'] ?? 0) }}% CTR</span>
+                    class="px-3.5 py-2 rounded-xl text-xs font-black transition inline-flex items-center gap-2 {{ $adSubTab === 'analytics' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100/80 hover:bg-slate-200 text-slate-700' }}">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    <span>Analytics &amp; Reports</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px] {{ $adSubTab === 'analytics' ? 'bg-white/25 text-white' : 'bg-slate-200 text-slate-800' }}">{{ $kpiCtr }}% CTR</span>
+                </button>
+
+                <button type="button" wire:click="setAdSubTab('legacy')"
+                    class="px-3.5 py-2 rounded-xl text-xs font-black transition inline-flex items-center gap-2 {{ $adSubTab === 'legacy' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100/80 hover:bg-slate-200 text-slate-700' }}">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                    <span>Legacy Slots</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px] {{ $adSubTab === 'legacy' ? 'bg-white/25 text-white' : 'bg-slate-200 text-slate-800' }}">{{ $adStats['total_campaigns'] ?? 0 }}</span>
                 </button>
             </div>
 
+            {{-- SUB-TAB 1: ENTERPRISE CAMPAIGNS --}}
             @if($adSubTab === 'campaigns')
                 @include('livewire.admin.partials.ads-campaigns-table')
-                <div class="mb-2 pt-2 border-t border-slate-200 flex items-center justify-between">
-                    <span class="text-xs font-black uppercase tracking-wider text-slate-600">Legacy Quick Slot Placements</span>
-                </div>
-                <!-- Action Toolbar: Search, Filters & Add Placement -->
+            @endif
+
+            {{-- SUB-TAB 2: SLOT ARCHITECTURE & INVENTORY --}}
+            @if($adSubTab === 'inventory')
+                @include('livewire.admin.partials.ads-inventory-configs')
+            @endif
+
+            {{-- SUB-TAB 3: CONVERSION & ANALYTICS LEDGER --}}
+            @if($adSubTab === 'analytics')
+                @include('livewire.admin.partials.ads-analytics-ledger')
+            @endif
+
+            {{-- SUB-TAB 4: LEGACY QUICK SLOT PLACEMENTS --}}
+            @if($adSubTab === 'legacy')
                 <div class="{{ $card }} p-4 mb-4">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                        <div class="flex flex-wrap items-center gap-2.5 flex-1">
-                            <!-- Search Box -->
-                            <div class="relative min-w-[220px] max-w-sm flex-1">
-                                <input 
-                                    type="text" 
-                                    wire:model.live.debounce.300ms="adSearch" 
-                                    class="{{ $input }} pl-8 text-xs font-bold text-slate-900" 
-                                    placeholder="Search campaigns, advertisers, URLs..."
-                                />
-                                <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                            </div>
-
-                            <!-- Slot Filter Dropdown -->
-                            <div class="min-w-[150px]">
-                                <select wire:model.live="adSlotFilter" class="{{ $input }} text-xs font-bold text-slate-900">
-                                    <option value="all">All Placement Slots</option>
-                                    @foreach(\App\Modules\Admin\Models\AdPlacement::SLOTS as $s)
-                                        <option value="{{ $s }}">{{ ucwords(str_replace('_', ' ', $s)) }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <!-- Status Filter Dropdown -->
-                            <div class="min-w-[130px]">
-                                <select wire:model.live="adStatusFilter" class="{{ $input }} text-xs font-bold text-slate-900">
-                                    <option value="all">All Statuses</option>
-                                    <option value="active">Active Only</option>
-                                    <option value="paused">Paused Only</option>
-                                </select>
-                            </div>
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                        <div class="md:col-span-5 relative">
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="adSearch"
+                                class="{{ $input }} pl-9 text-xs font-bold text-slate-900"
+                                placeholder="Search legacy placements, advertisers, URLs..."
+                            />
+                            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                         </div>
 
-                        <!-- Create New Placement Button -->
-                        <button 
-                            type="button" 
-                            wire:click="openAdModal" 
-                            class="px-4 py-2.5 rounded-xl bg-[#F20B83] hover:bg-[#D00972] text-white text-xs font-black transition shadow-xs flex items-center justify-center gap-2 shrink-0"
-                        >
-                            <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                            <span>+ New Placement</span>
-                        </button>
+                        <div class="md:col-span-3">
+                            <select wire:model.live="adSlotFilter" class="{{ $input }} text-xs font-bold text-slate-900">
+                                <option value="all">All Placement Slots</option>
+                                @foreach(\App\Modules\Admin\Models\AdPlacement::SLOTS as $s)
+                                    <option value="{{ $s }}">{{ ucwords(str_replace('_', ' ', $s)) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <select wire:model.live="adStatusFilter" class="{{ $input }} text-xs font-bold text-slate-900">
+                                <option value="all">All Statuses</option>
+                                <option value="active">Active Only</option>
+                                <option value="paused">Paused Only</option>
+                            </select>
+                        </div>
+
+                        <div class="md:col-span-2 flex justify-end">
+                            <button
+                                type="button"
+                                wire:click="openAdModal"
+                                class="w-full px-3.5 py-2.5 rounded-xl bg-[#F20B83] hover:bg-[#D00972] text-white text-xs font-black transition shadow-xs inline-flex items-center justify-center gap-1.5"
+                            >
+                                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                                <span>New Placement</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Ad Campaigns Table -->
-                <div class="{{ $card }} overflow-x-auto shadow-sm">
+                <!-- Mobile Cards (md:hidden) -->
+                <div class="grid grid-cols-1 gap-3 md:hidden">
+                    @forelse($ads as $ad)
+                        <div class="{{ $card }} p-4 space-y-3" wire:key="ad-mobile-{{ $ad->id }}">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    @if($ad->image_url)
+                                        <img src="{{ $ad->image_url }}" alt="{{ $ad->name }}" class="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0" />
+                                    @else
+                                        <div class="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 font-mono text-[10px] font-bold shrink-0">HTML</div>
+                                    @endif
+                                    <div class="min-w-0">
+                                        <h4 class="font-black text-slate-950 text-sm truncate">{{ $ad->name }}</h4>
+                                        <p class="text-xs text-slate-600 font-medium truncate">{{ $ad->advertiser_name ?: 'Internal Sponsor' }}</p>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    wire:click="toggleAd({{ $ad->id }})"
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black border shrink-0 {{ $ad->is_active ? 'bg-emerald-50 text-emerald-900 border-emerald-300' : 'bg-amber-50 text-amber-900 border-amber-300' }}"
+                                >
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $ad->is_active ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
+                                    <span>{{ $ad->is_active ? 'Active' : 'Paused' }}</span>
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                                <div>
+                                    <span class="block text-[10px] font-bold text-slate-500 uppercase">Slot</span>
+                                    <span class="font-bold text-slate-900 truncate block">{{ str_replace('_', ' ', $ad->slot) }}</span>
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] font-bold text-slate-500 uppercase">Rate</span>
+                                    <span class="font-bold text-slate-900">{{ $ad->price_cents ? '$' . number_format($ad->price_cents / 100, 2) : 'In-House' }}</span>
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] font-bold text-slate-500 uppercase">CTR</span>
+                                    <span class="font-black text-emerald-700">{{ $ad->clickThroughRate() }}%</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                                <button type="button" wire:click="openPreviewAdModal({{ $ad->id }})" class="px-2.5 py-1.5 rounded-lg bg-pink-50 text-[#F20B83] text-xs font-bold border border-pink-200">Preview</button>
+                                <button type="button" wire:click="openAdModal({{ $ad->id }})" class="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-800 text-xs font-bold border border-slate-300">Edit</button>
+                                <button type="button" wire:click="cloneAd({{ $ad->id }})" class="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-800 text-xs font-bold border border-slate-300">Clone</button>
+                                <button type="button" wire:click="confirmDeleteAd({{ $ad->id }})" class="px-2.5 py-1.5 rounded-lg bg-rose-50 text-rose-800 text-xs font-bold border border-rose-300">Delete</button>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="{{ $card }} p-8 text-center">
+                            <p class="text-sm font-black text-slate-800">No Legacy Placements Found</p>
+                            <p class="text-xs text-slate-500 mt-1">Switch to Campaigns for full enterprise ad serving, or add a legacy slot below.</p>
+                            <button type="button" wire:click="openAdModal" class="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#F20B83] text-white font-bold text-xs">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                                <span>Create Legacy Placement</span>
+                            </button>
+                        </div>
+                    @endforelse
+                </div>
+
+                <!-- Desktop Table (hidden md:block) -->
+                <div class="{{ $card }} hidden md:block overflow-x-auto shadow-sm">
                     <table class="min-w-full divide-y divide-slate-200">
                         <thead class="bg-slate-50">
                             <tr>
-                                <th class="{{ $th }}">Campaign & Creative</th>
+                                <th class="{{ $th }}">Campaign &amp; Creative</th>
                                 <th class="{{ $th }}">Placement Slot</th>
                                 <th class="{{ $th }}">Schedule Window</th>
                                 <th class="{{ $th }}">Rate / Price</th>
@@ -5212,16 +5352,21 @@
                                             </button>
                                         @else
                                             <div class="w-10 h-10 rounded-lg bg-slate-100 border border-slate-300 flex items-center justify-center text-slate-500 font-mono text-[10px] shrink-0 font-bold">
-                                                CODE
+                                                HTML
                                             </div>
                                         @endif
                                         <div class="min-w-0">
                                             <div class="font-black text-slate-950 text-xs truncate max-w-[220px]">{{ $ad->name }}</div>
-                                            <div class="text-[11px] font-semibold text-slate-600 flex items-center gap-1.5 mt-0.5">
-                                                <span>👤 {{ $ad->advertiser_name ?: 'Internal Sponsor' }}</span>
+                                            <div class="text-[11px] font-semibold text-slate-600 flex items-center gap-2 mt-0.5">
+                                                <span class="inline-flex items-center gap-1">
+                                                    <svg class="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                                    <span>{{ $ad->advertiser_name ?: 'Internal Sponsor' }}</span>
+                                                </span>
                                                 @if($ad->target_url)
-                                                    <span>·</span>
-                                                    <a href="{{ $ad->target_url }}" target="_blank" class="text-pink-600 hover:underline truncate max-w-[140px]" title="{{ $ad->target_url }}">🔗 {{ parse_url($ad->target_url, PHP_URL_HOST) ?: 'Link' }}</a>
+                                                    <a href="{{ $ad->target_url }}" target="_blank" class="text-pink-600 hover:underline truncate max-w-[140px] inline-flex items-center gap-1" title="{{ $ad->target_url }}">
+                                                        <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                                        <span>{{ parse_url($ad->target_url, PHP_URL_HOST) ?: 'Link' }}</span>
+                                                    </a>
                                                 @endif
                                             </div>
                                         </div>
@@ -5238,7 +5383,7 @@
                                     </div>
                                     <div class="text-[10px] text-slate-500 font-medium mt-0.5">
                                         @if(!$ad->ends_at || $ad->ends_at->isFuture())
-                                            <span class="text-emerald-700 font-bold">● Active Window</span>
+                                            <span class="text-emerald-700 font-bold">Active Window</span>
                                         @else
                                             <span class="text-rose-600 font-bold">Ended</span>
                                         @endif
@@ -5260,9 +5405,9 @@
                                     </div>
                                 </td>
                                 <td class="{{ $td }}">
-                                    <button 
-                                        type="button" 
-                                        wire:click="toggleAd({{ $ad->id }})" 
+                                    <button
+                                        type="button"
+                                        wire:click="toggleAd({{ $ad->id }})"
                                         class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black border transition {{ $ad->is_active ? 'bg-emerald-50 text-emerald-900 border-emerald-300 hover:bg-emerald-100' : 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100' }}"
                                         title="Click to toggle active delivery state"
                                     >
@@ -5272,43 +5417,39 @@
                                 </td>
                                 <td class="{{ $td }} text-right pr-4 whitespace-nowrap">
                                     <div class="inline-flex items-center gap-1">
-                                        <button 
-                                            type="button" 
-                                            wire:click="openPreviewAdModal({{ $ad->id }})" 
+                                        <button
+                                            type="button"
+                                            wire:click="openPreviewAdModal({{ $ad->id }})"
                                             class="px-2 py-1 rounded-lg bg-pink-50 hover:bg-pink-100 text-[#F20B83] text-xs font-bold transition border border-pink-200"
-                                            title="Live Viewport Simulation"
                                         >
                                             Preview
                                         </button>
-                                        <button 
-                                            type="button" 
-                                            wire:click="openAdModal({{ $ad->id }})" 
+                                        <button
+                                            type="button"
+                                            wire:click="openAdModal({{ $ad->id }})"
                                             class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition border border-slate-300"
-                                            title="Edit Campaign"
                                         >
                                             Edit
                                         </button>
-                                        <button 
-                                            type="button" 
-                                            wire:click="cloneAd({{ $ad->id }})" 
+                                        <button
+                                            type="button"
+                                            wire:click="cloneAd({{ $ad->id }})"
                                             class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition border border-slate-300"
-                                            title="Clone Campaign"
                                         >
                                             Clone
                                         </button>
-                                        <button 
-                                            type="button" 
-                                            wire:click="resetAdStats({{ $ad->id }})" 
-                                            class="px-1.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition border border-slate-300"
-                                            title="Reset Impression & Click Counters"
+                                        <button
+                                            type="button"
+                                            wire:click="resetAdStats({{ $ad->id }})"
+                                            class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition border border-slate-300"
+                                            title="Reset Impression &amp; Click Counters"
                                         >
-                                            ↺
+                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                                         </button>
-                                        <button 
-                                            type="button" 
-                                            wire:click="confirmDeleteAd({{ $ad->id }})" 
+                                        <button
+                                            type="button"
+                                            wire:click="confirmDeleteAd({{ $ad->id }})"
                                             class="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 text-xs font-bold transition border border-rose-300"
-                                            title="Delete Placement"
                                         >
                                             Delete
                                         </button>
@@ -5318,16 +5459,19 @@
                         @empty
                             <tr>
                                 <td colspan="7" class="px-6 py-12 text-center bg-slate-50">
-                                    <div class="max-w-sm mx-auto text-center space-y-2">
-                                        <div class="text-3xl">📢</div>
-                                        <p class="text-sm font-black text-slate-800">No Advertising Placements Found</p>
-                                        <p class="text-xs text-slate-500">No campaigns match your current search or slot filter. Click below to publish a new placement.</p>
-                                        <button 
-                                            type="button" 
-                                            wire:click="openAdModal" 
-                                            class="mt-2 inline-flex items-center gap-1 px-3.5 py-2 rounded-xl bg-pink-600 hover:bg-pink-700 text-white font-bold text-xs"
+                                    <div class="max-w-sm mx-auto text-center space-y-2.5">
+                                        <div class="w-12 h-12 rounded-2xl bg-pink-50 border border-pink-200 text-pink-600 flex items-center justify-center mx-auto">
+                                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+                                        </div>
+                                        <p class="text-sm font-black text-slate-900">No Legacy Placements Found</p>
+                                        <p class="text-xs text-slate-500">No legacy placements match your current filter. Use Campaigns for full geo/device/affiliate targeting, or create a legacy placement.</p>
+                                        <button
+                                            type="button"
+                                            wire:click="openAdModal"
+                                            class="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#F20B83] hover:bg-[#D00972] text-white font-bold text-xs transition"
                                         >
-                                            <span>+ Create First Placement</span>
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                                            <span>Create First Placement</span>
                                         </button>
                                     </div>
                                 </td>
@@ -5340,142 +5484,6 @@
                             {{ $ads->links() }}
                         </div>
                     @endif
-                </div>
-            @endif
-
-            {{-- SUB-TAB 2: SLOT ARCHITECTURE & INVENTORY --}}
-            @if($adSubTab === 'inventory')
-                @include('livewire.admin.partials.ads-inventory-configs')
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                    @foreach($slotInventory as $key => $slot)
-                        <div class="{{ $card }} p-5 flex flex-col justify-between border-t-4 border-t-pink-600">
-                            <div>
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-pink-100 text-pink-900 border border-pink-200">
-                                        {{ $slot['dimensions'] }}
-                                    </span>
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold {{ $slot['active_count'] > 0 ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' : 'bg-slate-100 text-slate-600' }}">
-                                        {{ $slot['active_count'] }} Active Live
-                                    </span>
-                                </div>
-                                <h4 class="text-sm font-black text-slate-950 mt-1">{{ $slot['name'] }}</h4>
-                                <p class="text-xs text-slate-600 font-medium mt-1 leading-relaxed">{{ $slot['location'] }}</p>
-                                
-                                <div class="mt-3 p-2.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1 text-xs">
-                                    <div class="flex justify-between">
-                                        <span class="text-slate-500 font-bold">Recommended Rate:</span>
-                                        <span class="font-black text-slate-950">{{ $slot['suggested_rate'] }}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-slate-500 font-bold">Target Devices:</span>
-                                        <span class="font-bold text-slate-800">{{ $slot['device'] }}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-slate-500 font-bold">Campaigns In Slot:</span>
-                                        <span class="font-bold text-slate-800">{{ $slot['total_count'] }} total ({{ $slot['active_count'] }} live)</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
-                                <button type="button" wire:click="$set('adSlotFilter', '{{ $key }}'); setAdSubTab('campaigns')" class="text-xs font-bold text-pink-600 hover:underline">
-                                    Filter Campaigns &rarr;
-                                </button>
-                                <button type="button" wire:click="openAdModal" class="px-3 py-1.5 rounded-xl bg-[#F20B83] hover:bg-[#D00972] text-white text-xs font-black shadow-xs">
-                                    + Add To Slot
-                                </button>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @endif
-
-            {{-- SUB-TAB 3: CONVERSION & ANALYTICS LEDGER --}}
-            @if($adSubTab === 'analytics')
-                @include('livewire.admin.partials.ads-analytics-ledger')
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
-                    <!-- Top Converting Placements -->
-                    <div class="{{ $card }} p-5">
-                        <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
-                            <div>
-                                <h4 class="text-sm font-black text-slate-950">Top Converting Campaigns</h4>
-                                <p class="text-xs text-slate-500 font-medium">Ranked by Click-Through Rate (CTR) and verified user engagement.</p>
-                            </div>
-                            <span class="text-xl">🏆</span>
-                        </div>
-
-                        <div class="space-y-3">
-                            @forelse($topPerformers as $idx => $top)
-                                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3">
-                                    <div class="flex items-center gap-3 min-w-0">
-                                        <span class="w-6 h-6 rounded-full bg-slate-200 text-slate-900 font-black text-xs flex items-center justify-center shrink-0">
-                                            #{{ $idx + 1 }}
-                                        </span>
-                                        <div class="min-w-0">
-                                            <p class="text-xs font-black text-slate-950 truncate">{{ $top->name }}</p>
-                                            <p class="text-[11px] text-slate-500 font-semibold">{{ $top->advertiser_name ?: 'Direct Sponsor' }} · {{ str_replace('_', ' ', $top->slot) }}</p>
-                                        </div>
-                                    </div>
-                                    <div class="text-right shrink-0">
-                                        <span class="px-2 py-0.5 rounded text-xs font-black bg-emerald-100 text-emerald-900 border border-emerald-300">
-                                            {{ $top->clickThroughRate() }}% CTR
-                                        </span>
-                                        <p class="text-[10px] text-slate-600 font-bold mt-0.5">{{ number_format($top->clicks) }} clicks / {{ number_format($top->impressions) }} impr</p>
-                                    </div>
-                                </div>
-                            @empty
-                                <p class="text-xs text-slate-500 text-center py-6">No performance records recorded yet.</p>
-                            @endforelse
-                        </div>
-                    </div>
-
-                    <!-- Direct Sponsor Revenue Pipeline -->
-                    <div class="{{ $card }} p-5 flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
-                                <div>
-                                    <h4 class="text-sm font-black text-slate-950">Monetization & Traffic Health</h4>
-                                    <p class="text-xs text-slate-500 font-medium">Direct billing valuation across all active advertising inventory.</p>
-                                </div>
-                                <span class="text-xl">💰</span>
-                            </div>
-
-                            <div class="space-y-3">
-                                <div class="p-4 rounded-xl bg-gradient-to-br from-pink-50 to-purple-50 border border-pink-200">
-                                    <span class="text-[11px] font-black uppercase text-pink-900">Current Monthly Ad Run Rate:</span>
-                                    <div class="text-3xl font-black text-slate-950 mt-1">
-                                        ${{ number_format($adStats['total_revenue_usd'] ?? 0, 2) }}
-                                    </div>
-                                    <p class="text-xs text-slate-600 font-medium mt-1">Combined monthly contract values of {{ $adStats['active_campaigns'] ?? 0 }} active sponsor campaigns.</p>
-                                </div>
-
-                                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
-                                    <div class="flex justify-between items-center">
-                                        <span class="font-bold text-slate-700">Total Ad Impressions Delivered:</span>
-                                        <span class="font-black text-slate-950">{{ number_format($adStats['total_impressions'] ?? 0) }}</span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="font-bold text-slate-700">Total Ad Clicks Generated:</span>
-                                        <span class="font-black text-slate-950">{{ number_format($adStats['total_clicks'] ?? 0) }}</span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="font-bold text-slate-700">Global Average CTR:</span>
-                                        <span class="font-black text-emerald-700">{{ $adStats['global_ctr'] ?? 0 }}%</span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="font-bold text-slate-700">Live Delivery Status:</span>
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-900">● 100% Operational</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="pt-4 mt-4 border-t border-slate-200 flex justify-end">
-                            <button type="button" wire:click="openAdModal" class="px-4 py-2 rounded-xl bg-[#F20B83] hover:bg-[#D00972] text-white text-xs font-black shadow-xs">
-                                + Create New Monetized Campaign
-                            </button>
-                        </div>
-                    </div>
                 </div>
             @endif
         @endif
@@ -8279,10 +8287,14 @@
                             @error('editUserPassword')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
                         </div>
 
-                        <div class="flex items-center gap-2 pt-1">
-                            <input type="checkbox" id="editIsAgeVerified" wire:model="editUserIsAgeVerified" class="rounded border-slate-300 text-[#F20B83] focus:ring-[#F20B83]">
-                            <label for="editIsAgeVerified" class="text-xs font-bold text-slate-800 cursor-pointer">
-                                18+ Age Verified Status
+                        <div class="flex flex-wrap items-center gap-5 pt-1">
+                            <label for="editIsAgeVerified" class="inline-flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer">
+                                <input type="checkbox" id="editIsAgeVerified" wire:model="editUserIsAgeVerified" class="rounded border-slate-300 text-[#F20B83] focus:ring-[#F20B83]">
+                                <span>18+ Age Verified Status</span>
+                            </label>
+                            <label for="editIsIdentityVerified" class="inline-flex items-center gap-2 text-xs font-bold text-blue-700 cursor-pointer">
+                                <input type="checkbox" id="editIsIdentityVerified" wire:model="editUserIsIdentityVerified" class="rounded border-slate-300 text-blue-600 focus:ring-blue-600">
+                                <span>Blue Verified Badge (ID Verified)</span>
                             </label>
                         </div>
 
@@ -8591,10 +8603,21 @@
                         <button type="button" wire:click="closeModals" class="text-slate-400 hover:text-slate-700 font-bold text-lg">&times;</button>
                     </div>
                     <form wire:submit="suspendUser" class="space-y-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <label class="block text-xs font-black text-slate-800">Suspension Type
+                                <select wire:model="userSuspendType" class="{{ $input }} mt-1 text-xs font-bold">
+                                    <option value="temporary">Temporary Suspension</option>
+                                    <option value="permanent">Permanent Ban</option>
+                                </select>
+                            </label>
+                            <label class="block text-xs font-black text-slate-800">Duration (Days)
+                                <input type="number" wire:model="userSuspendDays" min="1" max="3650" class="{{ $input }} mt-1 text-xs font-bold" @disabled($userSuspendType === 'permanent') />
+                            </label>
+                        </div>
                         <label class="block text-xs font-black text-slate-800">Reason for suspension
-                            <textarea wire:model="suspensionReason" rows="3" class="{{ $input }} mt-1" required placeholder="Specify violation, chargeback, fraud, etc..."></textarea>
+                            <textarea wire:model="userSuspendReason" rows="3" class="{{ $input }} mt-1" required placeholder="Specify violation, chargeback, fraud, etc..."></textarea>
                         </label>
-                        @error('suspensionReason')<p class="text-xs text-rose-600 font-bold">{{ $message }}</p>@enderror
+                        @error('userSuspendReason')<p class="text-xs text-rose-600 font-bold">{{ $message }}</p>@enderror
                         <div class="flex justify-end gap-2 pt-2">
                             <button type="button" wire:click="closeModals" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl">Cancel</button>
                             <button type="submit" class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black shadow-md">Confirm Suspension</button>

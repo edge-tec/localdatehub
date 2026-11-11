@@ -1,34 +1,98 @@
 {{-- Enterprise Advertising Campaigns Hub (Banner & Affiliate Offer Campaigns) --}}
-<div class="space-y-4 mb-6">
-    <!-- Enterprise Toolbar -->
-    <div class="{{ $card }} p-4 border-t-4 border-t-[#F20B83]">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-            <div class="flex flex-wrap items-center gap-2.5 flex-1">
-                <div class="relative min-w-[210px] flex-1 max-w-xs">
-                    <input
-                        type="text"
-                        wire:model.live.debounce.300ms="campaignSearch"
-                        class="{{ $input }} pl-8 text-xs font-bold text-slate-900"
-                        placeholder="Search enterprise campaigns, brands, URLs..."
-                    />
-                    <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                </div>
+@php
+    $hasActiveFilters = trim($campaignSearch) !== ''
+        || $campaignTypeFilter !== 'all'
+        || $campaignStatusFilter !== 'all'
+        || $campaignSlotFilter !== 'all';
 
-                <select wire:model.live="campaignTypeFilter" class="{{ $input }} text-xs font-bold text-slate-900 w-auto">
+    $visibleIds = method_exists($campaigns, 'pluck') ? $campaigns->pluck('id')->all() : [];
+    $allVisibleSelected = !empty($visibleIds) && empty(array_diff($visibleIds, array_map('intval', $selectedCampaignIds)));
+
+    $statusCounts = [
+        'all' => $enterpriseStats['enterprise_campaigns'] ?? 0,
+        'active' => \App\Modules\Advertising\Models\AdCampaign::where('status', 'active')->count(),
+        'scheduled' => $enterpriseStats['scheduled_campaigns'] ?? 0,
+        'paused' => $enterpriseStats['paused_campaigns'] ?? 0,
+        'draft' => $enterpriseStats['draft_campaigns'] ?? 0,
+        'expired' => $enterpriseStats['expired_campaigns'] ?? 0,
+    ];
+@endphp
+
+<div class="space-y-4">
+    <!-- Filter & Command Bar -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3.5">
+        <!-- Quick Status Filter Pills -->
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-1.5">
+                @foreach([
+                    'all' => 'All Campaigns',
+                    'active' => 'Active',
+                    'scheduled' => 'Scheduled',
+                    'paused' => 'Paused',
+                    'draft' => 'Draft',
+                    'expired' => 'Expired',
+                ] as $stKey => $stLabel)
+                    <button
+                        type="button"
+                        wire:click="$set('campaignStatusFilter', '{{ $stKey }}')"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition cursor-pointer {{ $campaignStatusFilter === $stKey ? 'bg-slate-900 text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}"
+                    >
+                        <span>{{ $stLabel }}</span>
+                        <span class="px-1.5 py-0.2 rounded-full text-[10px] font-black {{ $campaignStatusFilter === $stKey ? 'bg-white/20 text-white' : 'bg-white text-slate-700' }}">
+                            {{ number_format($statusCounts[$stKey] ?? 0) }}
+                        </span>
+                    </button>
+                @endforeach
+            </div>
+
+            @if($hasActiveFilters)
+                <button
+                    type="button"
+                    wire:click="resetCampaignFilters"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition cursor-pointer"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    <span>Reset Filters</span>
+                </button>
+            @endif
+        </div>
+
+        <!-- Responsive Search & Dropdown Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5 items-center">
+            <!-- Search Input -->
+            <div class="sm:col-span-2 lg:col-span-4 relative">
+                <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input
+                    type="text"
+                    wire:model.live.debounce.300ms="campaignSearch"
+                    class="w-full rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900 pl-9 pr-3 py-2.5 focus:bg-white focus:border-[#F20B83] focus:ring-2 focus:ring-[#F20B83]/20 focus:outline-none transition"
+                    placeholder="Search campaigns, brands, affiliate URLs..."
+                />
+            </div>
+
+            <!-- Format Select -->
+            <div class="lg:col-span-2">
+                <select wire:model.live="campaignTypeFilter" aria-label="Filter by format" class="w-full rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-900 px-3 py-2.5 focus:bg-white focus:border-[#F20B83] focus:ring-2 focus:ring-[#F20B83]/20 focus:outline-none">
                     <option value="all">All Formats</option>
                     <option value="banner">Banner Ads</option>
                     <option value="affiliate">Affiliate Offers</option>
                     <option value="hybrid">Hybrid</option>
                 </select>
+            </div>
 
-                <select wire:model.live="campaignStatusFilter" class="{{ $input }} text-xs font-bold text-slate-900 w-auto">
+            <!-- Status Select (All 8 Statuses) -->
+            <div class="lg:col-span-2">
+                <select wire:model.live="campaignStatusFilter" aria-label="Filter by status" class="w-full rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-900 px-3 py-2.5 focus:bg-white focus:border-[#F20B83] focus:ring-2 focus:ring-[#F20B83]/20 focus:outline-none">
                     <option value="all">All 8 Statuses</option>
                     @foreach(\App\Modules\Advertising\Models\AdCampaign::STATUSES as $st)
                         <option value="{{ $st }}">{{ ucwords(str_replace('_', ' ', $st)) }}</option>
                     @endforeach
                 </select>
+            </div>
 
-                <select wire:model.live="campaignSlotFilter" class="{{ $input }} text-xs font-bold text-slate-900 w-auto">
+            <!-- Placement Select -->
+            <div class="lg:col-span-2">
+                <select wire:model.live="campaignSlotFilter" aria-label="Filter by placement" class="w-full rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-900 px-3 py-2.5 focus:bg-white focus:border-[#F20B83] focus:ring-2 focus:ring-[#F20B83]/20 focus:outline-none">
                     <option value="all">All 13 Placements</option>
                     @foreach(\App\Modules\Advertising\Models\AdCampaign::SLOTS as $s)
                         <option value="{{ $s }}">{{ \App\Modules\Advertising\Models\AdCampaign::SLOT_CATALOG[$s]['label'] ?? ucwords(str_replace('_', ' ', $s)) }}</option>
@@ -36,160 +100,308 @@
                 </select>
             </div>
 
-            <button
-                type="button"
-                wire:click="openCampaignModal"
-                class="px-4 py-2.5 rounded-xl bg-[#F20B83] hover:bg-[#D00972] text-white text-xs font-black transition shadow-xs flex items-center justify-center gap-2 shrink-0 cursor-pointer"
-            >
-                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                <span>+ New Promotional Campaign</span>
-            </button>
+            <!-- Create Campaign CTA -->
+            <div class="sm:col-span-2 lg:col-span-2">
+                <button
+                    type="button"
+                    wire:click="openCampaignModal"
+                    class="w-full px-4 py-2.5 rounded-xl bg-[#F20B83] hover:bg-[#D00972] text-white text-xs font-black transition shadow-sm hover:shadow flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                    <svg class="w-4 h-4 text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    <span class="truncate">New Campaign</span>
+                </button>
+            </div>
         </div>
+
+        <!-- Bulk Selection Action Bar -->
+        @if(!empty($selectedCampaignIds))
+            <div class="p-3 rounded-xl bg-slate-900 text-white flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2 text-xs font-bold">
+                    <span class="px-2 py-0.5 rounded-md bg-[#F20B83] text-white font-black">{{ count($selectedCampaignIds) }}</span>
+                    <span>{{ Str::plural('campaign', count($selectedCampaignIds)) }} selected</span>
+                </div>
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <button type="button" wire:click="bulkUpdateCampaignStatus('active')" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition cursor-pointer">Activate</button>
+                    <button type="button" wire:click="bulkUpdateCampaignStatus('paused')" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition cursor-pointer">Pause</button>
+                    <button type="button" wire:click="bulkUpdateCampaignStatus('archived')" class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold transition cursor-pointer">Archive</button>
+                    <button type="button" wire:click="bulkDeleteCampaigns" wire:confirm="Delete all selected campaigns?" class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition cursor-pointer">Delete</button>
+                    <button type="button" wire:click="$set('selectedCampaignIds', [])" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer">Clear</button>
+                </div>
+            </div>
+        @endif
     </div>
 
-    <!-- Enterprise Campaigns Table -->
-    <div class="{{ $card }} overflow-x-auto shadow-sm">
-        <table class="min-w-full divide-y divide-slate-200">
-            <thead class="bg-slate-50">
-                <tr>
-                    <th class="{{ $th }}">Campaign & Format</th>
-                    <th class="{{ $th }}">Placements & Targeting</th>
-                    <th class="{{ $th }}">Schedule & Priority</th>
-                    <th class="{{ $th }}">Budget & Caps</th>
-                    <th class="{{ $th }}">Impr / Clicks / Conv</th>
-                    <th class="{{ $th }}">Status</th>
-                    <th class="{{ $th }} text-right pr-4">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 bg-white">
-            @forelse($campaigns as $camp)
-                @php
-                    $creative = $camp->creatives->first();
-                    $thumb = $creative?->resolvedImageUrl('desktop');
-                    $statusColors = [
-                        'active' => 'bg-emerald-50 text-emerald-900 border-emerald-300',
-                        'scheduled' => 'bg-blue-50 text-blue-900 border-blue-300',
-                        'pending_approval' => 'bg-indigo-50 text-indigo-900 border-indigo-300',
-                        'paused' => 'bg-amber-50 text-amber-900 border-amber-300',
-                        'draft' => 'bg-slate-100 text-slate-700 border-slate-300',
-                        'expired' => 'bg-rose-50 text-rose-800 border-rose-200',
-                        'rejected' => 'bg-red-100 text-red-900 border-red-300',
-                        'archived' => 'bg-zinc-100 text-zinc-700 border-zinc-300',
-                    ];
-                @endphp
-                <tr class="hover:bg-slate-50/70 transition" wire:key="camp-row-{{ $camp->id }}">
-                    <td class="{{ $td }}">
-                        <div class="flex items-center gap-2.5">
-                            @if($thumb)
-                                <button type="button" wire:click="openPreviewCampaignModal({{ $camp->id }})" class="shrink-0 group">
-                                    <img src="{{ $thumb }}" alt="{{ $camp->name }}" class="w-11 h-11 rounded-lg object-cover border border-slate-300 group-hover:ring-2 ring-pink-500 transition" />
-                                </button>
-                            @else
-                                <div class="w-11 h-11 rounded-lg bg-pink-50 border border-pink-200 flex items-center justify-center text-[#F20B83] font-black text-[10px] shrink-0 uppercase">
-                                    {{ $camp->campaign_type === 'affiliate' ? 'AFF' : 'AD' }}
-                                </div>
-                            @endif
-                            <div class="min-w-0">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="font-black text-slate-950 text-xs truncate max-w-[180px]">{{ $camp->name }}</span>
-                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-black uppercase {{ $camp->campaign_type === 'affiliate' ? 'bg-purple-100 text-purple-900 border border-purple-200' : 'bg-blue-100 text-blue-900 border border-blue-200' }}">
-                                        {{ $camp->campaign_type }}
-                                    </span>
-                                </div>
-                                <div class="text-[11px] font-semibold text-slate-600 truncate max-w-[220px] mt-0.5">
-                                    {{ $creative?->affiliate_brand_name ?: ($camp->advertiser_name ?: 'Direct Partner') }}
-                                    @if($creative?->offer_badge)
-                                        · <span class="text-[#F20B83] font-black">{{ $creative->offer_badge }}</span>
-                                    @endif
+    <!-- Desktop / Tablet Enterprise Campaigns Table -->
+    <div class="hidden md:block bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50/90">
+                    <tr>
+                        <th class="pl-4 pr-2 py-3 text-left w-10">
+                            <input
+                                type="checkbox"
+                                wire:click="toggleSelectAllCampaigns({{ json_encode($visibleIds) }})"
+                                @checked($allVisibleSelected)
+                                aria-label="Select all campaigns on page"
+                                class="rounded border-slate-300 text-[#F20B83] focus:ring-[#F20B83] cursor-pointer"
+                            />
+                        </th>
+                        <th class="{{ $th }}">Campaign &amp; Format</th>
+                        <th class="{{ $th }}">Placements &amp; Targeting</th>
+                        <th class="{{ $th }}">Schedule &amp; Priority</th>
+                        <th class="{{ $th }}">Budget &amp; Caps</th>
+                        <th class="{{ $th }}">Performance</th>
+                        <th class="{{ $th }}">Status</th>
+                        <th class="{{ $th }} text-right pr-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 bg-white">
+                @forelse($campaigns as $camp)
+                    @php
+                        $creative = $camp->creatives->first();
+                        $thumb = $creative?->resolvedImageUrl('desktop');
+                        $statusStyles = [
+                            'active' => ['pill' => 'bg-emerald-50 text-emerald-800 border-emerald-200', 'dot' => 'bg-emerald-500'],
+                            'scheduled' => ['pill' => 'bg-blue-50 text-blue-800 border-blue-200', 'dot' => 'bg-blue-500'],
+                            'pending_approval' => ['pill' => 'bg-indigo-50 text-indigo-800 border-indigo-200', 'dot' => 'bg-indigo-500'],
+                            'paused' => ['pill' => 'bg-amber-50 text-amber-800 border-amber-200', 'dot' => 'bg-amber-500'],
+                            'draft' => ['pill' => 'bg-slate-100 text-slate-700 border-slate-300', 'dot' => 'bg-slate-400'],
+                            'expired' => ['pill' => 'bg-rose-50 text-rose-800 border-rose-200', 'dot' => 'bg-rose-500'],
+                            'rejected' => ['pill' => 'bg-red-100 text-red-900 border-red-300', 'dot' => 'bg-red-600'],
+                            'archived' => ['pill' => 'bg-zinc-100 text-zinc-700 border-zinc-300', 'dot' => 'bg-zinc-400'],
+                        ];
+                        $stStyle = $statusStyles[$camp->status] ?? $statusStyles['draft'];
+                    @endphp
+                    <tr class="hover:bg-slate-50/80 transition" wire:key="camp-row-{{ $camp->id }}">
+                        <td class="pl-4 pr-2 py-3 align-middle">
+                            <input
+                                type="checkbox"
+                                value="{{ $camp->id }}"
+                                wire:model.live="selectedCampaignIds"
+                                aria-label="Select {{ $camp->name }}"
+                                class="rounded border-slate-300 text-[#F20B83] focus:ring-[#F20B83] cursor-pointer"
+                            />
+                        </td>
+                        <td class="{{ $td }}">
+                            <div class="flex items-center gap-3">
+                                @if($thumb)
+                                    <button type="button" wire:click="openPreviewCampaignModal({{ $camp->id }})" class="shrink-0 group cursor-pointer" title="Preview Creative">
+                                        <img src="{{ $thumb }}" alt="{{ $camp->name }}" class="w-12 h-12 rounded-xl object-cover border border-slate-200 group-hover:ring-2 ring-[#F20B83] transition" />
+                                    </button>
+                                @else
+                                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-50 to-purple-50 border border-pink-200 flex items-center justify-center text-[#F20B83] shrink-0">
+                                        @if($camp->campaign_type === 'affiliate')
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                        @else
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        @endif
+                                    </div>
+                                @endif
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                        <span class="font-black text-slate-950 text-xs truncate max-w-[180px]">{{ $camp->name }}</span>
+                                        <span class="px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase {{ $camp->campaign_type === 'affiliate' ? 'bg-purple-100 text-purple-900' : ($camp->campaign_type === 'hybrid' ? 'bg-indigo-100 text-indigo-900' : 'bg-blue-100 text-blue-900') }}">
+                                            {{ $camp->campaign_type }}
+                                        </span>
+                                    </div>
+                                    <div class="text-[11px] font-semibold text-slate-500 truncate max-w-[220px] mt-0.5">
+                                        {{ $creative?->affiliate_brand_name ?: ($camp->advertiser_name ?: 'Direct Partner') }}
+                                        @if($creative?->offer_badge)
+                                            <span class="text-[#F20B83] font-black">· {{ $creative->offer_badge }}</span>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </td>
-                    <td class="{{ $td }}">
-                        <div class="flex flex-wrap gap-1 max-w-[200px]">
-                            @foreach($camp->placements->take(3) as $pl)
-                                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-200">
-                                    {{ str_replace('_', ' ', $pl->placement_slot) }}
+                        </td>
+                        <td class="{{ $td }}">
+                            <div class="flex flex-wrap gap-1 max-w-[210px]">
+                                @foreach($camp->placements->take(2) as $pl)
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-200">
+                                        {{ \App\Modules\Advertising\Models\AdCampaign::SLOT_CATALOG[$pl->placement_slot]['label'] ?? str_replace('_', ' ', $pl->placement_slot) }}
+                                    </span>
+                                @endforeach
+                                @if($camp->placements->count() > 2)
+                                    <span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-pink-50 text-[#F20B83] border border-pink-200">+{{ $camp->placements->count() - 2 }} more</span>
+                                @endif
+                            </div>
+                            <div class="text-[10px] text-slate-500 font-semibold mt-1 flex items-center gap-1">
+                                <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <span>
+                                    @if($camp->targetingRules->isEmpty())
+                                        Global (All Locations &amp; Devices)
+                                    @else
+                                        {{ $camp->targetingRules->count() }} Targeting {{ Str::plural('Rule', $camp->targetingRules->count()) }}
+                                    @endif
                                 </span>
-                            @endforeach
-                            @if($camp->placements->count() > 3)
-                                <span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-200 text-slate-700">+{{ $camp->placements->count() - 3 }}</span>
-                            @endif
-                        </div>
-                        <div class="text-[10px] text-slate-500 font-semibold mt-1">
-                            @if($camp->targetingRules->isEmpty())
-                                Global Targeting (All Geo / Categories / Devices)
-                            @else
-                                {{ $camp->targetingRules->count() }} Targeting {{ Str::plural('Rule', $camp->targetingRules->count()) }}
-                            @endif
-                        </div>
-                    </td>
-                    <td class="{{ $td }}">
-                        <div class="text-[11px] font-bold text-slate-800">
-                            {{ $camp->starts_at?->format('M j, Y') ?? 'Immediate' }} &rarr; {{ $camp->ends_at?->format('M j, Y') ?? 'Continuous' }}
-                        </div>
-                        <div class="text-[10px] text-slate-500 font-bold mt-0.5">
-                            Priority: <span class="text-slate-900">{{ $camp->priority }}</span> · Weight: {{ $camp->weight }}
-                        </div>
-                    </td>
-                    <td class="{{ $td }}">
-                        <div class="text-xs font-black text-slate-900">
-                            {{ $camp->total_budget_cents ? '$' . number_format($camp->total_budget_cents / 100, 2) . ' max' : ($camp->price_cents ? '$' . number_format($camp->price_cents / 100, 2) : 'Unlimited') }}
-                        </div>
-                        <div class="text-[10px] text-slate-500 font-semibold">
-                            Spent: ${{ number_format($camp->spent_cents / 100, 2) }}
-                            @if($camp->frequency_cap_per_session)
-                                · Cap {{ $camp->frequency_cap_per_session }}/sess
-                            @endif
-                        </div>
-                    </td>
-                    <td class="{{ $td }}">
-                        <div class="font-mono text-xs font-black text-slate-900">
-                            {{ number_format($camp->total_impressions) }} / {{ number_format($camp->total_clicks) }} / <span class="text-emerald-700">{{ number_format($camp->total_conversions) }}</span>
-                        </div>
-                        <div class="text-[10px] font-bold text-slate-600 mt-0.5">
-                            CTR: <span class="text-slate-900">{{ $camp->clickThroughRate() }}%</span> · Rev: ${{ number_format($camp->total_conversion_revenue_cents / 100, 2) }}
-                        </div>
-                    </td>
-                    <td class="{{ $td }}">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase border {{ $statusColors[$camp->status] ?? 'bg-slate-100 text-slate-800 border-slate-300' }}">
-                            {{ str_replace('_', ' ', $camp->status) }}
-                        </span>
-                    </td>
-                    <td class="{{ $td }} text-right pr-4 whitespace-nowrap">
-                        <div class="inline-flex items-center gap-1">
-                            @if($camp->status === 'active')
-                                <button type="button" wire:click="updateCampaignStatus({{ $camp->id }}, 'paused')" class="px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold border border-amber-200 transition">Pause</button>
-                            @else
-                                <button type="button" wire:click="updateCampaignStatus({{ $camp->id }}, 'active')" class="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-900 text-xs font-bold border border-emerald-200 transition">Activate</button>
-                            @endif
-                            <button type="button" wire:click="openPreviewCampaignModal({{ $camp->id }})" class="px-2 py-1 rounded-lg bg-pink-50 hover:bg-pink-100 text-[#F20B83] text-xs font-bold border border-pink-200 transition">Preview</button>
-                            <button type="button" wire:click="openCampaignModal({{ $camp->id }})" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold border border-slate-300 transition">Edit</button>
-                            <button type="button" wire:click="duplicateCampaign({{ $camp->id }})" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold border border-slate-300 transition">Duplicate</button>
-                            <button type="button" wire:click="confirmDeleteCampaign({{ $camp->id }})" class="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 text-xs font-bold border border-rose-300 transition">Delete</button>
-                        </div>
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="7" class="px-6 py-10 text-center bg-slate-50">
-                        <div class="max-w-md mx-auto space-y-2">
-                            <p class="text-sm font-black text-slate-800">No Enterprise Advertising Campaigns Yet</p>
-                            <p class="text-xs text-slate-500">Launch responsive Banner Ads or Affiliate Offers with geo, category &amp; device targeting, frequency capping, and S2S conversion postbacks.</p>
-                            <button type="button" wire:click="openCampaignModal" class="mt-2 inline-flex items-center gap-1 px-4 py-2 rounded-xl bg-[#F20B83] hover:bg-[#D00972] text-white font-bold text-xs cursor-pointer">
-                                <span>+ Create Enterprise Campaign</span>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            @endforelse
-            </tbody>
-        </table>
+                            </div>
+                        </td>
+                        <td class="{{ $td }}">
+                            <div class="text-[11px] font-bold text-slate-800 whitespace-nowrap">
+                                {{ $camp->starts_at?->format('M j, Y') ?? 'Immediate' }} &rarr; {{ $camp->ends_at?->format('M j, Y') ?? 'Ongoing' }}
+                            </div>
+                            <div class="text-[10px] text-slate-500 font-bold mt-0.5">
+                                Priority <span class="text-slate-900">{{ $camp->priority }}</span> · Weight {{ $camp->weight }}
+                            </div>
+                        </td>
+                        <td class="{{ $td }}">
+                            <div class="text-xs font-black text-slate-900">
+                                {{ $camp->total_budget_cents ? '$' . number_format($camp->total_budget_cents / 100, 2) . ' max' : ($camp->price_cents ? '$' . number_format($camp->price_cents / 100, 2) : 'Unlimited') }}
+                            </div>
+                            <div class="text-[10px] text-slate-500 font-semibold">
+                                Spent ${{ number_format($camp->spent_cents / 100, 2) }}@if($camp->frequency_cap_per_session) · {{ $camp->frequency_cap_per_session }}/sess @endif
+                            </div>
+                        </td>
+                        <td class="{{ $td }}">
+                            <div class="font-mono text-xs font-black text-slate-900">
+                                {{ number_format($camp->total_impressions) }} <span class="text-slate-400 font-normal">/</span> {{ number_format($camp->total_clicks) }} <span class="text-slate-400 font-normal">/</span> <span class="text-emerald-700">{{ number_format($camp->total_conversions) }}</span>
+                            </div>
+                            <div class="text-[10px] font-bold text-slate-600 mt-0.5">
+                                <span class="text-[#F20B83]">{{ $camp->clickThroughRate() }}% CTR</span> · ${{ number_format($camp->total_conversion_revenue_cents / 100, 2) }} rev
+                            </div>
+                        </td>
+                        <td class="{{ $td }}">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase border {{ $stStyle['pill'] }}">
+                                <span class="w-1.5 h-1.5 rounded-full {{ $stStyle['dot'] }}"></span>
+                                <span>{{ str_replace('_', ' ', $camp->status) }}</span>
+                            </span>
+                        </td>
+                        <td class="{{ $td }} text-right pr-4 whitespace-nowrap">
+                            <div class="inline-flex items-center gap-1">
+                                @if($camp->status === 'active')
+                                    <button type="button" wire:click="updateCampaignStatus({{ $camp->id }}, 'paused')" title="Pause Campaign" class="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 9v6m4-6v6"/></svg>
+                                    </button>
+                                @else
+                                    <button type="button" wire:click="updateCampaignStatus({{ $camp->id }}, 'active')" title="Activate Campaign" class="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 transition cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3l14 9-14 9V3z"/></svg>
+                                    </button>
+                                @endif
+                                <button type="button" wire:click="openPreviewCampaignModal({{ $camp->id }})" title="Preview & Postback URL" class="p-1.5 rounded-lg bg-pink-50 hover:bg-pink-100 text-[#F20B83] border border-pink-200 transition cursor-pointer">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                </button>
+                                <button type="button" wire:click="openCampaignModal({{ $camp->id }})" title="Edit Campaign" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition cursor-pointer">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                </button>
+                                <button type="button" wire:click="duplicateCampaign({{ $camp->id }})" title="Duplicate Campaign" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition cursor-pointer">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                </button>
+                                <button type="button" wire:click="confirmDeleteCampaign({{ $camp->id }})" title="Delete Campaign" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition cursor-pointer">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="8" class="px-6 py-12 text-center bg-slate-50/60">
+                            <div class="max-w-md mx-auto space-y-3">
+                                <div class="w-12 h-12 rounded-2xl bg-pink-50 border border-pink-200 text-[#F20B83] flex items-center justify-center mx-auto">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+                                </div>
+                                <h4 class="text-sm font-black text-slate-900">
+                                    {{ $hasActiveFilters ? 'No Campaigns Match Your Filters' : 'No Enterprise Advertising Campaigns Yet' }}
+                                </h4>
+                                <p class="text-xs text-slate-500 leading-relaxed">
+                                    {{ $hasActiveFilters ? 'Try clearing one or more active search, status, format, or placement filters.' : 'Launch responsive Banner Ads or Affiliate Offers with geo, category & device targeting, frequency capping, and S2S conversion postbacks.' }}
+                                </p>
+                                <div class="flex items-center justify-center gap-2 pt-1">
+                                    @if($hasActiveFilters)
+                                        <button type="button" wire:click="resetCampaignFilters" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs cursor-pointer">
+                                            Reset Filters
+                                        </button>
+                                    @endif
+                                    <button type="button" wire:click="openCampaignModal" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#F20B83] hover:bg-[#D00972] text-white font-bold text-xs shadow-xs cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                                        <span>Create Campaign</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
         @if(method_exists($campaigns, 'hasPages') && $campaigns->hasPages())
             <div class="p-3 border-t border-slate-200 bg-slate-50">
                 {{ $campaigns->links() }}
             </div>
         @endif
     </div>
-</div>
 
+    <!-- Mobile Responsive Card Feed -->
+    <div class="md:hidden space-y-3">
+        @forelse($campaigns as $camp)
+            @php
+                $creative = $camp->creatives->first();
+                $thumb = $creative?->resolvedImageUrl('mobile');
+            @endphp
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs space-y-3" wire:key="camp-card-{{ $camp->id }}">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <input
+                            type="checkbox"
+                            value="{{ $camp->id }}"
+                            wire:model.live="selectedCampaignIds"
+                            class="rounded border-slate-300 text-[#F20B83] focus:ring-[#F20B83]"
+                        />
+                        @if($thumb)
+                            <img src="{{ $thumb }}" alt="{{ $camp->name }}" class="w-11 h-11 rounded-xl object-cover border border-slate-200 shrink-0" />
+                        @endif
+                        <div class="min-w-0">
+                            <div class="font-black text-slate-950 text-sm truncate">{{ $camp->name }}</div>
+                            <div class="text-[11px] font-semibold text-slate-500 truncate">{{ $creative?->affiliate_brand_name ?: ($camp->advertiser_name ?: 'Direct Partner') }} · {{ ucfirst($camp->campaign_type) }}</div>
+                        </div>
+                    </div>
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-slate-100 text-slate-800 border border-slate-200 shrink-0">
+                        {{ str_replace('_', ' ', $camp->status) }}
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs">
+                    <div>
+                        <div class="text-[10px] font-bold text-slate-500 uppercase">Impr.</div>
+                        <div class="font-black text-slate-900">{{ number_format($camp->total_impressions) }}</div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-bold text-slate-500 uppercase">Clicks</div>
+                        <div class="font-black text-slate-900">{{ number_format($camp->total_clicks) }}</div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-bold text-slate-500 uppercase">CTR</div>
+                        <div class="font-black text-[#F20B83]">{{ $camp->clickThroughRate() }}%</div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100">
+                    @if($camp->status === 'active')
+                        <button type="button" wire:click="updateCampaignStatus({{ $camp->id }}, 'paused')" class="px-3 py-1.5 rounded-lg bg-amber-50 text-amber-900 text-xs font-bold border border-amber-200">Pause</button>
+                    @else
+                        <button type="button" wire:click="updateCampaignStatus({{ $camp->id }}, 'active')" class="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-900 text-xs font-bold border border-emerald-200">Activate</button>
+                    @endif
+                    <div class="flex items-center gap-1.5">
+                        <button type="button" wire:click="openPreviewCampaignModal({{ $camp->id }})" class="px-2.5 py-1.5 rounded-lg bg-pink-50 text-[#F20B83] text-xs font-bold border border-pink-200">Preview</button>
+                        <button type="button" wire:click="openCampaignModal({{ $camp->id }})" class="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-800 text-xs font-bold border border-slate-300">Edit</button>
+                        <button type="button" wire:click="duplicateCampaign({{ $camp->id }})" class="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-800 text-xs font-bold border border-slate-300">Clone</button>
+                        <button type="button" wire:click="confirmDeleteCampaign({{ $camp->id }})" class="px-2.5 py-1.5 rounded-lg bg-rose-50 text-rose-700 text-xs font-bold border border-rose-200">Delete</button>
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-3">
+                <p class="text-sm font-black text-slate-900">
+                    {{ $hasActiveFilters ? 'No Campaigns Match Filters' : 'No Campaigns Created Yet' }}
+                </p>
+                <div class="flex flex-wrap justify-center gap-2">
+                    @if($hasActiveFilters)
+                        <button type="button" wire:click="resetCampaignFilters" class="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold">Reset Filters</button>
+                    @endif
+                    <button type="button" wire:click="openCampaignModal" class="px-4 py-2 rounded-xl bg-[#F20B83] text-white text-xs font-bold">Create Campaign</button>
+                </div>
+            </div>
+        @endforelse
+        @if(method_exists($campaigns, 'hasPages') && $campaigns->hasPages())
+            <div class="pt-2">{{ $campaigns->links() }}</div>
+        @endif
+    </div>
+</div>

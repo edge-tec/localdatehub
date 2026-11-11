@@ -33,16 +33,27 @@
                         {{ Auth::user()->profile?->display_name ?: (Auth::user()->name ?: 'Valued Member') }}
                     </h1>
 
-                    @if(Auth::user()->is_age_verified)
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-2xs">
-                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span>18+ Verified</span>
-                        </span>
+                    @if(Auth::user()->is_identity_verified)
+                        <x-verified-badge variant="pill" label="Verified" title="Blue Verified Badge — Identity Verified by Admin" />
+                    @elseif($latestVerification && $latestVerification->isPending())
+                        <a href="{{ route('account.verification.show') }}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100 transition shadow-2xs" title="Your ID card submission is awaiting admin verification">
+                            <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span>ID Pending Review</span>
+                        </a>
+                    @elseif($latestVerification && $latestVerification->status === \App\Modules\Verification\Models\IdentityVerification::STATUS_REJECTED)
+                        <a href="{{ route('account.verification.show') }}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-rose-50 text-rose-800 border border-rose-300 hover:bg-rose-100 transition shadow-2xs" title="Previous ID verification was declined. Click to resubmit.">
+                            <svg class="w-3.5 h-3.5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            <span>ID Rejected — Resubmit</span>
+                        </a>
+                    @elseif($latestVerification && $latestVerification->status === \App\Modules\Verification\Models\IdentityVerification::STATUS_SUSPENDED)
+                        <a href="{{ route('account.verification.show') }}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200 transition shadow-2xs" title="Verification badge is currently suspended">
+                            <span>Verification Suspended</span>
+                        </a>
                     @else
-                        <button wire:click="setTab('age_assurance')" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100 transition shadow-2xs">
-                            <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                            <span>Verify Age (18+)</span>
-                        </button>
+                        <a href="{{ route('account.verification.show') }}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition shadow-2xs" title="Submit your government ID card to unlock the Blue Verified Badge">
+                            <svg class="w-3.5 h-3.5 text-blue-600 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                            <span>Verify ID</span>
+                        </a>
                     @endif
 
                     @if($activeSubscription)
@@ -189,7 +200,8 @@
                 <!-- 1. OVERVIEW BUTTON -->
                 <a
                     href="{{ route('account.dashboard', ['tab' => 'overview']) }}"
-                    wire:click.prevent="setTab('overview'); close()"
+                    wire:click.prevent="setTab('overview')"
+                    @click="close()"
                     class="px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'overview' ? 'font-black shadow-xs bg-[#fff1f2] text-[#F20B65] border-2 border-[#F20B65]' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
                 >
                     <svg class="w-4 h-4 {{ $tab === 'overview' ? 'text-[#F20B65]' : 'text-slate-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
@@ -231,7 +243,8 @@
                             <!-- My Listings -->
                             <a
                                 href="{{ route('account.dashboard', ['tab' => 'listings']) }}"
-                                wire:click.prevent="setTab('listings'); close()"
+                                wire:click.prevent="setTab('listings')"
+                                @click="close()"
                                 class="flex items-center justify-between p-2.5 rounded-xl transition group {{ in_array($tab, ['listings', 'active', 'pending', 'rejected', 'expired', 'suspended']) ? 'bg-rose-50/80 text-[#F20B65] font-black' : 'hover:bg-slate-50 text-slate-700' }}"
                             >
                                 <div class="flex items-center gap-3">
@@ -249,7 +262,8 @@
                             <!-- Saved Listings -->
                             <a
                                 href="{{ route('account.dashboard', ['tab' => 'saved']) }}"
-                                wire:click.prevent="setTab('saved'); close()"
+                                wire:click.prevent="setTab('saved')"
+                                @click="close()"
                                 class="flex items-center justify-between p-2.5 rounded-xl transition group {{ $tab === 'saved' ? 'bg-rose-50/80 text-[#F20B65] font-black' : 'hover:bg-slate-50 text-slate-700' }}"
                             >
                                 <div class="flex items-center gap-3">
@@ -267,7 +281,8 @@
                             <!-- Promotions & Featured Ads -->
                             <a
                                 href="{{ route('account.dashboard', ['tab' => 'promotions']) }}"
-                                wire:click.prevent="setTab('promotions'); close()"
+                                wire:click.prevent="setTab('promotions')"
+                                @click="close()"
                                 class="flex items-center justify-between p-2.5 rounded-xl transition group {{ $tab === 'promotions' ? 'bg-rose-50/80 text-[#F20B65] font-black' : 'hover:bg-slate-50 text-slate-700' }}"
                             >
                                 <div class="flex items-center gap-3">
@@ -284,7 +299,8 @@
                             <!-- Performance Analytics -->
                             <a
                                 href="{{ route('account.dashboard', ['tab' => 'analytics']) }}"
-                                wire:click.prevent="setTab('analytics'); close()"
+                                wire:click.prevent="setTab('analytics')"
+                                @click="close()"
                                 class="flex items-center justify-between p-2.5 rounded-xl transition group {{ $tab === 'analytics' ? 'bg-rose-50/80 text-[#F20B65] font-black' : 'hover:bg-slate-50 text-slate-700' }}"
                             >
                                 <div class="flex items-center gap-3">
@@ -314,7 +330,7 @@
                         <svg class="w-4 h-4 {{ $isAccountGroupActive ? 'text-[#F20B65]' : 'text-slate-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                         <span>Account &amp; Trust</span>
                         @if(auth()->user()?->is_identity_verified)
-                            <span class="w-2 h-2 rounded-full bg-blue-500" title="Verified Member"></span>
+                            <x-verified-badge variant="icon" size="w-4 h-4" />
                         @endif
                         <svg class="w-3.5 h-3.5 transition-transform duration-200 text-slate-500" :class="{ 'rotate-180': activeMenu === 'account' }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                     </button>
@@ -336,7 +352,8 @@
                             <!-- Profile Details -->
                             <a
                                 href="{{ route('account.dashboard', ['tab' => 'profile']) }}"
-                                wire:click.prevent="setTab('profile'); close()"
+                                wire:click.prevent="setTab('profile')"
+                                @click="close()"
                                 class="flex items-center justify-between p-2.5 rounded-xl transition group {{ $tab === 'profile' ? 'bg-rose-50/80 text-[#F20B65] font-black' : 'hover:bg-slate-50 text-slate-700' }}"
                             >
                                 <div class="flex items-center gap-3">
@@ -374,7 +391,8 @@
                             <!-- 18+ Assurance -->
                             <a
                                 href="{{ route('account.dashboard', ['tab' => 'age_assurance']) }}"
-                                wire:click.prevent="setTab('age_assurance'); close()"
+                                wire:click.prevent="setTab('age_assurance')"
+                                @click="close()"
                                 class="flex items-center justify-between p-2.5 rounded-xl transition group {{ $tab === 'age_assurance' ? 'bg-rose-50/80 text-[#F20B65] font-black' : 'hover:bg-slate-50 text-slate-700' }}"
                             >
                                 <div class="flex items-center gap-3">
@@ -391,7 +409,8 @@
                             <!-- Security -->
                             <a
                                 href="{{ route('account.dashboard', ['tab' => 'security']) }}"
-                                wire:click.prevent="setTab('security'); close()"
+                                wire:click.prevent="setTab('security')"
+                                @click="close()"
                                 class="flex items-center justify-between p-2.5 rounded-xl transition group {{ $tab === 'security' ? 'bg-rose-50/80 text-[#F20B65] font-black' : 'hover:bg-slate-50 text-slate-700' }}"
                             >
                                 <div class="flex items-center gap-3">
@@ -408,7 +427,8 @@
                             <!-- Privacy -->
                             <a
                                 href="{{ route('account.dashboard', ['tab' => 'privacy']) }}"
-                                wire:click.prevent="setTab('privacy'); close()"
+                                wire:click.prevent="setTab('privacy')"
+                                @click="close()"
                                 class="flex items-center justify-between p-2.5 rounded-xl transition group {{ $tab === 'privacy' ? 'bg-rose-50/80 text-[#F20B65] font-black' : 'hover:bg-slate-50 text-slate-700' }}"
                             >
                                 <div class="flex items-center gap-3">
@@ -425,7 +445,8 @@
                             <!-- Blocked Users -->
                             <a
                                 href="{{ route('account.dashboard', ['tab' => 'blocked_users']) }}"
-                                wire:click.prevent="setTab('blocked_users'); close()"
+                                wire:click.prevent="setTab('blocked_users')"
+                                @click="close()"
                                 class="flex items-center justify-between p-2.5 rounded-xl transition group {{ $tab === 'blocked_users' ? 'bg-rose-50/80 text-[#F20B65] font-black' : 'hover:bg-slate-50 text-slate-700' }}"
                             >
                                 <div class="flex items-center gap-3">
@@ -478,7 +499,8 @@
                             <!-- Subscription Plan -->
                             <a
                                 href="{{ route('account.dashboard', ['tab' => 'subscription']) }}"
-                                wire:click.prevent="setTab('subscription'); close()"
+                                wire:click.prevent="setTab('subscription')"
+                                @click="close()"
                                 class="flex items-center justify-between p-2.5 rounded-xl transition group {{ $tab === 'subscription' ? 'bg-rose-50/80 text-[#F20B65] font-black' : 'hover:bg-slate-50 text-slate-700' }}"
                             >
                                 <div class="flex items-center gap-3">
@@ -498,7 +520,8 @@
                             <!-- Billing & Invoices -->
                             <a
                                 href="{{ route('account.dashboard', ['tab' => 'billing']) }}"
-                                wire:click.prevent="setTab('billing'); close()"
+                                wire:click.prevent="setTab('billing')"
+                                @click="close()"
                                 class="flex items-center justify-between p-2.5 rounded-xl transition group {{ $tab === 'billing' ? 'bg-rose-50/80 text-[#F20B65] font-black' : 'hover:bg-slate-50 text-slate-700' }}"
                             >
                                 <div class="flex items-center gap-3">
@@ -1907,7 +1930,7 @@
                     <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between gap-4">
                         <div class="space-y-0.5">
                             <span class="text-xs font-black text-slate-950 block">Hide Exact Age</span>
-                            <span class="text-xs text-slate-700 font-medium block">Show only the "18+ Verified" badge without displaying your numerical birth year.</span>
+                            <span class="text-xs text-slate-700 font-medium block">Hide your numerical birth year from public display on listings and profile cards.</span>
                         </div>
                         <input type="checkbox" wire:model="hideAge" class="rounded bg-white border-slate-300 text-[#F20B83] focus:ring-[#F20B83] w-5 h-5">
                     </div>
@@ -1968,7 +1991,7 @@
                             <svg class="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                             <span>18+ Age Assurance Active</span>
                         </div>
-                        <p class="text-slate-700 font-medium">Your account is fully verified. Your personal advertisements feature the 18+ Age Verified trust badge.</p>
+                        <p class="text-slate-700 font-medium">Your 18+ adult age compliance is confirmed. Submit your government ID in <a href="{{ route('account.verification.show') }}" class="text-blue-700 font-bold underline">Identity Verification</a> to earn the Blue Verified Badge.</p>
                     </div>
                 @else
                     <form wire:submit="submitAgeAssurance" class="space-y-4">

@@ -324,20 +324,30 @@ class AdTrackingService
             ->first();
 
         if (!$row) {
-            $row = AdDailyStatistic::create([
-                'date' => $date,
-                'campaign_id' => $campaignId,
-                'placement_slot' => $slot,
-                'device_type' => $normalizedDevice,
-                'state_code' => $normalizedState,
-                'impressions' => 0,
-                'unique_impressions' => 0,
-                'clicks' => 0,
-                'unique_clicks' => 0,
-                'conversions' => 0,
-                'revenue_cents' => 0,
-                'spend_cents' => 0,
-            ]);
+            try {
+                $row = AdDailyStatistic::create([
+                    'date' => $date,
+                    'campaign_id' => $campaignId,
+                    'placement_slot' => $slot,
+                    'device_type' => $normalizedDevice,
+                    'state_code' => $normalizedState,
+                    'impressions' => 0,
+                    'unique_impressions' => 0,
+                    'clicks' => 0,
+                    'unique_clicks' => 0,
+                    'conversions' => 0,
+                    'revenue_cents' => 0,
+                    'spend_cents' => 0,
+                ]);
+            } catch (\Illuminate\Database\UniqueConstraintViolationException) {
+                $row = AdDailyStatistic::query()
+                    ->whereDate('date', $date)
+                    ->where('campaign_id', $campaignId)
+                    ->where('placement_slot', $slot)
+                    ->where('device_type', $normalizedDevice)
+                    ->where('state_code', $normalizedState)
+                    ->firstOrFail();
+            }
         }
 
         foreach ($deltas as $col => $delta) {

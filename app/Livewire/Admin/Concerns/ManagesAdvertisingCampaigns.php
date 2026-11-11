@@ -34,6 +34,8 @@ trait ManagesAdvertisingCampaigns
     public string $campaignStatusFilter = 'all';
     public string $campaignSlotFilter = 'all';
 
+    public array $selectedCampaignIds = [];
+
     public bool $showDeleteCampaignModal = false;
     public ?int $deleteCampaignId = null;
     public ?string $deleteCampaignName = null;
@@ -65,6 +67,112 @@ trait ManagesAdvertisingCampaigns
     public function updatingCampaignSlotFilter(): void
     {
         $this->resetPage('campaignPage');
+    }
+
+    public function resetCampaignFilters(): void
+    {
+        $this->campaignSearch = '';
+        $this->campaignTypeFilter = 'all';
+        $this->campaignStatusFilter = 'all';
+        $this->campaignSlotFilter = 'all';
+        $this->selectedCampaignIds = [];
+        $this->resetPage('campaignPage');
+    }
+
+    public function toggleSelectAllCampaigns(array $visibleIds): void
+    {
+        $ids = array_values(array_unique(array_map('intval', $visibleIds)));
+        $current = array_map('intval', $this->selectedCampaignIds);
+        $allSelected = !empty($ids) && empty(array_diff($ids, $current));
+
+        $this->selectedCampaignIds = $allSelected
+            ? array_values(array_diff($current, $ids))
+            : array_values(array_unique(array_merge($current, $ids)));
+    }
+
+    public function bulkUpdateCampaignStatus(string $newStatus): void
+    {
+        $this->authorizePermission('ads.manage');
+        if (!in_array($newStatus, AdCampaign::STATUSES, true) || empty($this->selectedCampaignIds)) {
+            return;
+        }
+
+        $ids = array_map('intval', $this->selectedCampaignIds);
+        $campaigns = AdCampaign::whereIn('id', $ids)->get();
+
+        foreach ($campaigns as $campaign) {
+            $before = ['status' => $campaign->status];
+            $campaign->update([
+                'status' => $newStatus,
+                'updated_by_admin_id' => Auth::id(),
+            ]);
+            AdminAuditService::log('ads.campaign.bulk_status', $campaign, $before, ['status' => $newStatus]);
+        }
+
+        $count = $campaigns->count();
+        $this->selectedCampaignIds = [];
+        $label = ucwords(str_replace('_', ' ', $newStatus));
+        session()->flash('success', "{$count} campaign(s) updated to {$label}.");
+        $this->dispatch('toast', type: 'success', message: "{$count} campaign(s) set to {$label}.");
+    }
+
+    public function bulkDeleteCampaigns(): void
+    {
+        $this->authorizePermission('ads.manage');
+        if (empty($this->selectedCampaignIds)) {
+            return;
+        }
+
+        $ids = array_map('intval', $this->selectedCampaignIds);
+        $campaigns = AdCampaign::whereIn('id', $ids)->get();
+
+        foreach ($campaigns as $campaign) {
+            AdminAuditService::log('ads.campaign.bulk_delete', $campaign, ['name' => $campaign->name, 'status' => $campaign->status], null);
+            $campaign->delete();
+        }
+
+        $count = $campaigns->count();
+        $this->selectedCampaignIds = [];
+        session()->flash('success', "{$count} campaign(s) moved to trash.");
+        $this->dispatch('toast', type: 'info', message: "{$count} campaign(s) deleted.");
+    }
+
+    public function clearCampaignMedia(string $field): void
+    {
+        $this->authorizePermission('ads.manage');
+        if (in_array($field, ['desktop_banner_url', 'mobile_banner_url', 'thumbnail_url'], true)) {
+            $this->campaignForm[$field] = '';
+        }
+    }
+
+    public function selectPlacementGroup(string $group): void
+    {
+        $this->authorizePermission('ads.manage');
+        $feeds = [
+            AdCampaign::SLOT_HOMEPAGE_FEED,
+            AdCampaign::SLOT_BETWEEN_LISTINGS,
+            AdCampaign::SLOT_CATEGORY_PAGE,
+            AdCampaign::SLOT_SEARCH_RESULTS,
+            AdCampaign::SLOT_LOCATION_PAGE,
+            AdCampaign::SLOT_RELATED_LISTINGS,
+            AdCampaign::SLOT_MOBILE_FEED,
+            AdCampaign::SLOT_DESKTOP_FEED,
+        ];
+        $banners = [
+            AdCampaign::SLOT_HOMEPAGE_FEATURED,
+            AdCampaign::SLOT_HOMEPAGE_TOP,
+            AdCampaign::SLOT_SIDEBAR,
+            AdCampaign::SLOT_LISTING_DETAIL,
+            AdCampaign::SLOT_FOOTER,
+        ];
+
+        $this->campaignForm['placements'] = match ($group) {
+            'all' => AdCampaign::SLOTS,
+            'feeds' => $feeds,
+            'banners' => $banners,
+            'clear' => [],
+            default => $this->campaignForm['placements'] ?? [],
+        };
     }
 
     public function resetCampaignForm(): void
@@ -399,13 +507,8 @@ trait ManagesAdvertisingCampaigns
         $this->dispatch('toast', type: 'info', message: "Campaign [{$name}] deleted.");
     }
 
-    public function savePlacementConfig(string $slot): void
+    private function persistPlacementConfig(string $slot): AdPlacementConfig
     {
-        $this->authorizePermission('ads.manage');
-        if (!in_array($slot, AdCampaign::SLOTS, true)) {
-            return;
-        }
-
         $input = $this->placementConfigsForm[$slot] ?? [];
         $config = AdPlacementConfig::forSlot($slot);
 
@@ -421,8 +524,64 @@ trait ManagesAdvertisingCampaigns
             'is_enabled' => (bool) ($input['is_enabled'] ?? true),
         ]);
 
+        return $config;
+    }
+
+    public function savePlacementConfig(string $slot): void
+    {
+        $this->authorizePermission('ads.manage');
+        if (!in_array($slot, AdCampaign::SLOTS, true)) {
+            return;
+        }
+
+        $config = $this->persistPlacementConfig($slot);
+
         AdminAuditService::log('ads.placement_config.update', $config, null, ['slot' => $slot, 'every_n' => $config->insert_every_n]);
         $this->dispatch('toast', type: 'success', message: "Delivery frequency for [" . str_replace('_', ' ', $slot) . "] updated!");
+    }
+
+    public function saveAllPlacementConfigs(): void
+    {
+        $this->authorizePermission('ads.manage');
+
+        foreach (AdCampaign::SLOTS as $slot) {
+            $this->persistPlacementConfig($slot);
+        }
+
+        AdminAuditService::log('ads.placement_config.bulk_update', null, null, ['slots' => count(AdCampaign::SLOTS)]);
+        session()->flash('success', 'All 13 placement delivery rules saved.');
+        $this->dispatch('toast', type: 'success', message: 'All 13 slot delivery rules updated!');
+    }
+
+    public function exportAdAnalyticsCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $this->authorizePermission('ads.manage');
+        $report = app(AdAnalyticsService::class)->getReport(
+            $this->adAnalyticsRange,
+            $this->adAnalyticsCustomStart ?: null,
+            $this->adAnalyticsCustomEnd ?: null
+        );
+
+        $filename = 'ad-analytics-' . ($report['start_date'] ?? now()->toDateString()) . '-to-' . ($report['end_date'] ?? now()->toDateString()) . '.csv';
+
+        return response()->streamDownload(function () use ($report) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['Date', 'Impressions', 'Unique Views', 'Clicks', 'CTR (%)', 'Conversions', 'Revenue (USD)']);
+            foreach ($report['daily_breakdown'] ?? [] as $row) {
+                fputcsv($out, [
+                    $row->date,
+                    (int) $row->impressions,
+                    (int) $row->unique_impressions,
+                    (int) $row->clicks,
+                    (float) $row->ctr,
+                    (int) $row->conversions,
+                    number_format(((int) ($row->revenue_cents ?? 0)) / 100, 2, '.', ''),
+                ]);
+            }
+            fclose($out);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 
     /**

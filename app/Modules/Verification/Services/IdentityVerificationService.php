@@ -96,6 +96,7 @@ class IdentityVerificationService
             // Upgrade User
             $user = $verification->user;
             $user->is_identity_verified = true;
+            $user->is_age_verified = true;
             $user->save();
 
             // Upgrade user's active listings with verified badge
@@ -107,9 +108,23 @@ class IdentityVerificationService
                 'verification_id' => $verification->id,
                 'actor_id' => $reviewer->id,
                 'action' => 'approved',
-                'details' => "Verification approved by administrator {$reviewer->name}. Verified badge activated.",
+                'details' => "Verification approved by administrator {$reviewer->name}. Blue Verified badge activated.",
                 'created_at' => now(),
             ]);
+
+            try {
+                \App\Modules\Notifications\Models\NotificationLog::create([
+                    'user_id' => $user->id,
+                    'channel' => 'system',
+                    'notification_type' => 'id_verification_approved',
+                    'subject' => 'Blue Verified Badge Activated',
+                    'message' => 'Your identity verification has been approved by an administrator. Your Blue Verified Badge is now active across your account and listings.',
+                    'recipient_target' => $user->email,
+                    'status' => 'sent',
+                    'is_read' => false,
+                    'sent_at' => now(),
+                ]);
+            } catch (\Throwable $e) {}
 
             return $verification;
         });
@@ -144,6 +159,20 @@ class IdentityVerificationService
                 'created_at' => now(),
             ]);
 
+            try {
+                \App\Modules\Notifications\Models\NotificationLog::create([
+                    'user_id' => $user->id,
+                    'channel' => 'system',
+                    'notification_type' => 'id_verification_rejected',
+                    'subject' => 'Identity Verification Requires Attention',
+                    'message' => "Your identity verification request was declined. Reason: {$reason}",
+                    'recipient_target' => $user->email,
+                    'status' => 'sent',
+                    'is_read' => false,
+                    'sent_at' => now(),
+                ]);
+            } catch (\Throwable $e) {}
+
             return $verification;
         });
     }
@@ -173,6 +202,20 @@ class IdentityVerificationService
                 'details' => "Verification suspended by {$reviewer->name}. Reason: {$reason}",
                 'created_at' => now(),
             ]);
+
+            try {
+                \App\Modules\Notifications\Models\NotificationLog::create([
+                    'user_id' => $user->id,
+                    'channel' => 'system',
+                    'notification_type' => 'id_verification_suspended',
+                    'subject' => 'Verified Badge Suspended',
+                    'message' => "Your Blue Verified Badge was suspended. Reason: {$reason}",
+                    'recipient_target' => $user->email,
+                    'status' => 'sent',
+                    'is_read' => false,
+                    'sent_at' => now(),
+                ]);
+            } catch (\Throwable $e) {}
 
             return $verification;
         });

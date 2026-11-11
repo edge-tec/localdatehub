@@ -235,7 +235,7 @@
                     <div class="flex items-center justify-between pb-2 border-b border-slate-100">
                         <h2 class="text-base font-black text-slate-900 tracking-tight flex items-center gap-2">
                             <svg class="w-5 h-5 text-[#F20B65]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            <span>Verified Member Photo Gallery</span>
+                            <span>{{ ($listing->user?->is_identity_verified || $listing->is_verified_poster) ? 'Verified Member Photo Gallery' : 'Member Photo Gallery' }}</span>
                             <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-[#F20B65] text-xs font-black">
                                 {{ $listing->approvedMedia->isNotEmpty() ? $listing->approvedMedia->count() : '1' }} Photos
                             </span>
@@ -394,8 +394,11 @@
                             {{ strtoupper(substr($listing->user?->name ?? 'M', 0, 1)) }}
                         </div>
                         <div class="min-w-0 flex-1">
-                            <h3 class="text-base font-black text-slate-900 truncate">
-                                {{ $listing->user?->name ?? 'Anonymous Poster' }}
+                            <h3 class="text-base font-black text-slate-900 truncate flex items-center gap-1.5">
+                                <span class="truncate">{{ $listing->user?->name ?? 'Anonymous Poster' }}</span>
+                                @if($listing->user?->is_identity_verified || $listing->is_verified_poster)
+                                    <x-verified-badge variant="icon" size="w-4 h-4" title="Blue Verified Badge — Identity Verified" />
+                                @endif
                             </h3>
                             <p class="text-xs font-medium text-slate-500 mt-0.5">
                                 Member since {{ $listing->user?->created_at?->format('M Y') ?? 'Nov 2026' }}
@@ -405,18 +408,19 @@
 
                     <!-- Trust & Assurance Badges -->
                     <div class="pt-2 space-y-2.5 text-xs">
-                        <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 font-bold">
-                            <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                            <span>18+ Age Assurance Verified</span>
-                        </div>
-                        <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-purple-50 border border-purple-200 text-purple-900 font-bold">
-                            <svg class="w-4 h-4 text-purple-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                            <span>ID &amp; Identity Badge Active</span>
-                        </div>
+                        @if($listing->user?->is_identity_verified || $listing->is_verified_poster)
+                            <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 font-bold">
+                                <x-verified-badge variant="icon" size="w-4 h-4" title="Identity Verified Member" />
+                                <span>Blue Verified Identity Badge</span>
+                            </div>
+                        @else
+                            <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 font-semibold">
+                                <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 1.657-1.343 3-3 3m0-6a3 3 0 110 6m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span>Identity Not Yet Verified</span>
+                            </div>
+                        @endif
                     </div>
                 </div>
 

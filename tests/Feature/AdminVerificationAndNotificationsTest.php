@@ -193,9 +193,10 @@ class AdminVerificationAndNotificationsTest extends TestCase
         $component = Livewire::actingAs($this->admin)
             ->test(AdminEnterpriseHub::class, ['initialTab' => 'ads'])
             ->assertSee('Total Campaigns')
-            ->assertSee('Active Slots')
-            ->assertSee('Total Impressions')
-            ->assertSee('Avg. CTR')
+            ->assertSee('Active Delivery')
+            ->assertSee('Verified Impressions')
+            ->assertSee('CTR &amp; S2S Revenue', false)
+            ->call('setAdSubTab', 'legacy')
             ->assertSee('Elite Escort Agency Banner')
             ->assertSee('Elite Brand Group');
 
@@ -221,7 +222,9 @@ class AdminVerificationAndNotificationsTest extends TestCase
         $component->call('setAdSubTab', 'inventory')
             ->assertSee('Slot Architecture')
             ->call('setAdSubTab', 'analytics')
-            ->assertSee('Performance Analytics');
+            ->assertSee('Analytics &amp; Reports', false)
+            ->call('setAdSubTab', 'legacy')
+            ->assertSee('Legacy Slots');
 
         // Delete ad
         $component->call('confirmDeleteAd', $ad->id)
@@ -324,5 +327,76 @@ class AdminVerificationAndNotificationsTest extends TestCase
         $this->assertTrue($itemsCollection->contains(fn($item) => str_contains($item['title'], 'John Candidate') || $item['category'] === 'id_verification'));
         $this->assertTrue($itemsCollection->contains(fn($item) => str_contains($item['title'], 'Seeking evening date') || $item['category'] === 'listing_pending'));
         $this->assertTrue($itemsCollection->contains(fn($item) => str_contains($item['title'], 'Alice Member') || $item['category'] === 'contact_message'));
+    }
+
+    public function test_account_dashboard_and_listings_replace_18_plus_badge_with_admin_approved_blue_verified_badge(): void
+    {
+        $category = \App\Modules\Categories\Models\Category::first();
+        $city = \App\Modules\Locations\Models\City::first();
+
+        $listing = \App\Modules\Listings\Models\Listing::create([
+            'user_id' => $this->user->id,
+            'category_id' => $category?->id ?? 1,
+            'city_id' => $city?->id ?? 1,
+            'state_id' => $city?->state_id ?? 1,
+            'title' => 'Looking for coffee partner in Austin',
+            'slug' => 'looking-coffee-partner-' . uniqid(),
+            'description' => 'Friendly local dating listing for testing verified badge.',
+            'status' => \App\Modules\Listings\Models\Listing::STATUS_ACTIVE,
+            'poster_age' => 29,
+            'poster_gender' => 'Woman',
+            'intent' => 'dating',
+            'is_verified_poster' => false,
+            'published_at' => now(),
+            'expires_at' => now()->addDays(30),
+        ]);
+
+        // 1. Before ID submission (even with is_age_verified = true), 18+ Verified badge must NOT appear
+        $dashboardBefore = $this->actingAs($this->user)->get(route('account.dashboard'));
+        $dashboardBefore->assertStatus(200);
+        $dashboardBefore->assertDontSee('18+ Verified');
+        $dashboardBefore->assertSee('Verify ID');
+
+        $listingBefore = $this->actingAs($this->user)->get(route('listings.show', $listing->slug));
+        $listingBefore->assertStatus(200);
+        $listingBefore->assertDontSee('18+ Age Assurance Verified');
+        $listingBefore->assertDontSee('Blue Verified Identity Badge');
+        $listingBefore->assertSee('Identity Not Yet Verified');
+
+        // 2. When user submits ID card, dashboard shows pending review state (no verified badge yet)
+        $verification = \App\Modules\Verification\Models\IdentityVerification::create([
+            'user_id' => $this->user->id,
+            'document_type' => 'national_id',
+            'document_front_path' => 'verifications/front.jpg',
+            'selfie_path' => 'verifications/selfie.jpg',
+            'status' => \App\Modules\Verification\Models\IdentityVerification::STATUS_PENDING,
+            'submitted_at' => now(),
+        ]);
+
+        $dashboardPending = $this->actingAs($this->user)->get(route('account.dashboard'));
+        $dashboardPending->assertStatus(200);
+        $dashboardPending->assertDontSee('18+ Verified');
+        $dashboardPending->assertSee('ID Pending Review');
+
+        // 3. When admin approves ID card, Blue Verified Badge appears on dashboard & listing
+        $this->actingAs($this->admin)
+            ->post(route('admin.verifications.approve', $verification))
+            ->assertRedirect(route('admin.verifications.index'));
+
+        $freshUser = $this->user->fresh();
+        $this->assertTrue((bool) $freshUser->is_identity_verified);
+        $this->assertTrue((bool) $listing->fresh()->is_verified_poster);
+
+        $dashboardVerified = $this->actingAs($freshUser)->get(route('account.dashboard'));
+        $dashboardVerified->assertStatus(200);
+        $dashboardVerified->assertDontSee('18+ Verified');
+        $dashboardVerified->assertDontSee('ID Pending Review');
+        $dashboardVerified->assertSee('Blue Verified Badge — Identity Verified by Admin');
+        $dashboardVerified->assertSee('bg-blue-600 text-white', false);
+
+        $listingVerified = $this->actingAs($this->user)->get(route('listings.show', $listing->slug));
+        $listingVerified->assertStatus(200);
+        $listingVerified->assertSee('Blue Verified Identity Badge');
+        $listingVerified->assertDontSee('18+ Age Assurance Verified');
     }
 }
