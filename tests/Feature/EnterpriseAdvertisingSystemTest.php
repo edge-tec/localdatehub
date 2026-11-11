@@ -796,5 +796,61 @@ class EnterpriseAdvertisingSystemTest extends TestCase
             ->assertSet('diagnosticData.eligible', true)
             ->assertSet('diagnosticData.delivery_status', 'LIVE DELIVERING');
     }
+
+    public function test_sidebar_ads_do_not_use_sticky_overlap_containers_on_scroll(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('ad-banners/sidebar-clean.jpg', 'fake-jpg');
+
+        $manager = app(AdCampaignManager::class);
+        $manager->saveCampaign([
+            'name' => 'Sidebar Clean Banner',
+            'campaign_type' => 'banner',
+            'advertiser_name' => 'PartnerBrand',
+            'creative_title' => 'Discover New Local Connections',
+            'cta_text' => 'Visit Site',
+            'destination_url' => 'https://partner.example.com/offer',
+            'desktop_banner_url' => '/storage/ad-banners/sidebar-clean.jpg',
+            'status' => AdCampaign::STATUS_ACTIVE,
+            'priority' => 10,
+            'weight' => 100,
+            'placements' => [AdCampaign::SLOT_SIDEBAR, AdCampaign::SLOT_SEARCH_RESULTS, AdCampaign::SLOT_LISTING_DETAIL],
+        ], null, $this->admin->id);
+
+        $listing = Listing::create([
+            'user_id' => $this->admin->id,
+            'category_id' => $this->category->id,
+            'state_id' => $this->state->id,
+            'city_id' => $this->city->id,
+            'title' => 'Clean Sidebar Listing Check',
+            'slug' => 'clean-sidebar-listing-check-' . uniqid(),
+            'description' => 'Detailed personal classified listing for layout and advertisement placement verification.',
+            'poster_age' => 27,
+            'poster_gender' => 'Female',
+            'intent' => 'dating',
+            'status' => Listing::STATUS_ACTIVE,
+            'published_at' => now(),
+            'expires_at' => now()->addDays(30),
+        ]);
+
+        // Search page must not apply sticky positioning on the oversized filter form (which previously caused sidebar ads to scroll over form fields)
+        $searchResponse = $this->withSession(['age_confirmed_18' => true])
+            ->get(route('search.index'))
+            ->assertOk()
+            ->assertSee('Discover New Local Connections')
+            ->assertSee('aria-label="Sponsored advertisement"', false)
+            ->assertDontSee('sticky top-20 shadow-sm', false);
+
+        $searchHtml = $searchResponse->getContent();
+        $this->assertStringContainsString('/storage/ad-banners/sidebar-clean.jpg', $searchHtml);
+        $this->assertStringContainsString('object-contain', $searchHtml);
+
+        // Listing detail right column must also remain non-sticky so the sidebar ad does not pin or overlap during scroll
+        $this->withSession(['age_confirmed_18' => true])
+            ->get(route('listings.show', $listing->slug))
+            ->assertOk()
+            ->assertSee('Discover New Local Connections')
+            ->assertDontSee('lg:col-span-4 space-y-6 lg:sticky lg:top-24', false);
+    }
 }
 

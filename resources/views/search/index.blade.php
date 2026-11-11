@@ -93,8 +93,8 @@
 
             <div class="mt-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
                 <!-- Filter Sidebar -->
-                <aside class="lg:col-span-1">
-                    <form method="GET" action="{{ route('search.index') }}" class="bg-white border-2 border-slate-200/90 rounded-3xl p-5 sm:p-6 space-y-5 sticky top-20 shadow-sm">
+                <aside class="lg:col-span-1 space-y-6">
+                    <form method="GET" action="{{ route('search.index') }}" class="bg-white border-2 border-slate-200/90 rounded-3xl p-5 sm:p-6 space-y-5 shadow-sm">
                         <!-- Sidebar Header -->
                         <div class="flex items-center justify-between pb-4 border-b border-slate-200">
                             <div class="flex items-center gap-2">
@@ -497,7 +497,7 @@
                     </form>
 
                     <!-- Sidebar Promotional Ad Banner -->
-                    <div class="mt-5">
+                    <div class="w-full">
                         <x-ad-banner placement="sidebar" :context="$adContext ?? []" variant="sidebar" :limit="2" />
                     </div>
                 </aside>

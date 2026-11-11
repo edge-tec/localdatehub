@@ -1,7 +1,7 @@
 @props(['ad'])
 
 <article
-    class="group bg-white border-2 border-amber-200/90 hover:border-[#F20B65]/60 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative"
+    class="group bg-white border border-slate-200/90 hover:border-[#F20B65]/50 rounded-2xl overflow-clip shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative"
     data-ad-card="{{ $ad['campaign_id'] ?? $ad['legacy_id'] ?? 'ad' }}"
     data-ad-campaign-uuid="{{ $ad['campaign_uuid'] ?? '' }}"
     data-ad-creative-id="{{ $ad['creative_id'] ?? '' }}"
@@ -9,7 +9,7 @@
 >
     <div>
         {{-- Creative Media Showcase (Hardware-Safe Full Uncut Responsive Image) --}}
-        <div class="relative h-72 sm:h-80 w-full overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 flex items-center justify-center isolate">
+        <div class="relative h-72 sm:h-80 w-full overflow-hidden bg-slate-950 flex items-center justify-center isolate">
             @php
                 $desktopCardImg = $ad['desktop_banner_url'] ?: ($ad['thumbnail_url'] ?: ($ad['image_url'] ?: $ad['mobile_banner_url']));
                 $mobileCardImg = $ad['mobile_banner_url'] ?: $desktopCardImg;
@@ -43,10 +43,10 @@
                         />
                     @endif
                 </a>
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-transparent pointer-events-none"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent pointer-events-none"></div>
             @else
-                <a href="{{ $ad['click_url'] }}" target="_blank" rel="sponsored noopener noreferrer" class="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-amber-50 via-white to-pink-50">
-                    <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-black uppercase tracking-wider mb-3">
+                <a href="{{ $ad['click_url'] }}" target="_blank" rel="sponsored noopener noreferrer" class="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-slate-50 via-white to-rose-50">
+                    <span class="px-3 py-1 rounded-full bg-slate-200/80 text-slate-800 border border-slate-300 text-[10px] font-black uppercase tracking-wider mb-3">
                         {{ $ad['disclosure_label'] ?? 'Sponsored' }}
                     </span>
                     <span class="text-base font-black text-slate-900 line-clamp-2">{{ $ad['title'] }}</span>
@@ -54,9 +54,9 @@
                 </a>
             @endif
 
-            {{-- Top Promotional Disclosure Badges (Always Unmistakably Labeled) --}}
+            {{-- Top Promotional Disclosure Badges (High Contrast IAB Compliant) --}}
             <div class="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-2 z-20 pointer-events-none">
-                <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-amber-400 text-slate-950 shadow-sm border border-amber-300">
+                <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-slate-900/85 text-white shadow-sm border border-white/15 backdrop-blur-xs">
                     {{ $ad['disclosure_label'] ?? 'Sponsored' }}
                 </span>
 
@@ -82,10 +82,10 @@
 
         {{-- Body Details --}}
         <div class="p-4 space-y-2">
-            <div class="flex items-center gap-2 text-[11px] font-bold text-amber-800">
-                <span class="uppercase tracking-wider">{{ $ad['format'] === 'affiliate' ? 'Partner Offer' : 'Promoted Ad' }}</span>
-                <span>&bull;</span>
-                <span class="text-slate-500 truncate">{{ $ad['advertiser_name'] ?? 'Partner' }}</span>
+            <div class="flex items-center gap-2 min-w-0 text-[11px] font-bold text-[#F20B65]">
+                <span class="uppercase tracking-wider shrink-0">{{ ($ad['format'] ?? 'banner') === 'affiliate' ? 'Partner Offer' : 'Promoted Ad' }}</span>
+                <span class="text-slate-300">/</span>
+                <span class="text-slate-500 truncate min-w-0">{{ $ad['advertiser_name'] ?? 'Partner' }}</span>
             </div>
 
             <h3 class="text-sm sm:text-base font-extrabold text-slate-900 group-hover:text-[#F20B65] transition line-clamp-1 leading-snug">
@@ -103,17 +103,16 @@
     </div>
 
     {{-- Footer CTA --}}
-    <div class="px-4 py-3 bg-amber-50/50 border-t border-amber-200/70 flex items-center justify-between text-xs">
-        <span class="font-bold text-amber-900 text-[11px]">{{ $ad['disclosure_label'] ?? 'Sponsored' }}</span>
+    <div class="px-4 py-3 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between gap-2 text-xs">
+        <span class="font-bold text-slate-600 text-[11px] uppercase tracking-wider truncate">{{ $ad['disclosure_label'] ?? 'Sponsored' }}</span>
         <a
             href="{{ $ad['click_url'] }}"
             target="_blank"
             rel="sponsored noopener noreferrer"
-            class="px-3.5 py-1.5 rounded-xl bg-[#F20B65] hover:bg-[#d90858] text-white font-black text-xs flex items-center space-x-1 transition-all shadow-xs"
+            class="shrink-0 px-3.5 py-1.5 rounded-xl bg-[#F20B65] hover:bg-[#d90858] text-white font-black text-xs inline-flex items-center space-x-1 transition-all shadow-xs"
         >
             <span>{{ $ad['cta_text'] ?? 'Visit Offer' }}</span>
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
         </a>
     </div>
 </article>
-

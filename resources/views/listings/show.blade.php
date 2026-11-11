@@ -360,8 +360,8 @@
 
             </div>
 
-            <!-- RIGHT COLUMN (4 COLS): Sticky Contact & Safety Sidebar -->
-            <div class="lg:col-span-4 space-y-6 lg:sticky lg:top-24">
+            <!-- RIGHT COLUMN (4 COLS): Contact, Safety & Sidebar Ad Column -->
+            <div class="lg:col-span-4 space-y-6">
                 
                 <!-- 1. Advertiser Profile Card -->
                 <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-5">
