@@ -21,7 +21,9 @@ use App\Modules\Moderation\Models\UserSuspension;
 use App\Modules\SEO\Models\CmsPage;
 use App\Modules\SEO\Models\SeoMeta;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -672,12 +674,17 @@ class EnterpriseAdminSystemTest extends TestCase
 
     public function test_staff_can_create_and_toggle_advertisements(): void
     {
+        Storage::fake('public');
+        $bannerFile = UploadedFile::fake()->image('sidebar-banner.png', 300, 600);
+
         Livewire::actingAs($this->financeManager)
             ->test(AdminEnterpriseHub::class, ['initialTab' => 'ads'])
             ->call('openAdModal')
+            ->assertSee('Upload Banner Image')
             ->set('adForm.name', 'Safe Dating Verified Partner')
             ->set('adForm.slot', 'sidebar')
             ->set('adForm.advertiser_name', 'VerifiedPartner Co')
+            ->set('adBannerUpload', $bannerFile)
             ->set('adForm.is_active', true)
             ->call('saveAd')
             ->assertHasNoErrors();
@@ -685,6 +692,9 @@ class EnterpriseAdminSystemTest extends TestCase
         $ad = AdPlacement::where('name', 'Safe Dating Verified Partner')->first();
         $this->assertNotNull($ad);
         $this->assertTrue($ad->is_active);
+        $this->assertNotNull($ad->image_url);
+        $this->assertStringStartsWith('/storage/ad-banners/', $ad->image_url);
+        Storage::disk('public')->assertExists(str_replace('/storage/', '', $ad->image_url));
 
         // Toggle ad
         Livewire::actingAs($this->financeManager)

@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Livewire\Admin\Concerns\ManagesAdvertisingCampaigns;
+use App\Modules\Advertising\Services\AdUrlService;
 use App\Models\User;
 use App\Models\PlatformTrafficLog;
 use App\Modules\Accounts\Models\UserProfile;
@@ -503,6 +504,7 @@ class AdminEnterpriseHub extends Component
     public bool $showAdModal = false;
     public ?int $editingAdId = null;
     public array $adForm = [];
+    public $adBannerUpload = null;
     public string $adSearch = '';
     public string $adSlotFilter = 'all';
     public string $adStatusFilter = 'all';
@@ -4159,6 +4161,7 @@ class AdminEnterpriseHub extends Component
     public function resetAdForm(): void
     {
         $this->editingAdId = null;
+        $this->adBannerUpload = null;
         $this->adForm = [
             'name' => '',
             'slot' => 'sidebar',
@@ -4196,14 +4199,43 @@ class AdminEnterpriseHub extends Component
         $this->showAdModal = true;
     }
 
+    public function updatedAdBannerUpload(): void
+    {
+        $this->authorizePermission('ads.manage');
+        $this->validate([
+            'adBannerUpload' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'],
+        ]);
+        $path = $this->adBannerUpload->store('ad-banners', 'public');
+        $this->adForm['image_url'] = '/storage/' . $path;
+        $this->adBannerUpload = null;
+    }
+
+    public function clearAdBannerMedia(): void
+    {
+        $this->authorizePermission('ads.manage');
+        $this->adForm['image_url'] = '';
+        $this->adBannerUpload = null;
+    }
+
     public function saveAd(): void
     {
         $this->authorizePermission('ads.manage');
+
+        if ($this->adBannerUpload) {
+            $this->updatedAdBannerUpload();
+        }
+
+        $safeImageRule = function (string $attribute, mixed $value, \Closure $fail): void {
+            if ($value !== null && trim((string) $value) !== '' && !AdUrlService::isSafeImageUrl((string) $value)) {
+                $fail('Banner image must be a valid http(s) URL or uploaded storage image.');
+            }
+        };
+
         $data = $this->validate([
             'adForm.name' => ['required', 'string', 'max:120'],
             'adForm.slot' => ['required', Rule::in(AdPlacement::SLOTS)],
             'adForm.advertiser_name' => ['nullable', 'string', 'max:120'],
-            'adForm.image_url' => ['nullable', 'url', 'max:255'],
+            'adForm.image_url' => ['nullable', 'string', 'max:500', $safeImageRule],
             'adForm.target_url' => ['nullable', 'url', 'max:255'],
             'adForm.html_snippet' => ['nullable', 'string', 'max:3000'],
             'adForm.price_dollars' => ['nullable', 'numeric', 'min:0'],

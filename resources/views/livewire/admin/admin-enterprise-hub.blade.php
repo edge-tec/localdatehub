@@ -9346,9 +9346,57 @@
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-black text-slate-800 mb-1">Banner Image URL</label>
-                            <input type="url" wire:model="adForm.image_url" class="{{ $input }}" placeholder="https://example.com/banners/ad-728x90.jpg">
+                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div>
+                                    <label class="block text-xs font-black text-slate-900">Banner Image Upload or URL</label>
+                                    <span class="text-[11px] font-medium text-slate-500">Upload JPG, PNG, WEBP or GIF (Max 5MB) or paste a direct URL below.</span>
+                                </div>
+                                @if(!empty($adForm['image_url']))
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">Uploaded</span>
+                                @endif
+                            </div>
+
+                            <label class="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 rounded-xl border-2 border-dashed border-pink-300 bg-white hover:border-[#F20B83] hover:bg-pink-50/30 transition cursor-pointer">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="w-9 h-9 rounded-lg bg-pink-50 border border-pink-200 text-[#F20B83] flex items-center justify-center shrink-0">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                    </span>
+                                    <div>
+                                        <span class="block text-xs font-black text-slate-900">{{ !empty($adForm['image_url']) ? 'Change Banner Image' : 'Upload Banner Image' }}</span>
+                                        <span class="block text-[10px] font-semibold text-slate-500">Click to select an image file from your device</span>
+                                    </div>
+                                </div>
+                                <span class="px-3 py-1.5 rounded-lg bg-[#F20B83] text-white text-[11px] font-black shadow-xs shrink-0">Choose Banner File</span>
+                                <input type="file" wire:model="adBannerUpload" accept="image/png,image/jpeg,image/webp,image/gif" class="sr-only">
+                            </label>
+
+                            <div wire:loading wire:target="adBannerUpload" class="flex items-center gap-2 text-xs font-bold text-[#F20B83]">
+                                <svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
+                                <span>Uploading banner image...</span>
+                            </div>
+
+                            @if(!empty($adForm['image_url']))
+                                <div class="p-2 rounded-xl bg-white border border-slate-200 flex items-center justify-between gap-3">
+                                    <div class="flex items-center gap-2.5 min-w-0">
+                                        <img src="{{ $adForm['image_url'] }}" alt="Banner preview" class="w-24 h-12 rounded-lg object-cover border border-slate-200 bg-slate-100 shrink-0" />
+                                        <div class="min-w-0">
+                                            <span class="block text-[11px] font-black text-slate-800 truncate">Active Banner Preview</span>
+                                            <span class="block text-[10px] text-slate-500 font-mono truncate">{{ $adForm['image_url'] }}</span>
+                                        </div>
+                                    </div>
+                                    <button type="button" wire:click="clearAdBannerMedia" class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-black shrink-0 cursor-pointer">
+                                        Remove
+                                    </button>
+                                </div>
+                            @endif
+
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Or Paste Banner Image URL</label>
+                                <input type="text" wire:model="adForm.image_url" class="{{ $input }} text-xs" placeholder="https://example.com/banners/ad-728x90.jpg or /storage/...">
+                            </div>
+
+                            @error('adBannerUpload')<p class="text-xs text-rose-600 mt-1 font-bold">{{ $message }}</p>@enderror
                             @error('adForm.image_url')<p class="text-xs text-rose-600 mt-1 font-bold">{{ $message }}</p>@enderror
                         </div>
 
