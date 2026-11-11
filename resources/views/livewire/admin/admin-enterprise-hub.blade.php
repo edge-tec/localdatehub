@@ -6992,7 +6992,7 @@
                         ],
                         [
                             'id' => 'branding',
-                            'label' => 'Logo & Favicon',
+                            'label' => 'Logos & Hero Image',
                             'icon' => '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>',
                         ],
                         [
@@ -7275,6 +7275,97 @@
                                     </div>
                                 </div>
                                 <span class="text-[11px] text-slate-500 mt-2 block">Primary accent color used for buttons, highlight badges, and active tabs.</span>
+                            </div>
+                        </div>
+
+                        <!-- Homepage Heading / Hero Image & Optional Offer Link Manager -->
+                        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200/80">
+                                <div>
+                                    <h4 class="text-sm font-black text-slate-900">Homepage Heading Image &amp; Offer Link</h4>
+                                    <p class="text-xs text-slate-500 mt-0.5">Change the main homepage hero photograph and optionally make it clickable to open an offer or landing URL.</p>
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    @if(!empty($settingValues['hero_offer_link']))
+                                        <span class="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-black uppercase tracking-wider">Offer Link Active</span>
+                                    @endif
+                                    <button type="button" wire:click="resetBrandAsset('hero_image_url')" class="px-3 py-1 rounded-lg bg-white hover:bg-rose-50 border border-slate-200 text-[11px] font-bold text-slate-600 hover:text-pink-600 transition">
+                                        Reset Image
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                                <!-- Live Preview -->
+                                <div class="lg:col-span-5 space-y-3">
+                                    @php
+                                        $adminHeroRaw = trim((string) ($settingValues['hero_image_url'] ?? '/images/hero-model.jpg'));
+                                        $adminHeroPreview = (str_starts_with($adminHeroRaw, 'http://') || str_starts_with($adminHeroRaw, 'https://'))
+                                            ? $adminHeroRaw
+                                            : asset(ltrim($adminHeroRaw !== '' ? $adminHeroRaw : 'images/hero-model.jpg', '/'));
+                                    @endphp
+                                    <div class="relative rounded-2xl overflow-hidden border border-slate-300 bg-slate-900 h-52 sm:h-56 shadow-inner flex items-center justify-center">
+                                        <img
+                                            src="{{ $adminHeroPreview }}"
+                                            alt="{{ $settingValues['hero_offer_alt'] ?? 'Homepage Heading Image' }}"
+                                            onerror="this.onerror=null;this.src='/images/hero-model.jpg';"
+                                            class="w-full h-full object-cover"
+                                        >
+                                        <div wire:loading.flex wire:target="brandHeroImageUpload" class="absolute inset-0 bg-white/90 backdrop-blur-xs items-center justify-center gap-2 text-xs font-black text-pink-600">
+                                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                            <span>Uploading Heading Image...</span>
+                                        </div>
+                                    </div>
+
+                                    <label class="w-full cursor-pointer inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#F20B83] to-pink-600 hover:from-pink-600 hover:to-rose-600 text-white text-xs font-black shadow-xs transition">
+                                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                        <span>Upload New Heading Image</span>
+                                        <input type="file" wire:model="brandHeroImageUpload" accept=".png,.jpg,.jpeg,.webp,.gif,image/*" class="hidden">
+                                    </label>
+                                    @error('brandHeroImageUpload') <p class="text-[11px] font-bold text-rose-600">{{ $message }}</p> @enderror
+                                    <p class="text-[11px] text-slate-500">JPG, PNG, WEBP, or GIF up to 5MB. Recommended landscape photo (e.g. 1200×900).</p>
+                                </div>
+
+                                <!-- Hero URL + Optional Offer Link Controls -->
+                                <div class="lg:col-span-7 space-y-4">
+                                    <div>
+                                        <label class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1">Heading Image URL / Path</label>
+                                        <input type="text" wire:model="settingValues.hero_image_url" class="{{ $input }} text-xs font-mono" placeholder="/images/hero-model.jpg or https://...">
+                                        <span class="text-[11px] text-slate-500 mt-1 block">Automatically updated when you upload a new heading image, or paste a custom image URL.</span>
+                                    </div>
+
+                                    <div>
+                                        <div class="flex items-center justify-between gap-2 mb-1">
+                                            <label class="block text-xs font-black text-slate-800 uppercase tracking-wider">Offer / Destination Link (Optional)</label>
+                                            @if(!empty($settingValues['hero_offer_link']))
+                                                <button type="button" wire:click="clearHeroOfferLink" class="text-[11px] font-bold text-rose-600 hover:underline">Remove Offer Link</button>
+                                            @endif
+                                        </div>
+                                        <input type="text" wire:model="settingValues.hero_offer_link" class="{{ $input }} text-xs font-mono" placeholder="https://example.com/special-offer or /register (leave empty for no link)">
+                                        @error('settingValues.hero_offer_link') <p class="text-[11px] font-bold text-rose-600 mt-1">{{ $message }}</p> @enderror
+                                        <span class="text-[11px] text-slate-500 mt-1 block">When filled in, clicking the homepage heading image navigates visitors to this offer URL. Leave blank to keep the image non-clickable.</span>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1">Offer Link Target</label>
+                                            <select wire:model="settingValues.hero_offer_new_tab" class="{{ $input }} text-xs font-bold text-slate-900">
+                                                <option value="true">Open in New Tab (_blank)</option>
+                                                <option value="false">Open in Same Tab</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1">Image Alt Text (SEO)</label>
+                                            <input type="text" wire:model="settingValues.hero_offer_alt" class="{{ $input }} text-xs font-bold" placeholder="LocalDateHub Dating Lifestyle">
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-1 flex justify-end">
+                                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-[#F20B83] hover:bg-[#d90858] text-white text-xs font-black shadow-xs transition">
+                                            Save Hero Image &amp; Offer Settings
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

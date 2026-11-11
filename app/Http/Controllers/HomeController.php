@@ -8,6 +8,7 @@ use App\Modules\Categories\Services\CategoryService;
 use App\Modules\Listings\Models\Listing;
 use App\Modules\Locations\Models\City;
 use App\Modules\Locations\Models\State;
+use App\Modules\Admin\Models\SystemSetting;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
@@ -124,6 +125,45 @@ class HomeController extends Controller
         $latestListingsFeed = $delivery->injectIntoListings($latestListings, \App\Modules\Advertising\Models\AdCampaign::SLOT_HOMEPAGE_FEED);
         $homepageFeaturedAds = $delivery->getAdsForSlot(\App\Modules\Advertising\Models\AdCampaign::SLOT_HOMEPAGE_FEATURED, [], 1);
 
+        $heroImageUrl = asset('images/hero-model.jpg');
+        $heroOfferLink = null;
+        $heroOfferNewTab = true;
+        $heroOfferAlt = 'LocalDateHub Dating Lifestyle';
+
+        if (Schema::hasTable('system_settings')) {
+            $heroSettings = SystemSetting::whereIn('key', [
+                'hero_image_url',
+                'hero_offer_link',
+                'hero_offer_new_tab',
+                'hero_offer_alt',
+            ])->pluck('value', 'key');
+
+            $rawImage = trim((string) ($heroSettings['hero_image_url'] ?? ''));
+            if ($rawImage !== '') {
+                $heroImageUrl = (str_starts_with($rawImage, 'http://') || str_starts_with($rawImage, 'https://'))
+                    ? $rawImage
+                    : asset(ltrim($rawImage, '/'));
+            }
+
+            $rawOfferLink = trim((string) ($heroSettings['hero_offer_link'] ?? ''));
+            if ($rawOfferLink !== '') {
+                $isRelative = str_starts_with($rawOfferLink, '/') && !str_starts_with($rawOfferLink, '//');
+                $scheme = strtolower((string) parse_url($rawOfferLink, PHP_URL_SCHEME));
+                if ($isRelative || (in_array($scheme, ['http', 'https'], true) && filter_var($rawOfferLink, FILTER_VALIDATE_URL))) {
+                    $heroOfferLink = $rawOfferLink;
+                }
+            }
+
+            if (isset($heroSettings['hero_offer_new_tab'])) {
+                $heroOfferNewTab = filter_var($heroSettings['hero_offer_new_tab'], FILTER_VALIDATE_BOOLEAN);
+            }
+
+            $rawAlt = trim((string) ($heroSettings['hero_offer_alt'] ?? ''));
+            if ($rawAlt !== '') {
+                $heroOfferAlt = $rawAlt;
+            }
+        }
+
         return view('welcome', [
             'categories' => $categories,
             'homepageCategories' => $homepageCategories,
@@ -136,6 +176,10 @@ class HomeController extends Controller
             'popularCities' => $popularCities,
             'stats' => $stats,
             'seo' => $seo,
+            'heroImageUrl' => $heroImageUrl,
+            'heroOfferLink' => $heroOfferLink,
+            'heroOfferNewTab' => $heroOfferNewTab,
+            'heroOfferAlt' => $heroOfferAlt,
         ]);
     }
 }

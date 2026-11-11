@@ -16,15 +16,32 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
                 
-                <!-- Left Column: Attractive Model Photograph -->
+                <!-- Left Column: Attractive Model / Offer Photograph -->
                 <div class="lg:col-span-5 flex justify-center lg:justify-start">
                     <div class="relative w-full max-w-md lg:max-w-none group">
                         <div class="absolute -inset-1 bg-gradient-to-r from-[#F20B65]/30 to-purple-600/30 rounded-2xl blur-lg opacity-40 group-hover:opacity-70 transition duration-500"></div>
-                        <img 
-                            src="{{ asset('images/hero-model.jpg') }}" 
-                            alt="LocalDateHub Dating Lifestyle" 
-                            class="relative w-full h-[320px] sm:h-[380px] lg:h-[420px] object-cover rounded-2xl shadow-xl border border-slate-200"
-                        />
+                        @if(!empty($heroOfferLink))
+                            <a
+                                href="{{ $heroOfferLink }}"
+                                @if(!empty($heroOfferNewTab)) target="_blank" rel="noopener noreferrer sponsored" @endif
+                                aria-label="{{ $heroOfferAlt ?? 'LocalDateHub Featured Offer' }}"
+                                class="relative block rounded-2xl overflow-hidden shadow-xl border border-slate-200 cursor-pointer"
+                            >
+                                <img
+                                    src="{{ $heroImageUrl ?? asset('images/hero-model.jpg') }}"
+                                    alt="{{ $heroOfferAlt ?? 'LocalDateHub Dating Lifestyle' }}"
+                                    onerror="this.onerror=null;this.src='{{ asset('images/hero-model.jpg') }}';"
+                                    class="w-full h-[320px] sm:h-[380px] lg:h-[420px] object-cover transition duration-300 group-hover:scale-[1.01]"
+                                />
+                            </a>
+                        @else
+                            <img
+                                src="{{ $heroImageUrl ?? asset('images/hero-model.jpg') }}"
+                                alt="{{ $heroOfferAlt ?? 'LocalDateHub Dating Lifestyle' }}"
+                                onerror="this.onerror=null;this.src='{{ asset('images/hero-model.jpg') }}';"
+                                class="relative w-full h-[320px] sm:h-[380px] lg:h-[420px] object-cover rounded-2xl shadow-xl border border-slate-200"
+                            />
+                        @endif
                     </div>
                 </div>
 
