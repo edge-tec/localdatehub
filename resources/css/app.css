@@ -56,3 +56,15 @@
         padding: 0.625rem 0.75rem;
     }
 }
+
+/* Native top-layer modal scroll containment */
+dialog:modal {
+    overscroll-behavior: contain;
+}
+
+dialog::backdrop {
+    overflow: hidden;
+    overscroll-behavior: contain;
+    background: rgb(2 6 23 / 0.88);
+    backdrop-filter: blur(8px);
+}

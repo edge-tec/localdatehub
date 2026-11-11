@@ -238,5 +238,41 @@ class ImageIntegrityAndPipelineTest extends TestCase
         $homeResponse->assertStatus(200);
         $homeResponse->assertDontSee('filter blur-lg scale-110');
     }
+
+    public function test_listing_detail_renders_full_resolution_uncropped_gallery_and_native_lightbox(): void
+    {
+        $user = User::factory()->create(['is_age_verified' => true, 'is_identity_verified' => false]);
+        $listing = $this->createSampleListing($user);
+
+        $mediaService = app(ListingMediaService::class);
+        $photo1 = $mediaService->processAndStorePhoto(
+            $listing,
+            UploadedFile::fake()->image('lead_full.jpg', 900, 1200),
+            true
+        );
+
+        $listing->update(['status' => Listing::STATUS_ACTIVE, 'published_at' => now()]);
+
+        $singleResponse = $this->get(route('listings.show', $listing->slug));
+        $singleResponse->assertStatus(200);
+        $singleResponse->assertSee('src="' . $photo1->url . '"', false);
+        $singleResponse->assertSee('fetchpriority="high"', false);
+        $singleResponse->assertSee('<dialog', false);
+        $singleResponse->assertDontSee('aria-label="Select photo 1"', false);
+
+        // Adding a second photo enables the interactive thumbnail switcher and carousel buttons
+        $mediaService->processAndStorePhoto(
+            $listing,
+            UploadedFile::fake()->image('second_angle.jpg', 800, 1000),
+            false
+        );
+
+        $multiResponse = $this->get(route('listings.show', $listing->slug));
+        $multiResponse->assertStatus(200);
+        $multiResponse->assertSee('2 Photos', false);
+        $multiResponse->assertSee('aria-label="Select photo 1"', false);
+        $multiResponse->assertSee('aria-label="Select photo 2"', false);
+        $multiResponse->assertSee('aria-label="Next photo"', false);
+    }
 }
 
