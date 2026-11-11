@@ -113,45 +113,95 @@
                             <input type="url" wire:model="campaignForm.destination_url" class="{{ $input }}" placeholder="https://advertiser.com/landing-page">
                             @error('campaignForm.destination_url')<p class="text-xs text-rose-600 mt-1 font-bold">{{ $message }}</p>@enderror
                         </div>
+                    @endif
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-2">
-                                <div class="flex items-center justify-between">
-                                    <label class="block text-xs font-black text-slate-800">Desktop Banner Image</label>
-                                    @if(!empty($campaignForm['desktop_banner_url']))
-                                        <button type="button" wire:click="clearCampaignMedia('desktop_banner_url')" class="text-[10px] font-bold text-rose-600 hover:underline cursor-pointer">Remove</button>
-                                    @endif
+                    <!-- Desktop & Mobile Banner Upload Zone (Available for All Campaign Types) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        <!-- Desktop Banner Uploader -->
+                        <div class="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-2.5">
+                            <div class="flex items-center justify-between gap-2">
+                                <div>
+                                    <label class="block text-xs font-black text-slate-900">Desktop Banner Image</label>
+                                    <span class="text-[10px] font-semibold text-slate-400">Recommended: 728&times;90 or 1200&times;200</span>
                                 </div>
                                 @if(!empty($campaignForm['desktop_banner_url']))
-                                    <img src="{{ $campaignForm['desktop_banner_url'] }}" alt="Desktop Banner Preview" class="w-full h-24 object-cover rounded-lg border border-slate-200" />
+                                    <button type="button" wire:click="clearCampaignMedia('desktop_banner_url')" class="px-2 py-0.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-[10px] font-black text-rose-600 border border-rose-200 transition cursor-pointer">Remove</button>
                                 @endif
-                                <input type="file" wire:model="campaignDesktopBannerUpload" accept=".jpg,.jpeg,.png,.webp,.gif" class="block w-full text-[11px] text-slate-600" />
-                                <input type="text" wire:model="campaignForm.desktop_banner_url" class="{{ $input }} text-xs" placeholder="https://... or /storage/..." />
-                                @error('campaignDesktopBannerUpload')<p class="text-xs text-rose-600 font-bold">{{ $message }}</p>@enderror
-                                @error('campaignForm.desktop_banner_url')<p class="text-xs text-rose-600 font-bold">{{ $message }}</p>@enderror
                             </div>
-                            <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-2">
-                                <div class="flex items-center justify-between">
-                                    <label class="block text-xs font-black text-slate-800">Mobile Banner Image</label>
-                                    @if(!empty($campaignForm['mobile_banner_url']))
-                                        <button type="button" wire:click="clearCampaignMedia('mobile_banner_url')" class="text-[10px] font-bold text-rose-600 hover:underline cursor-pointer">Remove</button>
-                                    @endif
+
+                            @if(!empty($campaignForm['desktop_banner_url']))
+                                <div class="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
+                                    <img src="{{ $campaignForm['desktop_banner_url'] }}" alt="Desktop Banner Preview" class="w-full h-24 object-cover" />
+                                    <span class="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full bg-emerald-600/90 text-white text-[9px] font-black uppercase tracking-wider shadow-xs">Uploaded</span>
                                 </div>
-                                @if(!empty($campaignForm['mobile_banner_url']))
-                                    <img src="{{ $campaignForm['mobile_banner_url'] }}" alt="Mobile Banner Preview" class="w-full h-24 object-cover rounded-lg border border-slate-200" />
-                                @endif
-                                <input type="file" wire:model="campaignMobileBannerUpload" accept=".jpg,.jpeg,.png,.webp,.gif" class="block w-full text-[11px] text-slate-600" />
-                                <input type="text" wire:model="campaignForm.mobile_banner_url" class="{{ $input }} text-xs" placeholder="https://... or /storage/..." />
-                                @error('campaignMobileBannerUpload')<p class="text-xs text-rose-600 font-bold">{{ $message }}</p>@enderror
-                                @error('campaignForm.mobile_banner_url')<p class="text-xs text-rose-600 font-bold">{{ $message }}</p>@enderror
+                            @endif
+
+                            <label class="group flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl border-2 border-dashed border-slate-300 hover:border-[#F20B83] bg-slate-50/70 hover:bg-rose-50/40 transition-all cursor-pointer text-center">
+                                <input type="file" wire:model="campaignDesktopBannerUpload" accept=".jpg,.jpeg,.png,.webp,.gif,image/*" class="sr-only" />
+                                <span wire:loading.remove wire:target="campaignDesktopBannerUpload" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#F20B83] to-rose-600 group-hover:from-[#D00972] group-hover:to-rose-700 text-white text-[11px] font-black shadow-xs transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                    <span>{{ !empty($campaignForm['desktop_banner_url']) ? 'Change Desktop Banner' : 'Upload Desktop Banner' }}</span>
+                                </span>
+                                <span wire:loading wire:target="campaignDesktopBannerUpload" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-[11px] font-black">
+                                    <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                                    <span>Uploading banner...</span>
+                                </span>
+                                <span class="text-[10px] font-semibold text-slate-500">JPG, PNG, WEBP or GIF (Max 5MB)</span>
+                            </label>
+
+                            <div>
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Or Paste Banner URL</span>
+                                <input type="text" wire:model="campaignForm.desktop_banner_url" class="{{ $input }} text-xs" placeholder="https://... or /storage/..." />
                             </div>
+                            @error('campaignDesktopBannerUpload')<p class="text-xs text-rose-600 font-bold">{{ $message }}</p>@enderror
+                            @error('campaignForm.desktop_banner_url')<p class="text-xs text-rose-600 font-bold">{{ $message }}</p>@enderror
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-black text-slate-800 mb-1">Image Alt Text</label>
-                            <input type="text" wire:model="campaignForm.alt_text" class="{{ $input }}" placeholder="Descriptive accessible alt text">
+                        <!-- Mobile Banner Uploader -->
+                        <div class="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-2.5">
+                            <div class="flex items-center justify-between gap-2">
+                                <div>
+                                    <label class="block text-xs font-black text-slate-900">Mobile Banner Image</label>
+                                    <span class="text-[10px] font-semibold text-slate-400">Recommended: 320&times;100 or 320&times;250</span>
+                                </div>
+                                @if(!empty($campaignForm['mobile_banner_url']))
+                                    <button type="button" wire:click="clearCampaignMedia('mobile_banner_url')" class="px-2 py-0.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-[10px] font-black text-rose-600 border border-rose-200 transition cursor-pointer">Remove</button>
+                                @endif
+                            </div>
+
+                            @if(!empty($campaignForm['mobile_banner_url']))
+                                <div class="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
+                                    <img src="{{ $campaignForm['mobile_banner_url'] }}" alt="Mobile Banner Preview" class="w-full h-24 object-cover" />
+                                    <span class="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full bg-emerald-600/90 text-white text-[9px] font-black uppercase tracking-wider shadow-xs">Uploaded</span>
+                                </div>
+                            @endif
+
+                            <label class="group flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl border-2 border-dashed border-slate-300 hover:border-[#F20B83] bg-slate-50/70 hover:bg-rose-50/40 transition-all cursor-pointer text-center">
+                                <input type="file" wire:model="campaignMobileBannerUpload" accept=".jpg,.jpeg,.png,.webp,.gif,image/*" class="sr-only" />
+                                <span wire:loading.remove wire:target="campaignMobileBannerUpload" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 group-hover:bg-[#F20B83] text-white text-[11px] font-black shadow-xs transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                    <span>{{ !empty($campaignForm['mobile_banner_url']) ? 'Change Mobile Banner' : 'Upload Mobile Banner' }}</span>
+                                </span>
+                                <span wire:loading wire:target="campaignMobileBannerUpload" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-[11px] font-black">
+                                    <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                                    <span>Uploading banner...</span>
+                                </span>
+                                <span class="text-[10px] font-semibold text-slate-500">JPG, PNG, WEBP or GIF (Max 5MB)</span>
+                            </label>
+
+                            <div>
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Or Paste Banner URL</span>
+                                <input type="text" wire:model="campaignForm.mobile_banner_url" class="{{ $input }} text-xs" placeholder="https://... or /storage/..." />
+                            </div>
+                            @error('campaignMobileBannerUpload')<p class="text-xs text-rose-600 font-bold">{{ $message }}</p>@enderror
+                            @error('campaignForm.mobile_banner_url')<p class="text-xs text-rose-600 font-bold">{{ $message }}</p>@enderror
                         </div>
-                    @endif
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-black text-slate-800 mb-1">Image Alt Text</label>
+                        <input type="text" wire:model="campaignForm.alt_text" class="{{ $input }}" placeholder="Descriptive accessible alt text">
+                    </div>
 
                     @if(in_array($campaignForm['campaign_type'] ?? 'banner', ['affiliate', 'hybrid'], true))
                         <div class="p-3.5 rounded-xl bg-purple-50/60 border border-purple-200 space-y-3">
@@ -182,9 +232,14 @@
                                         @endif
                                     </div>
                                     @if(!empty($campaignForm['thumbnail_url']))
-                                        <img src="{{ $campaignForm['thumbnail_url'] }}" alt="Thumbnail Preview" class="w-full h-16 object-cover rounded-lg border border-purple-200 mb-1" />
+                                        <img src="{{ $campaignForm['thumbnail_url'] }}" alt="Thumbnail Preview" class="w-full h-16 object-cover rounded-lg border border-purple-200 mb-1.5" />
                                     @endif
-                                    <input type="file" wire:model="campaignThumbnailUpload" accept=".jpg,.jpeg,.png,.webp,.gif" class="block w-full text-[11px] text-slate-600 mb-1" />
+                                    <label class="flex items-center justify-center gap-1.5 w-full px-3 py-1.5 mb-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-[11px] font-black transition cursor-pointer">
+                                        <input type="file" wire:model="campaignThumbnailUpload" accept=".jpg,.jpeg,.png,.webp,.gif,image/*" class="sr-only" />
+                                        <svg wire:loading.remove wire:target="campaignThumbnailUpload" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                        <span wire:loading.remove wire:target="campaignThumbnailUpload">Upload Thumbnail</span>
+                                        <span wire:loading wire:target="campaignThumbnailUpload">Uploading...</span>
+                                    </label>
                                     <input type="text" wire:model="campaignForm.thumbnail_url" class="{{ $input }} text-xs" placeholder="https://... or /storage/...">
                                 </div>
                                 <div>
