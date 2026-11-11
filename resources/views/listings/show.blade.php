@@ -248,27 +248,34 @@
                     @endphp
 
                     @if($displayPhotos->isNotEmpty())
-                        <!-- User Uploaded Photos -->
+                        <!-- User Uploaded Photos: 100% Full Uncut Photo with Ambient Backdrop -->
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3.5">
                             @foreach($displayPhotos as $photo)
                                 <div
-                                    class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 aspect-[4/4.5] sm:aspect-[4/4.2] relative group cursor-pointer shadow-2xs hover:shadow-md transition-all duration-300"
+                                    class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-950 aspect-[4/4.5] sm:aspect-[4/4.2] relative group cursor-pointer shadow-2xs hover:shadow-md transition-all duration-300 flex items-center justify-center"
                                     @click="activePhotoUrl = '{{ $photo->url }}'; lightboxOpen = true"
                                 >
+                                    <!-- Ambient blurred backdrop -->
+                                    <img 
+                                        src="{{ $photo->url }}" 
+                                        alt="" 
+                                        aria-hidden="true"
+                                        class="absolute inset-0 w-full h-full object-cover filter blur-lg scale-110 opacity-50 select-none pointer-events-none"
+                                    />
+                                    <!-- 100% Full Image visible, never cut or cropped -->
                                     <img
                                         src="{{ $photo->url }}"
                                         alt="{{ $listing->title }}"
-                                        class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                                        style="object-position: center top;"
+                                        class="relative z-10 max-h-full max-w-full w-auto h-auto object-contain mx-auto transition duration-500 group-hover:scale-105"
                                         loading="lazy"
                                     >
-                                    <div class="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/20 transition-colors flex items-center justify-center">
+                                    <div class="absolute inset-0 z-10 bg-slate-900/0 group-hover:bg-slate-900/20 transition-colors flex items-center justify-center">
                                         <span class="w-10 h-10 rounded-full bg-white text-slate-800 flex items-center justify-center opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition duration-300 shadow-lg font-bold">
                                             🔍
                                         </span>
                                     </div>
                                     @if($photo->is_primary)
-                                        <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-white text-[10px] font-black uppercase tracking-wider shadow" style="background-color: #F20B65 !important;">
+                                        <span class="absolute top-2.5 left-2.5 z-20 px-2 py-0.5 rounded-md text-white text-[10px] font-black uppercase tracking-wider shadow" style="background-color: #F20B65 !important;">
                                             Primary
                                         </span>
                                     @endif
@@ -282,17 +289,24 @@
                             $showcaseImg = asset('images/featured-' . $showcaseIndex . '.jpg');
                         @endphp
                         <div
-                            class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 relative group cursor-pointer shadow-sm hover:shadow-md transition-all duration-300"
+                            class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-950 relative group cursor-pointer shadow-sm hover:shadow-md transition-all duration-300 h-[360px] sm:h-[460px] flex items-center justify-center"
                             @click="activePhotoUrl = '{{ $showcaseImg }}'; lightboxOpen = true"
                         >
+                            <!-- Ambient blurred backdrop -->
+                            <img 
+                                src="{{ $showcaseImg }}" 
+                                alt="" 
+                                aria-hidden="true"
+                                class="absolute inset-0 w-full h-full object-cover filter blur-lg scale-110 opacity-50 select-none pointer-events-none"
+                            />
+                            <!-- 100% Full Image visible, never cut or cropped -->
                             <img
                                 src="{{ $showcaseImg }}"
                                 alt="{{ $listing->title }}"
-                                class="w-full h-[320px] sm:h-[400px] object-cover group-hover:scale-105 transition duration-500"
-                                style="object-position: center top;"
+                                class="relative z-10 max-h-full max-w-full w-auto h-auto object-contain mx-auto transition duration-500 group-hover:scale-105"
                                 loading="lazy"
                             >
-                            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-5 sm:p-6">
+                            <div class="absolute inset-0 z-10 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-5 sm:p-6 pointer-events-none">
                                 <div class="flex items-center justify-between w-full text-white">
                                     <div>
                                         <span class="px-3 py-1 rounded-lg text-white text-xs font-black uppercase tracking-wider shadow" style="background-color: #F20B65 !important;">

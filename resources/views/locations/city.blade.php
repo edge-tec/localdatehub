@@ -109,8 +109,20 @@
                         @foreach($listings as $ad)
                             <div class="p-5 rounded-xl bg-white border border-slate-200 hover:border-slate-200 transition flex flex-col sm:flex-row gap-4">
                                 @if($ad->primaryPhoto)
-                                    <div class="w-full sm:w-36 h-36 rounded-lg bg-slate-50 overflow-hidden shrink-0 border border-slate-200">
-                                        <img src="{{ $ad->primaryPhoto->url }}" alt="{{ $ad->title }}" class="w-full h-full object-cover" style="object-position: center top;">
+                                    <div class="w-full sm:w-36 h-36 rounded-lg bg-slate-950 overflow-hidden shrink-0 border border-slate-200 relative flex items-center justify-center">
+                                        <!-- Ambient blurred backdrop -->
+                                        <img 
+                                            src="{{ $ad->primaryPhoto->url }}" 
+                                            alt="" 
+                                            aria-hidden="true"
+                                            class="absolute inset-0 w-full h-full object-cover filter blur-lg scale-110 opacity-50 select-none pointer-events-none"
+                                        />
+                                        <!-- 100% Full Image visible, never cut or cropped -->
+                                        <img 
+                                            src="{{ $ad->primaryPhoto->url }}" 
+                                            alt="{{ $ad->title }}" 
+                                            class="relative z-10 max-h-full max-w-full w-auto h-auto object-contain mx-auto"
+                                        >
                                     </div>
                                 @endif
                                 <div class="flex-1 flex flex-col justify-between">
