@@ -20,27 +20,27 @@
     };
 @endphp
 
-<div wire:poll.15s class="space-y-6">
+<div wire:poll.15s class="@container space-y-6 min-w-0 w-full">
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
+        <div class="min-w-0">
             <h1 class="text-2xl font-black text-slate-900">Analytics &amp; Reports</h1>
             <p class="text-xs text-slate-500 mt-0.5">Real visitor traffic only — admin visits, bots &amp; page reloads (30 min) are excluded. Period: <strong>{{ $periodLabel }}</strong></p>
         </div>
-        <div class="flex items-center gap-2">
-            <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800 shadow-2xs w-max">
+        <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800 shadow-2xs w-max whitespace-nowrap">
                 <span class="relative flex h-2 w-2">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
                 <span>Live · Auto-updating (15s)</span>
             </div>
-            <button type="button" wire:click="resetAnalyticsFilters" class="px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">↺ Reset Filters</button>
+            <button type="button" wire:click="resetAnalyticsFilters" class="px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition whitespace-nowrap cursor-pointer">↺ Reset Filters</button>
         </div>
     </div>
 
     {{-- Filter Bar --}}
-    <div class="{{ $card }} p-4 space-y-4">
+    <div class="{{ $card }} p-4 space-y-4 min-w-0">
         <div>
             <div class="text-[10px] uppercase tracking-wider text-slate-400 font-black mb-2">Report Type</div>
             <div class="flex flex-wrap gap-2">
@@ -52,15 +52,16 @@
                     'devices' => '📱 Devices',
                     'age' => '🎂 Age Groups',
                 ] as $key => $label)
-                    <button type="button" wire:click="setAnalyticsDimension('{{ $key }}')" class="{{ $pill }} {{ $dim === $key ? $pillOn : $pillOff }}">{{ $label }}</button>
+                    <button type="button" wire:click="setAnalyticsDimension('{{ $key }}')" class="{{ $pill }} whitespace-nowrap {{ $dim === $key ? $pillOn : $pillOff }}">{{ $label }}</button>
                 @endforeach
             </div>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            <label class="block">
-                <span class="text-[10px] uppercase tracking-wider text-slate-400 font-black">Period</span>
-                <select wire:model.live="analyticsPeriod" class="{{ $input }} mt-1">
+        {{-- Select Dropdowns Row --}}
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,150px),1fr))] gap-3">
+            <label class="block min-w-0">
+                <span class="block text-[10px] uppercase tracking-wider text-slate-400 font-black">Period</span>
+                <select wire:model.live="analyticsPeriod" class="{{ $input }} mt-1 min-w-0">
                     <option value="today">Today</option>
                     <option value="7d">Last 7 Days</option>
                     <option value="30d">Last 30 Days</option>
@@ -68,9 +69,9 @@
                     <option value="all">All Time</option>
                 </select>
             </label>
-            <label class="block">
-                <span class="text-[10px] uppercase tracking-wider text-slate-400 font-black">Country</span>
-                <select wire:model.live="analyticsCountryFilter" class="{{ $input }} mt-1">
+            <label class="block min-w-0">
+                <span class="block text-[10px] uppercase tracking-wider text-slate-400 font-black">Country</span>
+                <select wire:model.live="analyticsCountryFilter" class="{{ $input }} mt-1 min-w-0">
                     <option value="all">All Countries</option>
                     @foreach($availableCountries as $c)
                         @if($c->country_code)
@@ -79,18 +80,18 @@
                     @endforeach
                 </select>
             </label>
-            <label class="block">
-                <span class="text-[10px] uppercase tracking-wider text-slate-400 font-black">Device</span>
-                <select wire:model.live="analyticsDeviceFilter" class="{{ $input }} mt-1">
+            <label class="block min-w-0">
+                <span class="block text-[10px] uppercase tracking-wider text-slate-400 font-black">Device</span>
+                <select wire:model.live="analyticsDeviceFilter" class="{{ $input }} mt-1 min-w-0">
                     <option value="all">All Devices</option>
                     <option value="Desktop">🖥 Desktop</option>
                     <option value="Mobile">📱 Mobile</option>
                     <option value="Tablet">📲 Tablet</option>
                 </select>
             </label>
-            <label class="block">
-                <span class="text-[10px] uppercase tracking-wider text-slate-400 font-black">Age Group</span>
-                <select wire:model.live="analyticsAgeFilter" class="{{ $input }} mt-1">
+            <label class="block min-w-0">
+                <span class="block text-[10px] uppercase tracking-wider text-slate-400 font-black">Age Group</span>
+                <select wire:model.live="analyticsAgeFilter" class="{{ $input }} mt-1 min-w-0">
                     <option value="all">All Ages</option>
                     <option value="18-24">18-24</option>
                     <option value="25-34">25-34</option>
@@ -99,19 +100,23 @@
                     <option value="55+">55+</option>
                 </select>
             </label>
-            <div>
-                <span class="text-[10px] uppercase tracking-wider text-slate-400 font-black">Views</span>
-                <div class="mt-1 inline-flex w-full rounded-xl bg-slate-100 p-0.5 border border-slate-200 text-[11px] font-bold">
+        </div>
+
+        {{-- Segmented Toggles Row (Dedicated track width prevents overlap & horizontal overflow) --}}
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,240px),1fr))] gap-3 pt-2 border-t border-slate-100">
+            <div class="min-w-0">
+                <span class="block text-[10px] uppercase tracking-wider text-slate-400 font-black">Views</span>
+                <div class="mt-1 flex w-full min-w-0 rounded-xl bg-slate-100 p-0.5 border border-slate-200 text-[11px] font-bold gap-0.5">
                     @foreach(['unique' => 'Unique', 'gross' => 'Gross', 'both' => 'Both'] as $k => $l)
-                        <button type="button" wire:click="setAnalyticsViewMode('{{ $k }}')" class="flex-1 px-2 py-1.5 rounded-lg transition {{ $analyticsViewMode === $k ? 'bg-teal-600 text-white' : 'text-slate-600 hover:text-slate-900' }}">{{ $l }}</button>
+                        <button type="button" wire:click="setAnalyticsViewMode('{{ $k }}')" class="flex-1 min-w-0 inline-flex items-center justify-center whitespace-nowrap px-2.5 py-1.5 rounded-lg transition cursor-pointer {{ $analyticsViewMode === $k ? 'bg-teal-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}">{{ $l }}</button>
                     @endforeach
                 </div>
             </div>
-            <div>
-                <span class="text-[10px] uppercase tracking-wider text-slate-400 font-black">Display</span>
-                <div class="mt-1 inline-flex w-full rounded-xl bg-slate-100 p-0.5 border border-slate-200 text-[11px] font-bold">
+            <div class="min-w-0">
+                <span class="block text-[10px] uppercase tracking-wider text-slate-400 font-black">Display</span>
+                <div class="mt-1 flex w-full min-w-0 rounded-xl bg-slate-100 p-0.5 border border-slate-200 text-[11px] font-bold gap-0.5">
                     @foreach(['graph' => '📈 Graph', 'chart' => '📊 Chart', 'both' => '⚡ Both'] as $k => $l)
-                        <button type="button" wire:click="setAnalyticsVisualMode('{{ $k }}')" class="flex-1 px-2 py-1.5 rounded-lg transition {{ $analyticsVisualMode === $k ? 'bg-[#F20B65] text-white' : 'text-slate-600 hover:text-slate-900' }}">{{ $l }}</button>
+                        <button type="button" wire:click="setAnalyticsVisualMode('{{ $k }}')" class="flex-1 min-w-0 inline-flex items-center justify-center gap-1 whitespace-nowrap px-2.5 py-1.5 rounded-lg transition cursor-pointer {{ $analyticsVisualMode === $k ? 'bg-[#F20B65] text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}">{{ $l }}</button>
                     @endforeach
                 </div>
             </div>
@@ -119,7 +124,7 @@
     </div>
 
     {{-- KPI Cards --}}
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,155px),1fr))] gap-3 sm:gap-4">
         @php
             $kpis = [];
             if ($showUnique) { $kpis[] = ['👤 Unique Visitors', number_format($analytics['uniqueVisitors']), 'text-teal-700']; }
@@ -136,18 +141,24 @@
             $kpis[] = ['💰 Revenue', '$' . number_format($analytics['revenue30'], 2), 'text-amber-700'];
         @endphp
         @foreach($kpis as [$label, $value, $color])
-            <div class="{{ $card }} p-4">
-                <div class="text-[11px] uppercase tracking-wider text-slate-400 font-bold">{{ $label }}</div>
-                <div class="mt-1 text-xl font-black {{ $color }}">{{ $value }}</div>
+            <div class="{{ $card }} p-4 min-w-0">
+                <div class="text-[11px] uppercase tracking-wider text-slate-400 font-bold truncate" title="{{ $label }}">{{ $label }}</div>
+                <div class="mt-1 text-xl font-black tabular-nums {{ $color }}">{{ $value }}</div>
             </div>
         @endforeach
     </div>
 
     {{-- 1. Visitors & Traffic Trend --}}
     @if($show('visitors'))
-        <div class="{{ $card }} p-5">
+        @php
+            $labelCount = count($trendChart['labels']);
+            $labelStep = $labelCount > 18 ? 4 : ($labelCount > 10 ? 2 : 1);
+            $barCount = count($trendChart['bars']);
+            $barStep = $barCount > 18 ? 4 : ($barCount > 10 ? 2 : 1);
+        @endphp
+        <div class="{{ $card }} p-5 min-w-0">
             <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-                <div>
+                <div class="min-w-0">
                     <h2 class="text-sm font-extrabold text-slate-900">👥 Visitors &amp; Traffic Trend</h2>
                     <p class="text-[11px] text-slate-500">Daily unique visitors vs gross views vs post views</p>
                 </div>
@@ -158,9 +169,9 @@
                 </div>
             </div>
 
-            <div class="grid gap-6 {{ $showGraph && $showChart ? 'lg:grid-cols-2' : '' }}">
+            <div class="grid gap-6 {{ $showGraph && $showChart ? '@3xl:grid-cols-2' : '' }}">
                 @if($showGraph)
-                    <div>
+                    <div class="min-w-0">
                         <div class="text-[10px] uppercase tracking-wider text-slate-400 font-black mb-2">📈 Line / Area Graph</div>
                         <div class="h-56 w-full">
                             <svg viewBox="0 0 600 160" preserveAspectRatio="none" class="w-full h-full overflow-visible">
@@ -182,21 +193,23 @@
                                 <path d="{{ $trendChart['postLineD'] }}" fill="none" stroke="#8B35F6" stroke-width="2" stroke-dasharray="5,3" vector-effect="non-scaling-stroke"/>
                             </svg>
                         </div>
-                        <div class="flex justify-between text-[9px] font-bold text-slate-400 mt-1">
+                        <div class="flex justify-between gap-2 text-[9px] font-bold text-slate-400 mt-1.5 overflow-hidden">
                             @foreach($trendChart['labels'] as $i => $lbl)
-                                <span class="{{ count($trendChart['labels']) > 7 && $i % 2 ? 'hidden sm:inline' : '' }}">{{ $lbl }}</span>
+                                @if($i === 0 || $i === $labelCount - 1 || ($i % $labelStep === 0 && ($labelCount - 1 - $i) >= $labelStep))
+                                    <span class="whitespace-nowrap">{{ $lbl }}</span>
+                                @endif
                             @endforeach
                         </div>
                     </div>
                 @endif
 
                 @if($showChart)
-                    <div>
+                    <div class="min-w-0">
                         <div class="text-[10px] uppercase tracking-wider text-slate-400 font-black mb-2">📊 Column Bar Chart</div>
-                        <div class="h-56 flex items-end gap-1.5">
+                        <div class="h-56 flex items-end gap-1 sm:gap-1.5">
                             @foreach($trendChart['bars'] as $b)
-                                <div class="flex-1 h-full flex flex-col justify-end items-center group relative">
-                                    <div class="absolute -top-1 left-1/2 -translate-x-1/2 hidden group-hover:block z-10 whitespace-nowrap bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow">
+                                <div class="flex-1 min-w-0 h-full flex flex-col justify-end items-center group relative">
+                                    <div class="absolute -top-1 left-1/2 -translate-x-1/2 hidden group-hover:block z-10 whitespace-nowrap bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow pointer-events-none">
                                         {{ $b['label'] }}: {{ $b['unique'] }} unique · {{ $b['gross'] }} gross · {{ $b['postViews'] }} post
                                     </div>
                                     <div class="w-full h-full flex items-end justify-center gap-0.5">
@@ -207,9 +220,11 @@
                                 </div>
                             @endforeach
                         </div>
-                        <div class="flex gap-1.5 text-[9px] font-bold text-slate-400 mt-1">
+                        <div class="flex justify-between gap-2 text-[9px] font-bold text-slate-400 mt-1.5 overflow-hidden">
                             @foreach($trendChart['bars'] as $i => $b)
-                                <span class="flex-1 text-center truncate {{ count($trendChart['bars']) > 7 && $i % 2 ? 'invisible sm:visible' : '' }}">{{ $b['label'] }}</span>
+                                @if($i === 0 || $i === $barCount - 1 || ($i % $barStep === 0 && ($barCount - 1 - $i) >= $barStep))
+                                    <span class="whitespace-nowrap">{{ $b['label'] }}</span>
+                                @endif
                             @endforeach
                         </div>
                     </div>
@@ -222,18 +237,18 @@
     @if($show('posts'))
         <div class="space-y-4">
             <!-- Top Summary Visuals: Category Distribution & Status Donut -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 @2xl:grid-cols-2 gap-4">
                 @if($showChart)
-                    <div class="{{ $card }} p-5 flex flex-col justify-between">
+                    <div class="{{ $card }} p-5 flex flex-col justify-between min-w-0">
                         <div>
                             <h2 class="text-sm font-extrabold text-slate-900 mb-3">📊 Post Views by Category</h2>
                             <div class="space-y-2.5">
                                 @forelse($topCategories as $c)
                                     @php $catPct = (int) round(((int) $c->total_views / max(1, $maxCatViews)) * 100); @endphp
                                     <div>
-                                        <div class="flex justify-between text-[11px] font-semibold text-slate-700">
+                                        <div class="flex justify-between gap-2 text-[11px] font-semibold text-slate-700">
                                             <span class="truncate font-bold">{{ $c->name }}</span>
-                                            <span class="text-slate-500 shrink-0">{{ number_format((int) $c->total_views) }} views · {{ $c->listings_count }} posts</span>
+                                            <span class="text-slate-500 shrink-0 whitespace-nowrap">{{ number_format((int) $c->total_views) }} views · {{ $c->listings_count }} posts</span>
                                         </div>
                                         <div class="h-2 rounded-full bg-slate-100 mt-1 overflow-hidden">
                                             <div class="h-2 rounded-full bg-[#F20B65] transition-all duration-300" style="width: {{ max(2, $catPct) }}%"></div>
@@ -290,8 +305,8 @@
             </div>
 
             <!-- Full-Width Responsive Table for Top Posts (Zero Clipping of Favs / Columns) -->
-            <div class="{{ $card }} p-5">
-                <div class="flex items-center justify-between mb-3">
+            <div class="{{ $card }} p-5 min-w-0">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                     <h2 class="text-sm font-extrabold text-slate-900">📝 Top Posts by Views</h2>
                     <span class="text-[11px] text-slate-400 font-semibold">{{ count($topListingsReport) }} posts ranked</span>
                 </div>
@@ -336,13 +351,13 @@
 
     {{-- 3. Countries --}}
     @if($show('countries'))
-        <div class="{{ $card }} p-5">
-            <div class="flex items-center justify-between mb-4">
-                <div>
+        <div class="{{ $card }} p-5 min-w-0">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                <div class="min-w-0">
                     <h2 class="text-sm font-extrabold text-slate-900">🌍 Country / Geo Report</h2>
                     <p class="text-[11px] text-slate-500">Real-time visitor geographic distribution</p>
                 </div>
-                <span class="text-[10px] font-black text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200">
+                <span class="text-[10px] font-black text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200 whitespace-nowrap">
                     {{ count($countryReport) }} Countries Reached
                 </span>
             </div>
@@ -350,10 +365,10 @@
             @if(empty($countryReport))
                 <p class="text-xs text-slate-400 py-6 text-center">No real visitor traffic recorded for this period yet.</p>
             @else
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="grid grid-cols-1 @3xl:grid-cols-12 gap-6">
                     <!-- Left: Visual Distribution & Donut Share (5 cols) -->
                     @if($showGraph || $showChart)
-                        <div class="lg:col-span-5 space-y-4">
+                        <div class="@3xl:col-span-5 space-y-4 min-w-0">
                             @if($showGraph)
                                 @php
                                     $cTotal = max(1, array_sum(array_column($countryReport, $showGross ? 'hits' : 'unique_visitors')));
@@ -410,7 +425,7 @@
                     @endif
 
                     <!-- Right: Detailed Country Data Table (7 cols) -->
-                    <div class="{{ ($showGraph || $showChart) ? 'lg:col-span-7' : 'lg:col-span-12' }} overflow-x-auto">
+                    <div class="{{ ($showGraph || $showChart) ? '@3xl:col-span-7' : '@3xl:col-span-12' }} min-w-0 overflow-x-auto">
                         <table class="min-w-full divide-y divide-slate-100 text-left text-xs">
                             <thead>
                                 <tr class="bg-slate-50/80">
@@ -447,8 +462,8 @@
 
     {{-- 4. Devices, Browsers & OS --}}
     @if($show('devices'))
-        <div class="grid gap-4 lg:grid-cols-3">
-            <div class="{{ $card }} p-5">
+        <div class="grid gap-4 grid-cols-1 @md:grid-cols-2 @3xl:grid-cols-3">
+            <div class="{{ $card }} p-5 min-w-0">
                 <h2 class="text-sm font-extrabold text-slate-900 mb-4">📱 Devices</h2>
                 @php
                     $dKey = $showGross ? 'gross_pct' : 'unique_pct';
@@ -472,9 +487,9 @@
                 <div class="space-y-2.5">
                     @foreach($deviceReport as $d)
                         <div>
-                            <div class="flex justify-between text-[11px] font-semibold text-slate-700">
-                                <span>{{ $dIcons[$d['device']] }} {{ $d['device'] }}</span>
-                                <span>@if($showUnique){{ number_format($d['unique_visitors']) }}u @endif @if($showGross)· {{ number_format($d['hits']) }}g @endif · {{ $d[$dKey] }}%</span>
+                            <div class="flex justify-between gap-2 text-[11px] font-semibold text-slate-700">
+                                <span class="truncate">{{ $dIcons[$d['device']] }} {{ $d['device'] }}</span>
+                                <span class="shrink-0 whitespace-nowrap">@if($showUnique){{ number_format($d['unique_visitors']) }}u @endif @if($showGross)· {{ number_format($d['hits']) }}g @endif · {{ $d[$dKey] }}%</span>
                             </div>
                             @if($showChart)
                                 <div class="h-2 rounded-full bg-slate-100 mt-1"><div class="h-2 rounded-full" style="width: {{ max(1, $d[$dKey]) }}%; background: {{ $dColors[$d['device']] }}"></div></div>
@@ -485,13 +500,13 @@
             </div>
 
             @foreach([['🌐 Browsers', $browserReport, 'browser', '#0D9488'], ['💻 Operating Systems', $osReport, 'os', '#8B35F6']] as [$title, $rows, $field, $color])
-                <div class="{{ $card }} p-5">
+                <div class="{{ $card }} p-5 min-w-0">
                     <h2 class="text-sm font-extrabold text-slate-900 mb-4">{{ $title }}</h2>
                     @forelse($rows as $r)
                         <div class="mb-2.5">
-                            <div class="flex justify-between text-[11px] font-semibold text-slate-700">
-                                <span>{{ $r[$field] }}</span>
-                                <span>@if($showUnique){{ number_format($r['unique_visitors']) }} unique @endif @if($showGross)· {{ number_format($r['hits']) }} gross @endif</span>
+                            <div class="flex justify-between gap-2 text-[11px] font-semibold text-slate-700">
+                                <span class="truncate">{{ $r[$field] }}</span>
+                                <span class="shrink-0 whitespace-nowrap">@if($showUnique){{ number_format($r['unique_visitors']) }} unique @endif @if($showGross)· {{ number_format($r['hits']) }} gross @endif</span>
                             </div>
                             <div class="h-2 rounded-full bg-slate-100 mt-1"><div class="h-2 rounded-full" style="width: {{ max(2, $r['pct']) }}%; background: {{ $color }}"></div></div>
                         </div>
@@ -505,16 +520,16 @@
 
     {{-- 5. Age Demographics --}}
     @if($show('age'))
-        <div class="{{ $card }} p-5">
+        <div class="{{ $card }} p-5 min-w-0">
             <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
                 <div>
                     <h2 class="text-sm font-extrabold text-slate-900">🎂 Age Demographics</h2>
                     <p class="text-[11px] text-slate-500">Posters (post age) + registered users (birthdate) by age group, with post views</p>
                 </div>
             </div>
-            <div class="grid gap-6 {{ $showGraph && $showChart ? 'lg:grid-cols-2' : '' }}">
+            <div class="grid gap-6 {{ $showGraph && $showChart ? '@3xl:grid-cols-2' : '' }}">
                 @if($showChart)
-                    <div>
+                    <div class="min-w-0">
                         <div class="text-[10px] uppercase tracking-wider text-slate-400 font-black mb-2">📊 Column Chart (Posts / Users / Views)</div>
                         <div class="h-52 flex items-end gap-4 px-2">
                             @foreach($ageReport as $a)
@@ -535,7 +550,7 @@
                     </div>
                 @endif
                 @if($showGraph)
-                    <div>
+                    <div class="min-w-0">
                         <div class="text-[10px] uppercase tracking-wider text-slate-400 font-black mb-2">📈 Distribution Graph</div>
                         <div class="h-44">
                             <svg viewBox="0 0 400 135" preserveAspectRatio="none" class="w-full h-full overflow-visible">
