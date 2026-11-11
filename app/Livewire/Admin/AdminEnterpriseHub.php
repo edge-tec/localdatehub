@@ -524,6 +524,7 @@ class AdminEnterpriseHub extends Component
     public $brandMobileLogoUpload = null;
     public $brandFaviconUpload = null;
     public $brandHeroImageUpload = null;
+    public $brandSidebarPromoUpload = null;
     public string $testEmailRecipient = '';
     public ?string $smtpTestSuccessMessage = null;
     public ?string $smtpTestErrorMessage = null;
@@ -4445,6 +4446,10 @@ class AdminEnterpriseHub extends Component
             'hero_offer_link' => '',
             'hero_offer_new_tab' => 'true',
             'hero_offer_alt' => 'LocalDateHub Dating Lifestyle',
+            'sidebar_promo_image_url' => '/images/promo-banner.jpg',
+            'sidebar_promo_offer_link' => '',
+            'sidebar_promo_offer_new_tab' => 'true',
+            'sidebar_promo_offer_alt' => 'Find Your Perfect Match',
             'primary_brand_color' => '#F20B65',
             'mail_mailer' => 'smtp',
             'mail_host' => 'smtp.mailgun.org',
@@ -4562,13 +4567,44 @@ class AdminEnterpriseHub extends Component
             'brandHeroImageUpload' => ['required', 'file', 'mimes:png,jpg,jpeg,webp,gif', 'max:5120'],
         ]);
 
-        $ext = strtolower($this->brandHeroImageUpload->getClientOriginalExtension());
+        $this->storeUploadedBrandingPhoto($this->brandHeroImageUpload, 'hero_image_url', 'Homepage Heading Image');
+        $this->brandHeroImageUpload = null;
+    }
+
+    public function updatedBrandSidebarPromoUpload(): void
+    {
+        $this->authorizePermission('settings.manage');
+        $this->validate([
+            'brandSidebarPromoUpload' => ['required', 'file', 'mimes:png,jpg,jpeg,webp,gif', 'max:5120'],
+        ]);
+
+        $this->storeUploadedBrandingPhoto($this->brandSidebarPromoUpload, 'sidebar_promo_image_url', 'Default Sidebar Promotional Image');
+        $this->brandSidebarPromoUpload = null;
+    }
+
+    public function clearHeroOfferLink(): void
+    {
+        $this->authorizePermission('settings.manage');
+        $this->settingValues['hero_offer_link'] = '';
+        $this->persistSingleBrandSetting('hero_offer_link', '', 'Homepage Heading Image Offer Link');
+    }
+
+    public function clearSidebarPromoOfferLink(): void
+    {
+        $this->authorizePermission('settings.manage');
+        $this->settingValues['sidebar_promo_offer_link'] = '';
+        $this->persistSingleBrandSetting('sidebar_promo_offer_link', '', 'Default Sidebar Promo Offer Link');
+    }
+
+    protected function storeUploadedBrandingPhoto($uploadedFile, string $settingKey, string $label): string
+    {
+        $ext = strtolower($uploadedFile->getClientOriginalExtension());
         if ($ext === 'gif') {
-            $path = $this->brandHeroImageUpload->store('branding', 'public');
+            $path = $uploadedFile->store('branding', 'public');
             $url = '/storage/' . $path;
         } else {
             $stored = app(\App\Support\Storage\MediaStorageService::class)->storeSanitizedPhoto(
-                $this->brandHeroImageUpload,
+                $uploadedFile,
                 'branding',
                 'public',
                 1600,
@@ -4577,16 +4613,30 @@ class AdminEnterpriseHub extends Component
             $url = $stored['url'];
         }
 
-        $this->settingValues['hero_image_url'] = $url;
-        $this->persistSingleBrandSetting('hero_image_url', $url, 'Homepage Heading Image');
-        $this->brandHeroImageUpload = null;
+        $this->settingValues[$settingKey] = $url;
+        $this->persistSingleBrandSetting($settingKey, $url, $label);
+
+        return $url;
     }
 
-    public function clearHeroOfferLink(): void
+    protected function validateOptionalOfferLink(string $key): void
     {
-        $this->authorizePermission('settings.manage');
-        $this->settingValues['hero_offer_link'] = '';
-        $this->persistSingleBrandSetting('hero_offer_link', '', 'Homepage Heading Image Offer Link');
+        $offerLink = trim((string) ($this->settingValues[$key] ?? ''));
+        if ($offerLink === '') {
+            return;
+        }
+
+        $isRelative = str_starts_with($offerLink, '/') && !str_starts_with($offerLink, '//');
+        $scheme = strtolower((string) parse_url($offerLink, PHP_URL_SCHEME));
+        $isHttpUrl = in_array($scheme, ['http', 'https'], true) && filter_var($offerLink, FILTER_VALIDATE_URL);
+
+        if (!$isRelative && !$isHttpUrl) {
+            throw ValidationException::withMessages([
+                "settingValues.{$key}" => 'Offer link must start with https://, http://, or a valid site path like /promo.',
+            ]);
+        }
+
+        $this->settingValues[$key] = $offerLink;
     }
 
     protected function persistSingleBrandSetting(string $key, string $url, string $label): void
@@ -4614,6 +4664,7 @@ class AdminEnterpriseHub extends Component
             'site_mobile_logo_url' => '/images/logo-mobile.png',
             'site_favicon_url' => '/favicon.ico',
             'hero_image_url' => '/images/hero-model.jpg',
+            'sidebar_promo_image_url' => '/images/promo-banner.jpg',
         ];
         if (!array_key_exists($key, $defaults)) {
             return;
@@ -4641,26 +4692,19 @@ class AdminEnterpriseHub extends Component
         if ($this->brandHeroImageUpload) {
             $this->updatedBrandHeroImageUpload();
         }
-
-        $offerLink = trim((string) ($this->settingValues['hero_offer_link'] ?? ''));
-        if ($offerLink !== '') {
-            $isRelative = str_starts_with($offerLink, '/') && !str_starts_with($offerLink, '//');
-            $scheme = strtolower((string) parse_url($offerLink, PHP_URL_SCHEME));
-            $isHttpUrl = in_array($scheme, ['http', 'https'], true) && filter_var($offerLink, FILTER_VALIDATE_URL);
-            if (!$isRelative && !$isHttpUrl) {
-                throw ValidationException::withMessages([
-                    'settingValues.hero_offer_link' => 'Offer link must start with https://, http://, or a valid site path like /promo.',
-                ]);
-            }
-            $this->settingValues['hero_offer_link'] = $offerLink;
+        if ($this->brandSidebarPromoUpload) {
+            $this->updatedBrandSidebarPromoUpload();
         }
+
+        $this->validateOptionalOfferLink('hero_offer_link');
+        $this->validateOptionalOfferLink('sidebar_promo_offer_link');
 
         $changed = 0;
         foreach ($this->settingValues as $key => $val) {
             $setting = SystemSetting::firstOrNew(['key' => $key]);
             if (!$setting->exists) {
                 $group = 'general';
-                if (str_starts_with($key, 'site_logo') || str_starts_with($key, 'site_favicon') || str_starts_with($key, 'hero_') || $key === 'site_mobile_logo_url' || $key === 'primary_brand_color') {
+                if (str_starts_with($key, 'site_logo') || str_starts_with($key, 'site_favicon') || str_starts_with($key, 'hero_') || str_starts_with($key, 'sidebar_promo_') || $key === 'site_mobile_logo_url' || $key === 'primary_brand_color') {
                     $group = 'branding';
                 } elseif (str_starts_with($key, 'mail_') && (str_contains($key, 'host') || str_contains($key, 'port') || str_contains($key, 'username') || str_contains($key, 'password') || str_contains($key, 'encryption') || str_contains($key, 'mailer') || str_contains($key, 'from_'))) {
                     $group = 'smtp';
@@ -4676,7 +4720,14 @@ class AdminEnterpriseHub extends Component
                     $group = 'security';
                 }
                 $setting->group = $group;
-                $setting->type = in_array($key, ['hero_image_url', 'hero_offer_link', 'hero_offer_alt'], true)
+                $setting->type = in_array($key, [
+                    'hero_image_url',
+                    'hero_offer_link',
+                    'hero_offer_alt',
+                    'sidebar_promo_image_url',
+                    'sidebar_promo_offer_link',
+                    'sidebar_promo_offer_alt',
+                ], true)
                     ? 'string'
                     : (in_array((string) $val, ['true', 'false'], true) ? 'boolean' : (is_numeric($val) ? 'integer' : 'string'));
                 $setting->description = ucwords(str_replace('_', ' ', $key));

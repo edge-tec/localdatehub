@@ -7368,6 +7368,97 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Default Sidebar Promotional Image & Optional Offer Link Manager -->
+                        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200/80">
+                                <div>
+                                    <h4 class="text-sm font-black text-slate-900">Default Sidebar Promotional Image &amp; Offer Link</h4>
+                                    <p class="text-xs text-slate-500 mt-0.5">Replace the default homepage sidebar promo image (between Join Our Community and Safety guidelines) and set a custom offer destination link.</p>
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    @if(!empty($settingValues['sidebar_promo_offer_link']))
+                                        <span class="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-black uppercase tracking-wider">Offer Link Active</span>
+                                    @endif
+                                    <button type="button" wire:click="resetBrandAsset('sidebar_promo_image_url')" class="px-3 py-1 rounded-lg bg-white hover:bg-rose-50 border border-slate-200 text-[11px] font-bold text-slate-600 hover:text-pink-600 transition">
+                                        Reset Image
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                                <!-- Live Preview -->
+                                <div class="lg:col-span-5 space-y-3">
+                                    @php
+                                        $adminSidebarRaw = trim((string) ($settingValues['sidebar_promo_image_url'] ?? '/images/promo-banner.jpg'));
+                                        $adminSidebarPreview = (str_starts_with($adminSidebarRaw, 'http://') || str_starts_with($adminSidebarRaw, 'https://'))
+                                            ? $adminSidebarRaw
+                                            : asset(ltrim($adminSidebarRaw !== '' ? $adminSidebarRaw : 'images/promo-banner.jpg', '/'));
+                                    @endphp
+                                    <div class="relative rounded-2xl overflow-hidden border border-slate-300 bg-slate-900 h-52 sm:h-56 shadow-inner flex items-center justify-center p-2">
+                                        <img
+                                            src="{{ $adminSidebarPreview }}"
+                                            alt="{{ $settingValues['sidebar_promo_offer_alt'] ?? 'Default Sidebar Promotional Image' }}"
+                                            onerror="this.onerror=null;this.src='/images/promo-banner.jpg';"
+                                            class="max-w-full max-h-full w-auto h-auto object-contain"
+                                        >
+                                        <div wire:loading.flex wire:target="brandSidebarPromoUpload" class="absolute inset-0 bg-white/90 backdrop-blur-xs items-center justify-center gap-2 text-xs font-black text-pink-600">
+                                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                            <span>Uploading Sidebar Image...</span>
+                                        </div>
+                                    </div>
+
+                                    <label class="w-full cursor-pointer inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#F20B83] to-pink-600 hover:from-pink-600 hover:to-rose-600 text-white text-xs font-black shadow-xs transition">
+                                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                        <span>Upload New Sidebar Image</span>
+                                        <input type="file" wire:model="brandSidebarPromoUpload" accept=".png,.jpg,.jpeg,.webp,.gif,image/*" class="hidden">
+                                    </label>
+                                    @error('brandSidebarPromoUpload') <p class="text-[11px] font-bold text-rose-600">{{ $message }}</p> @enderror
+                                    <p class="text-[11px] text-slate-500">JPG, PNG, WEBP, or GIF up to 5MB. Displays uncropped in the homepage sidebar.</p>
+                                </div>
+
+                                <!-- Sidebar URL + Optional Offer Link Controls -->
+                                <div class="lg:col-span-7 space-y-4">
+                                    <div>
+                                        <label class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1">Sidebar Image URL / Path</label>
+                                        <input type="text" wire:model="settingValues.sidebar_promo_image_url" class="{{ $input }} text-xs font-mono" placeholder="/images/promo-banner.jpg or https://...">
+                                        <span class="text-[11px] text-slate-500 mt-1 block">Automatically updated on upload, or paste a custom banner URL.</span>
+                                    </div>
+
+                                    <div>
+                                        <div class="flex items-center justify-between gap-2 mb-1">
+                                            <label class="block text-xs font-black text-slate-800 uppercase tracking-wider">Offer / Destination Link (Optional)</label>
+                                            @if(!empty($settingValues['sidebar_promo_offer_link']))
+                                                <button type="button" wire:click="clearSidebarPromoOfferLink" class="text-[11px] font-bold text-rose-600 hover:underline">Remove Offer Link</button>
+                                            @endif
+                                        </div>
+                                        <input type="text" wire:model="settingValues.sidebar_promo_offer_link" class="{{ $input }} text-xs font-mono" placeholder="https://example.com/offer or /register (blank uses /register)">
+                                        @error('settingValues.sidebar_promo_offer_link') <p class="text-[11px] font-bold text-rose-600 mt-1">{{ $message }}</p> @enderror
+                                        <span class="text-[11px] text-slate-500 mt-1 block">Clicking the default sidebar promo image directs visitors to this offer URL (defaults to Sign Up if left empty).</span>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1">Offer Link Target</label>
+                                            <select wire:model="settingValues.sidebar_promo_offer_new_tab" class="{{ $input }} text-xs font-bold text-slate-900">
+                                                <option value="true">Open in New Tab (_blank)</option>
+                                                <option value="false">Open in Same Tab</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1">Image Alt Text (SEO)</label>
+                                            <input type="text" wire:model="settingValues.sidebar_promo_offer_alt" class="{{ $input }} text-xs font-bold" placeholder="Find Your Perfect Match">
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-1 flex justify-end">
+                                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-[#F20B83] hover:bg-[#d90858] text-white text-xs font-black shadow-xs transition">
+                                            Save Sidebar Promo &amp; Offer Settings
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 @endif
 

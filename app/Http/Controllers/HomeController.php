@@ -132,37 +132,51 @@ class HomeController extends Controller
         $heroOfferNewTab = true;
         $heroOfferAlt = 'LocalDateHub Dating Lifestyle';
 
+        $sidebarPromoImageUrl = asset('images/promo-banner.jpg');
+        $sidebarPromoIsCustom = false;
+        $sidebarPromoOfferLink = null;
+        $sidebarPromoOfferNewTab = true;
+        $sidebarPromoOfferAlt = 'Find Your Perfect Match';
+
         if (Schema::hasTable('system_settings')) {
-            $heroSettings = SystemSetting::whereIn('key', [
+            $brandSettings = SystemSetting::whereIn('key', [
                 'hero_image_url',
                 'hero_offer_link',
                 'hero_offer_new_tab',
                 'hero_offer_alt',
+                'sidebar_promo_image_url',
+                'sidebar_promo_offer_link',
+                'sidebar_promo_offer_new_tab',
+                'sidebar_promo_offer_alt',
             ])->pluck('value', 'key');
 
-            $rawImage = trim((string) ($heroSettings['hero_image_url'] ?? ''));
-            if ($rawImage !== '') {
-                $heroImageUrl = (str_starts_with($rawImage, 'http://') || str_starts_with($rawImage, 'https://'))
-                    ? $rawImage
-                    : asset(ltrim($rawImage, '/'));
+            $rawHeroImage = trim((string) ($brandSettings['hero_image_url'] ?? ''));
+            if ($rawHeroImage !== '') {
+                $heroImageUrl = $this->resolveBrandImageUrl($rawHeroImage);
             }
 
-            $rawOfferLink = trim((string) ($heroSettings['hero_offer_link'] ?? ''));
-            if ($rawOfferLink !== '') {
-                $isRelative = str_starts_with($rawOfferLink, '/') && !str_starts_with($rawOfferLink, '//');
-                $scheme = strtolower((string) parse_url($rawOfferLink, PHP_URL_SCHEME));
-                if ($isRelative || (in_array($scheme, ['http', 'https'], true) && filter_var($rawOfferLink, FILTER_VALIDATE_URL))) {
-                    $heroOfferLink = $rawOfferLink;
-                }
+            $heroOfferLink = $this->sanitizeOfferLink((string) ($brandSettings['hero_offer_link'] ?? ''));
+            if (isset($brandSettings['hero_offer_new_tab'])) {
+                $heroOfferNewTab = filter_var($brandSettings['hero_offer_new_tab'], FILTER_VALIDATE_BOOLEAN);
+            }
+            $rawHeroAlt = trim((string) ($brandSettings['hero_offer_alt'] ?? ''));
+            if ($rawHeroAlt !== '') {
+                $heroOfferAlt = $rawHeroAlt;
             }
 
-            if (isset($heroSettings['hero_offer_new_tab'])) {
-                $heroOfferNewTab = filter_var($heroSettings['hero_offer_new_tab'], FILTER_VALIDATE_BOOLEAN);
+            $rawSidebarImage = trim((string) ($brandSettings['sidebar_promo_image_url'] ?? ''));
+            if ($rawSidebarImage !== '') {
+                $sidebarPromoImageUrl = $this->resolveBrandImageUrl($rawSidebarImage);
+                $sidebarPromoIsCustom = ltrim($rawSidebarImage, '/') !== 'images/promo-banner.jpg';
             }
 
-            $rawAlt = trim((string) ($heroSettings['hero_offer_alt'] ?? ''));
-            if ($rawAlt !== '') {
-                $heroOfferAlt = $rawAlt;
+            $sidebarPromoOfferLink = $this->sanitizeOfferLink((string) ($brandSettings['sidebar_promo_offer_link'] ?? ''));
+            if (isset($brandSettings['sidebar_promo_offer_new_tab'])) {
+                $sidebarPromoOfferNewTab = filter_var($brandSettings['sidebar_promo_offer_new_tab'], FILTER_VALIDATE_BOOLEAN);
+            }
+            $rawSidebarAlt = trim((string) ($brandSettings['sidebar_promo_offer_alt'] ?? ''));
+            if ($rawSidebarAlt !== '') {
+                $sidebarPromoOfferAlt = $rawSidebarAlt;
             }
         }
 
@@ -182,6 +196,34 @@ class HomeController extends Controller
             'heroOfferLink' => $heroOfferLink,
             'heroOfferNewTab' => $heroOfferNewTab,
             'heroOfferAlt' => $heroOfferAlt,
+            'sidebarPromoImageUrl' => $sidebarPromoImageUrl,
+            'sidebarPromoIsCustom' => $sidebarPromoIsCustom,
+            'sidebarPromoOfferLink' => $sidebarPromoOfferLink,
+            'sidebarPromoOfferNewTab' => $sidebarPromoOfferNewTab,
+            'sidebarPromoOfferAlt' => $sidebarPromoOfferAlt,
         ]);
+    }
+
+    protected function resolveBrandImageUrl(string $rawImage): string
+    {
+        return (str_starts_with($rawImage, 'http://') || str_starts_with($rawImage, 'https://'))
+            ? $rawImage
+            : asset(ltrim($rawImage, '/'));
+    }
+
+    protected function sanitizeOfferLink(string $rawUrl): ?string
+    {
+        $trimmed = trim($rawUrl);
+        if ($trimmed === '') {
+            return null;
+        }
+
+        $isRelative = str_starts_with($trimmed, '/') && !str_starts_with($trimmed, '//');
+        $scheme = strtolower((string) parse_url($trimmed, PHP_URL_SCHEME));
+        if ($isRelative || (in_array($scheme, ['http', 'https'], true) && filter_var($trimmed, FILTER_VALIDATE_URL))) {
+            return $trimmed;
+        }
+
+        return null;
     }
 }

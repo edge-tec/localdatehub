@@ -718,25 +718,36 @@
                         </a>
                     </div>
 
-                    <!-- 2. Sunset Romance Promotional Banner -->
-                    <div class="rounded-2xl overflow-hidden shadow-sm border border-slate-200 relative group">
-                        <a href="{{ route('register') }}" class="block relative">
-                            <img 
-                                src="{{ asset('images/promo-banner.jpg') }}" 
-                                alt="Find Your Perfect Match" 
-                                class="w-full h-auto object-cover group-hover:scale-105 transition duration-300"
+                    <!-- 2. Default Promotional Sidebar Banner (Admin Configurable Image & Offer Link) -->
+                    @php
+                        $sidebarHref = !empty($sidebarPromoOfferLink) ? $sidebarPromoOfferLink : route('register');
+                        $sidebarExternalTarget = !empty($sidebarPromoOfferLink) && !empty($sidebarPromoOfferNewTab);
+                    @endphp
+                    <div class="rounded-2xl overflow-clip shadow-sm border border-slate-200 relative group bg-slate-950">
+                        <a
+                            href="{{ $sidebarHref }}"
+                            @if($sidebarExternalTarget) target="_blank" rel="noopener noreferrer sponsored" @endif
+                            class="block relative"
+                        >
+                            <img
+                                src="{{ $sidebarPromoImageUrl ?? asset('images/promo-banner.jpg') }}"
+                                alt="{{ $sidebarPromoOfferAlt ?? 'Find Your Perfect Match' }}"
+                                onerror="this.onerror=null;this.src='{{ asset('images/promo-banner.jpg') }}';"
+                                class="w-full h-auto {{ ($sidebarPromoIsCustom ?? false) ? 'object-contain bg-slate-950' : 'object-cover' }} block group-hover:scale-[1.02] transition duration-300"
                             />
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-4">
-                                <div class="text-xl font-bold font-serif italic text-pink-600 drop-shadow-md">
-                                    Find Your Perfect Match
+                            @if(!($sidebarPromoIsCustom ?? false))
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-4">
+                                    <div class="text-xl font-bold font-serif italic text-pink-600 drop-shadow-md">
+                                        Find Your Perfect Match
+                                    </div>
+                                    <div class="text-xs font-bold text-white flex items-center gap-1 mt-1">
+                                        <svg class="w-3.5 h-3.5 text-[#F20B65] fill-current" viewBox="0 0 24 24">
+                                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                        </svg>
+                                        <span>LocalDate<span class="text-[#F20B65]">Hub</span></span>
+                                    </div>
                                 </div>
-                                <div class="text-xs font-bold text-white flex items-center gap-1 mt-1">
-                                    <svg class="w-3.5 h-3.5 text-[#F20B65] fill-current" viewBox="0 0 24 24">
-                                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                                    </svg>
-                                    <span>LocalDate<span class="text-[#F20B65]">Hub</span></span>
-                                </div>
-                            </div>
+                            @endif
                         </a>
                     </div>
 
