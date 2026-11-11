@@ -287,32 +287,143 @@
                     </div>
 
                     <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-                        <h4 class="text-xs font-black uppercase tracking-wider text-slate-800">4. Audience Targeting (Leave Empty for All Traffic)</h4>
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <h4 class="text-xs font-black uppercase tracking-wider text-slate-800">4. Audience Targeting (All Traffic by Default)</h4>
+                            <span class="text-[11px] font-semibold text-slate-500">Pick specific targets or choose <strong class="text-emerald-700">All</strong> for nationwide reach.</span>
+                        </div>
+
+                        @php
+                            $targetDimensions = [
+                                [
+                                    'key' => 'states',
+                                    'field' => 'target_states',
+                                    'label' => 'Target States',
+                                    'all_label' => 'All States (Nationwide)',
+                                    'badge_all' => 'All States',
+                                    'placeholder' => 'Filter states...',
+                                    'items' => ($targetingOptions['states'] ?? collect())->map(fn ($st) => [
+                                        'value' => (string) $st->code,
+                                        'label' => $st->name . ' (' . $st->code . ')',
+                                    ]),
+                                ],
+                                [
+                                    'key' => 'categories',
+                                    'field' => 'target_categories',
+                                    'label' => 'Target Categories',
+                                    'all_label' => 'All Categories',
+                                    'badge_all' => 'All Categories',
+                                    'placeholder' => 'Filter categories...',
+                                    'items' => ($targetingOptions['categories'] ?? collect())->map(fn ($cat) => [
+                                        'value' => (string) $cat->id,
+                                        'label' => (string) $cat->name,
+                                    ]),
+                                ],
+                                [
+                                    'key' => 'cities',
+                                    'field' => 'target_cities',
+                                    'label' => 'Target Cities',
+                                    'all_label' => 'All Cities',
+                                    'badge_all' => 'All Cities',
+                                    'placeholder' => 'Filter cities...',
+                                    'items' => ($targetingOptions['cities'] ?? collect())->map(fn ($ct) => [
+                                        'value' => (string) $ct->id,
+                                        'label' => $ct->name . ($ct->state ? ', ' . $ct->state->code : ''),
+                                    ]),
+                                ],
+                            ];
+                        @endphp
+
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-xs font-black text-slate-800 mb-1">Target States</label>
-                                <select multiple wire:model="campaignForm.target_states" class="{{ $input }} text-xs h-28">
-                                    @foreach(($targetingOptions['states'] ?? collect()) as $st)
-                                        <option value="{{ $st->code }}">{{ $st->name }} ({{ $st->code }})</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-black text-slate-800 mb-1">Target Categories</label>
-                                <select multiple wire:model="campaignForm.target_categories" class="{{ $input }} text-xs h-28">
-                                    @foreach(($targetingOptions['categories'] ?? collect()) as $cat)
-                                        <option value="{{ $cat->id }}">{{ $cat->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-black text-slate-800 mb-1">Target Cities</label>
-                                <select multiple wire:model="campaignForm.target_cities" class="{{ $input }} text-xs h-28">
-                                    @foreach(($targetingOptions['cities'] ?? collect()) as $ct)
-                                        <option value="{{ $ct->id }}">{{ $ct->name }}{{ $ct->state ? ', ' . $ct->state->code : '' }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                            @foreach($targetDimensions as $dim)
+                                <div
+                                    x-data="{
+                                        search: '',
+                                        isAll() {
+                                            const vals = $wire.campaignForm?.['{{ $dim['field'] }}'] || [];
+                                            return vals.length === 0 || vals.includes('ALL');
+                                        },
+                                        selectedCount() {
+                                            return ($wire.campaignForm?.['{{ $dim['field'] }}'] || []).filter((v) => v !== 'ALL').length;
+                                        }
+                                    }"
+                                    class="rounded-xl border border-slate-200 bg-white overflow-hidden flex flex-col"
+                                >
+                                    <div class="px-2.5 py-2 bg-slate-50/80 border-b border-slate-200 flex items-center justify-between gap-1.5">
+                                        <label class="text-xs font-black text-slate-800 truncate">{{ $dim['label'] }}</label>
+                                        <span
+                                            x-show="isAll()"
+                                            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0"
+                                        >
+                                            {{ $dim['badge_all'] }}
+                                        </span>
+                                        <span
+                                            x-show="!isAll()"
+                                            x-cloak
+                                            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-pink-50 text-[#F20B83] border border-pink-200 shrink-0"
+                                            x-text="selectedCount() + ' Selected'"
+                                        ></span>
+                                    </div>
+
+                                    <div class="px-2 py-1.5 border-b border-slate-100 flex items-center justify-between gap-1 bg-white">
+                                        <div class="flex items-center gap-1 text-[10px] font-bold shrink-0">
+                                            <button
+                                                type="button"
+                                                wire:click="selectTargetingScope('{{ $dim['key'] }}', 'all')"
+                                                @click="search = ''"
+                                                :class="isAll() ? 'bg-emerald-50 text-emerald-700 border-emerald-300' : 'bg-white text-slate-600 border-slate-200 hover:border-pink-300'"
+                                                class="px-2 py-0.5 rounded-md border transition cursor-pointer"
+                                            >
+                                                {{ $dim['badge_all'] }}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="selectTargetingScope('{{ $dim['key'] }}', 'every')"
+                                                class="px-2 py-0.5 rounded-md bg-white border border-slate-200 hover:border-pink-300 text-slate-700 transition cursor-pointer"
+                                            >
+                                                Select All
+                                            </button>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            x-model="search"
+                                            placeholder="{{ $dim['placeholder'] }}"
+                                            class="w-full min-w-0 px-2 py-0.5 rounded-md border border-slate-200 text-[11px] text-slate-700 focus:outline-none focus:border-pink-400"
+                                        >
+                                    </div>
+
+                                    <div class="max-h-36 overflow-y-auto divide-y divide-slate-100 text-xs">
+                                        <button
+                                            type="button"
+                                            wire:click="selectTargetingScope('{{ $dim['key'] }}', 'all')"
+                                            @click="search = ''"
+                                            :class="isAll() ? 'bg-emerald-50/70 text-emerald-900 font-black' : 'bg-white text-slate-700 hover:bg-slate-50 font-semibold'"
+                                            class="w-full px-2.5 py-1.5 flex items-center justify-between text-left transition cursor-pointer"
+                                        >
+                                            <span class="truncate">{{ $dim['all_label'] }}</span>
+                                            <span
+                                                :class="isAll() ? 'bg-emerald-600 border-emerald-600 text-white' : 'bg-white border-slate-300 text-transparent'"
+                                                class="w-4 h-4 rounded-sm border inline-flex items-center justify-center shrink-0 text-[10px] font-black"
+                                            >&check;</span>
+                                        </button>
+
+                                        @foreach($dim['items'] as $opt)
+                                            <label
+                                                data-filter="{{ strtolower($opt['label']) }}"
+                                                x-show="!search || $el.dataset.filter.includes(search.toLowerCase())"
+                                                class="px-2.5 py-1.5 flex items-center justify-between gap-2 hover:bg-pink-50/40 cursor-pointer text-slate-700"
+                                            >
+                                                <span class="truncate text-[11px] font-medium">{{ $opt['label'] }}</span>
+                                                <input
+                                                    type="checkbox"
+                                                    value="{{ $opt['value'] }}"
+                                                    wire:model="campaignForm.{{ $dim['field'] }}"
+                                                    class="rounded border-slate-300 text-[#F20B83] focus:ring-[#F20B83] shrink-0"
+                                                />
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">

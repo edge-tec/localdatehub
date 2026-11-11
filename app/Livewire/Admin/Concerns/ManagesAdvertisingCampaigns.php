@@ -175,6 +175,43 @@ trait ManagesAdvertisingCampaigns
         };
     }
 
+    /**
+     * Quick-toggle audience targeting dimensions between nationwide/all-traffic and full selection.
+     */
+    public function selectTargetingScope(string $dimension, string $mode = 'all'): void
+    {
+        $this->authorizePermission('ads.manage');
+
+        $fieldMap = [
+            'states' => 'target_states',
+            'categories' => 'target_categories',
+            'cities' => 'target_cities',
+        ];
+
+        $field = $fieldMap[$dimension] ?? null;
+        if (!$field) {
+            return;
+        }
+
+        if ($mode !== 'every') {
+            $this->campaignForm[$field] = [];
+            return;
+        }
+
+        $this->campaignForm[$field] = match ($dimension) {
+            'states' => Schema::hasTable('states')
+                ? State::where('is_active', true)->orderBy('name')->pluck('code')->all()
+                : [],
+            'categories' => Schema::hasTable('categories')
+                ? Category::where('is_active', true)->orderBy('display_order')->orderBy('name')->pluck('id')->map(fn ($id) => (string) $id)->all()
+                : [],
+            'cities' => Schema::hasTable('cities')
+                ? City::orderByDesc('is_popular')->orderBy('name')->take(120)->pluck('id')->map(fn ($id) => (string) $id)->all()
+                : [],
+            default => [],
+        };
+    }
+
     public function resetCampaignForm(): void
     {
         $this->editingCampaignId = null;

@@ -532,5 +532,36 @@ class EnterpriseAdvertisingSystemTest extends TestCase
         $this->assertNull(AdCampaign::find($second->id));
         $this->assertNotNull(AdCampaign::find($first->id));
     }
+
+    public function test_all_states_target_option_toggles_and_delivers_nationwide(): void
+    {
+        $secondState = State::where('is_active', true)->where('id', '!=', $this->state->id)->firstOrFail();
+        $allStateCodes = State::where('is_active', true)->orderBy('name')->pluck('code')->all();
+
+        $hub = Livewire::actingAs($this->admin)
+            ->test(AdminEnterpriseHub::class, ['initialTab' => 'ads'])
+            ->call('openCampaignModal')
+            ->assertSee('All States (Nationwide)')
+            ->call('selectTargetingScope', 'states', 'every')
+            ->assertSet('campaignForm.target_states', $allStateCodes)
+            ->call('selectTargetingScope', 'states', 'all')
+            ->assertSet('campaignForm.target_states', []);
+
+        // Passing 'ALL' alongside state codes treats the state dimension as unrestricted (nationwide)
+        $hub->set('campaignForm.name', 'Nationwide State Banner')
+            ->set('campaignForm.destination_url', 'https://nationwide.example.com')
+            ->set('campaignForm.desktop_banner_url', 'https://cdn.example.com/nationwide.png')
+            ->set('campaignForm.placements', [AdCampaign::SLOT_SIDEBAR])
+            ->set('campaignForm.target_states', ['ALL', $this->state->code])
+            ->call('saveCampaign')
+            ->assertHasNoErrors();
+
+        $campaign = AdCampaign::where('name', 'Nationwide State Banner')->with('targetingRules')->firstOrFail();
+        $this->assertSame(0, $campaign->targetingRules->where('rule_type', 'state')->count());
+
+        $delivery = app(AdDeliveryService::class);
+        $this->assertCount(1, $delivery->getAdsForSlot(AdCampaign::SLOT_SIDEBAR, ['state' => $secondState->code], 5, false));
+        $this->assertCount(1, $delivery->getAdsForSlot(AdCampaign::SLOT_SIDEBAR, ['state' => $this->state->code], 5, false));
+    }
 }
 

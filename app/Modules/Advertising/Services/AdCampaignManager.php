@@ -163,8 +163,12 @@ class AdCampaignManager
         ];
 
         foreach ($ruleMappings as $ruleType => $values) {
+            if (collect($values)->contains(fn ($v) => strcasecmp(trim((string) $v), 'all') === 0)) {
+                continue;
+            }
+
             foreach ($values as $value) {
-                if (strcasecmp($value, 'all') === 0 || $value === '') {
+                if ($value === '') {
                     continue;
                 }
                 AdTargetingRule::create([
