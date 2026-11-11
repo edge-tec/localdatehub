@@ -27,15 +27,14 @@
                                 {{ strtoupper(substr(auth()->user()?->name ?: 'A', 0, 1)) }}
                             </div>
                         @endif
-                        <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="text-xs font-bold text-slate-900 truncate flex items-center justify-between">
                             <span class="truncate">{{ auth()->user()?->name ?? 'Admin' }}</span>
                             <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 transition transform duration-150" :class="{ 'rotate-180': adminProfileOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                         </div>
-                        <div class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <div class="text-[10px] text-[#F20B83] font-black flex items-center gap-1 mt-0.5">
+                            <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                             <span>{{ auth()->user() ? strtoupper(str_replace('_', ' ', auth()->user()->role)) : 'Online' }}</span>
                         </div>
                     </div>
@@ -354,10 +353,9 @@
                         <p class="text-xs text-slate-500 mt-0.5">Welcome back, Super Admin! Real-time live platform telemetry and visitor tracking.</p>
                     </div>
                     <div class="flex items-center gap-2">
-                        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800 shadow-xs w-max">
-                            <span class="relative flex h-2.5 w-2.5">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                        <div class="inline-flex items-center gap-2 pl-1.5 pr-3.5 py-1 rounded-full bg-white/95 border border-rose-200/80 shadow-[0_6px_18px_-8px_rgba(242,11,131,0.3)] ring-1 ring-rose-500/10 text-xs font-black text-slate-900 w-max">
+                            <span class="w-5 h-5 rounded-full bg-gradient-to-br from-[#F20B83] via-rose-500 to-fuchsia-600 text-white flex items-center justify-center shrink-0">
+                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                             </span>
                             <span>{{ $metrics['activeVisitorsNow'] }} Visitors Online Now · Auto-updating (10s)</span>
                         </div>
@@ -653,17 +651,17 @@
                         <div class="space-y-1 text-[11px] font-medium pt-2 border-t border-slate-200">
                             <a href="{{ route('admin.dashboard', ['tab' => 'listings']) }}" wire:click.prevent="setListingStatusFilter('active')"
                                 class="flex justify-between items-center p-1.5 rounded-lg hover:bg-slate-50 transition cursor-pointer group">
-                                <span class="flex items-center gap-1.5 text-slate-700 group-hover:text-emerald-700 font-semibold"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Published</span>
+                                <span class="flex items-center gap-1.5 text-slate-700 group-hover:text-emerald-700 font-semibold"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Published</span>
                                 <span class="font-bold text-slate-900 group-hover:text-emerald-700">{{ $statusCounts['pubPct'] }}% ({{ number_format($statusCounts['published']) }})</span>
                             </a>
                             <a href="{{ route('admin.dashboard', ['tab' => 'moderation']) }}" wire:click.prevent="setTab('moderation')"
                                 class="flex justify-between items-center p-1.5 rounded-lg hover:bg-slate-50 transition cursor-pointer group">
-                                <span class="flex items-center gap-1.5 text-slate-700 group-hover:text-amber-700 font-semibold"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Pending</span>
+                                <span class="flex items-center gap-1.5 text-slate-700 group-hover:text-amber-700 font-semibold"><svg class="w-3.5 h-3.5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Pending</span>
                                 <span class="font-bold text-slate-900 group-hover:text-amber-700">{{ $statusCounts['penPct'] }}% ({{ number_format($statusCounts['pending']) }})</span>
                             </a>
                             <a href="{{ route('admin.dashboard', ['tab' => 'listings']) }}" wire:click.prevent="setListingStatusFilter('rejected')"
                                 class="flex justify-between items-center p-1.5 rounded-lg hover:bg-slate-50 transition cursor-pointer group">
-                                <span class="flex items-center gap-1.5 text-slate-700 group-hover:text-rose-700 font-semibold"><span class="w-2 h-2 rounded-full bg-[#F20B65]"></span>Rejected</span>
+                                <span class="flex items-center gap-1.5 text-slate-700 group-hover:text-rose-700 font-semibold"><svg class="w-3.5 h-3.5 text-[#F20B65] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>Rejected</span>
                                 <span class="font-bold text-slate-900 group-hover:text-rose-700">{{ $statusCounts['rejPct'] }}% ({{ number_format($statusCounts['rejected']) }})</span>
                             </a>
                         </div>
@@ -858,15 +856,14 @@
                             <div class="flex items-center justify-between mb-3">
                                 <div>
                                     <h2 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
-                                        <span class="relative flex h-2 w-2">
-                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                        <span class="w-5 h-5 rounded-lg bg-rose-50 border border-rose-200 text-[#F20B83] flex items-center justify-center shrink-0">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                         </span>
                                         <span>Live Visitor Stream</span>
                                     </h2>
                                     <p class="text-[10px] text-slate-500">Incoming requests real-time telemetry</p>
                                 </div>
-                                <span class="text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">LIVE</span>
+                                <span class="inline-flex items-center gap-1 text-[10px] font-black text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider">LIVE</span>
                             </div>
 
                             <div class="space-y-2 text-xs">
@@ -956,8 +953,10 @@
                             </div>
                         </div>
 
-                        <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-center flex items-center justify-center gap-1.5 text-xs font-bold text-emerald-700">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <div class="p-2.5 rounded-xl bg-gradient-to-r from-emerald-50/90 via-white to-teal-50/70 border border-emerald-200/80 text-center flex items-center justify-center gap-2 text-xs font-bold text-emerald-700 shadow-xs">
+                            <span class="w-4 h-4 rounded-md bg-emerald-500/15 text-emerald-600 flex items-center justify-center shrink-0">
+                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            </span>
                             <span>All Systems Operational (PHP {{ $health['php'] }} · Laravel {{ $health['laravel'] }})</span>
                         </div>
                     </div>
@@ -3423,7 +3422,7 @@
                             ${{ number_format($subscriptionStats['mrr'] ?? 0, 2) }}
                         </div>
                         <div class="mt-1 text-xs text-slate-600 font-semibold flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                            <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             <span>Active membership base</span>
                         </div>
                     </div>
@@ -4697,9 +4696,9 @@
                     <!-- Live Customer Visual Cards Preview -->
                     <div>
                         <div class="flex items-center justify-between mb-3 px-1">
-                            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                            <h3 class="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-[#F20B83] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                 <span>Live Visual Preview on Checkout Page</span>
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                             </h3>
                             <span class="text-[11px] text-slate-500 font-medium">Changes reflect immediately on user wallet page</span>
                         </div>
@@ -4718,12 +4717,12 @@
                                         @endif
 
                                         @if($pkg->is_active)
-                                            <span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+                                            <span class="inline-flex items-center gap-1 bg-rose-50 text-[#F20B83] border border-rose-200 text-[10px] font-black px-2 py-0.5 rounded-full">
+                                                <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Active
                                             </span>
                                         @else
                                             <span class="inline-flex items-center gap-1 bg-slate-100 text-slate-600 border border-slate-300 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Disabled
+                                                <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg> Disabled
                                             </span>
                                         @endif
                                     </div>
@@ -4837,9 +4836,9 @@
                                             ${{ $pkg->total_credits > 0 ? number_format($pkg->price_usd / $pkg->total_credits, 4) : '0' }} / cr
                                         </td>
                                         <td class="py-3 px-4">
-                                            <button wire:click="togglePackageActive({{ $pkg->id }})" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black transition {{ $pkg->is_active ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' : 'bg-slate-200 text-slate-700 hover:bg-slate-300' }}" title="Click to toggle active state">
-                                                <span class="w-1.5 h-1.5 rounded-full {{ $pkg->is_active ? 'bg-emerald-600' : 'bg-slate-500' }}"></span>
-                                                {{ $pkg->is_active ? 'Active (Live)' : 'Disabled (Hidden)' }}
+                                            <button wire:click="togglePackageActive({{ $pkg->id }})" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black transition {{ $pkg->is_active ? 'bg-rose-50 text-[#F20B83] border border-rose-200 hover:bg-rose-100' : 'bg-slate-200 text-slate-700 hover:bg-slate-300' }}" title="Click to toggle active state">
+                                                <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $pkg->is_active ? 'M5 13l4 4L19 7' : 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636' }}"/></svg>
+                                                <span>{{ $pkg->is_active ? 'Active (Live)' : 'Disabled (Hidden)' }}</span>
                                             </button>
                                         </td>
                                         <td class="py-3 px-4 text-right space-x-1">
@@ -5069,13 +5068,12 @@
                 <div class="absolute left-1/3 -bottom-20 w-56 h-56 rounded-full bg-violet-500/8 blur-3xl pointer-events-none"></div>
 
                 <div class="relative flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-                    <div class="min-w-0 space-y-2">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50/90 border border-rose-200/80 text-rose-700 text-[11px] font-black uppercase tracking-widest">
-                            <span class="relative flex h-2 w-2">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    <div class="min-w-0 space-y-2.5">
+                        <div class="inline-flex items-center gap-2 pl-1.5 pr-3.5 py-1 rounded-full bg-white/95 border border-rose-200/80 shadow-[0_6px_18px_-8px_rgba(242,11,131,0.32)] ring-1 ring-rose-500/10">
+                            <span class="w-5 h-5 rounded-full bg-gradient-to-br from-[#F20B83] via-rose-500 to-fuchsia-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                             </span>
-                            <span>Ad Server &amp; Affiliate Monetization</span>
+                            <span class="text-[11px] font-black uppercase tracking-[0.14em] bg-gradient-to-r from-[#F20B83] via-rose-600 to-fuchsia-600 bg-clip-text text-transparent">Ad Server &amp; Affiliate Monetization</span>
                         </div>
                         <h2 class="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">Advertising &amp; Revenue Command Hub</h2>
                         <p class="text-xs sm:text-sm text-slate-500 font-medium max-w-2xl leading-relaxed">
@@ -5122,8 +5120,8 @@
                         </div>
                     </div>
                     <div class="relative mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-purple-800 bg-purple-50/90 border border-purple-200/70 px-2.5 py-0.5 rounded-full">
-                            <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-purple-900 bg-purple-50/90 border border-purple-200/70 px-2.5 py-0.5 rounded-full">
+                            <svg class="w-3 h-3 text-purple-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
                             <span>{{ $enterpriseStats['draft_campaigns'] ?? 0 }} drafts · {{ $enterpriseStats['expired_campaigns'] ?? 0 }} expired</span>
                         </span>
                         <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Inventory</span>
@@ -5131,26 +5129,26 @@
                 </div>
 
                 <!-- Card 2: Active Delivery -->
-                <div class="group relative overflow-hidden rounded-3xl bg-white border border-slate-200/80 p-5 shadow-[0_8px_28px_-14px_rgba(15,23,42,0.07)] hover:shadow-[0_18px_36px_-14px_rgba(16,185,129,0.18)] hover:border-emerald-200 transition-all duration-200">
-                    <div class="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-emerald-500/8 blur-2xl group-hover:bg-emerald-500/15 transition"></div>
+                <div class="group relative overflow-hidden rounded-3xl bg-white border border-slate-200/80 p-5 shadow-[0_8px_28px_-14px_rgba(15,23,42,0.07)] hover:shadow-[0_18px_36px_-14px_rgba(242,11,131,0.18)] hover:border-rose-200 transition-all duration-200">
+                    <div class="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-rose-500/8 blur-2xl group-hover:bg-rose-500/15 transition"></div>
                     <div class="relative flex items-start justify-between gap-3">
                         <div class="min-w-0">
                             <p class="text-[11px] font-black uppercase tracking-widest text-slate-400">Active Delivery</p>
-                            <h3 class="text-3xl font-black text-emerald-700 tracking-tight tabular-nums mt-1.5">{{ number_format($kpiActiveCampaigns) }}</h3>
+                            <h3 class="text-3xl font-black text-slate-950 tracking-tight tabular-nums mt-1.5">{{ number_format($kpiActiveCampaigns) }}</h3>
                             <p class="text-xs font-semibold text-slate-500 mt-1 truncate">
                                 {{ $enterpriseStats['paused_campaigns'] ?? 0 }} paused across 13 slots
                             </p>
                         </div>
-                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-100/80 text-emerald-700 border border-emerald-200/70 flex items-center justify-center shrink-0 shadow-xs">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-rose-50 to-pink-100/80 text-[#F20B83] border border-rose-200/70 flex items-center justify-center shrink-0 shadow-xs">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         </div>
                     </div>
                     <div class="relative mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-800 bg-emerald-50/90 border border-emerald-200/70 px-2.5 py-0.5 rounded-full">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-rose-800 bg-rose-50/90 border border-rose-200/70 px-2.5 py-0.5 rounded-full">
+                            <svg class="w-3 h-3 text-[#F20B83] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                             <span>Weighted Ad Rotation Live</span>
                         </span>
-                        <span class="text-[10px] font-black tabular-nums text-emerald-600">{{ $activeSharePct }}%</span>
+                        <span class="text-[10px] font-black tabular-nums text-[#F20B83]">{{ $activeSharePct }}%</span>
                     </div>
                 </div>
 
@@ -5171,7 +5169,7 @@
                     </div>
                     <div class="relative mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                         <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-900 bg-amber-50/90 border border-amber-200/70 px-2.5 py-0.5 rounded-full">
-                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                            <svg class="w-3 h-3 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                             <span>Anti-Fraud Click Guard Enabled</span>
                         </span>
                         <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Shield</span>
@@ -5195,7 +5193,7 @@
                     </div>
                     <div class="relative mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                         <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-rose-800 bg-rose-50/90 border border-rose-200/70 px-2.5 py-0.5 rounded-full">
-                            <span class="w-1.5 h-1.5 rounded-full bg-[#F20B83]"></span>
+                            <svg class="w-3 h-3 text-[#F20B83] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
                             <span>{{ number_format($kpiClicks) }} Verified Engagements</span>
                         </span>
                         <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Yield</span>
@@ -5277,7 +5275,7 @@
                                 class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-2xl bg-slate-50/90 hover:bg-white border text-xs font-bold text-slate-800 transition-all cursor-pointer"
                                 :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200/90'">
                                 <span class="flex items-center gap-2 min-w-0 truncate">
-                                    <span class="w-2 h-2 rounded-full shrink-0 {{ $adSlotFilter === 'all' ? 'bg-slate-400' : 'bg-[#F20B83]' }}"></span>
+                                    <svg class="w-3.5 h-3.5 shrink-0 {{ $adSlotFilter === 'all' ? 'text-slate-400' : 'text-[#F20B83]' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6z"/></svg>
                                     <span class="truncate">{{ $adSlotFilter === 'all' ? 'All Placement Slots' : ucwords(str_replace('_', ' ', $adSlotFilter)) }}</span>
                                 </span>
                                 <svg class="w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
@@ -5305,17 +5303,17 @@
                                 class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-2xl bg-slate-50/90 hover:bg-white border text-xs font-bold text-slate-800 transition-all cursor-pointer"
                                 :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200/90'">
                                 <span class="flex items-center gap-2 min-w-0 truncate">
-                                    <span class="w-2 h-2 rounded-full shrink-0 {{ $adStatusFilter === 'active' ? 'bg-emerald-500' : ($adStatusFilter === 'paused' ? 'bg-amber-500' : 'bg-slate-400') }}"></span>
+                                    <svg class="w-3.5 h-3.5 shrink-0 {{ $adStatusFilter === 'active' ? 'text-[#F20B83]' : ($adStatusFilter === 'paused' ? 'text-amber-500' : 'text-slate-400') }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $adStatusFilter === 'active' ? 'M13 10V3L4 14h7v7l9-11h-7z' : ($adStatusFilter === 'paused' ? 'M10 9v6m4-6v6' : 'M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z') }}"/></svg>
                                     <span class="truncate">{{ $adStatusFilter === 'active' ? 'Active Only' : ($adStatusFilter === 'paused' ? 'Paused Only' : 'All Statuses') }}</span>
                                 </span>
                                 <svg class="w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                             </button>
                             <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-y-1 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 translate-y-1 scale-95"
                                 class="absolute left-0 right-0 mt-2 z-50 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-[0_20px_50px_-12px_rgba(15,23,42,0.22)] p-1.5 space-y-0.5">
-                                @foreach(['all' => ['All Statuses', 'bg-slate-400'], 'active' => ['Active Only', 'bg-emerald-500'], 'paused' => ['Paused Only', 'bg-amber-500']] as $stKey => [$stText, $stDot])
+                                @foreach(['all' => ['All Statuses', 'text-slate-400', 'M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z'], 'active' => ['Active Only', 'text-[#F20B83]', 'M13 10V3L4 14h7v7l9-11h-7z'], 'paused' => ['Paused Only', 'text-amber-500', 'M10 9v6m4-6v6']] as $stKey => [$stText, $stIconClass, $stIconPath])
                                     <button type="button" wire:click="$set('adStatusFilter', '{{ $stKey }}')" @click="open = false"
                                         class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer {{ $adStatusFilter === $stKey ? 'bg-rose-50 text-[#F20B83]' : 'text-slate-700 hover:bg-slate-50' }}">
-                                        <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full {{ $stDot }}"></span><span>{{ $stText }}</span></span>
+                                        <span class="flex items-center gap-2"><svg class="w-3.5 h-3.5 {{ $stIconClass }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $stIconPath }}"/></svg><span>{{ $stText }}</span></span>
                                         @if($adStatusFilter === $stKey) <svg class="w-3.5 h-3.5 text-[#F20B83]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> @endif
                                     </button>
                                 @endforeach
@@ -5354,9 +5352,9 @@
                                 <button
                                     type="button"
                                     wire:click="toggleAd({{ $ad->id }})"
-                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black border shrink-0 {{ $ad->is_active ? 'bg-emerald-50 text-emerald-900 border-emerald-300' : 'bg-amber-50 text-amber-900 border-amber-300' }}"
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black border shrink-0 {{ $ad->is_active ? 'bg-rose-50 text-[#F20B83] border-rose-200' : 'bg-amber-50 text-amber-900 border-amber-300' }}"
                                 >
-                                    <span class="w-1.5 h-1.5 rounded-full {{ $ad->is_active ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
+                                    <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $ad->is_active ? 'M13 10V3L4 14h7v7l9-11h-7z' : 'M10 9v6m4-6v6' }}"/></svg>
                                     <span>{{ $ad->is_active ? 'Active' : 'Paused' }}</span>
                                 </button>
                             </div>
@@ -5474,10 +5472,10 @@
                                     <button
                                         type="button"
                                         wire:click="toggleAd({{ $ad->id }})"
-                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black border transition {{ $ad->is_active ? 'bg-emerald-50 text-emerald-900 border-emerald-300 hover:bg-emerald-100' : 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100' }}"
+                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black border transition {{ $ad->is_active ? 'bg-rose-50 text-[#F20B83] border-rose-200 hover:bg-rose-100' : 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100' }}"
                                         title="Click to toggle active delivery state"
                                     >
-                                        <span class="w-1.5 h-1.5 rounded-full {{ $ad->is_active ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
+                                        <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $ad->is_active ? 'M13 10V3L4 14h7v7l9-11h-7z' : 'M10 9v6m4-6v6' }}"/></svg>
                                         <span>{{ $ad->is_active ? 'Active' : 'Paused' }}</span>
                                     </button>
                                 </td>
@@ -5575,26 +5573,25 @@
                 ];
 
                 $robotsOptions = [
-                    'all' => ['All Robots Directives', 'bg-slate-400'],
-                    'index, follow' => ['index, follow (Indexed)', 'bg-emerald-500'],
-                    'noindex, follow' => ['noindex, follow (Follow Links Only)', 'bg-amber-500'],
-                    'index, nofollow' => ['index, nofollow (Index No Pass)', 'bg-purple-500'],
-                    'noindex, nofollow' => ['noindex, nofollow (Blocked)', 'bg-rose-500'],
+                    'all' => ['All Robots Directives', 'text-slate-400'],
+                    'index, follow' => ['index, follow (Indexed)', 'text-[#F20B83]'],
+                    'noindex, follow' => ['noindex, follow (Follow Links Only)', 'text-amber-500'],
+                    'index, nofollow' => ['index, nofollow (Index No Pass)', 'text-purple-500'],
+                    'noindex, nofollow' => ['noindex, nofollow (Blocked)', 'text-rose-500'],
                 ];
             @endphp
 
             <!-- Light Architectural Glass SEO Header -->
             <div class="relative overflow-hidden rounded-3xl bg-white/95 backdrop-blur-xl p-5 sm:p-6 mb-5 border border-slate-200/80 shadow-[0_14px_40px_-16px_rgba(15,23,42,0.08)]">
-                <div class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[#F20B83] via-fuchsia-500 to-emerald-400 opacity-85"></div>
-                <div class="absolute -right-14 -top-14 w-64 h-64 rounded-full bg-gradient-to-br from-[#F20B83]/10 via-fuchsia-400/10 to-emerald-300/10 blur-3xl pointer-events-none"></div>
+                <div class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[#F20B83] via-fuchsia-500 to-purple-500 opacity-85"></div>
+                <div class="absolute -right-14 -top-14 w-64 h-64 rounded-full bg-gradient-to-br from-[#F20B83]/10 via-fuchsia-400/10 to-purple-300/10 blur-3xl pointer-events-none"></div>
                 <div class="relative flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                    <div class="min-w-0 space-y-1.5">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50/90 border border-rose-200/80 text-rose-700 text-[11px] font-black uppercase tracking-widest">
-                            <span class="relative flex h-2 w-2">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    <div class="min-w-0 space-y-2">
+                        <div class="inline-flex items-center gap-2 pl-1.5 pr-3.5 py-1 rounded-full bg-white/95 border border-rose-200/80 shadow-[0_6px_18px_-8px_rgba(242,11,131,0.32)] ring-1 ring-rose-500/10">
+                            <span class="w-5 h-5 rounded-full bg-gradient-to-br from-[#F20B83] via-fuchsia-500 to-purple-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                             </span>
-                            <span>Search Engine Intelligence &amp; Schema</span>
+                            <span class="text-[11px] font-black uppercase tracking-[0.14em] bg-gradient-to-r from-[#F20B83] via-rose-600 to-fuchsia-600 bg-clip-text text-transparent">Search Engine Intelligence &amp; Schema</span>
                         </div>
                         <h2 class="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">SEO Meta, Sitemaps &amp; SERP Command Hub</h2>
                         <p class="text-xs sm:text-sm text-slate-500 font-medium max-w-2xl">
@@ -5638,8 +5635,8 @@
                         </div>
                     </div>
                     <div class="relative mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-800 bg-emerald-50/90 border border-emerald-200/70 px-2.5 py-0.5 rounded-full">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-800 bg-slate-100/90 border border-slate-200 px-2.5 py-0.5 rounded-full">
+                            <svg class="w-3 h-3 text-[#F20B83] shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9"/></svg>
                             <span>100% Crawlable Search Ready</span>
                         </span>
                         <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Index</span>
@@ -5661,7 +5658,7 @@
                     </div>
                     <div class="relative mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                         <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-rose-800 bg-rose-50/90 border border-rose-200/70 px-2.5 py-0.5 rounded-full">
-                            <span class="w-1.5 h-1.5 rounded-full bg-[#F20B83]"></span>
+                            <svg class="w-3 h-3 text-[#F20B83] shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
                             <span>OpenGraph &amp; Twitter Cards Active</span>
                         </span>
                         <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">SERP</span>
@@ -5683,7 +5680,7 @@
                     </div>
                     <div class="relative mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                         <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-900 bg-amber-50/90 border border-amber-200/70 px-2.5 py-0.5 rounded-full">
-                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                            <svg class="w-3 h-3 text-amber-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
                             <span>/robots.txt Live Directives Serving</span>
                         </span>
                         <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Bots</span>
@@ -5704,8 +5701,8 @@
                         </div>
                     </div>
                     <div class="relative mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-purple-800 bg-purple-50/90 border border-purple-200/70 px-2.5 py-0.5 rounded-full">
-                            <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-purple-900 bg-purple-50/90 border border-purple-200/70 px-2.5 py-0.5 rounded-full">
+                            <svg class="w-3 h-3 text-purple-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                             <span>Geo Search Demand Intel Active</span>
                         </span>
                         <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Trends</span>
@@ -5764,17 +5761,17 @@
                                 class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-2xl bg-slate-50/90 hover:bg-white border text-xs font-bold text-slate-800 transition-all cursor-pointer"
                                 :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200/90'">
                                 <span class="flex items-center gap-2 min-w-0 truncate">
-                                    <span class="w-2 h-2 rounded-full shrink-0 {{ $robotsOptions[$seoRobotsFilter][1] ?? 'bg-slate-400' }}"></span>
+                                    <svg class="w-3.5 h-3.5 shrink-0 {{ $robotsOptions[$seoRobotsFilter][1] ?? 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                     <span class="truncate">{{ $robotsOptions[$seoRobotsFilter][0] ?? 'All Robots Directives' }}</span>
                                 </span>
                                 <svg class="w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                             </button>
                             <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-y-1 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 translate-y-1 scale-95"
                                 class="absolute left-0 right-0 mt-2 z-50 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-[0_20px_50px_-12px_rgba(15,23,42,0.22)] p-1.5 space-y-0.5">
-                                @foreach($robotsOptions as $robKey => [$robLabel, $robDot])
+                                @foreach($robotsOptions as $robKey => [$robLabel, $robIconColor])
                                     <button type="button" wire:click="$set('seoRobotsFilter', '{{ $robKey }}')" @click="open = false"
                                         class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer {{ $seoRobotsFilter === $robKey ? 'bg-rose-50 text-[#F20B83]' : 'text-slate-700 hover:bg-slate-50' }}">
-                                        <span class="flex items-center gap-2 truncate"><span class="w-2 h-2 rounded-full shrink-0 {{ $robDot }}"></span><span class="truncate">{{ $robLabel }}</span></span>
+                                        <span class="flex items-center gap-2 truncate"><svg class="w-3.5 h-3.5 shrink-0 {{ $robIconColor }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span class="truncate">{{ $robLabel }}</span></span>
                                         @if($seoRobotsFilter === $robKey) <svg class="w-3.5 h-3.5 text-[#F20B83] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> @endif
                                     </button>
                                 @endforeach
@@ -5843,7 +5840,7 @@
                                 <td class="{{ $td }} align-top">
                                     <div class="flex items-center gap-2">
                                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 text-slate-900 border border-slate-200/90 font-mono text-xs font-black">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-[#F20B83]"></span>
+                                            <svg class="w-3 h-3 text-[#F20B83] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101"/></svg>
                                             <span>{{ $m->page_route ?? (class_basename($m->model_type) . ' #' . $m->model_id) }}</span>
                                         </span>
                                     </div>
@@ -5881,12 +5878,12 @@
                                 <td class="{{ $td }} align-top whitespace-nowrap">
                                     @if(str_contains($m->robots_directive, 'noindex'))
                                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-rose-50 text-rose-800 border border-rose-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+                                            <svg class="w-3 h-3 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
                                             <span>{{ $m->robots_directive }}</span>
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-800 border border-emerald-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-purple-50 text-purple-900 border border-purple-200">
+                                            <svg class="w-3 h-3 text-purple-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                                             <span>{{ $m->robots_directive }}</span>
                                         </span>
                                     @endif
@@ -5965,7 +5962,7 @@
                         <div class="rounded-3xl bg-white/95 border border-slate-200/80 p-4 shadow-xs space-y-3" wire:key="seo-mobile-{{ $m->id }}">
                             <div class="flex items-center justify-between gap-2">
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 text-slate-900 border border-slate-200 font-mono text-xs font-black">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-[#F20B83]"></span>
+                                    <svg class="w-3 h-3 text-[#F20B83] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101"/></svg>
                                     <span>{{ $m->page_route ?? (class_basename($m->model_type) . ' #' . $m->model_id) }}</span>
                                 </span>
                                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black {{ str_contains($m->robots_directive, 'noindex') ? 'bg-rose-50 text-rose-800 border border-rose-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200' }}">
@@ -6026,8 +6023,8 @@
                                         <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase font-mono bg-slate-100 text-slate-800 border border-slate-300">
                                             {{ $sm['type'] }}
                                         </span>
-                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-800 border border-emerald-300 flex items-center gap-1">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-50 text-[#F20B83] border border-rose-200 flex items-center gap-1">
+                                            <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                                             <span>{{ $sm['status'] }}</span>
                                         </span>
                                     </div>
@@ -6112,7 +6109,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="{{ $card }} p-5 border-l-4 border-l-emerald-600">
                                 <h5 class="text-sm font-black text-slate-950 flex items-center gap-1.5">
-                                    <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                                    <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                                     <span>Indexed Public Zones</span>
                                 </h5>
                                 <ul class="mt-3 space-y-1.5 text-xs font-semibold text-slate-700">
@@ -6137,7 +6134,7 @@
 
                             <div class="{{ $card }} p-5 border-l-4 border-l-rose-600">
                                 <h5 class="text-sm font-black text-slate-950 flex items-center gap-1.5">
-                                    <span class="w-2 h-2 rounded-full bg-rose-600"></span>
+                                    <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                                     <span>Protected Restricted Zones</span>
                                 </h5>
                                 <ul class="mt-3 space-y-1.5 text-xs font-semibold text-slate-700">
@@ -6525,7 +6522,7 @@
                             {{ number_format($cmsStats['published_pages'] ?? 0) }}
                         </div>
                         <div class="mt-1 text-xs text-slate-600 font-semibold flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                            <svg class="w-3.5 h-3.5 text-[#F20B83] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                             <span>Accessible to public web visitors</span>
                         </div>
                     </div>
@@ -6642,8 +6639,8 @@
                                             <button type="button" wire:click="toggleCmsPublish({{ $p->id }})"
                                                 title="Click to toggle publication status"
                                                 class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition border
-                                                {{ $p->is_published ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200' }}">
-                                                <span class="w-2 h-2 rounded-full {{ $p->is_published ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
+                                                {{ $p->is_published ? 'bg-rose-50 text-[#F20B83] border-rose-200 hover:bg-rose-100' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200' }}">
+                                                <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $p->is_published ? 'M5 13l4 4L19 7' : 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5' }}"/></svg>
                                                 <span>{{ $p->is_published ? 'PUBLISHED' : 'DRAFT' }}</span>
                                             </button>
                                         @else
@@ -7027,8 +7024,8 @@
                         </span>
                         <span>{{ $sTab['label'] }}</span>
                         @if(isset($sTab['badge']))
-                            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-black {{ $settingsSubTab === $sTab['id'] ? 'bg-white/25 text-white' : 'bg-pink-100 text-[#F20B83]' }}">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1 animate-pulse"></span>
+                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-black {{ $settingsSubTab === $sTab['id'] ? 'bg-white/25 text-white' : 'bg-pink-100 text-[#F20B83]' }}">
+                                <svg class="w-2.5 h-2.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                 {{ $sTab['badge'] }}
                             </span>
                         @endif
@@ -7281,8 +7278,8 @@
                                         <p class="text-xs text-slate-500 font-medium mt-0.5">Configure outbound transactional SMTP credentials for high-deliverability email alerts.</p>
                                     </div>
                                 </div>
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black bg-emerald-50 text-emerald-800 border border-emerald-300 self-start sm:self-auto shadow-2xs">
-                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-rose-50 text-[#F20B83] border border-rose-200 self-start sm:self-auto shadow-2xs">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                                     <span>TLS Handshake Ready</span>
                                 </span>
                             </div>
@@ -7989,7 +7986,9 @@
                 <!-- Sticky Bottom Action Footer -->
                 <div class="sticky bottom-4 z-20 backdrop-blur-md bg-white/95 p-4 rounded-2xl border border-slate-200 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="w-6 h-6 rounded-lg bg-rose-50 border border-rose-200 text-[#F20B83] flex items-center justify-center shrink-0">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                        </span>
                         <span class="text-xs font-bold text-slate-700">All changes persist directly to production database with full audit trail logging.</span>
                     </div>
 

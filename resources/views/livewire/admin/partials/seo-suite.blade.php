@@ -28,9 +28,11 @@
                 <div>
                     <h2 class="text-base sm:text-lg font-black text-slate-950 tracking-tight flex flex-wrap items-center gap-2">
                         <span>Enterprise SEO &amp; Google Indexing Suite</span>
-                        <span class="inline-flex items-center gap-1 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span>Live Production</span>
+                        <span class="inline-flex items-center gap-1.5 pl-1.5 pr-2.5 py-0.5 rounded-full bg-white border border-rose-200/80 shadow-2xs ring-1 ring-rose-500/10">
+                            <span class="w-4 h-4 rounded-full bg-gradient-to-br from-[#F20B83] via-rose-500 to-fuchsia-600 text-white flex items-center justify-center shrink-0">
+                                <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            </span>
+                            <span class="text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-[#F20B83] to-fuchsia-600 bg-clip-text text-transparent">Live Production</span>
                         </span>
                     </h2>
                     <p class="text-xs text-slate-500 font-medium mt-0.5">Full-cycle keyword intelligence, automated XML sitemaps, on-page optimization, and policy-compliant Google discovery.</p>
@@ -44,7 +46,7 @@
                         class="w-full flex items-center justify-between gap-2 px-3.5 py-2 rounded-2xl bg-slate-50/90 hover:bg-white border text-xs font-bold text-slate-800 transition-all cursor-pointer"
                         :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200/90'">
                         <span class="flex items-center gap-2 truncate">
-                            <span class="w-2 h-2 rounded-full bg-[#F20B83] shrink-0"></span>
+                            <svg class="w-3.5 h-3.5 text-[#F20B83] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             <span class="truncate">{{ $seoDateLabels[$seoDateRange] ?? 'Last 28 Days' }}</span>
                         </span>
                         <svg class="w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
@@ -99,7 +101,9 @@
         <div>
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                 <h3 class="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-[#F20B83]"></span>
+                    <span class="w-5 h-5 rounded-lg bg-rose-50 border border-rose-200 text-[#F20B83] flex items-center justify-center shrink-0">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                    </span>
                     <span>Platform Discovery &amp; Search Index Telemetry</span>
                     <span class="text-[10px] font-bold text-slate-400 lowercase">(realtime database &amp; gsc state)</span>
                 </h3>
@@ -137,7 +141,7 @@
                     <div class="group relative overflow-hidden rounded-2xl bg-white/95 border border-slate-200/80 p-4 shadow-[0_6px_22px_-12px_rgba(15,23,42,0.06)] hover:shadow-[0_14px_28px_-12px_rgba(15,23,42,0.12)] {{ $ovHoverBorder }} transition-all duration-150">
                         <div class="flex items-center justify-between gap-2">
                             <p class="text-[10px] font-black uppercase tracking-wider text-slate-400 truncate">{{ $ovTitle }}</p>
-                            <span class="w-2 h-2 rounded-full {{ $ovDot }} shrink-0"></span>
+                            <span class="w-4 h-1 rounded-full {{ $ovDot }} shrink-0 opacity-85"></span>
                         </div>
                         <h4 class="text-xl font-black text-slate-950 tracking-tight tabular-nums mt-1.5">{{ $ovVal }}</h4>
                         <p class="text-[11px] font-semibold text-slate-500 mt-0.5 truncate">{{ $ovSub }}</p>

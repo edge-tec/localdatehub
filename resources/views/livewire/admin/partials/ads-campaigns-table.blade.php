@@ -18,22 +18,22 @@
     ];
 
     $typeLabels = [
-        'all' => ['All Formats', 'bg-slate-400'],
-        'banner' => ['Banner Ads', 'bg-amber-500'],
-        'affiliate' => ['Affiliate Offers', 'bg-purple-500'],
-        'hybrid' => ['Hybrid Format', 'bg-fuchsia-500'],
+        'all' => ['All Formats', 'text-slate-400', 'M4 6h16M4 12h16M4 18h16'],
+        'banner' => ['Banner Ads', 'text-amber-500', 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14'],
+        'affiliate' => ['Affiliate Offers', 'text-purple-500', 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101'],
+        'hybrid' => ['Hybrid Format', 'text-[#F20B83]', 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21'],
     ];
 
-    $statusDotMap = [
-        'all' => 'bg-slate-400',
-        'active' => 'bg-emerald-500',
-        'scheduled' => 'bg-violet-500',
-        'paused' => 'bg-amber-500',
-        'draft' => 'bg-slate-400',
-        'expired' => 'bg-rose-500',
-        'archived' => 'bg-zinc-400',
-        'pending_approval' => 'bg-fuchsia-500',
-        'rejected' => 'bg-red-600',
+    $statusIconMap = [
+        'all' => ['text-slate-400', 'M4 6h16M4 12h16M4 18h16'],
+        'active' => ['text-[#F20B83]', 'M13 10V3L4 14h7v7l9-11h-7z'],
+        'scheduled' => ['text-violet-500', 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+        'paused' => ['text-amber-500', 'M10 9v6m4-6v6'],
+        'draft' => ['text-slate-400', 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5'],
+        'expired' => ['text-rose-500', 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+        'archived' => ['text-zinc-400', 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8'],
+        'pending_approval' => ['text-fuchsia-500', 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+        'rejected' => ['text-red-600', 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636'],
     ];
 
     $activeSlotLabel = $campaignSlotFilter === 'all'
@@ -48,19 +48,19 @@
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="inline-flex flex-wrap items-center gap-1.5 p-1 rounded-2xl bg-slate-100/85 border border-slate-200/70">
                 @foreach([
-                    'all' => ['All Campaigns', 'bg-slate-400'],
-                    'active' => ['Active', 'bg-emerald-500'],
-                    'scheduled' => ['Scheduled', 'bg-violet-500'],
-                    'paused' => ['Paused', 'bg-amber-500'],
-                    'draft' => ['Draft', 'bg-slate-400'],
-                    'expired' => ['Expired', 'bg-rose-500'],
-                ] as $stKey => [$stLabel, $stDot])
+                    'all' => ['All Campaigns', 'text-slate-400', 'M4 6h16M4 12h16M4 18h16'],
+                    'active' => ['Active', 'text-[#F20B83]', 'M13 10V3L4 14h7v7l9-11h-7z'],
+                    'scheduled' => ['Scheduled', 'text-violet-500', 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+                    'paused' => ['Paused', 'text-amber-500', 'M10 9v6m4-6v6'],
+                    'draft' => ['Draft', 'text-slate-400', 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5'],
+                    'expired' => ['Expired', 'text-rose-500', 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+                ] as $stKey => [$stLabel, $stIconColor, $stIconPath])
                     <button
                         type="button"
                         wire:click="$set('campaignStatusFilter', '{{ $stKey }}')"
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-150 cursor-pointer {{ $campaignStatusFilter === $stKey ? 'bg-slate-950 text-white shadow-sm' : 'text-slate-600 hover:text-slate-950 hover:bg-white/90' }}"
                     >
-                        <span class="w-1.5 h-1.5 rounded-full {{ $campaignStatusFilter === $stKey && $stKey === 'all' ? 'bg-[#F20B83]' : $stDot }}"></span>
+                        <svg class="w-3.5 h-3.5 shrink-0 {{ $campaignStatusFilter === $stKey && $stKey === 'all' ? 'text-[#F20B83]' : $stIconColor }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $stIconPath }}"/></svg>
                         <span>{{ $stLabel }}</span>
                         <span class="px-1.5 py-0.2 rounded-full text-[10px] font-black tabular-nums {{ $campaignStatusFilter === $stKey ? 'bg-white/15 text-white' : 'bg-white text-slate-700 border border-slate-200/70' }}">
                             {{ number_format($statusCounts[$stKey] ?? 0) }}
@@ -105,17 +105,17 @@
                     class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-2xl bg-slate-50/90 hover:bg-white border text-xs font-bold text-slate-800 transition-all cursor-pointer"
                     :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200/90'">
                     <span class="flex items-center gap-2 min-w-0 truncate">
-                        <span class="w-2 h-2 rounded-full shrink-0 {{ $typeLabels[$campaignTypeFilter][1] ?? 'bg-slate-400' }}"></span>
+                        <svg class="w-3.5 h-3.5 shrink-0 {{ $typeLabels[$campaignTypeFilter][1] ?? 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $typeLabels[$campaignTypeFilter][2] ?? 'M4 6h16M4 12h16M4 18h16' }}"/></svg>
                         <span class="truncate">{{ $typeLabels[$campaignTypeFilter][0] ?? 'All Formats' }}</span>
                     </span>
                     <svg class="w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                 </button>
                 <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-y-1 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 translate-y-1 scale-95"
                     class="absolute left-0 right-0 mt-2 z-50 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-[0_20px_50px_-12px_rgba(15,23,42,0.22)] p-1.5 space-y-0.5">
-                    @foreach($typeLabels as $tKey => [$tText, $tDot])
+                    @foreach($typeLabels as $tKey => [$tText, $tIconColor, $tIconPath])
                         <button type="button" wire:click="$set('campaignTypeFilter', '{{ $tKey }}')" @click="open = false"
                             class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer {{ $campaignTypeFilter === $tKey ? 'bg-rose-50 text-[#F20B83]' : 'text-slate-700 hover:bg-slate-50' }}">
-                            <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full {{ $tDot }}"></span><span>{{ $tText }}</span></span>
+                            <span class="flex items-center gap-2"><svg class="w-3.5 h-3.5 {{ $tIconColor }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $tIconPath }}"/></svg><span>{{ $tText }}</span></span>
                             @if($campaignTypeFilter === $tKey) <svg class="w-3.5 h-3.5 text-[#F20B83]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> @endif
                         </button>
                     @endforeach
@@ -127,8 +127,9 @@
                 <button type="button" @click="open = !open" aria-label="Filter by status"
                     class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-2xl bg-slate-50/90 hover:bg-white border text-xs font-bold text-slate-800 transition-all cursor-pointer"
                     :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200/90'">
+                    @php [$stClr, $stPath] = $statusIconMap[$campaignStatusFilter] ?? $statusIconMap['all']; @endphp
                     <span class="flex items-center gap-2 min-w-0 truncate">
-                        <span class="w-2 h-2 rounded-full shrink-0 {{ $statusDotMap[$campaignStatusFilter] ?? 'bg-slate-400' }}"></span>
+                        <svg class="w-3.5 h-3.5 shrink-0 {{ $stClr }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $stPath }}"/></svg>
                         <span class="truncate">{{ $campaignStatusFilter === 'all' ? 'All 8 Statuses' : ucwords(str_replace('_', ' ', $campaignStatusFilter)) }}</span>
                     </span>
                     <svg class="w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
@@ -137,13 +138,14 @@
                     class="absolute left-0 right-0 mt-2 z-50 max-h-64 overflow-y-auto rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-[0_20px_50px_-12px_rgba(15,23,42,0.22)] p-1.5 space-y-0.5">
                     <button type="button" wire:click="$set('campaignStatusFilter', 'all')" @click="open = false"
                         class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer {{ $campaignStatusFilter === 'all' ? 'bg-rose-50 text-[#F20B83]' : 'text-slate-700 hover:bg-slate-50' }}">
-                        <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-slate-400"></span><span>All 8 Statuses</span></span>
+                        <span class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg><span>All 8 Statuses</span></span>
                         @if($campaignStatusFilter === 'all') <svg class="w-3.5 h-3.5 text-[#F20B83]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> @endif
                     </button>
                     @foreach(\App\Modules\Advertising\Models\AdCampaign::STATUSES as $st)
+                        @php [$rowIconClr, $rowIconPath] = $statusIconMap[$st] ?? $statusIconMap['all']; @endphp
                         <button type="button" wire:click="$set('campaignStatusFilter', '{{ $st }}')" @click="open = false"
                             class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer {{ $campaignStatusFilter === $st ? 'bg-rose-50 text-[#F20B83] font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
-                            <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full {{ $statusDotMap[$st] ?? 'bg-slate-400' }}"></span><span>{{ ucwords(str_replace('_', ' ', $st)) }}</span></span>
+                            <span class="flex items-center gap-2"><svg class="w-3.5 h-3.5 {{ $rowIconClr }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $rowIconPath }}"/></svg><span>{{ ucwords(str_replace('_', ' ', $st)) }}</span></span>
                             @if($campaignStatusFilter === $st) <svg class="w-3.5 h-3.5 text-[#F20B83] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> @endif
                         </button>
                     @endforeach
@@ -156,7 +158,7 @@
                     class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-2xl bg-slate-50/90 hover:bg-white border text-xs font-bold text-slate-800 transition-all cursor-pointer"
                     :class="open ? 'border-[#F20B83] bg-white ring-4 ring-[#F20B83]/10' : 'border-slate-200/90'">
                     <span class="flex items-center gap-2 min-w-0 truncate">
-                        <span class="w-2 h-2 rounded-full shrink-0 {{ $campaignSlotFilter === 'all' ? 'bg-slate-400' : 'bg-[#F20B83]' }}"></span>
+                        <svg class="w-3.5 h-3.5 shrink-0 {{ $campaignSlotFilter === 'all' ? 'text-slate-400' : 'text-[#F20B83]' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6z"/></svg>
                         <span class="truncate">{{ $activeSlotLabel }}</span>
                     </span>
                     <svg class="w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180 text-[#F20B83]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
@@ -258,14 +260,14 @@
                         $creative = $camp->creatives->first();
                         $thumb = $creative?->resolvedImageUrl('desktop');
                         $statusStyles = [
-                            'active' => ['pill' => 'bg-emerald-50 text-emerald-800 border-emerald-200', 'dot' => 'bg-emerald-500'],
-                            'scheduled' => ['pill' => 'bg-violet-50 text-violet-800 border-violet-200', 'dot' => 'bg-violet-500'],
-                            'pending_approval' => ['pill' => 'bg-fuchsia-50 text-fuchsia-800 border-fuchsia-200', 'dot' => 'bg-fuchsia-500'],
-                            'paused' => ['pill' => 'bg-amber-50 text-amber-800 border-amber-200', 'dot' => 'bg-amber-500'],
-                            'draft' => ['pill' => 'bg-slate-100 text-slate-700 border-slate-300', 'dot' => 'bg-slate-400'],
-                            'expired' => ['pill' => 'bg-rose-50 text-rose-800 border-rose-200', 'dot' => 'bg-rose-500'],
-                            'rejected' => ['pill' => 'bg-red-100 text-red-900 border-red-300', 'dot' => 'bg-red-600'],
-                            'archived' => ['pill' => 'bg-zinc-100 text-zinc-700 border-zinc-300', 'dot' => 'bg-zinc-400'],
+                            'active' => ['pill' => 'bg-rose-50 text-[#F20B83] border-rose-200', 'icon' => 'text-[#F20B83]', 'path' => 'M13 10V3L4 14h7v7l9-11h-7z'],
+                            'scheduled' => ['pill' => 'bg-violet-50 text-violet-800 border-violet-200', 'icon' => 'text-violet-600', 'path' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+                            'pending_approval' => ['pill' => 'bg-fuchsia-50 text-fuchsia-800 border-fuchsia-200', 'icon' => 'text-fuchsia-600', 'path' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+                            'paused' => ['pill' => 'bg-amber-50 text-amber-800 border-amber-200', 'icon' => 'text-amber-600', 'path' => 'M10 9v6m4-6v6'],
+                            'draft' => ['pill' => 'bg-slate-100 text-slate-700 border-slate-300', 'icon' => 'text-slate-500', 'path' => 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5'],
+                            'expired' => ['pill' => 'bg-rose-50 text-rose-800 border-rose-200', 'icon' => 'text-rose-600', 'path' => 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+                            'rejected' => ['pill' => 'bg-red-100 text-red-900 border-red-300', 'icon' => 'text-red-600', 'path' => 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636'],
+                            'archived' => ['pill' => 'bg-zinc-100 text-zinc-700 border-zinc-300', 'icon' => 'text-zinc-500', 'path' => 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8'],
                         ];
                         $stStyle = $statusStyles[$camp->status] ?? $statusStyles['draft'];
                     @endphp
@@ -357,8 +359,8 @@
                             </div>
                         </td>
                         <td class="{{ $td }}">
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase border {{ $stStyle['pill'] }}">
-                                <span class="w-1.5 h-1.5 rounded-full {{ $stStyle['dot'] }}"></span>
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase border {{ $stStyle['pill'] }}">
+                                <svg class="w-3 h-3 shrink-0 {{ $stStyle['icon'] }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $stStyle['path'] }}"/></svg>
                                 <span>{{ str_replace('_', ' ', $camp->status) }}</span>
                             </span>
                         </td>
@@ -450,8 +452,9 @@
                             <div class="text-[11px] font-semibold text-slate-500 truncate">{{ $creative?->affiliate_brand_name ?: ($camp->advertiser_name ?: 'Direct Partner') }} · {{ ucfirst($camp->campaign_type) }}</div>
                         </div>
                     </div>
+                    @php [$mobStClr, $mobStPath] = $statusIconMap[$camp->status] ?? $statusIconMap['all']; @endphp
                     <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-slate-100 text-slate-800 border border-slate-200 shrink-0">
-                        <span class="w-1.5 h-1.5 rounded-full {{ $statusDotMap[$camp->status] ?? 'bg-slate-400' }}"></span>
+                        <svg class="w-3 h-3 shrink-0 {{ $mobStClr }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $mobStPath }}"/></svg>
                         <span>{{ str_replace('_', ' ', $camp->status) }}</span>
                     </span>
                 </div>
