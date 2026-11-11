@@ -106,12 +106,24 @@ class LocationWebController extends Controller
         $seoTitle = "{$city->name}, {$city->state->code}{$catName} Adult Personals & Local Classifieds — LocalDateHub";
         $seoDescription = "Discover genuine adult personal classifieds and dating connections in {$city->name}, {$city->state->code}. Connect with local people today.";
 
+        $adContext = array_filter([
+            'state' => $city->state?->code,
+            'city_id' => $city->id,
+            'category_id' => $selectedCategory?->id,
+            'parent_category_id' => $selectedCategory?->parent_id,
+        ], fn ($v) => $v !== null && $v !== '');
+
+        $cityFeedItems = app(\App\Modules\Advertising\Services\AdDeliveryService::class)
+            ->injectIntoListings($listings->getCollection(), \App\Modules\Advertising\Models\AdCampaign::SLOT_LOCATION_PAGE, $adContext);
+
         return view('locations.city', [
             'city' => $city,
             'state' => $city->state,
             'categories' => $categories,
             'selectedCategory' => $selectedCategory,
             'listings' => $listings,
+            'cityFeedItems' => $cityFeedItems,
+            'adContext' => $adContext,
             'radiusListings' => $radiusListings,
             'radiusMiles' => $radiusMiles,
             'nearbyCities' => $city->nearby_cities ?? collect(),

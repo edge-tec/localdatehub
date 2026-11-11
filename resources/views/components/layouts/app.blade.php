@@ -159,6 +159,12 @@
         {{ $slot }}
     </main>
 
+    @if(!$isPrivateArea)
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-6">
+            <x-ad-banner placement="footer" variant="leaderboard" :limit="1" />
+        </div>
+    @endif
+
     <!-- Global Footer -->
     <x-footer />
 

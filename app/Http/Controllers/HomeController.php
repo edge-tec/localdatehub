@@ -120,11 +120,17 @@ class HomeController extends Controller
 
         $seo = app(\App\Modules\SEO\Services\SeoService::class)->generateForHome();
 
+        $delivery = app(\App\Modules\Advertising\Services\AdDeliveryService::class);
+        $latestListingsFeed = $delivery->injectIntoListings($latestListings, \App\Modules\Advertising\Models\AdCampaign::SLOT_HOMEPAGE_FEED);
+        $homepageFeaturedAds = $delivery->getAdsForSlot(\App\Modules\Advertising\Models\AdCampaign::SLOT_HOMEPAGE_FEATURED, [], 1);
+
         return view('welcome', [
             'categories' => $categories,
             'homepageCategories' => $homepageCategories,
             'featuredListings' => $featuredListings,
+            'homepageFeaturedAds' => $homepageFeaturedAds,
             'latestListings' => $latestListings,
+            'latestListingsFeed' => $latestListingsFeed,
             'popularStates' => $popularStates,
             'allStates' => $allStates,
             'popularCities' => $popularCities,

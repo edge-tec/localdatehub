@@ -69,9 +69,22 @@ class ListingWebController extends Controller
 
         $seo = app(SeoService::class)->generateForListing($listing);
 
+        $adContext = array_filter([
+            'state' => $listing->state?->code ?? $listing->city?->state?->code,
+            'city_id' => $listing->city_id,
+            'zip_code' => $listing->zipCode?->code,
+            'category_id' => $listing->category_id,
+            'parent_category_id' => $listing->category?->parent_id,
+        ], fn ($v) => $v !== null && $v !== '');
+
+        $relatedFeedItems = app(\App\Modules\Advertising\Services\AdDeliveryService::class)
+            ->injectIntoListings($similarListings, \App\Modules\Advertising\Models\AdCampaign::SLOT_RELATED_LISTINGS, $adContext);
+
         return view('listings.show', [
             'listing' => $listing,
             'similarListings' => $similarListings,
+            'relatedFeedItems' => $relatedFeedItems,
+            'adContext' => $adContext,
             'isFavorited' => $isFavorited,
             'seo' => $seo,
         ]);

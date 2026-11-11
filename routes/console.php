@@ -79,3 +79,7 @@ Schedule::job(new \App\Modules\SEO\Jobs\RunTechnicalSeoAuditJob)
 Schedule::job(new \App\Modules\SEO\Jobs\SyncGoogleSearchConsoleJob)
     ->dailyAt('06:00')
     ->withoutOverlapping(30);
+
+Schedule::command('ads:sync-lifecycle')
+    ->everyFifteenMinutes()
+    ->withoutOverlapping(5);

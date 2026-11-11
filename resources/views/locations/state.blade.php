@@ -31,6 +31,9 @@
             </div>
         </div>
 
+        <!-- Location-Based Banner Advertisement -->
+        <x-ad-banner placement="location_page" :context="['state' => $state->code]" variant="leaderboard" :limit="1" />
+
         <!-- Popular Cities -->
         @php
             $popularCities = $cities->where('is_popular', true);

@@ -5121,21 +5121,25 @@
                 <button type="button" wire:click="setAdSubTab('campaigns')"
                     class="px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 {{ $adSubTab === 'campaigns' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
                     <span>Active Campaigns</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-[10px] {{ $adSubTab === 'campaigns' ? 'bg-white/30 text-white' : 'bg-slate-300 text-slate-800' }}">{{ $adStats['total_campaigns'] ?? 0 }}</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px] {{ $adSubTab === 'campaigns' ? 'bg-white/30 text-white' : 'bg-slate-300 text-slate-800' }}">{{ $enterpriseStats['total_campaigns'] ?? ($adStats['total_campaigns'] ?? 0) }}</span>
                 </button>
                 <button type="button" wire:click="setAdSubTab('inventory')"
                     class="px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 {{ $adSubTab === 'inventory' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
                     <span>Slot Architecture & Inventory</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-[10px] {{ $adSubTab === 'inventory' ? 'bg-white/30 text-white' : 'bg-slate-300 text-slate-800' }}">5 Slots</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px] {{ $adSubTab === 'inventory' ? 'bg-white/30 text-white' : 'bg-slate-300 text-slate-800' }}">13 Slots</span>
                 </button>
                 <button type="button" wire:click="setAdSubTab('analytics')"
                     class="px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 {{ $adSubTab === 'analytics' ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
                     <span>Performance Analytics</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-[10px] {{ $adSubTab === 'analytics' ? 'bg-white/30 text-white' : 'bg-slate-300 text-slate-800' }}">{{ $adStats['global_ctr'] ?? 0 }}% CTR</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px] {{ $adSubTab === 'analytics' ? 'bg-white/30 text-white' : 'bg-slate-300 text-slate-800' }}">{{ $enterpriseStats['global_ctr'] ?? ($adStats['global_ctr'] ?? 0) }}% CTR</span>
                 </button>
             </div>
 
             @if($adSubTab === 'campaigns')
+                @include('livewire.admin.partials.ads-campaigns-table')
+                <div class="mb-2 pt-2 border-t border-slate-200 flex items-center justify-between">
+                    <span class="text-xs font-black uppercase tracking-wider text-slate-600">Legacy Quick Slot Placements</span>
+                </div>
                 <!-- Action Toolbar: Search, Filters & Add Placement -->
                 <div class="{{ $card }} p-4 mb-4">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -5341,6 +5345,7 @@
 
             {{-- SUB-TAB 2: SLOT ARCHITECTURE & INVENTORY --}}
             @if($adSubTab === 'inventory')
+                @include('livewire.admin.partials.ads-inventory-configs')
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                     @foreach($slotInventory as $key => $slot)
                         <div class="{{ $card }} p-5 flex flex-col justify-between border-t-4 border-t-pink-600">
@@ -5387,6 +5392,7 @@
 
             {{-- SUB-TAB 3: CONVERSION & ANALYTICS LEDGER --}}
             @if($adSubTab === 'analytics')
+                @include('livewire.admin.partials.ads-analytics-ledger')
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
                     <!-- Top Converting Placements -->
                     <div class="{{ $card }} p-5">
@@ -7939,11 +7945,12 @@
             || $showAssignSubscriptionModal || $showViewSubscriptionModal
             || $showInspectVerificationModal || $showManualVerifyModal || $showRejectVerificationModal || $showBroadcastModal
             || $showInspectNotificationModal || $showInspectAbuseModal
-            || $showPreviewCmsModal || $showDeleteAdModal || $showPreviewAdModal;
+            || $showPreviewCmsModal || $showDeleteAdModal || $showPreviewAdModal
+            || $showCampaignModal || $showDeleteCampaignModal || $showPreviewCampaignModal;
     @endphp
     @if($anyModal)
         <div class="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" wire:keydown.escape.window="closeModals">
-            <div class="w-full {{ ($showViewListingModal || $showEditListingModal || $showViewUserModal || $showEditUserModal || $showInspectReportModal || $showViewTransactionModal || $showViewCryptoModal || $showViewSubscriptionModal || $showAssignSubscriptionModal || $showInspectVerificationModal || $showManualVerifyModal || $showBroadcastModal || $showInspectNotificationModal || $showInspectAbuseModal || $showPreviewCmsModal || $showPreviewAdModal) ? 'max-w-2xl' : 'max-w-xl' }} max-h-[90vh] overflow-y-auto rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl">
+            <div class="w-full {{ ($showCampaignModal || $showPreviewCampaignModal) ? 'max-w-4xl' : (($showViewListingModal || $showEditListingModal || $showViewUserModal || $showEditUserModal || $showInspectReportModal || $showViewTransactionModal || $showViewCryptoModal || $showViewSubscriptionModal || $showAssignSubscriptionModal || $showInspectVerificationModal || $showManualVerifyModal || $showBroadcastModal || $showInspectNotificationModal || $showInspectAbuseModal || $showPreviewCmsModal || $showPreviewAdModal) ? 'max-w-2xl' : 'max-w-xl') }} max-h-[90vh] overflow-y-auto rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl">
 
                 {{-- CREATE USER MODAL --}}
                 @if($showCreateUserModal)
@@ -9163,6 +9170,8 @@
                         </div>
                     </div>
                 @endif
+
+                @include('livewire.admin.partials.ads-campaign-modal')
 
                 @if($showAdModal)
                     <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">

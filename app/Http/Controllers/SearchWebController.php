@@ -27,9 +27,21 @@ class SearchWebController extends Controller
         $categoryCounts = $this->searchService->getCategoryCounts($filter);
         $activeDriver = $this->searchService->getActiveDriverName();
 
+        $adContext = array_filter([
+            'state' => $filter->stateCode ?? null,
+            'city_id' => $filter->cityId ?? null,
+            'zip_code' => $filter->zipCode ?? null,
+            'category_id' => $filter->categoryId ?? null,
+        ], fn ($v) => $v !== null && $v !== '');
+
+        $searchFeedItems = app(\App\Modules\Advertising\Services\AdDeliveryService::class)
+            ->injectIntoListings($listings->getCollection(), \App\Modules\Advertising\Models\AdCampaign::SLOT_SEARCH_RESULTS, $adContext);
+
         return view('search.index', [
             'filter' => $filter,
             'listings' => $listings,
+            'searchFeedItems' => $searchFeedItems,
+            'adContext' => $adContext,
             'categories' => $categories,
             'states' => $states,
             'categoryCounts' => $categoryCounts,

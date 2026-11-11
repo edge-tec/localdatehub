@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Admin\Concerns\ManagesAdvertisingCampaigns;
 use App\Models\User;
 use App\Models\PlatformTrafficLog;
 use App\Modules\Accounts\Models\UserProfile;
@@ -80,7 +81,7 @@ use Livewire\WithPagination;
  */
 class AdminEnterpriseHub extends Component
 {
-    use WithPagination, WithFileUploads;
+    use WithPagination, WithFileUploads, ManagesAdvertisingCampaigns;
 
     /** Staff roles recognised by the platform. */
     public const STAFF_ROLES = [
@@ -4219,6 +4220,10 @@ class AdminEnterpriseHub extends Component
         }
 
         $this->showAdModal = false;
+        $this->showCampaignModal = false;
+        $this->showDeleteCampaignModal = false;
+        $this->showPreviewCampaignModal = false;
+        $this->previewCampaignData = null;
         $this->resetAdForm();
         session()->flash('success', "Advertisement [{$ad->name}] saved successfully.");
         $this->dispatch('toast', type: 'success', message: "Campaign [{$ad->name}] saved!");
@@ -4785,6 +4790,10 @@ class AdminEnterpriseHub extends Component
         $this->showCmsModal = false;
         $this->showSeoModal = false;
         $this->showAdModal = false;
+        $this->showCampaignModal = false;
+        $this->showDeleteCampaignModal = false;
+        $this->showPreviewCampaignModal = false;
+        $this->previewCampaignData = null;
         $this->showAuditDetailModal = false;
         $this->showDmcaModal = false;
         $this->showLegalModal = false;
@@ -6141,7 +6150,7 @@ class AdminEnterpriseHub extends Component
             ],
         ];
 
-        return [
+        return array_merge([
             'ads' => $query->paginate(15, ['*'], 'adPage'),
             'adSlots' => AdPlacement::SLOTS,
             'slotInventory' => $slotInventory,
@@ -6155,7 +6164,7 @@ class AdminEnterpriseHub extends Component
                 'global_ctr' => $globalCtr,
                 'total_revenue_usd' => $totalRevenueCents / 100,
             ],
-        ];
+        ], $this->buildEnterpriseAdsData());
     }
 
     protected function dataSeo(): array

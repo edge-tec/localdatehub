@@ -105,6 +105,9 @@
             <!-- LEFT COLUMN (8 COLS): Title, Key Highlights, Photo Showcase & Full Details -->
             <div class="lg:col-span-8 space-y-6 sm:space-y-8">
                 
+                <!-- Listing Detail Showcase Advertisement Slot -->
+                <x-ad-banner placement="listing_detail" :context="$adContext ?? []" variant="leaderboard" :limit="1" />
+
                 <!-- 1. Hero Title & Metadata Card -->
                 <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
                     <!-- Top Gradient Glow Accent -->
@@ -606,6 +609,9 @@
                     </div>
                 </div>
 
+                <!-- 6. Sidebar Advertisement Slot -->
+                <x-ad-banner placement="sidebar" :context="$adContext ?? []" variant="sidebar" :limit="2" />
+
             </div>
 
         </div>
@@ -627,8 +633,15 @@
                     </a>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    @foreach($similarListings as $sim)
-                        <x-listing-card :listing="$sim" />
+                    @php
+                        $relFeed = $relatedFeedItems ?? $similarListings->map(fn ($s) => ['type' => 'listing', 'listing' => $s]);
+                    @endphp
+                    @foreach($relFeed as $feedItem)
+                        @if(($feedItem['type'] ?? 'listing') === 'ad')
+                            <x-sponsored-listing-card :ad="$feedItem['ad']" />
+                        @else
+                            <x-listing-card :listing="$feedItem['listing']" />
+                        @endif
                     @endforeach
                 </div>
             </div>

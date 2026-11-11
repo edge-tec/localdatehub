@@ -495,14 +495,28 @@
                             </button>
                         </div>
                     </form>
+
+                    <!-- Sidebar Promotional Ad Banner -->
+                    <div class="mt-5">
+                        <x-ad-banner placement="sidebar" :context="$adContext ?? []" variant="sidebar" :limit="2" />
+                    </div>
                 </aside>
 
                 <!-- Listing Cards Stream -->
-                <main class="lg:col-span-3">
+                <main class="lg:col-span-3 space-y-5">
+                    <x-ad-banner placement="search_results" :context="$adContext ?? []" variant="leaderboard" :limit="1" />
+
                     @if($listings->count() > 0)
                         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                            @foreach($listings as $listing)
-                                <x-listing-card :listing="$listing" />
+                            @php
+                                $srFeed = $searchFeedItems ?? $listings->map(fn ($l) => ['type' => 'listing', 'listing' => $l]);
+                            @endphp
+                            @foreach($srFeed as $feedItem)
+                                @if(($feedItem['type'] ?? 'listing') === 'ad')
+                                    <x-sponsored-listing-card :ad="$feedItem['ad']" />
+                                @else
+                                    <x-listing-card :listing="$feedItem['listing']" />
+                                @endif
                             @endforeach
                         </div>
 

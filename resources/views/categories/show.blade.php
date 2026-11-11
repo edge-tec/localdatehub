@@ -168,6 +168,9 @@
             </div>
         @endif
 
+        <!-- Category Banner Advertisement Slot -->
+        <x-ad-banner placement="category_page" :context="$adContext ?? ['category_id' => $category->id]" variant="leaderboard" :limit="1" />
+
         <!-- Listings List -->
         <div id="listings" class="space-y-4">
             <div class="flex items-center justify-between">
@@ -185,8 +188,15 @@
                 </div>
             @else
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                    @foreach($listings as $listing)
-                        <x-listing-card :listing="$listing" />
+                    @php
+                        $catFeed = $categoryFeedItems ?? $listings->map(fn ($l) => ['type' => 'listing', 'listing' => $l]);
+                    @endphp
+                    @foreach($catFeed as $feedItem)
+                        @if(($feedItem['type'] ?? 'listing') === 'ad')
+                            <x-sponsored-listing-card :ad="$feedItem['ad']" />
+                        @else
+                            <x-listing-card :listing="$feedItem['listing']" />
+                        @endif
                     @endforeach
                 </div>
 

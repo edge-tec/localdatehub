@@ -573,6 +573,13 @@
         </div>
     </section>
 
+    <!-- Homepage Top Advertisement Slot -->
+    <div class="bg-[#F8F7FA] pt-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <x-ad-banner placement="homepage_top" variant="leaderboard" :limit="1" />
+        </div>
+    </div>
+
     <!-- ======================================================================= -->
     <!-- 3. MAIN CONTENT: FEATURED LISTINGS + PROMOTIONAL SIDEBAR                -->
     <!-- ======================================================================= -->
@@ -665,6 +672,12 @@
                                     No featured listings found in this region.
                                 </div>
                             @endforelse
+
+                            @if(isset($homepageFeaturedAds) && $homepageFeaturedAds->isNotEmpty())
+                                @foreach($homepageFeaturedAds as $featuredAd)
+                                    <x-sponsored-listing-card :ad="$featuredAd" />
+                                @endforeach
+                            @endif
                         </div>
                     </div>
 
@@ -770,6 +783,9 @@
                         </a>
                     </div>
 
+                    <!-- 4. Dynamic Enterprise Sidebar Advertisement(s) -->
+                    <x-ad-banner placement="sidebar" variant="sidebar" :limit="2" />
+
                 </div>
             </div>
         </div>
@@ -792,48 +808,56 @@
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                @foreach($latestListings as $listing)
-                    <div class="bg-white rounded-xl border border-[#E8E4EC] overflow-hidden shadow-xs hover:shadow-lg transition-all flex flex-col group">
-                        <!-- Image Container: 100% Full Uncut Photo with Ambient Backdrop -->
-                        <div class="relative h-72 sm:h-80 overflow-hidden bg-slate-950 flex items-center justify-center">
-                            <a href="{{ route('listings.show', $listing->slug) }}" class="w-full h-full flex items-center justify-center relative block">
-                                <!-- Ambient blurred backdrop matching the photo's colors so no empty bars -->
-                                <img 
-                                    src="{{ $listing->primary_photo_url }}" 
-                                    alt="" 
-                                    aria-hidden="true"
-                                    class="absolute inset-0 w-full h-full object-cover filter blur-lg scale-110 opacity-50 select-none pointer-events-none"
-                                />
-                                <!-- 100% Full Image visible, never cut or cropped -->
-                                <img 
-                                    src="{{ $listing->primary_photo_url }}" 
-                                    alt="{{ $listing->title }}" 
-                                    class="relative z-10 max-h-full max-w-full w-auto h-auto object-contain mx-auto transition duration-300 group-hover:scale-[1.02]"
-                                />
-                            </a>
-                            <span class="absolute bottom-2 left-2 z-20 bg-black/75 backdrop-blur-xs text-white text-[10px] font-semibold px-2 py-0.5 rounded shadow">
-                                {{ $listing->city?->name ?? 'Austin' }}, {{ $listing->city?->state?->code ?? 'TX' }}
-                            </span>
-                        </div>
-                        <div class="p-3.5 flex-1 flex flex-col justify-between">
-                            <div>
-                                <a href="{{ route('listings.show', $listing->slug) }}" class="block text-xs font-bold text-[#171923] group-hover:text-[#F20B65] transition line-clamp-1">
-                                    {{ $listing->title }}
+                @php
+                    $feedCollection = $latestListingsFeed ?? $latestListings->map(fn ($l) => ['type' => 'listing', 'listing' => $l]);
+                @endphp
+                @foreach($feedCollection as $feedItem)
+                    @if(($feedItem['type'] ?? 'listing') === 'ad')
+                        <x-sponsored-listing-card :ad="$feedItem['ad']" />
+                    @else
+                        @php $listing = $feedItem['listing']; @endphp
+                        <div class="bg-white rounded-xl border border-[#E8E4EC] overflow-hidden shadow-xs hover:shadow-lg transition-all flex flex-col group">
+                            <!-- Image Container: 100% Full Uncut Photo with Ambient Backdrop -->
+                            <div class="relative h-72 sm:h-80 overflow-hidden bg-slate-950 flex items-center justify-center">
+                                <a href="{{ route('listings.show', $listing->slug) }}" class="w-full h-full flex items-center justify-center relative block">
+                                    <!-- Ambient blurred backdrop matching the photo's colors so no empty bars -->
+                                    <img 
+                                        src="{{ $listing->primary_photo_url }}" 
+                                        alt="" 
+                                        aria-hidden="true"
+                                        class="absolute inset-0 w-full h-full object-cover filter blur-lg scale-110 opacity-50 select-none pointer-events-none"
+                                    />
+                                    <!-- 100% Full Image visible, never cut or cropped -->
+                                    <img 
+                                        src="{{ $listing->primary_photo_url }}" 
+                                        alt="{{ $listing->title }}" 
+                                        class="relative z-10 max-h-full max-w-full w-auto h-auto object-contain mx-auto transition duration-300 group-hover:scale-[1.02]"
+                                    />
                                 </a>
-                                <p class="text-[11px] text-[#737784] mt-1 line-clamp-2 leading-relaxed">
-                                    {{ Str::limit($listing->description, 75) }}
-                                </p>
-                            </div>
-                            <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between">
-                                <span class="text-[10px] text-slate-400 font-medium">
-                                    {{ $listing->published_at?->diffForHumans() ?? 'Just now' }}
+                                <span class="absolute bottom-2 left-2 z-20 bg-black/75 backdrop-blur-xs text-white text-[10px] font-semibold px-2 py-0.5 rounded shadow">
+                                    {{ $listing->city?->name ?? 'Austin' }}, {{ $listing->city?->state?->code ?? 'TX' }}
                                 </span>
-                                <a href="{{ route('listings.show', $listing->slug) }}" class="text-[11px] font-bold text-[#F20B65] hover:underline">
-                                    View Ad →
-                                </a>
+                            </div>
+                            <div class="p-3.5 flex-1 flex flex-col justify-between">
+                                <div>
+                                    <a href="{{ route('listings.show', $listing->slug) }}" class="block text-xs font-bold text-[#171923] group-hover:text-[#F20B65] transition line-clamp-1">
+                                        {{ $listing->title }}
+                                    </a>
+                                    <p class="text-[11px] text-[#737784] mt-1 line-clamp-2 leading-relaxed">
+                                        {{ Str::limit($listing->description, 75) }}
+                                    </p>
+                                </div>
+                                <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between">
+                                    <span class="text-[10px] text-slate-400 font-medium">
+                                        {{ $listing->published_at?->diffForHumans() ?? 'Just now' }}
+                                    </span>
+                                    <a href="{{ route('listings.show', $listing->slug) }}" class="text-[11px] font-bold text-[#F20B65] hover:underline">
+                                        View Ad →
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    @endif
                 @endforeach
             </div>
         </div>

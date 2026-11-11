@@ -105,51 +105,61 @@
                         </a>
                     </div>
                 @else
+                    <x-ad-banner placement="location_page" :context="$adContext ?? ['state' => $state->code, 'city_id' => $city->id]" variant="leaderboard" :limit="1" class="mb-4" />
+
                     <div class="space-y-4">
-                        @foreach($listings as $ad)
-                            <div class="p-5 rounded-xl bg-white border border-slate-200 hover:border-slate-200 transition flex flex-col sm:flex-row gap-4">
-                                @if($ad->primaryPhoto)
-                                    <div class="w-full sm:w-36 h-36 rounded-lg bg-slate-950 overflow-hidden shrink-0 border border-slate-200 relative flex items-center justify-center">
-                                        <!-- Ambient blurred backdrop -->
-                                        <img 
-                                            src="{{ $ad->primaryPhoto->url }}" 
-                                            alt="" 
-                                            aria-hidden="true"
-                                            class="absolute inset-0 w-full h-full object-cover filter blur-lg scale-110 opacity-50 select-none pointer-events-none"
-                                        />
-                                        <!-- 100% Full Image visible, never cut or cropped -->
-                                        <img 
-                                            src="{{ $ad->primaryPhoto->url }}" 
-                                            alt="{{ $ad->title }}" 
-                                            class="relative z-10 max-h-full max-w-full w-auto h-auto object-contain mx-auto"
-                                        >
-                                    </div>
-                                @endif
-                                <div class="flex-1 flex flex-col justify-between">
-                                    <div>
-                                        <div class="flex items-center gap-2 mb-1.5">
-                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-600 border border-rose-500/20">
-                                                {{ $ad->category->name }}
-                                            </span>
-                                            <span class="text-xs text-slate-400">
-                                                Age {{ $ad->poster_age }}
-                                                @if($ad->poster_gender)
-                                                    • {{ $ad->poster_gender }}
-                                                @endif
-                                            </span>
-                                            <span class="text-[11px] text-slate-500 ml-auto">
-                                                {{ $ad->published_at ? $ad->published_at->diffForHumans() : 'Recently' }}
-                                            </span>
+                        @php
+                            $cityItems = $cityFeedItems ?? $listings->map(fn ($l) => ['type' => 'listing', 'listing' => $l]);
+                        @endphp
+                        @foreach($cityItems as $feedItem)
+                            @if(($feedItem['type'] ?? 'listing') === 'ad')
+                                <x-sponsored-listing-card :ad="$feedItem['ad']" />
+                            @else
+                                @php $ad = $feedItem['listing']; @endphp
+                                <div class="p-5 rounded-xl bg-white border border-slate-200 hover:border-slate-200 transition flex flex-col sm:flex-row gap-4">
+                                    @if($ad->primaryPhoto)
+                                        <div class="w-full sm:w-36 h-36 rounded-lg bg-slate-950 overflow-hidden shrink-0 border border-slate-200 relative flex items-center justify-center">
+                                            <!-- Ambient blurred backdrop -->
+                                            <img 
+                                                src="{{ $ad->primaryPhoto->url }}" 
+                                                alt="" 
+                                                aria-hidden="true"
+                                                class="absolute inset-0 w-full h-full object-cover filter blur-lg scale-110 opacity-50 select-none pointer-events-none"
+                                            />
+                                            <!-- 100% Full Image visible, never cut or cropped -->
+                                            <img 
+                                                src="{{ $ad->primaryPhoto->url }}" 
+                                                alt="{{ $ad->title }}" 
+                                                class="relative z-10 max-h-full max-w-full w-auto h-auto object-contain mx-auto"
+                                            >
                                         </div>
-                                        <h3 class="text-base font-bold text-slate-900 hover:text-rose-600 transition">
-                                            {{ $ad->title }}
-                                        </h3>
-                                        <p class="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
-                                            {{ $ad->description }}
-                                        </p>
+                                    @endif
+                                    <div class="flex-1 flex flex-col justify-between">
+                                        <div>
+                                            <div class="flex items-center gap-2 mb-1.5">
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-600 border border-rose-500/20">
+                                                    {{ $ad->category->name }}
+                                                </span>
+                                                <span class="text-xs text-slate-400">
+                                                    Age {{ $ad->poster_age }}
+                                                    @if($ad->poster_gender)
+                                                        • {{ $ad->poster_gender }}
+                                                    @endif
+                                                </span>
+                                                <span class="text-[11px] text-slate-500 ml-auto">
+                                                    {{ $ad->published_at ? $ad->published_at->diffForHumans() : 'Recently' }}
+                                                </span>
+                                            </div>
+                                            <h3 class="text-base font-bold text-slate-900 hover:text-rose-600 transition">
+                                                {{ $ad->title }}
+                                            </h3>
+                                            <p class="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                                                {{ $ad->description }}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            @endif
                         @endforeach
 
                         <div class="pt-4">
@@ -161,6 +171,8 @@
 
             <!-- Sidebar Column: Nearby Cities & Quick Info -->
             <div class="space-y-6">
+                <x-ad-banner placement="sidebar" :context="$adContext ?? ['state' => $state->code, 'city_id' => $city->id]" variant="sidebar" :limit="1" />
+
                 <!-- Nearby Cities (Radius Search Proof) -->
                 @if($nearbyCities->isNotEmpty())
                     <div class="p-6 rounded-2xl bg-white border border-slate-200">

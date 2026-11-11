@@ -423,6 +423,22 @@ Route::withoutMiddleware('web')->group(function () {
 // Google Indexing & SEO Webhooks (CSRF-exempt)
 Route::post('/webhooks/seo/google/indexing', [SitemapController::class, 'googleIndexingWebhook'])->name('webhooks.seo.google.indexing');
 
+// =========================================================================
+// Enterprise Advertising & Affiliate Campaign Tracking Routes
+// =========================================================================
+Route::get('/ads/click/{campaign:uuid}', [\App\Http\Controllers\Advertising\AdTrackingController::class, 'click'])
+    ->middleware('throttle:60,1')
+    ->name('ads.click');
+Route::get('/ads/legacy-click/{placement}', [\App\Http\Controllers\Advertising\AdTrackingController::class, 'legacyClick'])
+    ->middleware('throttle:60,1')
+    ->name('ads.legacy.click');
+Route::post('/ads/impression', [\App\Http\Controllers\Advertising\AdTrackingController::class, 'impression'])
+    ->middleware('throttle:120,1')
+    ->name('ads.impression');
+Route::match(['get', 'post'], '/webhooks/ads/postback/{campaign:uuid}', [\App\Http\Controllers\Advertising\AdTrackingController::class, 'postback'])
+    ->middleware('throttle:120,1')
+    ->name('ads.postback');
+
 // Admin SEO & Google Search Console Management Routes
 Route::middleware(['auth', 'admin.rbac'])->prefix('admin/seo')->name('admin.seo.')->group(function () {
     Route::match(['get', 'post'], '/google/sync', [SitemapController::class, 'googleSync'])->name('google.sync');

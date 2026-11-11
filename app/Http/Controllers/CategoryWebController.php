@@ -87,11 +87,20 @@ class CategoryWebController extends Controller
 
         $seo = app(\App\Modules\SEO\Services\SeoService::class)->generateForCategory($category, (int) $request->input('page', 1));
 
+        $adContext = [
+            'category_id' => $category->id,
+            'parent_category_id' => $category->parent_id,
+        ];
+        $categoryFeedItems = app(\App\Modules\Advertising\Services\AdDeliveryService::class)
+            ->injectIntoListings($listings->getCollection(), \App\Modules\Advertising\Models\AdCampaign::SLOT_CATEGORY_PAGE, $adContext);
+
         return view('categories.show', [
             'category' => $category,
             'subcategories' => $subcategories,
             'attributes' => $attributes,
             'listings' => $listings,
+            'categoryFeedItems' => $categoryFeedItems,
+            'adContext' => $adContext,
             'breadcrumbs' => $category->getBreadcrumbs(),
             'isPreview' => !$category->is_active && $isAdmin,
             'seo' => $seo,

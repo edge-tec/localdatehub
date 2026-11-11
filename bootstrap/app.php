@@ -31,6 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
         \App\Console\Commands\SeoGoogleInspectCommand::class,
         \App\Console\Commands\SeoProcessIndexingCommand::class,
         \App\Console\Commands\SeoRunAuditCommand::class,
+        \App\Console\Commands\SyncAdCampaignsCommand::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(\App\Http\Middleware\HandleSeoRedirects::class);
