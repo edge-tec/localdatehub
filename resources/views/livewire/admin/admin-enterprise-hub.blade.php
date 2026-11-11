@@ -707,105 +707,122 @@
 
                 </div>
 
-                <!-- Row 3: Recent Listings (4 Cards) + Real-Time Location & Country Telemetry -->
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                <!-- Row 3: Recent Listings + Real-Time Location & Country Telemetry -->
+                <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
                     
-                    <!-- Recent Listings (8 cols) -->
-                    <div class="lg:col-span-8 {{ $card }} p-5">
-                        <div class="flex items-center justify-between mb-4">
-                            <div>
-                                <h2 class="text-sm font-extrabold text-slate-900">Recent Listings</h2>
-                                <p class="text-[11px] text-slate-500">Latest active classified advertisements</p>
+                    <!-- Recent Listings (8 cols on xl+) -->
+                    <div class="xl:col-span-8 {{ $card }} p-4 sm:p-5">
+                        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                            <div class="min-w-0">
+                                <h2 class="text-sm sm:text-base font-extrabold text-slate-900">Recent Listings</h2>
+                                <p class="text-xs text-slate-500">Latest active classified advertisements</p>
                             </div>
                             <a href="{{ route('admin.dashboard', ['tab' => 'listings']) }}" wire:click.prevent="setTab('listings')"
-                                class="text-xs font-bold text-[#F20B65] hover:underline flex items-center gap-1 cursor-pointer">
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200/80 text-xs font-bold text-[#F20B65] transition cursor-pointer shrink-0">
                                 <span>View All Listings</span>
-                                <span>→</span>
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
                             </a>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             @forelse($recentListings as $rListing)
-                                <div class="bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col justify-between group shadow-xs hover:border-[#F20B65] hover:shadow-md transition">
-                                    <div class="relative h-28 bg-slate-100 overflow-hidden">
+                                <div class="bg-white rounded-2xl border border-slate-200 flex flex-col justify-between group shadow-xs hover:border-[#F20B65]/60 hover:shadow-md transition overflow-hidden">
+                                    <!-- Full Uncropped Image Showcase -->
+                                    <div class="relative w-full bg-slate-100/90 border-b border-slate-100 overflow-hidden">
                                         @if($rListing->primary_photo_url)
-                                            <a href="{{ route('listings.show', $rListing->slug) }}" target="_blank" class="block w-full h-full">
-                                                <img src="{{ $rListing->primary_photo_url }}" alt="{{ $rListing->title }}" class="w-full h-full object-cover group-hover:scale-105 transition" />
+                                            <a href="{{ route('listings.show', $rListing->slug) }}" target="_blank" class="relative block w-full bg-slate-950/5">
+                                                <img src="{{ $rListing->primary_photo_url }}" alt="" aria-hidden="true" class="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-25 pointer-events-none" />
+                                                <img src="{{ $rListing->primary_photo_url }}" alt="{{ $rListing->title }}" class="relative z-10 w-full h-auto max-h-[420px] object-contain mx-auto block transition-transform duration-300 group-hover:scale-[1.02]" />
                                             </a>
                                         @else
-                                            <a href="{{ route('listings.show', $rListing->slug) }}" target="_blank" class="w-full h-full flex flex-col items-center justify-center bg-slate-100 text-slate-400">
-                                                <svg class="w-8 h-8 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                                <span class="text-[9px] font-bold text-slate-400 mt-1">LocalDateHub</span>
+                                            <a href="{{ route('listings.show', $rListing->slug) }}" target="_blank" class="w-full min-h-[200px] flex flex-col items-center justify-center bg-slate-100 text-slate-400 p-6">
+                                                <svg class="w-10 h-10 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                <span class="text-xs font-bold text-slate-400 mt-1.5">LocalDateHub</span>
                                             </a>
                                         @endif
-                                        <button type="button" wire:click="setListingCategoryFilter({{ $rListing->category_id ?? 0 }})"
-                                            class="absolute top-1.5 left-1.5 bg-[#F20B65] hover:bg-[#d90858] text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full shadow-xs cursor-pointer transition"
-                                            title="Filter listings by {{ $rListing->category?->name }}">
-                                            {{ $rListing->category?->name ?? 'Featured' }}
-                                        </button>
                                     </div>
-                                    <div class="p-2.5 flex-1 flex flex-col justify-between">
-                                        <div>
-                                            <a href="{{ route('listings.show', $rListing->slug) }}" target="_blank" class="text-[11px] font-bold text-slate-900 hover:text-[#F20B65] transition truncate block" title="{{ $rListing->title }}">
+
+                                    <!-- Card Body: All Details & Actions Fully Visible -->
+                                    <div class="p-3.5 sm:p-4 flex-1 flex flex-col justify-between gap-3">
+                                        <div class="space-y-2 min-w-0">
+                                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                                <button type="button" wire:click="setListingCategoryFilter({{ $rListing->category_id ?? 0 }})"
+                                                    class="inline-flex items-center gap-1.5 bg-gradient-to-r from-[#F20B65] to-rose-500 hover:from-[#d90858] hover:to-rose-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-2xs cursor-pointer transition text-left"
+                                                    title="Filter listings by {{ $rListing->category?->name }}">
+                                                    <svg class="w-3 h-3 shrink-0 opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                                    <span>{{ $rListing->category?->name ?? 'Featured' }}</span>
+                                                </button>
+                                                <span class="inline-flex items-center gap-1 text-xs text-slate-600 font-semibold bg-slate-100 px-2 py-0.5 rounded-md shrink-0" title="Total views">
+                                                    <svg class="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                    <span>{{ number_format($rListing->view_count ?? 0) }}</span>
+                                                </span>
+                                            </div>
+
+                                            <a href="{{ route('listings.show', $rListing->slug) }}" target="_blank" class="text-sm font-extrabold text-slate-900 hover:text-[#F20B65] transition leading-snug break-words block">
                                                 {{ $rListing->title }}
                                             </a>
-                                            <div class="text-[10px] text-slate-500 mt-0.5 truncate">{{ $rListing->city?->name ?? 'City' }}, {{ $rListing->city?->state?->code ?? 'US' }}</div>
-                                        </div>
-                                        <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] gap-1">
-                                            <span class="text-slate-500 flex items-center gap-0.5 font-medium shrink-0">👁 {{ number_format($rListing->view_count ?? 0) }}</span>
-                                            <div class="flex items-center gap-1 shrink-0">
-                                                <button type="button" wire:click="openViewListingModal({{ $rListing->id }})" class="bg-slate-100 hover:bg-slate-200 text-slate-800 text-[9px] font-bold px-1.5 py-0.5 rounded transition cursor-pointer" title="Moderate/Inspect ad">
-                                                    Manage
-                                                </button>
-                                                <a href="{{ route('listings.show', $rListing->slug) }}" target="_blank" class="bg-[#F20B65] hover:bg-[#d90858] text-white text-[9px] font-bold px-2 py-0.5 rounded flex items-center gap-0.5 shadow-2xs">
-                                                    <span>View Ad</span>
-                                                    <span>→</span>
-                                                </a>
+
+                                            <div class="flex items-start gap-1.5 text-xs text-slate-500 font-medium">
+                                                <svg class="w-3.5 h-3.5 text-[#F20B65]/80 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                                <span class="break-words">{{ $rListing->city?->name ?? 'City' }}, {{ $rListing->city?->state?->code ?? 'US' }}</span>
                                             </div>
+                                        </div>
+
+                                        <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                                            <button type="button" wire:click="openViewListingModal({{ $rListing->id }})" class="flex-1 min-w-[100px] inline-flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold px-3 py-2 rounded-xl border border-slate-200/80 transition cursor-pointer whitespace-nowrap" title="Moderate/Inspect ad">
+                                                <svg class="w-3.5 h-3.5 text-slate-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                                                <span>Manage</span>
+                                            </button>
+                                            <a href="{{ route('listings.show', $rListing->slug) }}" target="_blank" class="flex-1 min-w-[110px] inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-[#F20B65] to-rose-500 hover:from-[#d90858] hover:to-rose-600 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-xs transition whitespace-nowrap">
+                                                <span>View Ad</span>
+                                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
                             @empty
-                                <div class="col-span-4 p-8 text-center text-xs text-slate-400 font-semibold bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                                <div class="sm:col-span-2 p-8 text-center text-xs text-slate-400 font-semibold bg-slate-50 rounded-xl border border-dashed border-slate-200">
                                     No classified listings posted yet. Click "+ Add New Listing" above to publish the first ad.
                                 </div>
                             @endforelse
                         </div>
                     </div>
 
-                    <!-- Top Locations & Real-Time Country Telemetry (4 cols) -->
-                    <div class="lg:col-span-4 {{ $card }} p-5 flex flex-col justify-between">
+                    <!-- Top Locations & Real-Time Country Telemetry (4 cols on xl+) -->
+                    <div class="xl:col-span-4 {{ $card }} p-4 sm:p-5 flex flex-col justify-between gap-4">
                         <div>
-                            <div class="flex items-center justify-between mb-3">
-                                <div>
-                                    <h2 class="text-sm font-extrabold text-slate-900">Traffic &amp; Locations</h2>
-                                    <p class="text-[10px] text-slate-500">Real-time visitor origins</p>
+                            <div class="flex flex-wrap items-center justify-between gap-2.5 mb-4">
+                                <div class="min-w-0">
+                                    <h2 class="text-sm sm:text-base font-extrabold text-slate-900">Traffic &amp; Locations</h2>
+                                    <p class="text-xs text-slate-500">Real-time visitor origins</p>
                                 </div>
-                                <div class="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
-                                    <button type="button" wire:click="setDashboardLocationMode('countries')" class="px-2.5 py-1 rounded-md text-[10px] font-bold transition {{ $dashboardLocationMode === 'countries' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900' }}">
-                                        🌍 Countries
+                                <div class="inline-flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
+                                    <button type="button" wire:click="setDashboardLocationMode('countries')" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer {{ $dashboardLocationMode === 'countries' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900' }}">
+                                        <svg class="w-3.5 h-3.5 {{ $dashboardLocationMode === 'countries' ? 'text-[#F20B65]' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        <span>Countries</span>
                                     </button>
-                                    <button type="button" wire:click="setDashboardLocationMode('states')" class="px-2.5 py-1 rounded-md text-[10px] font-bold transition {{ $dashboardLocationMode === 'states' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900' }}">
-                                        📍 States
+                                    <button type="button" wire:click="setDashboardLocationMode('states')" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer {{ $dashboardLocationMode === 'states' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900' }}">
+                                        <svg class="w-3.5 h-3.5 {{ $dashboardLocationMode === 'states' ? 'text-[#F20B65]' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                        <span>States</span>
                                     </button>
                                 </div>
                             </div>
 
                             @if($dashboardLocationMode === 'countries')
                                 <!-- Real-Time Country Tracking -->
-                                <div class="space-y-2">
+                                <div class="space-y-2.5">
                                     @forelse($topCountries as $idx => $c)
-                                        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200 text-xs hover:bg-slate-100 transition">
-                                            <div class="flex items-center space-x-2.5 truncate">
-                                                <span class="w-5 h-5 rounded-full bg-pink-100 text-[#F20B65] text-[10px] font-extrabold flex items-center justify-center shrink-0">
+                                        <div class="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs hover:bg-slate-100 transition">
+                                            <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                                <span class="w-6 h-6 rounded-lg bg-pink-100 text-[#F20B65] text-[11px] font-extrabold flex items-center justify-center shrink-0">
                                                     {{ $idx + 1 }}
                                                 </span>
                                                 <span class="text-base shrink-0">{{ \App\Models\PlatformTrafficLog::countryCodeToFlag($c->country_code) }}</span>
-                                                <span class="font-bold text-slate-900 truncate">{{ $c->country_name }}</span>
+                                                <span class="font-bold text-slate-900 break-words">{{ $c->country_name }}</span>
                                             </div>
-                                            <div class="text-right shrink-0">
-                                                <span class="text-slate-900 font-extrabold text-[11px]">{{ number_format($c->hits) }} hits</span>
-                                                <span class="block text-[9px] text-slate-500 font-medium">{{ number_format($c->unique_visitors) }} unique</span>
+                                            <div class="text-right shrink-0 ml-auto">
+                                                <span class="text-slate-900 font-extrabold text-xs">{{ number_format($c->hits) }} hits</span>
+                                                <span class="block text-[10px] text-slate-500 font-medium">{{ number_format($c->unique_visitors) }} unique</span>
                                             </div>
                                         </div>
                                     @empty
@@ -814,20 +831,20 @@
                                 </div>
                             @else
                                 <!-- State Listings Distribution -->
-                                <div class="space-y-2">
+                                <div class="space-y-2.5">
                                     @forelse($topLocations as $idx => $st)
                                         <a href="{{ route('admin.dashboard', ['tab' => 'locations']) }}" wire:click.prevent="setTab('locations')"
-                                            class="flex items-center justify-between p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs transition cursor-pointer group">
-                                            <div class="flex items-center space-x-2.5 truncate">
-                                                <span class="w-5 h-5 rounded-full bg-pink-100 text-[#F20B65] text-[10px] font-extrabold flex items-center justify-center shrink-0">
+                                            class="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2.5 p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs transition cursor-pointer group">
+                                            <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                                <span class="w-6 h-6 rounded-lg bg-pink-100 text-[#F20B65] text-[11px] font-extrabold flex items-center justify-center shrink-0">
                                                     {{ $idx + 1 }}
                                                 </span>
                                                 <span class="text-[#F20B65] shrink-0">
                                                     <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
                                                 </span>
-                                                <span class="font-bold text-slate-900 group-hover:text-[#F20B65] transition truncate">{{ $st->name }}</span>
+                                                <span class="font-bold text-slate-900 group-hover:text-[#F20B65] transition break-words">{{ $st->name }}</span>
                                             </div>
-                                            <span class="text-slate-700 font-black text-[11px] shrink-0">{{ number_format($st->listings_count) }} {{ \Illuminate\Support\Str::plural('ad', $st->listings_count) }}</span>
+                                            <span class="text-slate-700 font-black text-xs shrink-0 ml-auto">{{ number_format($st->listings_count) }} {{ \Illuminate\Support\Str::plural('ad', $st->listings_count) }}</span>
                                         </a>
                                     @empty
                                         <div class="text-center py-6 text-xs text-slate-400">No state location data available.</div>
@@ -836,11 +853,11 @@
                             @endif
                         </div>
 
-                        <div class="pt-3 mt-2 border-t border-slate-100 flex justify-end">
+                        <div class="pt-3 border-t border-slate-100 flex justify-end">
                             <a href="{{ route('admin.dashboard', ['tab' => 'locations']) }}" wire:click.prevent="setTab('locations')"
-                                class="text-xs font-bold text-[#F20B65] hover:underline flex items-center gap-1 cursor-pointer">
+                                class="inline-flex items-center gap-1.5 text-xs font-bold text-[#F20B65] hover:underline cursor-pointer">
                                 <span>Manage All Locations</span>
-                                <span>→</span>
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
                             </a>
                         </div>
                     </div>
