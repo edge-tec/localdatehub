@@ -143,6 +143,7 @@ class MeilisearchDriver implements SearchDriverInterface
             $models = Listing::query()
                 ->active()
                 ->with(['category.parent', 'city.state', 'state', 'primaryPhoto', 'location', 'ownerIdentityVerification'])
+                ->withCount('media')
                 ->whereIn('id', $ids)
                 ->get()
                 ->keyBy('id');

@@ -626,65 +626,14 @@
                         </div>
 
                         <!-- 4 Featured Cards Grid -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 min-[420px]:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
                             @forelse($featuredListings as $listing)
-                                <div class="bg-white rounded-xl border border-[#E8E4EC] overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col group">
-                                    <!-- Image Thumbnail: Hardware-Safe Uncropped Photo Frame -->
-                                    <div class="relative h-72 sm:h-80 overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 flex items-center justify-center isolate">
-                                        <a href="{{ route('listings.show', $listing->slug) }}" class="w-full h-full flex items-center justify-center relative block">
-                                            <img 
-                                                src="{{ $listing->primary_thumbnail_url }}" 
-                                                alt="{{ $listing->title }}" 
-                                                loading="lazy"
-                                                decoding="async"
-                                                onerror="this.onerror=null;this.src='{{ asset('images/featured-1.jpg') }}';"
-                                                class="max-h-full max-w-full w-auto h-auto object-contain mx-auto block"
-                                            />
-                                        </a>
-                                        <!-- Featured Badge (Pink Pill) -->
-                                        <span class="absolute top-2.5 left-2.5 bg-[#F20B65] text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-md tracking-wide pointer-events-none">
-                                            Featured
-                                        </span>
-                                    </div>
-
-                                    <!-- Card Content -->
-                                    <div class="p-3 flex-1 flex flex-col justify-between">
-                                        <div>
-                                            <a href="{{ route('listings.show', $listing->slug) }}" class="block text-xs font-bold text-[#171923] group-hover:text-[#F20B65] transition truncate">
-                                                {{ $listing->title }}
-                                            </a>
-                                            <div class="text-[11px] font-medium text-[#737784] mt-0.5 truncate">
-                                                {{ $listing->city?->name ?? 'New York' }}, {{ $listing->city?->state?->code ?? 'NY' }}
-                                            </div>
-                                            <!-- Age • Height Demographics -->
-                                            <div class="text-[11px] font-bold text-slate-700 mt-1">
-                                                {{ $listing->poster_age ?? 28 }} • {{ $listing->poster_age > 30 ? "5'7\"" : "5'6\"" }}
-                                            </div>
-                                        </div>
-
-                                        <!-- Card Footer: Views + View Ad Button -->
-                                        <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
-                                            <div class="flex items-center text-[11px] font-medium text-[#737784] space-x-1">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                </svg>
-                                                <span>{{ ($listing->view_count ?? 0) >= 1000 ? number_format(($listing->view_count ?? 0) / 1000, 1) . 'k' : number_format($listing->view_count ?? 0) }}</span>
-                                            </div>
-
-                                            <a href="{{ route('listings.show', $listing->slug) }}" class="bg-[#F20B65] hover:bg-[#d90858] text-white text-[11px] font-bold px-3 py-1 rounded-md flex items-center gap-1 shadow-xs transition">
-                                                <span>View Ad</span>
-                                                <span>→</span>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
+                                <x-listing-card :listing="$listing" variant="featured" :eager="$loop->index < 4" />
                             @empty
-                                <div class="col-span-4 bg-white rounded-xl p-8 text-center border border-slate-200 text-slate-500">
+                                <div class="col-span-full bg-white rounded-[16px] p-8 text-center border border-[#E8ECF3] text-[#718096]">
                                     No featured listings found in this region.
                                 </div>
                             @endforelse
-
                         </div>
 
                         @if(isset($homepageFeaturedAds) && $homepageFeaturedAds->isNotEmpty())
@@ -831,7 +780,7 @@
                 </a>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div class="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
                 @php
                     $feedCollection = $latestListingsFeed ?? $latestListings->map(fn ($l) => ['type' => 'listing', 'listing' => $l]);
                 @endphp
@@ -839,43 +788,7 @@
                     @if(($feedItem['type'] ?? 'listing') === 'ad')
                         <x-sponsored-listing-card :ad="$feedItem['ad']" />
                     @else
-                        @php $listing = $feedItem['listing']; @endphp
-                        <div class="bg-white rounded-xl border border-[#E8E4EC] overflow-hidden shadow-xs hover:shadow-lg transition-all flex flex-col group">
-                            <!-- Image Container: Hardware-Safe Uncropped Photo Frame -->
-                            <div class="relative h-72 sm:h-80 overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 flex items-center justify-center isolate">
-                                <a href="{{ route('listings.show', $listing->slug) }}" class="w-full h-full flex items-center justify-center relative block">
-                                    <img 
-                                        src="{{ $listing->primary_thumbnail_url }}" 
-                                        alt="{{ $listing->title }}" 
-                                        loading="lazy"
-                                        decoding="async"
-                                        onerror="this.onerror=null;this.src='{{ asset('images/featured-1.jpg') }}';"
-                                        class="max-h-full max-w-full w-auto h-auto object-contain mx-auto block"
-                                    />
-                                </a>
-                                <span class="absolute bottom-2 left-2 bg-black/75 text-white text-[10px] font-semibold px-2 py-0.5 rounded shadow pointer-events-none">
-                                    {{ $listing->city?->name ?? 'Austin' }}, {{ $listing->city?->state?->code ?? 'TX' }}
-                                </span>
-                            </div>
-                            <div class="p-3.5 flex-1 flex flex-col justify-between">
-                                <div>
-                                    <a href="{{ route('listings.show', $listing->slug) }}" class="block text-xs font-bold text-[#171923] group-hover:text-[#F20B65] transition line-clamp-1">
-                                        {{ $listing->title }}
-                                    </a>
-                                    <p class="text-[11px] text-[#737784] mt-1 line-clamp-2 leading-relaxed">
-                                        {{ Str::limit($listing->description, 75) }}
-                                    </p>
-                                </div>
-                                <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between">
-                                    <span class="text-[10px] text-slate-400 font-medium">
-                                        {{ $listing->published_at?->diffForHumans() ?? 'Just now' }}
-                                    </span>
-                                    <a href="{{ route('listings.show', $listing->slug) }}" class="text-[11px] font-bold text-[#F20B65] hover:underline">
-                                        View Ad →
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+                        <x-listing-card :listing="$feedItem['listing']" :eager="$loop->index < 4" />
                     @endif
                 @endforeach
             </div>

@@ -55,7 +55,8 @@ class CategoryWebController extends Controller
 
         $listingsQuery = Listing::whereIn('category_id', $categoryIds)
             ->where('status', 'active')
-            ->with(['city', 'state', 'primaryPhoto', 'ownerIdentityVerification'])
+            ->with(['category', 'city', 'state', 'primaryPhoto', 'ownerIdentityVerification'])
+            ->withCount('media')
             ->latest('published_at');
 
         // Apply attribute filters if provided

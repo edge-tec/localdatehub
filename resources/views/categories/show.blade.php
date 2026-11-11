@@ -187,7 +187,7 @@
                     <p class="text-slate-400 text-sm">No active listings currently found in this category.</p>
                 </div>
             @else
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div class="grid grid-cols-1 min-[420px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                     @php
                         $catFeed = $categoryFeedItems ?? $listings->map(fn ($l) => ['type' => 'listing', 'listing' => $l]);
                     @endphp
@@ -195,7 +195,7 @@
                         @if(($feedItem['type'] ?? 'listing') === 'ad')
                             <x-sponsored-listing-card :ad="$feedItem['ad']" />
                         @else
-                            <x-listing-card :listing="$feedItem['listing']" />
+                            <x-listing-card :listing="$feedItem['listing']" :eager="$loop->index < 4" />
                         @endif
                     @endforeach
                 </div>

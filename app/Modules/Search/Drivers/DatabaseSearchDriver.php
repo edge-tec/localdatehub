@@ -31,7 +31,8 @@ class DatabaseSearchDriver implements SearchDriverInterface
     {
         $query = Listing::query()
             ->active()
-            ->with(['category.parent', 'city.state', 'state', 'primaryPhoto', 'location', 'ownerIdentityVerification']);
+            ->with(['category.parent', 'city.state', 'state', 'primaryPhoto', 'location', 'ownerIdentityVerification'])
+            ->withCount('media');
 
         // 1. Text Keyword Search (title & description)
         if (!empty($filter->query)) {

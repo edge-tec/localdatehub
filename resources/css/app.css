@@ -11,3 +11,48 @@
 [x-cloak] {
     display: none !important;
 }
+
+/* ============================================================================
+   LocalDateHub Premium Listing Card Architecture
+   Uses container queries & accessible stretched-link pattern so independent
+   buttons (Favorite, Contact) remain operable without nested links.
+   ============================================================================ */
+.ldh-listing-card {
+    container: ldh-card / inline-size;
+    position: relative;
+}
+
+.ldh-listing-card a.ldh-card-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+.ldh-listing-card :is(a:not(.ldh-card-link), button, form) {
+    position: relative;
+    z-index: 2;
+}
+
+.ldh-listing-card a.ldh-card-link:focus-visible {
+    outline: none;
+}
+
+.ldh-listing-card:has(a.ldh-card-link:focus-visible) {
+    outline: 2px solid #F50057;
+    outline-offset: 2px;
+}
+
+@container ldh-card (max-width: 225px) {
+    .ldh-card-contact-btn {
+        display: none;
+    }
+
+    .ldh-card-body {
+        padding: 0.75rem;
+    }
+
+    .ldh-card-footer {
+        padding: 0.625rem 0.75rem;
+    }
+}

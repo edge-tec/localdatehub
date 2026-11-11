@@ -507,7 +507,7 @@
                     <x-ad-banner placement="search_results" :context="$adContext ?? []" variant="leaderboard" :limit="1" />
 
                     @if($listings->count() > 0)
-                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        <div class="grid grid-cols-1 min-[420px]:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                             @php
                                 $srFeed = $searchFeedItems ?? $listings->map(fn ($l) => ['type' => 'listing', 'listing' => $l]);
                             @endphp
@@ -515,7 +515,7 @@
                                 @if(($feedItem['type'] ?? 'listing') === 'ad')
                                     <x-sponsored-listing-card :ad="$feedItem['ad']" />
                                 @else
-                                    <x-listing-card :listing="$feedItem['listing']" />
+                                    <x-listing-card :listing="$feedItem['listing']" :eager="$loop->index < 3" />
                                 @endif
                             @endforeach
                         </div>

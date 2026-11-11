@@ -59,6 +59,7 @@ class ListingWebController extends Controller
                   ->orWhere('city_id', $listing->city_id);
             })
             ->with(['category', 'city.state', 'state', 'primaryPhoto', 'ownerIdentityVerification'])
+            ->withCount('media')
             ->latest('published_at')
             ->take(3)
             ->get();

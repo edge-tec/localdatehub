@@ -88,7 +88,8 @@ class LocationWebController extends Controller
         // Load active listings for this city
         $query = $city->listings()
             ->active()
-            ->with(['category', 'primaryPhoto', 'ownerIdentityVerification'])
+            ->with(['category', 'city.state', 'state', 'primaryPhoto', 'ownerIdentityVerification'])
+            ->withCount('media')
             ->latest('published_at');
 
         if ($selectedCategory) {

@@ -41,12 +41,14 @@ class HomeController extends Controller
             $featuredListings = Listing::active()
                 ->featured()
                 ->with(['category', 'city.state', 'state', 'primaryPhoto', 'ownerIdentityVerification'])
+                ->withCount('media')
                 ->latest('published_at')
                 ->take(4)
                 ->get();
 
             $latestListings = Listing::active()
                 ->with(['category', 'city.state', 'state', 'primaryPhoto', 'ownerIdentityVerification'])
+                ->withCount('media')
                 ->latest('published_at')
                 ->take(8)
                 ->get();

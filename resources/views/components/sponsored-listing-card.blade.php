@@ -1,15 +1,15 @@
 @props(['ad'])
 
 <article
-    class="group bg-white border border-slate-200/90 hover:border-[#F20B65]/50 rounded-2xl overflow-clip shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative"
+    class="ldh-listing-card group bg-white border border-[#E8ECF3] hover:border-[#F50057]/45 rounded-[16px] overflow-clip shadow-[0_4px_18px_rgba(20,30,50,0.06)] hover:shadow-[0_12px_28px_rgba(20,30,50,0.11)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between h-full"
     data-ad-card="{{ $ad['campaign_id'] ?? $ad['legacy_id'] ?? 'ad' }}"
     data-ad-campaign-uuid="{{ $ad['campaign_uuid'] ?? '' }}"
     data-ad-creative-id="{{ $ad['creative_id'] ?? '' }}"
     data-ad-slot="{{ $ad['slot'] ?? '' }}"
 >
     <div>
-        {{-- Creative Media Showcase (Hardware-Safe Full Uncut Responsive Image) --}}
-        <div class="relative h-72 sm:h-80 w-full overflow-hidden bg-slate-950 flex items-center justify-center isolate">
+        {{-- Creative Media Showcase (Hardware-Safe Full Uncut Responsive Image, 4:5 Alignment) --}}
+        <div class="relative aspect-[4/5] w-full overflow-hidden bg-slate-950 flex items-center justify-center isolate">
             @php
                 $desktopCardImg = $ad['desktop_banner_url'] ?: ($ad['thumbnail_url'] ?: ($ad['image_url'] ?: $ad['mobile_banner_url']));
                 $mobileCardImg = $ad['mobile_banner_url'] ?: $desktopCardImg;
@@ -81,21 +81,21 @@
         </div>
 
         {{-- Body Details --}}
-        <div class="p-4 space-y-2">
-            <div class="flex items-center gap-2 min-w-0 text-[11px] font-bold text-[#F20B65]">
+        <div class="ldh-card-body p-4 space-y-2 min-w-0">
+            <div class="flex items-center gap-2 min-w-0 text-[11px] font-bold text-[#F50057]">
                 <span class="uppercase tracking-wider shrink-0">{{ ($ad['format'] ?? 'banner') === 'affiliate' ? 'Partner Offer' : 'Promoted Ad' }}</span>
                 <span class="text-slate-300">/</span>
-                <span class="text-slate-500 truncate min-w-0">{{ $ad['advertiser_name'] ?? 'Partner' }}</span>
+                <span class="text-[#718096] truncate min-w-0">{{ $ad['advertiser_name'] ?? 'Partner' }}</span>
             </div>
 
-            <h3 class="text-sm sm:text-base font-extrabold text-slate-900 group-hover:text-[#F20B65] transition line-clamp-1 leading-snug">
-                <a href="{{ $ad['click_url'] }}" target="_blank" rel="sponsored noopener noreferrer" class="focus:outline-none focus:underline">
+            <h3 class="text-[15px] sm:text-base font-bold text-[#172033] group-hover:text-[#F50057] transition-colors line-clamp-2 leading-snug">
+                <a href="{{ $ad['click_url'] }}" target="_blank" rel="sponsored noopener noreferrer" class="ldh-card-link">
                     {{ $ad['title'] }}
                 </a>
             </h3>
 
             @if(!empty($ad['description']))
-                <p class="text-xs text-slate-600 font-normal line-clamp-2 leading-relaxed">
+                <p class="text-xs sm:text-[13px] text-[#718096] font-normal line-clamp-2 leading-relaxed">
                     {{ $ad['description'] }}
                 </p>
             @endif
@@ -103,16 +103,16 @@
     </div>
 
     {{-- Footer CTA --}}
-    <div class="px-4 py-3 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between gap-2 text-xs">
-        <span class="font-bold text-slate-600 text-[11px] uppercase tracking-wider truncate">{{ $ad['disclosure_label'] ?? 'Sponsored' }}</span>
+    <footer class="ldh-card-footer mt-auto px-4 py-3 bg-[#F7F8FC] border-t border-[#E8ECF3] flex items-center justify-between gap-2 text-xs">
+        <span class="font-bold text-[#718096] text-[11px] uppercase tracking-wider truncate">{{ $ad['disclosure_label'] ?? 'Sponsored' }}</span>
         <a
             href="{{ $ad['click_url'] }}"
             target="_blank"
             rel="sponsored noopener noreferrer"
-            class="shrink-0 px-3.5 py-1.5 rounded-xl bg-[#F20B65] hover:bg-[#d90858] text-white font-black text-xs inline-flex items-center space-x-1 transition-all shadow-xs"
+            class="shrink-0 min-h-[36px] px-3.5 py-1.5 rounded-xl bg-[#F50057] hover:bg-[#d90858] text-white font-bold text-xs inline-flex items-center space-x-1 transition-all shadow-xs"
         >
             <span>{{ $ad['cta_text'] ?? 'Visit Offer' }}</span>
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
         </a>
-    </div>
+    </footer>
 </article>
