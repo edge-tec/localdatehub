@@ -453,7 +453,7 @@ class EmailRelayService
         $domain = $this->getRelayDomain();
         $replyAddress = 'reply-' . $conversation->conversation_token . '@' . $domain;
         $maskedRelayEmail = $contact->masked_relay_email ?: ('relay-' . Str::random(10) . '@' . $domain);
-        $fromAddress = (string) config('email_relay.from_address', 'noreply@' . $domain);
+        $fromAddress = (string) config('email_relay.from_address', config('mail.from.address', 'no_reply@' . $domain));
         $fromName = $isReplyToVisitor
             ? ($this->sanitizeHeader($listing->title) . ' via LocalDateHub')
             : ($this->sanitizeHeader($relayMessage->sender_name ?: 'LocalDateHub Visitor') . ' via LocalDateHub');
@@ -461,12 +461,13 @@ class EmailRelayService
         $listingUrl = route('listings.show', $listing->slug);
         $bodyText = (string) $relayMessage->message_body_encrypted;
         $subjectLine = $this->sanitizeHeader((string) $relayMessage->subject);
-        $view = $isReplyToVisitor ? 'emails.relay.advertiser-reply' : 'emails.relay.advertiser-notification';
+        $htmlView = $isReplyToVisitor ? 'emails.relay.advertiser-reply' : 'emails.relay.advertiser-notification';
+        $textView = $isReplyToVisitor ? 'emails.relay.advertiser-reply-text' : 'emails.relay.advertiser-notification-text';
         $outboundMessageId = '<out-' . Str::uuid()->toString() . '@' . $domain . '>';
         $inReplyTo = $relayMessage->in_reply_to ?: $conversation->last_message_id;
-        $references = trim(($relayMessage->references_header ? $relayMessage->references_header . ' ' : '') . ($inReplyTo ?: ''));
+        $references = $this->formatReferencesHeader($relayMessage->references_header, $inReplyTo);
 
-        Mail::send($view, [
+        Mail::send(['html' => $htmlView, 'text' => $textView], [
             'listingTitle' => $listing->title,
             'listingUrl' => $listingUrl,
             'senderDisplayName' => $relayMessage->sender_name ?: 'LocalDateHub Member',
@@ -786,6 +787,28 @@ class EmailRelayService
                 'provider_event_id' => (string) ($payload['provider_event_id'] ?? $payload['event_id'] ?? $payload['message_id'] ?? ''),
             ],
         };
+    }
+
+    /**
+     * Format RFC 5322 References header ensuring each ID token is cleanly wrapped in <...>.
+     */
+    protected function formatReferencesHeader(?string $references, ?string $inReplyTo): string
+    {
+        $raw = trim(($references ? $references . ' ' : '') . ($inReplyTo ?: ''));
+        if ($raw === '') {
+            return '';
+        }
+
+        preg_match_all('/<([^>]+)>|([^\s<>]+)/', $raw, $matches);
+        $ids = [];
+        foreach ($matches[0] as $candidate) {
+            $cleaned = trim($candidate, " \t\n\r\0\x0B<>");
+            if ($cleaned !== '' && !in_array("<{$cleaned}>", $ids, true)) {
+                $ids[] = "<{$cleaned}>";
+            }
+        }
+
+        return implode(' ', $ids);
     }
 }
 
