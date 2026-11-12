@@ -1033,30 +1033,32 @@
         </div>
     </div>
 
-    <!-- Mobile & Tablet Slide-Out Navigation Drawer -->
-    <div x-show="mobileMenuOpen" x-cloak class="fixed inset-0 z-50 xl:hidden">
-        <div
-            x-show="mobileMenuOpen"
-            x-transition:enter="transition-opacity ease-out duration-200"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition-opacity ease-in duration-150"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            @click="mobileMenuOpen = false"
-            class="fixed inset-0 bg-slate-900/45 backdrop-blur-xs"
-        ></div>
+    <!-- Mobile & Tablet Slide-Out Navigation Drawer (teleported to body to escape header backdrop-filter/z-index stacking) -->
+    <template x-teleport="body">
+        <div x-show="mobileMenuOpen" x-cloak class="fixed inset-0 z-[9999] xl:hidden">
+            <div
+                x-show="mobileMenuOpen"
+                x-transition:enter="transition-opacity ease-out duration-200"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="transition-opacity ease-in duration-150"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                @click="mobileMenuOpen = false"
+                class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs"
+            ></div>
 
-        <aside
-            x-show="mobileMenuOpen"
-            x-transition:enter="transition ease-out duration-200 transform"
-            x-transition:enter-start="translate-x-full"
-            x-transition:enter-end="translate-x-0"
-            x-transition:leave="transition ease-in duration-150 transform"
-            x-transition:leave-start="translate-x-0"
-            x-transition:leave-end="translate-x-full"
-            class="fixed right-0 top-0 bottom-0 w-full max-w-xs bg-white shadow-2xl flex flex-col z-50 overflow-y-auto"
-        >
+            <aside
+                x-show="mobileMenuOpen"
+                x-transition:enter="transition ease-out duration-200 transform"
+                x-transition:enter-start="translate-x-full"
+                x-transition:enter-end="translate-x-0"
+                x-transition:leave="transition ease-in duration-150 transform"
+                x-transition:leave-start="translate-x-0"
+                x-transition:leave-end="translate-x-full"
+                style="height: 100dvh;"
+                class="fixed right-0 top-0 bottom-0 w-full max-w-xs bg-white shadow-2xl flex flex-col z-[10000] overflow-y-auto"
+            >
             <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
                 <div class="font-black text-lg text-slate-900">
                     LocalDate<span class="text-[#F50057]">Hub</span>
@@ -1122,5 +1124,6 @@
                 @endauth
             </div>
         </aside>
-    </div>
+        </div>
+    </template>
 </header>
