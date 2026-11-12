@@ -226,7 +226,7 @@
                             x-transition:leave="transition ease-in duration-100"
                             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                             x-transition:leave-end="opacity-0 translate-y-2 scale-95"
-                            class="fixed inset-x-3 top-[4.25rem] sm:inset-x-auto sm:top-auto sm:absolute sm:right-0 sm:mt-2.5 w-auto sm:w-[460px] md:w-[500px] max-w-[calc(100vw-1.5rem)] max-h-[calc(100dvh-5.5rem)] flex flex-col rounded-3xl bg-white border border-slate-200/90 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.18)] p-3.5 sm:p-5 z-50 text-xs font-sans"
+                            class="fixed inset-x-3 top-[4.25rem] mx-auto w-auto max-w-[500px] lg:mx-0 lg:inset-x-auto lg:top-auto lg:absolute lg:right-0 lg:mt-2.5 lg:w-[500px] max-h-[calc(100dvh-5.5rem)] flex flex-col rounded-3xl bg-white border border-slate-200/90 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.18)] p-3.5 sm:p-5 z-50 text-xs font-sans"
                         >
                             <!-- Dropdown Header -->
                             <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-100 shrink-0">
