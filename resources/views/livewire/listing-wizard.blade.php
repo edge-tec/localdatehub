@@ -214,115 +214,235 @@
 
     <!-- STEP 2: Details (Visual Step 2) -->
     @if($this->visualStep === 2)
-        <div class="space-y-6">
-            <div>
-                <h2 class="text-2xl font-black text-slate-900 tracking-tight">Ad Details</h2>
-                <p class="text-xs sm:text-sm text-slate-500 mt-1">Provide the headline and description for your personal listing</p>
+        <div class="space-y-7">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-4 border-b border-slate-100">
+                <div>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-pink-50 border border-pink-200/80 text-[#F20B83] text-[10px] font-extrabold uppercase tracking-wider mb-1.5">
+                        Step 2 of 6 • Personal Profile &amp; Story
+                    </span>
+                    <h2 class="text-2xl font-black text-slate-900 tracking-tight">Ad Details</h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Craft an engaging headline and tell local matches what you are looking for</p>
+                </div>
             </div>
 
-            <div class="space-y-5">
+            <div class="space-y-6">
                 <!-- Title / Headline -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Listing Headline / Title <span class="text-[#F20B83]">*</span>
-                    </label>
-                    <input 
-                        type="text" 
-                        wire:model="title" 
-                        placeholder="e.g., Austin Professional Seeking Long Term Match" 
-                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83] outline-none"
-                    />
-                    <div class="flex items-center justify-between mt-1 text-[11px] text-slate-400">
-                        <span>Be concise and descriptive. No phone numbers or external URLs in title.</span>
-                        <span>{{ strlen($title) }}/120</span>
+                <div class="rounded-2xl border border-slate-200/80 bg-slate-50/40 p-4 sm:p-5 space-y-2.5 transition focus-within:border-[#F20B83]/60 focus-within:bg-white focus-within:shadow-sm">
+                    <div class="flex items-center justify-between gap-2">
+                        <label class="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                            <span>Listing Headline / Title</span>
+                            <span class="text-[#F20B83]">*</span>
+                        </label>
+                        @php $titleLen = mb_strlen((string) $title); @endphp
+                        <span class="px-2 py-0.5 rounded-full text-[11px] font-bold {{ $titleLen >= 10 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500' }}">
+                            {{ $titleLen }}/120
+                        </span>
                     </div>
-                    @error('title') <span class="text-xs text-rose-500 block mt-1">{{ $message }}</span> @enderror
+
+                    <div class="relative">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
+                            </svg>
+                        </div>
+                        <input
+                            type="text"
+                            wire:model.live.debounce.250ms="title"
+                            maxlength="120"
+                            placeholder="e.g., Warm & Genuine Professional Seeking Meaningful Connection"
+                            class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm font-medium placeholder:text-slate-400 focus:border-[#F20B83] focus:ring-4 focus:ring-[#F20B83]/10 outline-none transition"
+                        />
+                    </div>
+
+                    <div class="flex items-center justify-between text-[11px] text-slate-500">
+                        <span>Be concise and descriptive. No phone numbers or external URLs in title.</span>
+                        @if($titleLen > 0 && $titleLen < 10)
+                            <span class="text-amber-600 font-semibold">Add {{ 10 - $titleLen }} more chars</span>
+                        @elseif($titleLen >= 10)
+                            <span class="text-emerald-600 font-semibold">✓ Great headline</span>
+                        @endif
+                    </div>
+                    @error('title')
+                        <div class="flex items-center gap-1.5 text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-1.5">
+                            <span>⚠</span>
+                            <span>{{ $message }}</span>
+                        </div>
+                    @enderror
                 </div>
 
-                <!-- Poster Age & Gender & Intent Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                            Your Age (18+) <span class="text-[#F20B83]">*</span>
-                        </label>
-                        <input 
-                            type="number" 
-                            wire:model="poster_age" 
-                            min="18" 
-                            max="99" 
-                            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83] outline-none"
-                        />
-                        @error('poster_age') <span class="text-xs text-rose-500 block mt-1">{{ $message }}</span> @enderror
+                <!-- Age & Gender Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                    <!-- Interactive Age Stepper (18+) -->
+                    <div class="lg:col-span-4 rounded-2xl border border-slate-200/80 bg-slate-50/40 p-4 sm:p-5 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">
+                                Your Age (18+) <span class="text-[#F20B83]">*</span>
+                            </label>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-50 text-[#F20B83] border border-pink-200">18+ Only</span>
+                        </div>
+
+                        <div
+                            x-data="{
+                                dec() { let v = parseInt($wire.poster_age || 25, 10); if (v > 18) $wire.set('poster_age', v - 1); },
+                                inc() { let v = parseInt($wire.poster_age || 25, 10); if (v < 99) $wire.set('poster_age', v + 1); }
+                            }"
+                            class="flex items-center gap-2 bg-white border border-slate-200 rounded-xl p-1.5 shadow-2xs focus-within:border-[#F20B83] focus-within:ring-4 focus-within:ring-[#F20B83]/10 transition"
+                        >
+                            <button
+                                type="button"
+                                @click="dec()"
+                                class="w-10 h-10 rounded-lg bg-slate-100 hover:bg-pink-50 hover:text-[#F20B83] text-slate-700 font-black text-lg flex items-center justify-center transition cursor-pointer"
+                                aria-label="Decrease age"
+                            >−</button>
+                            <input
+                                type="number"
+                                wire:model.live.debounce.200ms="poster_age"
+                                min="18"
+                                max="99"
+                                class="w-full text-center font-black text-lg text-slate-900 bg-transparent border-0 focus:ring-0 outline-none"
+                            />
+                            <button
+                                type="button"
+                                @click="inc()"
+                                class="w-10 h-10 rounded-lg bg-slate-100 hover:bg-pink-50 hover:text-[#F20B83] text-slate-700 font-black text-lg flex items-center justify-center transition cursor-pointer"
+                                aria-label="Increase age"
+                            >+</button>
+                        </div>
+                        <p class="text-[11px] text-slate-500">Must be 18 to 99 years old.</p>
+                        @error('poster_age')
+                            <span class="text-xs font-semibold text-rose-600 block">{{ $message }}</span>
+                        @enderror
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    <!-- Interactive Gender Pill Cards -->
+                    <div class="lg:col-span-8 rounded-2xl border border-slate-200/80 bg-slate-50/40 p-4 sm:p-5 space-y-3">
+                        <label class="block text-xs font-extrabold text-slate-800 uppercase tracking-wider">
                             Your Gender <span class="text-[#F20B83]">*</span>
                         </label>
-                        <select 
-                            wire:model="poster_gender" 
-                            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83] outline-none"
-                        >
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Non-Binary">Non-Binary / Trans</option>
-                            <option value="Couple">Couple</option>
-                            <option value="Other">Other</option>
-                        </select>
-                        @error('poster_gender') <span class="text-xs text-rose-500 block mt-1">{{ $message }}</span> @enderror
-                    </div>
 
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                            Seeking Intent <span class="text-[#F20B83]">*</span>
-                        </label>
-                        <select 
-                            wire:model="intent" 
-                            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83] outline-none"
-                        >
-                            <option value="dating">Dating & Romance</option>
-                            <option value="long-term">Long-Term Relationship</option>
-                            <option value="activity">Activity & Travel Partner</option>
-                            <option value="casual">Casual Dating</option>
-                            <option value="friendship">Friendship & Social</option>
-                        </select>
-                        @error('intent') <span class="text-xs text-rose-500 block mt-1">{{ $message }}</span> @enderror
+                        @php
+                            $genderOptions = [
+                                ['value' => 'Male', 'label' => 'Male', 'icon' => '👨'],
+                                ['value' => 'Female', 'label' => 'Female', 'icon' => '👩'],
+                                ['value' => 'Non-Binary', 'label' => 'Non-Binary / Trans', 'icon' => '⚧️'],
+                                ['value' => 'Couple', 'label' => 'Couple', 'icon' => '💑'],
+                                ['value' => 'Other', 'label' => 'Other', 'icon' => '✨'],
+                            ];
+                        @endphp
+
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                            @foreach($genderOptions as $gOpt)
+                                @php $gActive = ($poster_gender === $gOpt['value']); @endphp
+                                <button
+                                    type="button"
+                                    wire:click="$set('poster_gender', '{{ $gOpt['value'] }}')"
+                                    class="relative flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border-2 text-left transition cursor-pointer {{ $gActive ? 'border-[#F20B83] bg-pink-50/70 text-slate-900 shadow-xs' : 'border-slate-200 bg-white text-slate-700 hover:border-[#F20B83]/40 hover:bg-slate-50' }}"
+                                >
+                                    <span class="text-base leading-none">{{ $gOpt['icon'] }}</span>
+                                    <span class="text-xs font-bold leading-tight truncate">{{ $gOpt['label'] }}</span>
+                                    @if($gActive)
+                                        <span class="ml-auto w-4 h-4 rounded-full bg-[#F20B83] text-white text-[10px] flex items-center justify-center shrink-0">✓</span>
+                                    @endif
+                                </button>
+                            @endforeach
+                        </div>
+                        @error('poster_gender')
+                            <span class="text-xs font-semibold text-rose-600 block">{{ $message }}</span>
+                        @enderror
                     </div>
+                </div>
+
+                <!-- Interactive Seeking Intent Cards -->
+                <div class="rounded-2xl border border-slate-200/80 bg-slate-50/40 p-4 sm:p-5 space-y-3">
+                    <label class="block text-xs font-extrabold text-slate-800 uppercase tracking-wider">
+                        Seeking Intent <span class="text-[#F20B83]">*</span>
+                    </label>
+
+                    @php
+                        $intentOptions = [
+                            ['value' => 'dating', 'label' => 'Dating & Romance', 'desc' => 'Dates, chemistry & genuine sparks', 'icon' => '💘'],
+                            ['value' => 'long-term', 'label' => 'Long-Term Relationship', 'desc' => 'Committed partner & future together', 'icon' => '💍'],
+                            ['value' => 'activity', 'label' => 'Activity & Travel Partner', 'desc' => 'Events, dinners, trips & hobbies', 'icon' => '✈️'],
+                            ['value' => 'casual', 'label' => 'Casual Dating', 'desc' => 'Relaxed, no-pressure meetups', 'icon' => '🥂'],
+                            ['value' => 'friendship', 'label' => 'Friendship & Social', 'desc' => 'Local social circle & platonic hangs', 'icon' => '🤝'],
+                        ];
+                    @endphp
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                        @foreach($intentOptions as $iOpt)
+                            @php $iActive = ($intent === $iOpt['value']); @endphp
+                            <button
+                                type="button"
+                                wire:click="$set('intent', '{{ $iOpt['value'] }}')"
+                                class="relative flex items-start gap-3 p-3 rounded-xl border-2 text-left transition cursor-pointer {{ $iActive ? 'border-[#F20B83] bg-pink-50/70 shadow-xs' : 'border-slate-200 bg-white hover:border-[#F20B83]/40 hover:bg-slate-50' }}"
+                            >
+                                <span class="text-lg leading-none mt-0.5">{{ $iOpt['icon'] }}</span>
+                                <div class="min-w-0 flex-1">
+                                    <div class="text-xs font-extrabold text-slate-900 leading-snug">{{ $iOpt['label'] }}</div>
+                                    <div class="text-[11px] text-slate-500 leading-tight mt-0.5">{{ $iOpt['desc'] }}</div>
+                                </div>
+                                @if($iActive)
+                                    <span class="w-4 h-4 rounded-full bg-[#F20B83] text-white text-[10px] flex items-center justify-center shrink-0">✓</span>
+                                @endif
+                            </button>
+                        @endforeach
+                    </div>
+                    @error('intent')
+                        <span class="text-xs font-semibold text-rose-600 block">{{ $message }}</span>
+                    @enderror
                 </div>
 
                 <!-- Description -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Ad Description <span class="text-[#F20B83]">*</span>
-                    </label>
-                    <textarea 
-                        wire:model="description" 
-                        rows="6" 
-                        placeholder="Describe who you are, what activities you enjoy, and what you are looking for in a match..." 
-                        class="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83] outline-none"
-                    ></textarea>
-                    <div class="flex items-center justify-between mt-1 text-[11px] text-slate-400">
-                        <span>Minimum 20 characters. Commercial solicitations and prostitution are strictly prohibited.</span>
-                        <span>{{ strlen($description) }}/5000</span>
+                <div class="rounded-2xl border border-slate-200/80 bg-slate-50/40 p-4 sm:p-5 space-y-2.5 transition focus-within:border-[#F20B83]/60 focus-within:bg-white focus-within:shadow-sm">
+                    <div class="flex items-center justify-between gap-2">
+                        <label class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">
+                            Ad Description <span class="text-[#F20B83]">*</span>
+                        </label>
+                        @php $descLen = mb_strlen((string) $description); @endphp
+                        <span class="px-2 py-0.5 rounded-full text-[11px] font-bold {{ $descLen >= 20 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500' }}">
+                            {{ $descLen }}/5000
+                        </span>
                     </div>
-                    @error('description') <span class="text-xs text-rose-500 block mt-1">{{ $message }}</span> @enderror
+
+                    <textarea
+                        wire:model.live.debounce.250ms="description"
+                        rows="6"
+                        maxlength="5000"
+                        placeholder="Describe who you are, what activities you enjoy, and what you are looking for in a match..."
+                        class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm leading-relaxed placeholder:text-slate-400 focus:border-[#F20B83] focus:ring-4 focus:ring-[#F20B83]/10 outline-none transition"
+                    ></textarea>
+
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] text-slate-500">
+                        <span>Minimum 20 characters. Commercial solicitations and prostitution are strictly prohibited.</span>
+                        @if($descLen < 20)
+                            <span class="text-amber-600 font-semibold shrink-0">{{ 20 - $descLen }} more characters needed</span>
+                        @else
+                            <span class="text-emerald-600 font-semibold shrink-0">✓ Description ready</span>
+                        @endif
+                    </div>
+                    @error('description')
+                        <div class="flex items-center gap-1.5 text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-1.5">
+                            <span>⚠</span>
+                            <span>{{ $message }}</span>
+                        </div>
+                    @enderror
                 </div>
             </div>
 
             <!-- Bottom Actions -->
             <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-                <button 
-                    type="button" 
-                    wire:click="previousWizardStep" 
-                    class="text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 flex items-center space-x-1"
+                <button
+                    type="button"
+                    wire:click="previousWizardStep"
+                    class="px-4 py-2.5 rounded-full border border-slate-200 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition flex items-center space-x-1.5 cursor-pointer"
                 >
                     <span>←</span>
                     <span>Previous</span>
                 </button>
-                <button 
-                    type="button" 
-                    wire:click="nextWizardStep" 
-                    class="bg-[#F20B83] hover:bg-[#d90858] text-white px-7 py-2.5 rounded-full font-bold text-sm shadow-md transition flex items-center space-x-2"
+                <button
+                    type="button"
+                    wire:click="nextWizardStep"
+                    class="bg-[#F20B83] hover:bg-[#d90858] text-white px-7 py-2.5 rounded-full font-bold text-sm shadow-md transition flex items-center space-x-2 cursor-pointer"
                 >
                     <span>Next Step</span>
                     <span>→</span>
@@ -333,77 +453,201 @@
 
     <!-- STEP 3: Location (Visual Step 3) -->
     @if($this->visualStep === 3)
-        <div class="space-y-6">
-            <div>
+        <div class="space-y-7">
+            <div class="pb-4 border-b border-slate-100">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-pink-50 border border-pink-200/80 text-[#F20B83] text-[10px] font-extrabold uppercase tracking-wider mb-1.5">
+                    Step 3 of 6 • Local Discovery
+                </span>
                 <h2 class="text-2xl font-black text-slate-900 tracking-tight">Location Information</h2>
-                <p class="text-xs sm:text-sm text-slate-500 mt-1">Select where you are located to connect with local matches</p>
+                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Select your region and city to connect with verified local matches</p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        State <span class="text-[#F20B83]">*</span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <!-- Searchable State / Region Selector -->
+                <div
+                    x-data="{
+                        open: false,
+                        search: '',
+                        get filtered() {
+                            const q = this.search.trim().toLowerCase();
+                            return Array.from(this.$refs.nativeState.options).filter(o => o.value && (!q || o.text.toLowerCase().includes(q)));
+                        },
+                        selectedLabel() {
+                            const sel = this.$refs.nativeState.selectedOptions[0];
+                            return sel && sel.value ? sel.text : 'Select a State / Region';
+                        }
+                    }"
+                    @click.outside="open = false"
+                    class="rounded-2xl border border-slate-200/80 bg-slate-50/40 p-4 space-y-2 relative"
+                >
+                    <label class="block text-xs font-extrabold text-slate-800 uppercase tracking-wider">
+                        State / Region / Province <span class="text-[#F20B83]">*</span>
                     </label>
-                    <select 
-                        wire:model.live="state_id" 
-                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83] outline-none"
-                    >
-                        <option value="">Select a State</option>
+
+                    <select x-ref="nativeState" wire:model.live="state_id" class="sr-only" aria-hidden="true">
+                        <option value="">Select a State / Region</option>
                         @foreach($states as $s)
                             <option value="{{ $s->id }}">{{ $s->name }} ({{ $s->code }})</option>
                         @endforeach
                     </select>
-                    @error('state_id') <span class="text-xs text-rose-500 block mt-1">{{ $message }}</span> @enderror
+
+                    <button
+                        type="button"
+                        @click="open = !open; $nextTick(() => { if (open) $refs.stateSearch.focus(); })"
+                        class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-left text-sm font-semibold text-slate-800 hover:border-[#F20B83]/50 focus:border-[#F20B83] focus:ring-4 focus:ring-[#F20B83]/10 transition cursor-pointer"
+                    >
+                        <span class="flex items-center gap-2 truncate">
+                            <span class="text-[#F20B83]">📍</span>
+                            <span class="truncate" x-text="selectedLabel()"></span>
+                        </span>
+                        <svg class="w-4 h-4 text-slate-400 shrink-0 transition" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+
+                    <div
+                        x-show="open"
+                        x-transition
+                        class="absolute left-4 right-4 top-full mt-1 z-30 rounded-2xl border border-slate-200 bg-white shadow-xl p-2 space-y-2"
+                        style="display: none;"
+                    >
+                        <input
+                            x-ref="stateSearch"
+                            x-model="search"
+                            type="search"
+                            placeholder="Search state or region..."
+                            class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-800 focus:border-[#F20B83] outline-none"
+                        />
+                        <div class="max-h-52 overflow-y-auto space-y-1">
+                            <template x-for="opt in filtered" :key="opt.value">
+                                <button
+                                    type="button"
+                                    @click="$wire.set('state_id', opt.value); open = false; search = '';"
+                                    class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center justify-between"
+                                    :class="String($wire.state_id) === String(opt.value) ? 'bg-[#F20B83] text-white' : 'text-slate-700 hover:bg-pink-50 hover:text-[#F20B83]'"
+                                >
+                                    <span x-text="opt.text"></span>
+                                    <span x-show="String($wire.state_id) === String(opt.value)">✓</span>
+                                </button>
+                            </template>
+                            <div x-show="filtered.length === 0" class="text-xs text-slate-400 px-3 py-2">No matching region.</div>
+                        </div>
+                    </div>
+                    @error('state_id') <span class="text-xs font-semibold text-rose-600 block">{{ $message }}</span> @enderror
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                <!-- Searchable City Selector -->
+                <div
+                    x-data="{
+                        open: false,
+                        search: '',
+                        get filtered() {
+                            const q = this.search.trim().toLowerCase();
+                            return Array.from(this.$refs.nativeCity.options).filter(o => o.value && (!q || o.text.toLowerCase().includes(q)));
+                        },
+                        selectedLabel() {
+                            const sel = this.$refs.nativeCity.selectedOptions[0];
+                            return sel && sel.value ? sel.text : 'Select a City';
+                        }
+                    }"
+                    @click.outside="open = false"
+                    class="rounded-2xl border border-slate-200/80 bg-slate-50/40 p-4 space-y-2 relative"
+                >
+                    <label class="block text-xs font-extrabold text-slate-800 uppercase tracking-wider">
                         City <span class="text-[#F20B83]">*</span>
                     </label>
-                    <select 
-                        wire:model.live="city_id" 
-                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83] outline-none"
-                    >
+
+                    <select x-ref="nativeCity" wire:model.live="city_id" class="sr-only" aria-hidden="true">
                         <option value="">Select a City</option>
                         @foreach($cities as $c)
                             <option value="{{ $c->id }}">{{ $c->name }}</option>
                         @endforeach
                     </select>
-                    @error('city_id') <span class="text-xs text-rose-500 block mt-1">{{ $message }}</span> @enderror
+
+                    <button
+                        type="button"
+                        @click="open = !open; $nextTick(() => { if (open) $refs.citySearch.focus(); })"
+                        class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-left text-sm font-semibold text-slate-800 hover:border-[#F20B83]/50 focus:border-[#F20B83] focus:ring-4 focus:ring-[#F20B83]/10 transition cursor-pointer"
+                    >
+                        <span class="flex items-center gap-2 truncate">
+                            <span class="text-[#F20B83]">🏙️</span>
+                            <span class="truncate" x-text="selectedLabel()"></span>
+                        </span>
+                        <svg class="w-4 h-4 text-slate-400 shrink-0 transition" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+
+                    <div
+                        x-show="open"
+                        x-transition
+                        class="absolute left-4 right-4 top-full mt-1 z-30 rounded-2xl border border-slate-200 bg-white shadow-xl p-2 space-y-2"
+                        style="display: none;"
+                    >
+                        <input
+                            x-ref="citySearch"
+                            x-model="search"
+                            type="search"
+                            placeholder="Search city..."
+                            class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-800 focus:border-[#F20B83] outline-none"
+                        />
+                        <div class="max-h-52 overflow-y-auto space-y-1">
+                            <template x-for="opt in filtered" :key="opt.value">
+                                <button
+                                    type="button"
+                                    @click="$wire.set('city_id', opt.value); open = false; search = '';"
+                                    class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center justify-between"
+                                    :class="String($wire.city_id) === String(opt.value) ? 'bg-[#F20B83] text-white' : 'text-slate-700 hover:bg-pink-50 hover:text-[#F20B83]'"
+                                >
+                                    <span x-text="opt.text"></span>
+                                    <span x-show="String($wire.city_id) === String(opt.value)">✓</span>
+                                </button>
+                            </template>
+                            <div x-show="filtered.length === 0" class="text-xs text-slate-400 px-3 py-2">Select a state/region first or refine search.</div>
+                        </div>
+                    </div>
+                    @error('city_id') <span class="text-xs font-semibold text-rose-600 block">{{ $message }}</span> @enderror
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Neighborhood / Area (Optional)
+                <!-- Neighborhood / Area -->
+                <div class="rounded-2xl border border-slate-200/80 bg-slate-50/40 p-4 space-y-2 focus-within:border-[#F20B83]/60 focus-within:bg-white transition">
+                    <label class="block text-xs font-extrabold text-slate-800 uppercase tracking-wider">
+                        Neighborhood / Area <span class="text-slate-400 font-semibold normal-case">(Optional)</span>
                     </label>
-                    <input 
-                        type="text" 
-                        wire:model="neighborhood" 
-                        placeholder="e.g. Downtown, Uptown, South Congress" 
-                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83] outline-none"
+                    <input
+                        type="text"
+                        wire:model.live.debounce.300ms="neighborhood"
+                        placeholder="e.g. Downtown, Midtown, Soho, Bondi"
+                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:border-[#F20B83] focus:ring-4 focus:ring-[#F20B83]/10 outline-none transition"
                     />
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Cross Streets (Optional)
+                <!-- Cross Streets -->
+                <div class="rounded-2xl border border-slate-200/80 bg-slate-50/40 p-4 space-y-2 focus-within:border-[#F20B83]/60 focus-within:bg-white transition">
+                    <label class="block text-xs font-extrabold text-slate-800 uppercase tracking-wider">
+                        Cross Streets <span class="text-slate-400 font-semibold normal-case">(Optional)</span>
                     </label>
-                    <input 
-                        type="text" 
-                        wire:model="cross_streets" 
-                        placeholder="e.g. 6th St & Lamar Blvd" 
-                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 text-sm focus:border-[#F20B83] focus:ring-1 focus:ring-[#F20B83] outline-none"
+                    <input
+                        type="text"
+                        wire:model.live.debounce.300ms="cross_streets"
+                        placeholder="e.g. 6th St &amp; Main Ave"
+                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:border-[#F20B83] focus:ring-4 focus:ring-[#F20B83]/10 outline-none transition"
                     />
                 </div>
             </div>
 
             <!-- Privacy Distance Toggle -->
-            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between">
-                <div>
-                    <h4 class="text-xs sm:text-sm font-bold text-slate-800">Obfuscate Exact Location</h4>
-                    <p class="text-xs text-slate-500">Only display your city and general area. Protects personal privacy.</p>
+            <div class="bg-gradient-to-r from-slate-50 to-pink-50/40 border border-slate-200 rounded-2xl p-4 sm:p-5 flex items-center justify-between gap-4">
+                <div class="flex items-start gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-[#F20B83]/10 text-[#F20B83] flex items-center justify-center shrink-0">
+                        🛡️
+                    </div>
+                    <div>
+                        <h4 class="text-xs sm:text-sm font-extrabold text-slate-900">Obfuscate Exact Location</h4>
+                        <p class="text-xs text-slate-500 mt-0.5">Only display your city and general area. Protects your personal privacy from triangulation.</p>
+                    </div>
                 </div>
-                <label class="relative inline-flex items-center cursor-pointer">
+                <label class="relative inline-flex items-center cursor-pointer shrink-0">
                     <input type="checkbox" wire:model="hide_exact_distance" class="sr-only peer">
                     <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F20B83]"></div>
                 </label>
@@ -411,18 +655,18 @@
 
             <!-- Bottom Actions -->
             <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-                <button 
-                    type="button" 
-                    wire:click="previousWizardStep" 
-                    class="text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 flex items-center space-x-1"
+                <button
+                    type="button"
+                    wire:click="previousWizardStep"
+                    class="px-4 py-2.5 rounded-full border border-slate-200 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition flex items-center space-x-1.5 cursor-pointer"
                 >
                     <span>←</span>
                     <span>Previous</span>
                 </button>
-                <button 
-                    type="button" 
-                    wire:click="nextWizardStep" 
-                    class="bg-[#F20B83] hover:bg-[#d90858] text-white px-7 py-2.5 rounded-full font-bold text-sm shadow-md transition flex items-center space-x-2"
+                <button
+                    type="button"
+                    wire:click="nextWizardStep"
+                    class="bg-[#F20B83] hover:bg-[#d90858] text-white px-7 py-2.5 rounded-full font-bold text-sm shadow-md transition flex items-center space-x-2 cursor-pointer"
                 >
                     <span>Next Step</span>
                     <span>→</span>
