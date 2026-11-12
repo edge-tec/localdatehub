@@ -3,10 +3,12 @@
         class="py-12 bg-slate-50"
         x-data="{
             modalOpen: false,
-            selectedPlan: { name: '', slug: '', price: '', duration: '' },
+            selectedPlan: { name: '', slug: '', price: '', amount: '', duration: '' },
+            customAmount: '',
             selectedListingId: '{{ optional($userListings->first())->id ?? '' }}',
             openPlanModal(plan) {
                 this.selectedPlan = plan;
+                this.customAmount = plan.amount || '';
                 this.modalOpen = true;
             }
         }"
@@ -90,14 +92,15 @@
                                         name: @js($plan->name),
                                         slug: @js($plan->slug),
                                         price: @js('$' . number_format($plan->price_cents / 100, 2)),
+                                        amount: @js(number_format($plan->price_cents / 100, 2, '.', '')),
                                         duration: @js($plan->duration_days . ' days')
                                     })"
                                     class="block w-full py-2.5 text-center text-sm font-semibold rounded-xl transition duration-150 bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/20 cursor-pointer"
                                 >
                                     Select {{ $plan->name }}
                                 </button>
-                                <a href="{{ route('account.wallet.index') }}" class="block w-full py-2 text-center text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition">
-                                    💳 Top Up Wallet Credits &rarr;
+                                <a href="{{ auth()->check() ? route('account.wallet.topup-amount', ['amount' => number_format($plan->price_cents / 100, 2, '.', ''), 'plan' => $plan->name]) : route('login') }}" class="block w-full py-2 text-center text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition">
+                                    💳 Top Up ${{ number_format($plan->price_cents / 100, 2) }} Now &rarr;
                                 </a>
                             @endif
                         </div>
@@ -197,7 +200,40 @@
                             @if($creditPackages->count() > 0)
                                 <div class="space-y-2.5">
                                     <div class="text-xs font-extrabold uppercase tracking-wider text-slate-700">Quick Top-Up Options</div>
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+
+                                    <a
+                                        :href="'{{ route('account.wallet.topup-amount') }}?amount=' + encodeURIComponent(selectedPlan.amount) + '&plan=' + encodeURIComponent(selectedPlan.name)"
+                                        class="w-full p-3.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-between gap-2 shadow-sm transition"
+                                    >
+                                        <div>
+                                            <div class="text-xs font-extrabold">Top Up Exact Plan Amount</div>
+                                            <div class="text-[11px] opacity-90" x-text="'Add ' + selectedPlan.price + ' for ' + selectedPlan.name"></div>
+                                        </div>
+                                        <span class="px-3 py-1 rounded-lg bg-white/20 text-xs font-black shrink-0" x-text="selectedPlan.price + ' →'"></span>
+                                    </a>
+
+                                    <form action="{{ route('account.wallet.topup-amount') }}" method="GET" class="flex items-center gap-2 pt-1">
+                                        <input type="hidden" name="plan" :value="selectedPlan.name">
+                                        <div class="relative flex-1">
+                                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">$</span>
+                                            <input
+                                                type="number"
+                                                name="amount"
+                                                x-model="customAmount"
+                                                step="0.01"
+                                                min="1"
+                                                max="5000"
+                                                placeholder="Any amount (e.g. 5.00)"
+                                                class="w-full pl-7 pr-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:border-rose-500 outline-none"
+                                                required
+                                            >
+                                        </div>
+                                        <button type="submit" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition cursor-pointer shrink-0">
+                                            Top Up Custom &rarr;
+                                        </button>
+                                    </form>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
                                         @foreach($creditPackages as $pkg)
                                             <a
                                                 href="{{ route('account.wallet.checkout', ['package' => $pkg->id]) }}"

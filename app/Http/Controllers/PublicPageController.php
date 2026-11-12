@@ -114,6 +114,10 @@ class PublicPageController extends Controller
             ->orderBy('price_cents')
             ->get();
 
+        if (\App\Modules\Monetization\Models\CreditPackage::where('is_active', true)->count() === 0) {
+            \App\Http\Controllers\Account\UserWalletController::ensureDefaultCreditPackages();
+        }
+
         $creditPackages = \App\Modules\Monetization\Models\CreditPackage::where('is_active', true)
             ->orderBy('display_order')
             ->get();

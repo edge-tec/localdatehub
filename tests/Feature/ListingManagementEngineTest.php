@@ -501,7 +501,7 @@ class ListingManagementEngineTest extends TestCase
         $this->get('/pricing')
             ->assertOk()
             ->assertSee('Instant Bump to Top')
-            ->assertSee('Top Up Wallet Credits')
+            ->assertSee('Top Up $1.65 Now')
             ->assertSee('Wallet Top-Up Packages')
             ->assertSee('Starter Top-Up');
 
@@ -509,6 +509,16 @@ class ListingManagementEngineTest extends TestCase
             ->get('/pricing')
             ->assertOk()
             ->assertSee('Current Wallet Balance')
-            ->assertSee('Quick Top-Up Options');
+            ->assertSee('Quick Top-Up Options')
+            ->assertSee('Top Up Exact Plan Amount');
+
+        $this->actingAs($user)
+            ->get('/account/wallet/topup-amount?amount=1.65&plan=Instant+Bump+to+Top')
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('credit_packages', [
+            'price_usd' => 1.65,
+            'is_active' => true,
+        ]);
     }
 }

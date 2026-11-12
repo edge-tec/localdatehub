@@ -480,6 +480,7 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     // Credit Wallet & Packages
     Route::get('/account/wallet', [\App\Http\Controllers\Account\UserWalletController::class, 'index'])->name('account.wallet.index');
+    Route::get('/account/wallet/topup-amount', [\App\Http\Controllers\Account\UserWalletController::class, 'customTopup'])->name('account.wallet.topup-amount');
     Route::get('/account/wallet/checkout/{package}', [\App\Http\Controllers\Account\UserWalletController::class, 'checkout'])->name('account.wallet.checkout');
     Route::post('/account/wallet/checkout/{package}', [\App\Http\Controllers\Account\UserWalletController::class, 'storePayment'])->name('account.wallet.payment');
     Route::get('/account/wallet/invoice/{payment}', [\App\Http\Controllers\Account\UserWalletController::class, 'invoice'])->name('account.wallet.invoice');

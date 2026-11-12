@@ -42,6 +42,10 @@ class UserWalletController extends Controller
             ->latest()
             ->paginate(15);
 
+        if (CreditPackage::where('is_active', true)->count() === 0) {
+            self::ensureDefaultCreditPackages();
+        }
+
         $packages = CreditPackage::where('is_active', true)
             ->orderBy('display_order')
             ->get();
@@ -55,6 +59,61 @@ class UserWalletController extends Controller
             'packages' => $packages,
             'quotaSummary' => $quotaSummary,
         ]);
+    }
+
+    /**
+     * Top up any custom or plan-specific USD amount via crypto wallet checkout.
+     */
+    public function customTopup(Request $request)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:1|max:5000',
+            'plan' => 'nullable|string|max:120',
+        ]);
+
+        $amount = round((float) $validated['amount'], 2);
+        $credits = max(1, (int) round($amount * 10));
+
+        $package = CreditPackage::where('is_active', true)
+            ->where('price_usd', $amount)
+            ->first();
+
+        if (! $package) {
+            $label = ! empty($validated['plan'])
+                ? trim($validated['plan']) . ' Top-Up ($' . number_format($amount, 2) . ')'
+                : 'Wallet Top-Up ($' . number_format($amount, 2) . ')';
+
+            $package = CreditPackage::create([
+                'name' => $label,
+                'credits' => $credits,
+                'bonus_credits' => 0,
+                'price_usd' => $amount,
+                'display_order' => 99,
+                'is_popular' => false,
+                'is_active' => true,
+            ]);
+        }
+
+        return redirect()->route('account.wallet.checkout', ['package' => $package->id]);
+    }
+
+    /**
+     * Ensure default wallet top-up packages exist if the table has not been seeded yet.
+     */
+    public static function ensureDefaultCreditPackages(): void
+    {
+        $defaults = [
+            ['name' => 'Quick Bump Pack', 'credits' => 17, 'bonus_credits' => 0, 'price_usd' => 1.65, 'display_order' => 1, 'is_popular' => false, 'is_active' => true],
+            ['name' => 'Starter Pack', 'credits' => 50, 'bonus_credits' => 0, 'price_usd' => 4.99, 'display_order' => 2, 'is_popular' => false, 'is_active' => true],
+            ['name' => 'Spotlight Pack', 'credits' => 100, 'bonus_credits' => 10, 'price_usd' => 9.99, 'display_order' => 3, 'is_popular' => true, 'is_active' => true],
+            ['name' => 'Verified Plus Pack', 'credits' => 150, 'bonus_credits' => 25, 'price_usd' => 14.99, 'display_order' => 4, 'is_popular' => false, 'is_active' => true],
+            ['name' => 'Pro Power Pack', 'credits' => 400, 'bonus_credits' => 100, 'price_usd' => 29.99, 'display_order' => 5, 'is_popular' => false, 'is_active' => true],
+            ['name' => 'Elite Advertiser Pack', 'credits' => 1000, 'bonus_credits' => 300, 'price_usd' => 69.99, 'display_order' => 6, 'is_popular' => false, 'is_active' => true],
+        ];
+
+        foreach ($defaults as $pkg) {
+            CreditPackage::updateOrCreate(['name' => $pkg['name']], $pkg);
+        }
     }
 
     /**
