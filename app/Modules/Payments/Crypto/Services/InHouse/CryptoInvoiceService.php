@@ -37,10 +37,25 @@ class CryptoInvoiceService
             ->where('is_active', true)
             ->firstOrFail();
 
+        $networkAliases = match ($networkKey) {
+            'BEP20', 'BNB', 'BSC' => ['BEP20', 'BNB', 'BSC'],
+            'ERC20', 'ETH', 'ETHEREUM' => ['ERC20', 'ETH', 'ETHEREUM'],
+            'TRC20', 'TRX', 'TRON' => ['TRC20', 'TRX', 'TRON'],
+            'SOLANA', 'SOL' => ['SOLANA', 'SOL'],
+            'BITCOIN', 'BTC' => ['BTC', 'BITCOIN'],
+            'LITECOIN', 'LTC' => ['LTC', 'LITECOIN'],
+            'DOGECOIN', 'DOGE' => ['DOGE', 'DOGECOIN'],
+            'POLYGON', 'MATIC' => ['POLYGON', 'MATIC', 'ERC20'],
+            default => [$networkKey],
+        };
+
         $network = CryptoNetwork::where('currency_id', $currency->id)
-            ->where('network_key', $networkKey)
+            ->whereIn('network_key', $networkAliases)
             ->where('is_active', true)
-            ->firstOrFail();
+            ->first()
+            ?? CryptoNetwork::where('currency_id', $currency->id)
+                ->where('is_active', true)
+                ->firstOrFail();
 
         $usd = (float) $usdAmount;
         if ($usd < (float) $currency->min_deposit_usd || $usd > (float) $currency->max_deposit_usd) {

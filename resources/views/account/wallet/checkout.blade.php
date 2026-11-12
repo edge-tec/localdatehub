@@ -67,7 +67,7 @@
                     </span>
                     <div class="mt-1.5 px-3 py-1 rounded-xl bg-pink-50 border border-pink-200 text-[#F20B83] text-xs font-black inline-flex items-center gap-1.5 shadow-2xs">
                         <span>⚡ Est. Amount:</span>
-                        <span class="font-mono text-xs" x-text="(estimates[selectedCurrency] || '1.00') + ' ' + selectedCurrency"></span>
+                        <span class="font-mono text-xs" x-text="((typeof estimates[selectedCurrency] === 'object' && estimates[selectedCurrency] !== null ? estimates[selectedCurrency].crypto_amount : estimates[selectedCurrency]) || '1.00') + ' ' + selectedCurrency"></span>
                     </div>
                 </div>
             </div>

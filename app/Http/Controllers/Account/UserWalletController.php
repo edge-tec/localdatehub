@@ -138,7 +138,10 @@ class UserWalletController extends Controller
         $estimates = [];
         foreach (array_keys($supportedCurrencies) as $symbol) {
             try {
-                $estimates[$symbol] = $pricingService->convertUsdToCrypto((float) $package->price_usd, $symbol);
+                $conversion = $pricingService->convertUsdToCrypto((float) $package->price_usd, $symbol);
+                $estimates[$symbol] = is_array($conversion)
+                    ? (string) ($conversion['crypto_amount'] ?? round((float) $package->price_usd, 4))
+                    : (string) $conversion;
             } catch (\Throwable $e) {
                 $estimates[$symbol] = (string) round((float) $package->price_usd, 4);
             }
@@ -189,6 +192,8 @@ class UserWalletController extends Controller
                     'bonus_credits' => $package->bonus_credits,
                 ]
             );
+        } catch (\InvalidArgumentException $e) {
+            return back()->withErrors(['network' => $e->getMessage()]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error("Failed to generate in-house crypto invoice for package [{$package->id}]: " . $e->getMessage());
             return back()->withErrors(['network' => "Unable to generate a secure blockchain deposit address for {$currency} on {$network}. Please verify network settings or try another currency."]);
