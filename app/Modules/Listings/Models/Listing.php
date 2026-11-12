@@ -5,7 +5,9 @@ namespace App\Modules\Listings\Models;
 use App\Models\User;
 use App\Modules\Categories\Models\Category;
 use App\Modules\Contact\Models\ContactMessage;
+use App\Modules\Locations\Models\AdministrativeArea;
 use App\Modules\Locations\Models\City;
+use App\Modules\Locations\Models\Country;
 use App\Modules\Locations\Models\State;
 use App\Modules\Locations\Models\ZipCode;
 use App\Modules\Verification\Models\IdentityVerification;
@@ -35,6 +37,7 @@ class Listing extends Model
     protected $fillable = [
         'user_id',
         'category_id',
+        'country_id',
         'state_id',
         'city_id',
         'zip_code_id',
@@ -45,6 +48,8 @@ class Listing extends Model
         'poster_age',
         'poster_gender',
         'intent',
+        'price',
+        'currency_code',
         'status',
         'rejection_reason',
         'rejection_count',
@@ -85,7 +90,38 @@ class Listing extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::saving(function (Listing $listing) {
+            if (empty($listing->country_id) && $listing->state_id) {
+                $state = State::with('country')->find($listing->state_id);
+                if ($state) {
+                    $listing->country_id = $state->country_id;
+                    if (empty($listing->currency_code) && $state->country?->currency_code) {
+                        $listing->currency_code = $state->country->currency_code;
+                    }
+                }
+            }
+            if (empty($listing->currency_code) && $listing->country_id) {
+                $curr = Country::whereKey($listing->country_id)->value('currency_code');
+                if ($curr) {
+                    $listing->currency_code = $curr;
+                }
+            }
+        });
+    }
+
     // Relationships
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
+    }
+
+    public function administrativeArea(): BelongsTo
+    {
+        return $this->belongsTo(AdministrativeArea::class, 'state_id');
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -405,5 +441,36 @@ class Listing extends Model
     public function scopeInCategory(Builder $query, int $categoryId): Builder
     {
         return $query->where('category_id', $categoryId);
+    }
+
+    public function scopeInCountry(Builder $query, Country|int|string $country): Builder
+    {
+        if ($country instanceof Country) {
+            return $query->where('country_id', $country->id);
+        }
+        if (is_numeric($country)) {
+            return $query->where('country_id', (int) $country);
+        }
+
+        $code = strtoupper(trim($country));
+        return $query->whereHas('country', fn ($q) => $q->where('code', $code)->orWhere('slug', strtolower($code)));
+    }
+
+    public function formattedPrice(): string
+    {
+        $symbols = [
+            'GBP' => '£',
+            'CAD' => 'C$',
+            'AUD' => 'A$',
+            'EUR' => '€',
+            'NZD' => 'NZ$',
+            'USD' => '$',
+        ];
+        $symbol = $symbols[strtoupper((string) $this->currency_code)] ?? ($this->country?->currency_symbol ?: '$');
+        if ($this->price === null || (float) $this->price <= 0) {
+            return 'Free';
+        }
+
+        return $symbol . number_format((float) $this->price, 2);
     }
 }

@@ -14,6 +14,7 @@ class City extends Model
     use HasFactory;
 
     protected $fillable = [
+        'country_id',
         'state_id',
         'county_id',
         'name',
@@ -27,6 +28,15 @@ class City extends Model
         'is_active',
     ];
 
+    protected static function booted(): void
+    {
+        static::saving(function (City $city) {
+            if (empty($city->country_id) && $city->state_id) {
+                $city->country_id = State::whereKey($city->state_id)->value('country_id');
+            }
+        });
+    }
+
     protected function casts(): array
     {
         return [
@@ -38,9 +48,19 @@ class City extends Model
         ];
     }
 
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
+    }
+
     public function state(): BelongsTo
     {
         return $this->belongsTo(State::class);
+    }
+
+    public function administrativeArea(): BelongsTo
+    {
+        return $this->belongsTo(AdministrativeArea::class, 'state_id');
     }
 
     public function county(): BelongsTo

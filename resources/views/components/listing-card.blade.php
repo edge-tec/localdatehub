@@ -235,7 +235,11 @@
                     <span></span>
                 @endif
 
-                @if($intentLabel)
+                @if($listing->price !== null && (float) $listing->price > 0)
+                    <span class="shrink-0 px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-[11px] font-extrabold text-emerald-700" data-listing-price="{{ $listing->formattedPrice() }}">
+                        {{ $listing->formattedPrice() }}
+                    </span>
+                @elseif($intentLabel)
                     <span class="shrink-0 font-semibold text-[#718096]">{{ $intentLabel }}</span>
                 @endif
             </div>

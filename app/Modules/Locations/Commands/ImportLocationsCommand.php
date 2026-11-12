@@ -114,8 +114,8 @@ class ImportLocationsCommand extends Command
                 foreach (array_chunk($stateRows, $chunkSize) as $chunk) {
                     State::upsert(
                         $chunk,
-                        ['code'],
-                        ['country_id', 'name', 'slug', 'fips_code', 'is_territory', 'is_active', 'updated_at']
+                        ['country_id', 'code'],
+                        ['name', 'slug', 'fips_code', 'is_territory', 'is_active', 'updated_at']
                     );
                     $stats['states'] += count($chunk);
                     $bar->advance(count($chunk));
@@ -127,7 +127,7 @@ class ImportLocationsCommand extends Command
         }
 
         // Cache state codes to IDs for foreign key lookups
-        $stateMap = State::pluck('id', 'code')->toArray();
+        $stateMap = State::where('country_id', $country->id)->pluck('id', 'code')->toArray();
 
         // 2. Counties Import
         if (!$only || in_array('counties', $only)) {

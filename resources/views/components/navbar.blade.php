@@ -761,6 +761,59 @@
                     </svg>
                     <span>Contact</span>
                 </a>
+
+                <!-- Country Switcher Dropdown -->
+                <div class="relative" @click.away="if(activeDropdown === 'countries') activeDropdown = null" data-navbar-country-switcher>
+                    <button
+                        type="button"
+                        @click="toggle('countries')"
+                        :aria-expanded="activeDropdown === 'countries'"
+                        aria-haspopup="true"
+                        class="ldh-nav-item {{ request()->routeIs('country.*') ? 'is-active-soft' : '' }}"
+                    >
+                        <span>🌐</span>
+                        <span>Countries</span>
+                        <svg class="ldh-chevron" :class="{ 'rotate-180': activeDropdown === 'countries' }" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/>
+                        </svg>
+                    </button>
+
+                    <div
+                        x-show="activeDropdown === 'countries'"
+                        x-cloak
+                        style="box-shadow: var(--ldh-dropdown-shadow)"
+                        class="absolute right-0 mt-2.5 w-64 rounded-2xl bg-white p-2 z-50"
+                    >
+                        <div class="px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400">5 Country Marketplaces</div>
+                        <div class="space-y-0.5 text-xs font-semibold">
+                            <a href="{{ url('/switch-country/gb') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 hover:text-[#F50057] hover:bg-rose-50/80 transition">
+                                <span>🇬🇧 United Kingdom</span>
+                                <span class="text-[11px] font-bold text-slate-400">GBP (£)</span>
+                            </a>
+                            <a href="{{ url('/switch-country/ca') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 hover:text-[#F50057] hover:bg-rose-50/80 transition">
+                                <span>🇨🇦 Canada</span>
+                                <span class="text-[11px] font-bold text-slate-400">CAD (C$)</span>
+                            </a>
+                            <a href="{{ url('/switch-country/au') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 hover:text-[#F50057] hover:bg-rose-50/80 transition">
+                                <span>🇦🇺 Australia</span>
+                                <span class="text-[11px] font-bold text-slate-400">AUD (A$)</span>
+                            </a>
+                            <a href="{{ url('/switch-country/ie') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 hover:text-[#F50057] hover:bg-rose-50/80 transition">
+                                <span>🇮🇪 Ireland</span>
+                                <span class="text-[11px] font-bold text-slate-400">EUR (€)</span>
+                            </a>
+                            <a href="{{ url('/switch-country/nz') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 hover:text-[#F50057] hover:bg-rose-50/80 transition">
+                                <span>🇳🇿 New Zealand</span>
+                                <span class="text-[11px] font-bold text-slate-400">NZD (NZ$)</span>
+                            </a>
+                        </div>
+                        <div class="border-t border-slate-100 mt-1.5 pt-1.5">
+                            <a href="{{ url('/choose-country') }}" class="flex items-center justify-center px-3 py-1.5 rounded-xl text-xs font-extrabold text-[#F50057] bg-rose-50/70 hover:bg-rose-100/70 transition">
+                                Choose Country Marketplace &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </nav>
 
             <!-- RIGHT SECTION: DESKTOP ACTION CONTROLS -->

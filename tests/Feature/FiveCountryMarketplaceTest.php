@@ -1,0 +1,365 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\User;
+use App\Modules\Categories\Models\Category;
+use App\Modules\Listings\Models\Listing;
+use App\Modules\Locations\Models\City;
+use App\Modules\Locations\Models\Country;
+use App\Modules\Locations\Models\State;
+use App\Modules\Locations\Services\FiveCountryGeographicSeederService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
+use Tests\TestCase;
+
+class FiveCountryMarketplaceTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private Category $category;
+    private User $poster;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        app(FiveCountryGeographicSeederService::class)->seedAll();
+
+        $this->category = Category::query()->create([
+            'name' => 'Casual Encounters',
+            'slug' => 'casual-encounters',
+            'description' => 'Local dating and casual connections',
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $this->poster = User::factory()->create([
+            'name' => 'Verified Advertiser',
+            'email' => 'advertiser@example.com',
+        ]);
+    }
+
+    public function test_seeder_populates_exact_five_countries_and_their_administrative_hierarchies(): void
+    {
+        $codes = Country::query()
+            ->whereIn('code', Country::FIVE_MARKETPLACES)
+            ->orderBy('sort_order')
+            ->pluck('code')
+            ->all();
+
+        $this->assertSame(['GB', 'CA', 'AU', 'IE', 'NZ'], $codes);
+
+        // 1. UK: 4 constituent nations (England, Scotland, Wales, Northern Ireland)
+        $gb = Country::query()->where('code', 'GB')->firstOrFail();
+        $this->assertSame('GBP', $gb->currency_code);
+        $this->assertSame('£', $gb->currency_symbol);
+        $this->assertSame(4, State::query()->where('country_id', $gb->id)->count());
+
+        // 2. Canada: 10 provinces + 3 territories = 13
+        $ca = Country::query()->where('code', 'CA')->firstOrFail();
+        $this->assertSame('CAD', $ca->currency_code);
+        $this->assertSame('C$', $ca->currency_symbol);
+        $this->assertSame(13, State::query()->where('country_id', $ca->id)->count());
+
+        // 3. Australia: 6 states + 2 territories = 8
+        $au = Country::query()->where('code', 'AU')->firstOrFail();
+        $this->assertSame('AUD', $au->currency_code);
+        $this->assertSame('A$', $au->currency_symbol);
+        $this->assertSame(8, State::query()->where('country_id', $au->id)->count());
+
+        // 4. Republic of Ireland: 26 counties (Northern Ireland is in GB, never IE)
+        $ie = Country::query()->where('code', 'IE')->firstOrFail();
+        $this->assertSame('EUR', $ie->currency_code);
+        $this->assertSame('€', $ie->currency_symbol);
+        $this->assertSame(26, State::query()->where('country_id', $ie->id)->where('administrative_level', 'county')->count());
+        $this->assertFalse(State::query()->where('country_id', $ie->id)->where('slug', 'northern-ireland')->exists());
+
+        // 5. New Zealand: 16 regions
+        $nz = Country::query()->where('code', 'NZ')->firstOrFail();
+        $this->assertSame('NZD', $nz->currency_code);
+        $this->assertSame('NZ$', $nz->currency_symbol);
+        $this->assertSame(16, State::query()->where('country_id', $nz->id)->count());
+    }
+
+    public function test_united_kingdom_marketplace_loads_nations_cities_listings_and_gbp_currency(): void
+    {
+        $gb = Country::query()->where('code', 'GB')->firstOrFail();
+        $england = State::query()->where('country_id', $gb->id)->where('slug', 'england')->firstOrFail();
+        $london = City::query()->where('state_id', $england->id)->where('slug', 'london')->firstOrFail();
+
+        $ca = Country::query()->where('code', 'CA')->firstOrFail();
+        $ontario = State::query()->where('country_id', $ca->id)->where('slug', 'ontario')->firstOrFail();
+        $toronto = City::query()->where('state_id', $ontario->id)->where('slug', 'toronto')->firstOrFail();
+
+        $ukListing = $this->createListingForCity($london, 'London West End Connection', 120.00);
+        $caListing = $this->createListingForCity($toronto, 'Downtown Toronto Meetup', 150.00);
+
+        // /gb homepage
+        $homeResp = $this->get('/gb');
+        $homeResp->assertOk();
+        $homeResp->assertSee('United Kingdom Marketplace (GB)');
+        $homeResp->assertSee('GBP (£)');
+        $homeResp->assertSee('England');
+        $homeResp->assertSee('Scotland');
+        $homeResp->assertSee('Wales');
+        $homeResp->assertSee('Northern Ireland');
+        $homeResp->assertSee($ukListing->title);
+        $homeResp->assertSee('£120');
+        $homeResp->assertDontSee($caListing->title);
+
+        // /gb/england area page
+        $areaResp = $this->get('/gb/england');
+        $areaResp->assertOk();
+        $areaResp->assertSee('England, United Kingdom');
+        $areaResp->assertSee('London');
+        $areaResp->assertSee('Manchester');
+        $areaResp->assertSee($ukListing->title);
+        $areaResp->assertDontSee($caListing->title);
+
+        // /gb/england/london city page
+        $cityResp = $this->get('/gb/england/london');
+        $cityResp->assertOk();
+        $cityResp->assertSee('London, England Classifieds');
+        $cityResp->assertSee($ukListing->title);
+        $cityResp->assertDontSee($caListing->title);
+    }
+
+    public function test_canada_marketplace_loads_provinces_territories_cities_listings_and_cad_currency(): void
+    {
+        $ca = Country::query()->where('code', 'CA')->firstOrFail();
+        $ontario = State::query()->where('country_id', $ca->id)->where('slug', 'ontario')->firstOrFail();
+        $toronto = City::query()->where('state_id', $ontario->id)->where('slug', 'toronto')->firstOrFail();
+
+        $au = Country::query()->where('code', 'AU')->firstOrFail();
+        $nsw = State::query()->where('country_id', $au->id)->where('slug', 'new-south-wales')->firstOrFail();
+        $sydney = City::query()->where('state_id', $nsw->id)->where('slug', 'sydney')->firstOrFail();
+
+        $caListing = $this->createListingForCity($toronto, 'Toronto Harbourfront Date', 95.00);
+        $auListing = $this->createListingForCity($sydney, 'Sydney Harbour Evening', 110.00);
+
+        $homeResp = $this->get('/ca');
+        $homeResp->assertOk();
+        $homeResp->assertSee('Canada Marketplace (CA)');
+        $homeResp->assertSee('CAD (C$)');
+        $homeResp->assertSee('Ontario');
+        $homeResp->assertSee('Quebec');
+        $homeResp->assertSee('British Columbia');
+        $homeResp->assertSee($caListing->title);
+        $homeResp->assertSee('C$95');
+        $homeResp->assertDontSee($auListing->title);
+
+        $this->get('/ca/ontario')->assertOk()->assertSee('Toronto')->assertSee($caListing->title);
+        $this->get('/ca/ontario/toronto')->assertOk()->assertSee($caListing->title)->assertDontSee($auListing->title);
+    }
+
+    public function test_australia_marketplace_loads_states_territories_cities_listings_and_aud_currency(): void
+    {
+        $au = Country::query()->where('code', 'AU')->firstOrFail();
+        $victoria = State::query()->where('country_id', $au->id)->where('slug', 'victoria')->firstOrFail();
+        $melbourne = City::query()->where('state_id', $victoria->id)->where('slug', 'melbourne')->firstOrFail();
+
+        $auListing = $this->createListingForCity($melbourne, 'Melbourne Southbank Connection', 140.00);
+
+        $homeResp = $this->get('/au');
+        $homeResp->assertOk();
+        $homeResp->assertSee('Australia Marketplace (AU)');
+        $homeResp->assertSee('AUD (A$)');
+        $homeResp->assertSee('New South Wales');
+        $homeResp->assertSee('Victoria');
+        $homeResp->assertSee('Queensland');
+        $homeResp->assertSee($auListing->title);
+        $homeResp->assertSee('A$140');
+
+        $this->get('/au/victoria')->assertOk()->assertSee('Melbourne')->assertSee($auListing->title);
+        $this->get('/au/victoria/melbourne')->assertOk()->assertSee($auListing->title);
+    }
+
+    public function test_ireland_marketplace_represents_republic_of_ireland_and_never_mixes_northern_ireland(): void
+    {
+        $ie = Country::query()->where('code', 'IE')->firstOrFail();
+        $corkCounty = State::query()->where('country_id', $ie->id)->where('slug', 'county-cork')->firstOrFail();
+        $corkCity = City::query()->where('state_id', $corkCounty->id)->where('slug', 'cork')->firstOrFail();
+
+        $gb = Country::query()->where('code', 'GB')->firstOrFail();
+        $northernIreland = State::query()->where('country_id', $gb->id)->where('slug', 'northern-ireland')->firstOrFail();
+        $belfast = City::query()->where('state_id', $northernIreland->id)->where('slug', 'belfast')->firstOrFail();
+
+        $ieListing = $this->createListingForCity($corkCity, 'Cork City Centre Social', 80.00);
+        $niListing = $this->createListingForCity($belfast, 'Belfast Cathedral Quarter Ad', 85.00);
+
+        // /ie must show Republic of Ireland listing in EUR (€) and NEVER show Northern Ireland (Belfast) listing
+        $ieResp = $this->get('/ie');
+        $ieResp->assertOk();
+        $ieResp->assertSee('Ireland Marketplace (IE)');
+        $ieResp->assertSee('EUR (€)');
+        $ieResp->assertSee('County Cork');
+        $ieResp->assertSee('County Dublin');
+        $ieResp->assertSee($ieListing->title);
+        $ieResp->assertSee('€80');
+        $ieResp->assertDontSee($niListing->title);
+
+        // /ie/northern-ireland must 404 because Northern Ireland is under /gb/northern-ireland
+        $this->get('/ie/northern-ireland')->assertNotFound();
+        $this->get('/gb/northern-ireland/belfast')
+            ->assertOk()
+            ->assertSee($niListing->title)
+            ->assertDontSee($ieListing->title);
+
+        // /ie/county-cork/cork works and shows Cork listing
+        $this->get('/ie/county-cork/cork')
+            ->assertOk()
+            ->assertSee($ieListing->title)
+            ->assertDontSee($niListing->title);
+    }
+
+    public function test_new_zealand_marketplace_loads_regions_cities_listings_and_nzd_currency(): void
+    {
+        $nz = Country::query()->where('code', 'NZ')->firstOrFail();
+        $aucklandRegion = State::query()->where('country_id', $nz->id)->where('slug', 'auckland')->firstOrFail();
+        $aucklandCity = City::query()->where('state_id', $aucklandRegion->id)->where('slug', 'auckland')->firstOrFail();
+
+        $nzListing = $this->createListingForCity($aucklandCity, 'Auckland Viaduct Harbour Meetup', 130.00);
+
+        $nzResp = $this->get('/nz');
+        $nzResp->assertOk();
+        $nzResp->assertSee('New Zealand Marketplace (NZ)');
+        $nzResp->assertSee('NZD (NZ$)');
+        $nzResp->assertSee('Auckland');
+        $nzResp->assertSee('Wellington');
+        $nzResp->assertSee('Canterbury');
+        $nzResp->assertSee($nzListing->title);
+        $nzResp->assertSee('NZ$130');
+
+        $this->get('/nz/auckland/auckland')->assertOk()->assertSee($nzListing->title);
+    }
+
+    public function test_geoip_detection_redirects_supported_countries_and_sends_unsupported_to_choose_country(): void
+    {
+        // Supported countries redirect to their respective marketplaces
+        $this->withHeader('CF-IPCountry', 'GB')->get('/')->assertRedirect('/gb');
+        $this->withHeader('CF-IPCountry', 'CA')->get('/')->assertRedirect('/ca');
+        $this->withHeader('CF-IPCountry', 'AU')->get('/')->assertRedirect('/au');
+        $this->withHeader('CF-IPCountry', 'IE')->get('/')->assertRedirect('/ie');
+        $this->withHeader('CF-IPCountry', 'NZ')->get('/')->assertRedirect('/nz');
+
+        // Unsupported country (e.g. Germany DE) redirects to /choose-country
+        $this->withHeader('CF-IPCountry', 'DE')->get('/')->assertRedirect(route('country.choose'));
+
+        // /choose-country displays all 5 marketplaces
+        $chooseResp = $this->withHeader('CF-IPCountry', 'DE')->get('/choose-country');
+        $chooseResp->assertOk();
+        $chooseResp->assertSee('Choose Your Country Marketplace');
+        $chooseResp->assertSee('United Kingdom');
+        $chooseResp->assertSee('Canada');
+        $chooseResp->assertSee('Australia');
+        $chooseResp->assertSee('Ireland');
+        $chooseResp->assertSee('New Zealand');
+    }
+
+    public function test_search_engine_crawlers_are_never_force_redirected(): void
+    {
+        $crawlerResp = $this->withHeaders([
+            'CF-IPCountry' => 'GB',
+            'User-Agent' => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+        ])->get('/');
+
+        $crawlerResp->assertOk();
+    }
+
+    public function test_manual_country_switcher_persists_selection_and_overrides_geoip(): void
+    {
+        // Visitor switches to Canada
+        $switchResp = $this->get('/switch-country/ca');
+        $switchResp->assertRedirect('/ca');
+        $switchResp->assertCookie('ldh_country', 'CA');
+
+        // Even if IP says GB, manual selection in session keeps visitor on /ca
+        $this->withHeader('CF-IPCountry', 'GB')->get('/')->assertRedirect('/ca');
+    }
+
+    public function test_cascading_location_apis_and_country_sitemaps_work_for_all_five_countries(): void
+    {
+        $countriesApi = $this->getJson('/api/locations/countries');
+        $countriesApi->assertOk()
+            ->assertJsonPath('status', 'ok')
+            ->assertJsonCount(5, 'data');
+
+        $gbAreasApi = $this->getJson('/api/locations/countries/GB/areas');
+        $gbAreasApi->assertOk()
+            ->assertJsonPath('country.code', 'GB')
+            ->assertJsonCount(4, 'data');
+
+        $englandCitiesApi = $this->getJson('/api/locations/countries/GB/areas/england/cities');
+        $englandCitiesApi->assertOk()
+            ->assertJsonPath('country.code', 'GB')
+            ->assertJsonPath('area.slug', 'england');
+
+        foreach (['gb', 'ca', 'au', 'ie', 'nz'] as $slug) {
+            $sitemap = $this->get("/{$slug}/sitemap.xml");
+            $sitemap->assertOk();
+            $this->assertStringContainsString('<urlset', $sitemap->getContent());
+            $this->assertStringContainsString("/{$slug}", $sitemap->getContent());
+        }
+    }
+
+    public function test_admin_can_manage_country_marketplaces_currencies_categories_and_locations(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/countries')
+            ->assertOk()
+            ->assertSee('Five-Country Marketplace Management')
+            ->assertSee('United Kingdom (GB)')
+            ->assertSee('New Zealand (NZ)');
+
+        $this->actingAs($admin)
+            ->get('/admin/countries/gb')
+            ->assertOk()
+            ->assertSee('United Kingdom Marketplace Configuration');
+
+        $this->actingAs($admin)
+            ->put('/admin/countries/gb', [
+                'name' => 'United Kingdom',
+                'currency_code' => 'GBP',
+                'currency_symbol' => '£',
+                'division_label' => 'Nation',
+                'timezone' => 'Europe/London',
+                'seo_title' => 'UK Classifieds Custom SEO Title',
+                'seo_description' => 'Custom UK SEO Description',
+                'is_active' => '1',
+                'is_marketplace_enabled' => '1',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('countries', [
+            'code' => 'GB',
+            'seo_title' => 'UK Classifieds Custom SEO Title',
+        ]);
+    }
+
+    private function createListingForCity(City $city, string $title, float $price): Listing
+    {
+        return Listing::query()->create([
+            'user_id' => $this->poster->id,
+            'category_id' => $this->category->id,
+            'country_id' => $city->country_id,
+            'state_id' => $city->state_id,
+            'city_id' => $city->id,
+            'title' => $title,
+            'slug' => Str::slug($title) . '-' . Str::lower(Str::random(5)),
+            'description' => $title . ' full listing description with verified local details.',
+            'poster_age' => 26,
+            'poster_gender' => 'Woman',
+            'seeking_gender' => 'Man',
+            'price' => $price,
+            'status' => 'active',
+            'is_featured' => true,
+            'published_at' => now()->subMinutes(10),
+            'expires_at' => now()->addDays(30),
+        ]);
+    }
+}

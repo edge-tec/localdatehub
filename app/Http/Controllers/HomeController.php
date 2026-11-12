@@ -21,7 +21,7 @@ class HomeController extends Controller
     /**
      * Public Homepage for LocalDateHub — Premium Adult Classifieds & Dating Connections
      */
-    public function index(): View
+    public function index(): View|\Illuminate\Http\RedirectResponse
     {
         $categories = $this->categoryService->getActiveCategories();
 
@@ -104,6 +104,25 @@ class HomeController extends Controller
             'couples-seeking-women' => ['title' => 'Couples Seeking Women', 'subtitle' => '', 'icon' => 'couple-woman'],
             'couples-seeking-couples' => ['title' => 'Couples Seeking Couples', 'subtitle' => '', 'icon' => 'couples'],
         ];
+
+        $req = request();
+        if (
+            $req->boolean('auto_country')
+            || $req->hasHeader('X-Test-Country')
+            || $req->hasHeader('CF-IPCountry')
+            || $req->hasHeader('X-Country-Code')
+            || session()->has(\App\Services\GeoLocationService::SESSION_COUNTRY_KEY)
+            || $req->cookie(\App\Services\GeoLocationService::COOKIE_COUNTRY_KEY)
+        ) {
+            $geoService = app(\App\Services\GeoLocationService::class);
+            $decision = $geoService->resolveMarketplaceDecision($req);
+            if ($decision['action'] === 'marketplace' && !empty($decision['country_slug'])) {
+                return redirect()->to('/' . $decision['country_slug']);
+            }
+            if ($decision['action'] === 'choose_country') {
+                return redirect()->route('country.choose');
+            }
+        }
 
         $homepageCategories = collect();
         foreach ($topCategoriesSlugs as $slug => $meta) {

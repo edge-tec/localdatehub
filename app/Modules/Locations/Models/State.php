@@ -16,11 +16,15 @@ class State extends Model
 
     protected $fillable = [
         'country_id',
+        'parent_id',
         'name',
         'slug',
         'code',
+        'administrative_level',
         'fips_code',
         'is_territory',
+        'latitude',
+        'longitude',
         'is_active',
     ];
 
@@ -34,6 +38,8 @@ class State extends Model
         return [
             'is_active' => 'boolean',
             'is_territory' => 'boolean',
+            'latitude' => 'float',
+            'longitude' => 'float',
         ];
     }
 
@@ -63,6 +69,16 @@ class State extends Model
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_id');
+    }
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_id');
     }
 
     public function cities(): HasMany

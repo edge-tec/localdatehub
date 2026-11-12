@@ -565,3 +565,62 @@ Route::post('/webhooks/email-relay/inbound/{provider?}', [\App\Http\Controllers\
 
 Route::post('/webhooks/email-relay/status/{provider?}', [\App\Http\Controllers\EmailRelayWebhookController::class, 'handle'])
     ->name('webhooks.email-relay.status');
+
+// =========================================================================
+// Five-Country Classified Marketplace System (GB, CA, AU, IE, NZ)
+// =========================================================================
+Route::get('/choose-country', [\App\Http\Controllers\CountryMarketplaceController::class, 'chooseCountry'])
+    ->name('country.choose');
+
+Route::get('/marketplace/auto', [\App\Http\Controllers\CountryMarketplaceController::class, 'autoRoute'])
+    ->name('country.auto');
+
+Route::match(['get', 'post'], '/switch-country/{countrySlug}', [\App\Http\Controllers\CountryMarketplaceController::class, 'switchCountry'])
+    ->where('countrySlug', '^(?i)(gb|ca|au|ie|nz)$')
+    ->name('country.switch');
+
+// Five-Country Cascading Location & GeoIP JSON APIs
+Route::prefix('api/locations')->name('api.locations.')->group(function () {
+    Route::get('/countries', [\App\Http\Controllers\Api\LocationApiController::class, 'indexCountries'])->name('countries.index');
+    Route::get('/countries/{countryCode}/areas', [\App\Http\Controllers\Api\LocationApiController::class, 'countryAreas'])->name('countries.areas');
+    Route::get('/countries/{countryCode}/areas/{areaCode}/cities', [\App\Http\Controllers\Api\LocationApiController::class, 'countryAreaCities'])->name('countries.areas.cities');
+    Route::get('/detect-country', [\App\Http\Controllers\Api\LocationApiController::class, 'detectCountry'])->name('detect-country');
+});
+
+// Admin Five-Country Marketplace Management
+Route::middleware(['auth', 'admin.rbac'])->prefix('admin/countries')->name('admin.countries.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Admin\AdminCountryMarketplaceController::class, 'index'])->name('index');
+    Route::post('/seed', [\App\Http\Controllers\Admin\AdminCountryMarketplaceController::class, 'seedGeography'])->name('seed');
+    Route::get('/{countryCode}', [\App\Http\Controllers\Admin\AdminCountryMarketplaceController::class, 'show'])->name('show');
+    Route::put('/{countryCode}', [\App\Http\Controllers\Admin\AdminCountryMarketplaceController::class, 'update'])->name('update');
+    Route::post('/{countryCode}/categories', [\App\Http\Controllers\Admin\AdminCountryMarketplaceController::class, 'syncCategories'])->name('categories');
+    Route::post('/{countryCode}/areas', [\App\Http\Controllers\Admin\AdminCountryMarketplaceController::class, 'storeArea'])->name('areas.store');
+    Route::post('/{countryCode}/cities', [\App\Http\Controllers\Admin\AdminCountryMarketplaceController::class, 'storeCity'])->name('cities.store');
+});
+
+// Independent Country Marketplaces: /gb, /ca, /au, /ie, /nz
+Route::prefix('{countrySlug}')
+    ->where(['countrySlug' => '^(?i)(gb|ca|au|ie|nz)$'])
+    ->group(function () {
+        Route::get('/', [\App\Http\Controllers\CountryMarketplaceController::class, 'home'])
+            ->name('country.home');
+
+        Route::get('/search', [\App\Http\Controllers\CountryMarketplaceController::class, 'search'])
+            ->name('country.search');
+
+        Route::get('/sitemap.xml', [\App\Http\Controllers\CountryMarketplaceController::class, 'sitemap'])
+            ->withoutMiddleware('web')
+            ->name('country.sitemap');
+
+        Route::get('/{areaSlug}', [\App\Http\Controllers\CountryMarketplaceController::class, 'showArea'])
+            ->where('areaSlug', '[a-z0-9\-]+')
+            ->name('country.area');
+
+        Route::get('/{areaSlug}/{citySlug}', [\App\Http\Controllers\CountryMarketplaceController::class, 'showCity'])
+            ->where(['areaSlug' => '[a-z0-9\-]+', 'citySlug' => '[a-z0-9\-]+'])
+            ->name('country.city');
+
+        Route::get('/{areaSlug}/{citySlug}/{categorySlug}', [\App\Http\Controllers\CountryMarketplaceController::class, 'showCity'])
+            ->where(['areaSlug' => '[a-z0-9\-]+', 'citySlug' => '[a-z0-9\-]+', 'categorySlug' => '[a-z0-9\-]+'])
+            ->name('country.city.category');
+    });
