@@ -1033,9 +1033,9 @@
         </div>
     </div>
 
-    <!-- Mobile & Tablet Slide-Out Navigation Drawer (teleported to body to escape header backdrop-filter/z-index stacking) -->
+    <!-- Mobile & Tablet Slide-Out Navigation Drawer (teleported to body with explicit z-index so it works even without Vite rebuild) -->
     <template x-teleport="body">
-        <div x-show="mobileMenuOpen" x-cloak class="fixed inset-0 z-[9999] xl:hidden">
+        <div x-show="mobileMenuOpen" x-cloak style="position: fixed; inset: 0; z-index: 99998;" class="xl:hidden">
             <div
                 x-show="mobileMenuOpen"
                 x-transition:enter="transition-opacity ease-out duration-200"
@@ -1045,7 +1045,7 @@
                 x-transition:leave-start="opacity-100"
                 x-transition:leave-end="opacity-0"
                 @click="mobileMenuOpen = false"
-                class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs"
+                style="position: fixed; inset: 0; z-index: 99998; background-color: rgba(15, 23, 42, 0.55); backdrop-filter: blur(4px);"
             ></div>
 
             <aside
@@ -1056,8 +1056,8 @@
                 x-transition:leave="transition ease-in duration-150 transform"
                 x-transition:leave-start="translate-x-0"
                 x-transition:leave-end="translate-x-full"
-                style="height: 100dvh;"
-                class="fixed right-0 top-0 bottom-0 w-full max-w-xs bg-white shadow-2xl flex flex-col z-[10000] overflow-y-auto"
+                style="position: fixed; top: 0; right: 0; bottom: 0; width: 100%; max-width: 320px; height: 100dvh; z-index: 99999; background-color: #ffffff; box-shadow: -12px 0 40px rgba(15, 23, 42, 0.22); overflow-y: auto;"
+                class="flex flex-col"
             >
             <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
                 <div class="font-black text-lg text-slate-900">
