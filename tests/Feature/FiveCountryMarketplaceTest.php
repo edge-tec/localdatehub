@@ -56,11 +56,12 @@ class FiveCountryMarketplaceTest extends TestCase
         $this->assertSame('$', $us->currency_symbol);
         $this->assertGreaterThanOrEqual(51, State::query()->where('country_id', $us->id)->count());
 
-        // 1. UK: 4 constituent nations (England, Scotland, Wales, Northern Ireland)
+        // 1. UK: 13 nations & official regions (England + 9 English regions + Scotland, Wales, Northern Ireland)
         $gb = Country::query()->where('code', 'GB')->firstOrFail();
         $this->assertSame('GBP', $gb->currency_code);
         $this->assertSame('£', $gb->currency_symbol);
-        $this->assertSame(4, State::query()->where('country_id', $gb->id)->count());
+        $this->assertGreaterThanOrEqual(13, State::query()->where('country_id', $gb->id)->count());
+        $this->assertGreaterThanOrEqual(150, City::query()->where('country_id', $gb->id)->count());
 
         // 2. Canada: 10 provinces + 3 territories = 13
         $ca = Country::query()->where('code', 'CA')->firstOrFail();
@@ -315,8 +316,8 @@ class FiveCountryMarketplaceTest extends TestCase
 
         $gbAreasApi = $this->getJson('/api/locations/countries/GB/areas');
         $gbAreasApi->assertOk()
-            ->assertJsonPath('country.code', 'GB')
-            ->assertJsonCount(4, 'data');
+            ->assertJsonPath('country.code', 'GB');
+        $this->assertGreaterThanOrEqual(13, count($gbAreasApi->json('data')));
 
         $englandCitiesApi = $this->getJson('/api/locations/countries/GB/areas/england/cities');
         $englandCitiesApi->assertOk()
