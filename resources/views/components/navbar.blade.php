@@ -26,9 +26,18 @@
     $navStates = collect();
     $navCities = collect();
     try {
-        $navCategories = Category::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
+        $navCategories = Category::where('is_active', true)->orderBy('display_order')->orderBy('name')->get();
+    } catch (\Throwable $e) {
+    }
+    try {
         $navStates = State::orderBy('name')->get();
-        $navCities = City::where('is_popular', true)->with('state')->orderBy('name')->take(24)->get();
+    } catch (\Throwable $e) {
+    }
+    try {
+        $navCities = City::where('is_popular', true)->with('state')->orderBy('population', 'desc')->orderBy('name')->take(24)->get();
+        if ($navCities->isEmpty()) {
+            $navCities = City::with('state')->orderBy('population', 'desc')->orderBy('name')->take(24)->get();
+        }
     } catch (\Throwable $e) {
     }
 

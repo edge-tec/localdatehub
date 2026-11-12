@@ -3,6 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Modules\Categories\Models\Category;
+use App\Modules\Locations\Models\City;
+use App\Modules\Locations\Models\State;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -85,5 +88,28 @@ class NavbarRedesignTest extends TestCase
     {
         $this->get('/about')->assertStatus(200)->assertSee('LocalDateHub');
         $this->get('/contact')->assertStatus(200)->assertSee('LocalDateHub');
+    }
+
+    public function test_navbar_renders_categories_states_and_cities_from_database(): void
+    {
+        $this->artisan('locations:import')->assertSuccessful();
+
+        Category::create([
+            'name' => 'Casual Encounters',
+            'slug' => 'casual-encounters',
+            'display_order' => 1,
+            'is_active' => true,
+        ]);
+
+        $firstCity = City::where('is_popular', true)->orderBy('population', 'desc')->orderBy('name')->first()
+            ?? City::orderBy('population', 'desc')->orderBy('name')->first();
+
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+        $response->assertSee('Casual Encounters');
+        $response->assertSee('California');
+        $response->assertSee($firstCity->name);
+        $response->assertSee(State::count() . ' US States');
     }
 }
