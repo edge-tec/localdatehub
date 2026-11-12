@@ -26,7 +26,7 @@ class ContactMessageReceivedNotification extends Notification implements ShouldQ
         $listing = $this->contactMessage->listing;
 
         return (new MailMessage)
-            ->subject('You have received a new inquiry on LocalAdZone')
+            ->subject('You have received a new inquiry on LocalDateHub')
             ->greeting("Hello {$notifiable->name},")
             ->line("You received a secure message regarding your listing: \"{$listing?->title}\".")
             ->line('For your security, contact messages are encrypted end-to-end and screened for safety.')

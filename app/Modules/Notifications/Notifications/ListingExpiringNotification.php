@@ -25,7 +25,7 @@ class ListingExpiringNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("Your Listing \"{$this->listing->title}\" is Expiring in {$this->daysRemaining} Days — LocalAdZone")
+            ->subject("Your Listing \"{$this->listing->title}\" is Expiring in {$this->daysRemaining} Days — LocalDateHub")
             ->greeting("Hello {$notifiable->name},")
             ->line("Your listing \"{$this->listing->title}\" is scheduled to expire in {$this->daysRemaining} days.")
             ->line('You can renew your listing now with one click to keep receiving inquiries.')

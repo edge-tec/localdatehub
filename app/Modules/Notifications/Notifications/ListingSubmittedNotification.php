@@ -24,12 +24,12 @@ class ListingSubmittedNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Listing Submitted for Review — LocalAdZone')
+            ->subject('Listing Submitted for Review — LocalDateHub')
             ->greeting("Hello {$notifiable->name},")
             ->line("Your classified listing \"{$this->listing->title}\" has been submitted successfully.")
             ->line('Our automated safety and moderation filters are currently reviewing your listing. You will receive an update once it is live.')
             ->action('View My Listings', route('account.listings.index'))
-            ->line('Thank you for advertising with LocalAdZone.');
+            ->line('Thank you for advertising with LocalDateHub.');
     }
 
     public function toArray(object $notifiable): array

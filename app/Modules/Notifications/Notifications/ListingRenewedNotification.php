@@ -24,7 +24,7 @@ class ListingRenewedNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Listing Successfully Renewed — LocalAdZone')
+            ->subject('Listing Successfully Renewed — LocalDateHub')
             ->greeting("Hello {$notifiable->name},")
             ->line("Your listing \"{$this->listing->title}\" has been renewed for an additional 30 days.")
             ->line("Expires on: {$this->listing->expires_at?->format('F j, Y')}")

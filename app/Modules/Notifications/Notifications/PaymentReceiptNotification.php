@@ -29,7 +29,7 @@ class PaymentReceiptNotification extends Notification implements ShouldQueue
         $plan = $this->transaction->plan?->name ?: 'Listing Service / Promotion';
 
         $mail = (new MailMessage)
-            ->subject('Receipt for Your LocalAdZone Purchase')
+            ->subject('Receipt for Your LocalDateHub Purchase')
             ->greeting("Hello {$notifiable->name},")
             ->line("Thank you for your purchase. We have received your payment of {$amount} for {$plan}.")
             ->line("Transaction Reference: {$this->transaction->reference_id}");
@@ -39,7 +39,7 @@ class PaymentReceiptNotification extends Notification implements ShouldQueue
                 ->action('View & Download Invoice', route('account.invoices.show', $this->invoice));
         }
 
-        return $mail->line('Thank you for choosing LocalAdZone.');
+        return $mail->line('Thank you for choosing LocalDateHub.');
     }
 
     public function toArray(object $notifiable): array

@@ -24,9 +24,9 @@ class ListingApprovedNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Good News! Your Listing is Live — LocalAdZone')
+            ->subject('Good News! Your Listing is Live — LocalDateHub')
             ->greeting("Hello {$notifiable->name},")
-            ->line("Your listing \"{$this->listing->title}\" has passed Trust & Safety review and is now live on LocalAdZone.")
+            ->line("Your listing \"{$this->listing->title}\" has passed Trust & Safety review and is now live on LocalDateHub.")
             ->line("Location: {$this->listing->city?->name}, {$this->listing->state?->code}")
             ->action('View Live Listing', route('listings.show', $this->listing->slug))
             ->line('You can promote or boost your listing anytime from your account dashboard.');

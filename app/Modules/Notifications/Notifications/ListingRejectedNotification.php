@@ -25,13 +25,13 @@ class ListingRejectedNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Important Notice Regarding Your Listing — LocalAdZone')
+            ->subject('Important Notice Regarding Your Listing — LocalDateHub')
             ->greeting("Hello {$notifiable->name},")
             ->line("Your listing \"{$this->listing->title}\" could not be approved due to community safety standards.")
             ->line("Reason: {$this->reason}")
             ->line('If you believe this determination was made in error, you may submit a formal appeal through your account settings.')
             ->action('Submit an Appeal', url('/account/appeal'))
-            ->line('We appreciate your cooperation in keeping LocalAdZone safe and compliant.');
+            ->line('We appreciate your cooperation in keeping LocalDateHub safe and compliant.');
     }
 
     public function toArray(object $notifiable): array
