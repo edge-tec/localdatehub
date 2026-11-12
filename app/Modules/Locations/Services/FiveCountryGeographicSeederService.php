@@ -51,27 +51,31 @@ class FiveCountryGeographicSeederService
         ];
 
         $orderIdx = 1;
+        $hasCountrySortOrder = \Illuminate\Support\Facades\Schema::hasColumn('countries', 'sort_order');
         foreach ($datasets as $countryData) {
             $sortOrder = $countryData['sort_order'] ?? $orderIdx++;
-            DB::transaction(function () use ($countryData, $categories, $sortOrder, &$summary) {
+            DB::transaction(function () use ($countryData, $categories, $sortOrder, $hasCountrySortOrder, &$summary) {
+                $countryAttrs = [
+                    'slug' => $countryData['slug'],
+                    'name' => $countryData['name'],
+                    'iso3' => $countryData['iso3'],
+                    'phone_code' => $countryData['phone_code'],
+                    'currency_code' => $countryData['currency_code'],
+                    'currency_symbol' => $countryData['currency_symbol'],
+                    'flag' => $countryData['flag'],
+                    'timezone' => $countryData['timezone'],
+                    'division_label' => $countryData['division_label'],
+                    'seo_title' => $countryData['seo_title'],
+                    'seo_description' => $countryData['seo_description'],
+                    'is_active' => true,
+                    'is_marketplace_enabled' => true,
+                ];
+                if ($hasCountrySortOrder) {
+                    $countryAttrs['sort_order'] = $sortOrder;
+                }
                 $country = Country::updateOrCreate(
                     ['code' => $countryData['code']],
-                    [
-                        'slug' => $countryData['slug'],
-                        'name' => $countryData['name'],
-                        'iso3' => $countryData['iso3'],
-                        'phone_code' => $countryData['phone_code'],
-                        'currency_code' => $countryData['currency_code'],
-                        'currency_symbol' => $countryData['currency_symbol'],
-                        'flag' => $countryData['flag'],
-                        'timezone' => $countryData['timezone'],
-                        'division_label' => $countryData['division_label'],
-                        'seo_title' => $countryData['seo_title'],
-                        'seo_description' => $countryData['seo_description'],
-                        'is_active' => true,
-                        'is_marketplace_enabled' => true,
-                        'sort_order' => $sortOrder,
-                    ]
+                    $countryAttrs
                 );
 
                 $summary['countries_seeded']++;

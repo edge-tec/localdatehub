@@ -35,3 +35,4 @@ class CountryCategory extends Model
         return $this->belongsTo(Category::class);
     }
 }
+

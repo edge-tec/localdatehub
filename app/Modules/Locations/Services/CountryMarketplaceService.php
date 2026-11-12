@@ -35,7 +35,7 @@ class CountryMarketplaceService
                 'cities as cities_count' => fn ($q) => $q->where('is_active', true),
                 'listings as active_listings_count' => fn ($q) => $this->applyPublicListingScope($q),
             ])
-            ->orderBy('sort_order')
+            ->orderByRaw("CASE code WHEN 'GB' THEN 1 WHEN 'CA' THEN 2 WHEN 'AU' THEN 3 WHEN 'IE' THEN 4 WHEN 'NZ' THEN 5 ELSE 99 END")
             ->orderBy('name');
 
         if ($onlyEnabled) {
@@ -86,7 +86,7 @@ class CountryMarketplaceService
             ->where('is_active', true)
             ->with('parent:id,name,code,slug,administrative_level')
             ->withCount(['cities as cities_count' => fn ($q) => $q->where('is_active', true)])
-            ->orderBy('sort_order')
+            ->orderBy('is_territory')
             ->orderBy('name')
             ->get();
 
@@ -125,10 +125,10 @@ class CountryMarketplaceService
             })
             ->with([
                 'parent:id,name,code,slug,administrative_level',
-                'children' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order')->orderBy('name'),
+                'children' => fn ($q) => $q->where('is_active', true)->orderBy('name'),
                 'cities' => fn ($q) => $q->where('is_active', true)
-                    ->orderByDesc('is_major_city')
-                    ->orderBy('sort_order')
+                    ->orderByDesc('is_popular')
+                    ->orderByDesc('population')
                     ->orderBy('name'),
             ])
             ->first();
@@ -192,9 +192,8 @@ class CountryMarketplaceService
             ->where('country_id', $country->id)
             ->where('is_active', true)
             ->with('state:id,country_id,name,code,slug')
-            ->orderByDesc('is_major_city')
+            ->orderByDesc('is_popular')
             ->orderByDesc('population')
-            ->orderBy('sort_order')
             ->orderBy('name')
             ->limit($limit)
             ->get();
@@ -222,11 +221,15 @@ class CountryMarketplaceService
      */
     public function getCountryCategories(Country $country): Collection
     {
-        $disabledCategoryIds = DB::table('country_categories')
-            ->where('country_id', $country->id)
-            ->where('is_active', false)
-            ->pluck('category_id')
-            ->all();
+        $disabledCategoryIds = [];
+        try {
+            $disabledCategoryIds = DB::table('country_categories')
+                ->where('country_id', $country->id)
+                ->where('is_active', false)
+                ->pluck('category_id')
+                ->all();
+        } catch (\Throwable) {
+        }
 
         $categories = Category::query()
             ->whereNull('parent_id')
@@ -235,10 +238,10 @@ class CountryMarketplaceService
             ->with(['children' => function ($q) use ($disabledCategoryIds) {
                 $q->where('is_active', true)
                     ->when(! empty($disabledCategoryIds), fn ($sq) => $sq->whereNotIn('id', $disabledCategoryIds))
-                    ->orderBy('sort_order')
+                    ->orderBy('display_order')
                     ->orderBy('name');
             }])
-            ->orderBy('sort_order')
+            ->orderBy('display_order')
             ->orderBy('name')
             ->get();
 
@@ -376,7 +379,7 @@ class CountryMarketplaceService
             'featured' => $query->orderByDesc('is_featured')->latest('published_at')->latest('id'),
             'price_asc' => $query->orderByRaw('CASE WHEN price IS NULL THEN 1 ELSE 0 END')->orderBy('price')->latest('id'),
             'price_desc' => $query->orderByDesc('price')->latest('id'),
-            'popular' => $query->orderByDesc('views_count')->latest('published_at'),
+            'popular' => $query->orderByDesc('view_count')->latest('published_at'),
             default => $query->orderByDesc('is_featured')->latest('published_at')->latest('id'),
         };
 
@@ -443,12 +446,23 @@ class CountryMarketplaceService
     }
 
     /**
-     * Automatically seed the 5 countries if they haven't been seeded yet.
+     * Automatically migrate (if needed) and seed the 5 countries if they haven't been seeded yet.
      */
     public function ensureFiveCountriesExist(): void
     {
         try {
-            $count = Country::query()->whereIn('code', Country::FIVE_MARKETPLACES)->count();
+            if (! \Illuminate\Support\Facades\Schema::hasColumn('countries', 'is_marketplace_enabled')
+                || ! \Illuminate\Support\Facades\Schema::hasColumn('cities', 'country_id')) {
+                \Illuminate\Support\Facades\Artisan::call('migrate', [
+                    '--path' => 'database/migrations/2026_11_12_000003_create_five_country_marketplace_tables.php',
+                    '--force' => true,
+                ]);
+            }
+
+            $count = Country::query()
+                ->whereIn('code', Country::FIVE_MARKETPLACES)
+                ->where('is_marketplace_enabled', true)
+                ->count();
             if ($count < 5) {
                 $this->seederService->seedAll();
             }

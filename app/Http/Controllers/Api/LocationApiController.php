@@ -325,7 +325,7 @@ class LocationApiController extends Controller
             ->where('is_active', true)
             ->where('name', 'like', $q . '%')
             ->with('state:id,name,code,slug')
-            ->orderByDesc('is_major_city')
+            ->orderByDesc('is_popular')
             ->orderByDesc('population')
             ->limit($limit)
             ->get();

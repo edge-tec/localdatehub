@@ -40,7 +40,7 @@ class AdminCountryMarketplaceController extends Controller
                 'listings as pending_listings_count' => fn ($q) => $q->where('status', 'pending'),
                 'listings as featured_listings_count' => fn ($q) => $q->where('is_featured', true),
             ])
-            ->orderBy('sort_order')
+            ->orderByRaw("CASE code WHEN 'GB' THEN 1 WHEN 'CA' THEN 2 WHEN 'AU' THEN 3 WHEN 'IE' THEN 4 WHEN 'NZ' THEN 5 ELSE 99 END")
             ->get();
 
         // Country visitor counts from visitor_sessions / visitor_geolocation if tables exist
@@ -74,7 +74,7 @@ class AdminCountryMarketplaceController extends Controller
         $areas = State::query()
             ->where('country_id', $country->id)
             ->withCount(['cities', 'listings'])
-            ->orderBy('sort_order')
+            ->orderBy('is_territory')
             ->orderBy('name')
             ->get();
 
@@ -82,14 +82,14 @@ class AdminCountryMarketplaceController extends Controller
             ->where('country_id', $country->id)
             ->with('state:id,name,code,slug')
             ->withCount('listings')
-            ->orderByDesc('is_major_city')
+            ->orderByDesc('is_popular')
             ->orderByDesc('population')
             ->limit(60)
             ->get();
 
         $categories = Category::query()
             ->whereNull('parent_id')
-            ->orderBy('sort_order')
+            ->orderBy('display_order')
             ->orderBy('name')
             ->get();
 
@@ -168,7 +168,7 @@ class AdminCountryMarketplaceController extends Controller
             ->map(fn ($id) => (int) $id)
             ->all();
 
-        $allCategories = Category::query()->whereNull('parent_id')->orderBy('sort_order')->get();
+        $allCategories = Category::query()->whereNull('parent_id')->orderBy('display_order')->get();
         $now = now();
 
         foreach ($allCategories as $idx => $cat) {
@@ -255,7 +255,7 @@ class AdminCountryMarketplaceController extends Controller
                 'country_id' => $country->id,
                 'name' => trim($validated['name']),
                 'population' => (int) ($validated['population'] ?? 0),
-                'is_major_city' => $request->boolean('is_major_city', false),
+                'is_popular' => $request->boolean('is_major_city', false),
                 'timezone' => $country->timezone,
                 'is_active' => true,
             ]

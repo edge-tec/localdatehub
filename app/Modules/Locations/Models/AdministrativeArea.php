@@ -6,3 +6,4 @@ class AdministrativeArea extends State
 {
     protected $table = 'states';
 }
+

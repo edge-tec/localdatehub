@@ -31,7 +31,7 @@ class FiveCountryMarketplaceTest extends TestCase
             'slug' => 'casual-encounters',
             'description' => 'Local dating and casual connections',
             'is_active' => true,
-            'sort_order' => 1,
+            'display_order' => 1,
         ]);
 
         $this->poster = User::factory()->create([
@@ -44,7 +44,7 @@ class FiveCountryMarketplaceTest extends TestCase
     {
         $codes = Country::query()
             ->whereIn('code', Country::FIVE_MARKETPLACES)
-            ->orderBy('sort_order')
+            ->orderByRaw("CASE code WHEN 'GB' THEN 1 WHEN 'CA' THEN 2 WHEN 'AU' THEN 3 WHEN 'IE' THEN 4 WHEN 'NZ' THEN 5 ELSE 99 END")
             ->pluck('code')
             ->all();
 
