@@ -22,9 +22,15 @@
     $hasCustomNavLogo = !empty($navLogoUrl) && !in_array($navLogoUrl, ['/images/logo.png', '/images/logo.svg'], true);
     $hasCustomMobileLogo = !empty($navMobileLogoUrl) && !in_array($navMobileLogoUrl, ['/images/logo-mobile.png', '/images/logo-mobile.svg'], true);
 
-    $navCategories = Category::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
-    $navStates = State::orderBy('name')->get();
-    $navCities = City::where('is_popular', true)->with('state')->orderBy('name')->take(24)->get();
+    $navCategories = collect();
+    $navStates = collect();
+    $navCities = collect();
+    try {
+        $navCategories = Category::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
+        $navStates = State::orderBy('name')->get();
+        $navCities = City::where('is_popular', true)->with('state')->orderBy('name')->take(24)->get();
+    } catch (\Throwable $e) {
+    }
 
     $navUnreadMessages = 0;
     $navRecentMessages = collect();
