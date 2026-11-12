@@ -55,14 +55,20 @@ class MonitorInHouseCryptoInvoicesCommand extends Command
             $updatedInvoice = $scannerService->scanAndVerify($invoice);
 
             if ($updatedInvoice->status === CryptoPaymentInvoice::STATUS_COMPLETED) {
-                $this->info("Invoice #{$updatedInvoice->invoice_number} COMPLETED on-chain. Credited user internal balance.");
+                $this->info("Invoice #{$updatedInvoice->invoice_number} COMPLETED on-chain ({$updatedInvoice->received_crypto_amount} {$updatedInvoice->currency_symbol}). Credited user internal balance.");
                 try {
                     $treasuryEngine->evaluateAutoSweep($updatedInvoice);
                 } catch (\Throwable $e) {
                     Log::warning("Auto-sweep evaluation error: {$e->getMessage()}");
                 }
+            } elseif ($updatedInvoice->status === CryptoPaymentInvoice::STATUS_CONFIRMING) {
+                $this->info("Invoice #{$updatedInvoice->invoice_number} CONFIRMING ({$updatedInvoice->current_confirmations}/{$updatedInvoice->required_confirmations} confirmations, received {$updatedInvoice->received_crypto_amount} {$updatedInvoice->currency_symbol}).");
+            } elseif ($updatedInvoice->status === CryptoPaymentInvoice::STATUS_UNDERPAID) {
+                $this->warn("Invoice #{$updatedInvoice->invoice_number} UNDERPAID (received {$updatedInvoice->received_crypto_amount} of {$updatedInvoice->expected_crypto_amount} {$updatedInvoice->currency_symbol}).");
             } elseif ($updatedInvoice->status === CryptoPaymentInvoice::STATUS_EXPIRED) {
                 $this->warn("Invoice #{$updatedInvoice->invoice_number} expired.");
+            } else {
+                $this->line("Invoice #{$updatedInvoice->invoice_number}: {$updatedInvoice->status} (address: {$updatedInvoice->depositAddress?->public_address})");
             }
         }
     }

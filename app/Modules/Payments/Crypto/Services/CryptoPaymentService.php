@@ -89,13 +89,11 @@ class CryptoPaymentService
             return $payment;
         }
 
-        if ($payment->isExpired()) {
-            $payment->update(['status' => CryptoPayment::STATUS_EXPIRED]);
-            return $payment;
-        }
-
         $gateway = $payment->gateway;
         if (!$gateway) {
+            if ($payment->isExpired()) {
+                $payment->update(['status' => CryptoPayment::STATUS_EXPIRED]);
+            }
             return $payment;
         }
 
@@ -112,6 +110,9 @@ class CryptoPaymentService
             }
             if ($statusResponse->confirmations > 0) {
                 $payment->confirmations = $statusResponse->confirmations;
+            }
+            if ($payment->status === CryptoPayment::STATUS_AWAITING_PAYMENT && $payment->isExpired()) {
+                $payment->status = CryptoPayment::STATUS_EXPIRED;
             }
             $payment->save();
 
