@@ -54,4 +54,10 @@ return [
         'redirect' => env('FACEBOOK_REDIRECT_URI', env('APP_URL') ? rtrim(env('APP_URL'), '/') . '/auth/facebook/callback' : '/auth/facebook/callback'),
     ],
 
+    'turnstile' => [
+        'enabled' => env('TURNSTILE_ENABLED', true),
+        'site_key' => env('TURNSTILE_SITE_KEY'),
+        'secret_key' => env('TURNSTILE_SECRET_KEY'),
+    ],
+
 ];

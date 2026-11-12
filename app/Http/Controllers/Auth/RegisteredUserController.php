@@ -79,6 +79,7 @@ class RegisteredUserController extends Controller
             'terms_accepted' => ['required', 'accepted'],
             'anti_trafficking_confirmed' => ['required', 'accepted'],
             'age_confirmed_18' => ['required', 'accepted'],
+            'cf-turnstile-response' => [new \App\Rules\ValidTurnstile($request->ip())],
         ], [
             'terms_accepted.accepted' => 'You must accept the Terms of Service and Privacy Policy to create an account.',
             'anti_trafficking_confirmed.accepted' => 'You must acknowledge the platform anti-trafficking and anti-solicitation policy.',

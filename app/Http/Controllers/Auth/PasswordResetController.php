@@ -40,6 +40,7 @@ class PasswordResetController extends Controller
 
         $request->validate([
             'email' => ['required', 'email'],
+            'cf-turnstile-response' => [new \App\Rules\ValidTurnstile($request->ip())],
         ]);
 
         $status = Password::sendResetLink(

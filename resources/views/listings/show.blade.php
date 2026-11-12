@@ -1286,6 +1286,8 @@
                     <p class="text-[11px] text-slate-600 font-medium">Your message is encrypted before storage. The advertiser never sees your raw IP or location.</p>
                 </div>
 
+                <x-turnstile action="listing_contact" />
+
                 <div class="pt-2 flex justify-end gap-3">
                     <x-button type="button" variant="secondary" @click="$dispatch('close-modal', 'contact-modal')">
                         Cancel
@@ -1361,6 +1363,8 @@
                 <div class="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-950 font-medium">
                     <strong>Notice:</strong> Reports concerning minors or human trafficking are prioritized 24/7 and referred to law enforcement and NCMEC.
                 </div>
+
+                <x-turnstile action="listing_report" />
 
                 <div class="pt-2 flex justify-end gap-3">
                     <x-button type="button" variant="secondary" @click="$dispatch('close-modal', 'report-modal')">

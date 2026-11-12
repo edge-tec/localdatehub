@@ -328,6 +328,8 @@
                             </label>
                         </div>
 
+                        <x-turnstile action="login" class="pt-1" />
+
                         <!-- Login Now Button -->
                         <button 
                             type="submit" 

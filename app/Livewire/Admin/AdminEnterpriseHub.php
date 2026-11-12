@@ -4498,6 +4498,9 @@ class AdminEnterpriseHub extends Component
             'facebook_client_id' => '',
             'facebook_client_secret' => '',
             'facebook_oauth_enabled' => 'false',
+            'turnstile_enabled' => 'true',
+            'turnstile_site_key' => '',
+            'turnstile_secret_key' => '',
         ];
 
         $dbSettings = SystemSetting::orderBy('key')->pluck('value', 'key')->map(fn ($v) => (string) $v)->all();

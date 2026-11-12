@@ -57,6 +57,7 @@ class PublicPageController extends Controller
             'inquiry_type' => ['required', 'string', 'in:general_support,safety_report,billing,partnership'],
             'subject' => ['required', 'string', 'max:150'],
             'message' => ['required', 'string', 'min:10', 'max:3000'],
+            'cf-turnstile-response' => [new \App\Rules\ValidTurnstile($request->ip())],
         ]);
 
         $contactMsg = ContactMessage::create([

@@ -20,6 +20,8 @@
                 @enderror
             </div>
 
+            <x-turnstile action="forgot_password" class="pt-1" />
+
             <button type="submit"
                 class="w-full mt-2 bg-[#F20B83] hover:bg-[#d90858] active:bg-[#c0074d] text-white font-bold py-3.5 px-4 rounded-xl text-sm transition shadow-lg shadow-pink-500/20">
                 Email Password Reset Link

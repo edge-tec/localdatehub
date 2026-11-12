@@ -8178,6 +8178,38 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Cloudflare Turnstile Bot & Spam Protection -->
+                        <div class="pt-6 border-t border-slate-200 space-y-4">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                                    <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider">Cloudflare Turnstile Verification</h3>
+                                </div>
+                                <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
+                                    <input
+                                        type="checkbox"
+                                        wire:model.live="settingValues.turnstile_enabled"
+                                        true-value="true"
+                                        false-value="false"
+                                        class="rounded border-slate-300 text-[#F20B83] focus:ring-[#F20B83]"
+                                    >
+                                    <span>Enable Turnstile Protection</span>
+                                </label>
+                            </div>
+                            <p class="text-xs text-slate-500 font-medium">Protect Login, Registration, Password Reset, Contact, and Listing Report forms with privacy-first Cloudflare Turnstile bot verification. Requires both Site Key and Secret Key (or <code>TURNSTILE_SITE_KEY</code> / <code>TURNSTILE_SECRET_KEY</code> in <code>.env</code>).</p>
+
+                            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Turnstile Site Key</label>
+                                    <input type="text" wire:model="settingValues.turnstile_site_key" class="{{ $input }} text-xs font-mono" placeholder="0x4AAAAAAA...">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Turnstile Secret Key</label>
+                                    <input type="password" wire:model="settingValues.turnstile_secret_key" class="{{ $input }} text-xs font-mono" placeholder="0x4AAAAAAA...">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 @endif
 

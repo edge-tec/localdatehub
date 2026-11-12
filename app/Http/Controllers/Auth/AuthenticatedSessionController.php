@@ -40,6 +40,7 @@ class AuthenticatedSessionController extends Controller
         $request->validate([
             'login' => ['required', 'string'],
             'password' => ['required', 'string'],
+            'cf-turnstile-response' => [new \App\Rules\ValidTurnstile($request->ip())],
         ]);
 
         $this->ensureIsNotRateLimited($request);

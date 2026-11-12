@@ -23,6 +23,7 @@ class ListingReportRequest extends FormRequest
             'reporter_name' => ['nullable', 'string', 'max:100'],
             'reporter_email' => ['nullable', 'email', 'max:150'],
             'report_hp' => ['nullable'],
+            'cf-turnstile-response' => [new \App\Rules\ValidTurnstile($this->ip())],
         ];
     }
 

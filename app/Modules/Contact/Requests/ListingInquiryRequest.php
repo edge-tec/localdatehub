@@ -19,6 +19,7 @@ class ListingInquiryRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:25'],
             'message' => ['required', 'string', 'min:5', 'max:3000'],
             'contact_hp' => ['nullable'],
+            'cf-turnstile-response' => [new \App\Rules\ValidTurnstile($this->ip())],
         ];
     }
 
