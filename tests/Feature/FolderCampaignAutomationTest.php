@@ -205,4 +205,33 @@ class FolderCampaignAutomationTest extends TestCase
         $this->assertSame(0, User::where('email', 'manmarzi001@gmail.com')->count());
         $this->assertSame(0, Listing::count());
     }
+
+    public function test_admin_can_save_user_posting_override_without_optional_fields(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+            'account_status' => 'active',
+        ]);
+        $target = User::factory()->create([
+            'name' => 'Maisy Lowe',
+            'email' => 'manmarzi001@gmail.com',
+            'account_status' => 'active',
+        ]);
+
+        $response = $this->actingAs($admin)->post(route('admin.monetization.overrides.store'), [
+            'user_id' => $target->id,
+            'free_post_allowance' => null,
+            'custom_price_credits' => 0,
+            'approval_mode' => 'auto',
+            'is_unlimited' => '1',
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('user_posting_overrides', [
+            'user_id' => $target->id,
+            'is_unlimited' => 1,
+            'custom_price_credits' => 0,
+            'approval_mode' => 'auto',
+        ]);
+    }
 }

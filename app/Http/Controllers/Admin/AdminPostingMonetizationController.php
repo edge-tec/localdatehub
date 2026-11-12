@@ -155,14 +155,14 @@ class AdminPostingMonetizationController extends Controller
         UserPostingOverride::updateOrCreate(
             ['user_id' => $validated['user_id']],
             [
-                'custom_quota' => $validated['custom_quota'] !== null ? (int) $validated['custom_quota'] : null,
-                'free_post_allowance' => $validated['free_post_allowance'] !== null ? (int) $validated['free_post_allowance'] : null,
+                'custom_quota' => isset($validated['custom_quota']) ? (int) $validated['custom_quota'] : null,
+                'free_post_allowance' => isset($validated['free_post_allowance']) ? (int) $validated['free_post_allowance'] : null,
                 'is_unlimited' => (bool) $request->input('is_unlimited', false),
-                'custom_price_credits' => $validated['custom_price_credits'] !== null ? (int) $validated['custom_price_credits'] : null,
+                'custom_price_credits' => isset($validated['custom_price_credits']) ? (int) $validated['custom_price_credits'] : null,
                 'approval_mode' => $validated['approval_mode'],
                 'is_posting_restricted' => (bool) $request->input('is_posting_restricted', false),
-                'restriction_reason' => $validated['restriction_reason'] ?: null,
-                'expires_at' => $validated['expires_at'] ?: null,
+                'restriction_reason' => !empty($validated['restriction_reason']) ? $validated['restriction_reason'] : null,
+                'expires_at' => !empty($validated['expires_at']) ? $validated['expires_at'] : null,
             ]
         );
 
