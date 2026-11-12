@@ -8028,6 +8028,17 @@
                                 <span class="text-[11px] text-slate-500 mt-1 block">Number of days before ad automatically expires and needs renewal.</span>
                             </div>
                         </div>
+
+                        <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-slate-50/80 rounded-xl p-4 border border-slate-200/70">
+                            <div>
+                                <h4 class="text-xs font-black text-slate-900 uppercase tracking-wider">User Posting Overrides &amp; Unlimited Quota</h4>
+                                <p class="text-[11px] text-slate-600 mt-0.5">Grant unlimited posting privileges, custom credit pricing, or auto-approval overrides to specific advertiser accounts.</p>
+                            </div>
+                            <a href="{{ route('admin.monetization.index') }}#user-overrides" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shrink-0">
+                                <span>Open User Overrides</span>
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                            </a>
+                        </div>
                     </div>
                 @endif
 

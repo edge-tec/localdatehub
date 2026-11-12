@@ -136,3 +136,4 @@ class CloudflareTurnstileTest extends TestCase
         ])->assertSessionHasNoErrors();
     }
 }
+
