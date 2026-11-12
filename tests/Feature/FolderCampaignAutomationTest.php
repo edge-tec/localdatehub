@@ -234,4 +234,30 @@ class FolderCampaignAutomationTest extends TestCase
             'approval_mode' => 'auto',
         ]);
     }
+
+    public function test_admin_can_save_global_monetization_settings_without_weekly_limit(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+            'account_status' => 'active',
+        ]);
+
+        $response = $this->actingAs($admin)->put(route('admin.monetization.settings.update'), [
+            'global_posting_mode' => 'free',
+            'default_post_price_credits' => 10,
+            'default_free_quota' => 3,
+            'daily_limit' => 5,
+            'monthly_limit' => 50,
+            'approval_mode' => 'auto',
+            'verified_user_ranking_boost' => 25,
+            'unlimited_posting_enabled' => '1',
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('posting_settings', [
+            'global_posting_mode' => 'free',
+            'approval_mode' => 'auto',
+            'unlimited_posting_enabled' => 1,
+        ]);
+    }
 }

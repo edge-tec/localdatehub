@@ -58,9 +58,9 @@ class AdminPostingMonetizationController extends Controller
             'default_post_price_credits' => $validated['default_post_price_credits'],
             'default_free_quota' => $validated['default_free_quota'],
             'unlimited_posting_enabled' => (bool) $request->input('unlimited_posting_enabled', false),
-            'daily_limit' => $validated['daily_limit'] ?: null,
-            'weekly_limit' => $validated['weekly_limit'] ?: null,
-            'monthly_limit' => $validated['monthly_limit'] ?: null,
+            'daily_limit' => !empty($validated['daily_limit']) ? (int) $validated['daily_limit'] : null,
+            'weekly_limit' => !empty($validated['weekly_limit']) ? (int) $validated['weekly_limit'] : null,
+            'monthly_limit' => !empty($validated['monthly_limit']) ? (int) $validated['monthly_limit'] : null,
             'approval_mode' => $validated['approval_mode'],
             'new_account_manual_review' => (bool) $request->input('new_account_manual_review', false),
             'verified_user_auto_approve' => (bool) $request->input('verified_user_auto_approve', false),
@@ -88,12 +88,12 @@ class AdminPostingMonetizationController extends Controller
         AccountPostingLimit::updateOrCreate(
             ['account_type' => $accountType],
             [
-                'daily_limit' => $validated['daily_limit'] ?: null,
-                'weekly_limit' => $validated['weekly_limit'] ?: null,
-                'monthly_limit' => $validated['monthly_limit'] ?: null,
+                'daily_limit' => isset($validated['daily_limit']) ? (int) $validated['daily_limit'] : null,
+                'weekly_limit' => isset($validated['weekly_limit']) ? (int) $validated['weekly_limit'] : null,
+                'monthly_limit' => isset($validated['monthly_limit']) ? (int) $validated['monthly_limit'] : null,
                 'free_post_quota' => $validated['free_post_quota'],
                 'is_unlimited' => (bool) $request->input('is_unlimited', false),
-                'post_price_credits' => $validated['post_price_credits'] !== null ? (int) $validated['post_price_credits'] : null,
+                'post_price_credits' => isset($validated['post_price_credits']) ? (int) $validated['post_price_credits'] : null,
                 'approval_mode' => $validated['approval_mode'],
             ]
         );
@@ -115,8 +115,8 @@ class AdminPostingMonetizationController extends Controller
         ]);
 
         PostingPricingRule::create([
-            'category_id' => $validated['category_id'] ?: null,
-            'account_type' => $validated['account_type'] ?: null,
+            'category_id' => !empty($validated['category_id']) ? (int) $validated['category_id'] : null,
+            'account_type' => !empty($validated['account_type']) ? $validated['account_type'] : null,
             'price_credits' => $validated['price_credits'],
             'is_free' => (bool) $request->input('is_free', false),
             'priority' => $validated['priority'],
