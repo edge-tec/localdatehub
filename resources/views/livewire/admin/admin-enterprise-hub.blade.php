@@ -352,22 +352,138 @@
                         <h1 class="text-2xl font-black text-slate-900 tracking-tight">Admin Dashboard</h1>
                         <p class="text-xs text-slate-500 mt-0.5">Welcome back, Super Admin! Real-time live platform telemetry and visitor tracking.</p>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <a href="{{ route('admin.live-visitors') }}" class="inline-flex items-center gap-2 pl-2 pr-3.5 py-1.5 rounded-full bg-white/95 hover:bg-rose-50/70 border border-rose-200/80 shadow-[0_6px_18px_-8px_rgba(242,11,131,0.3)] ring-1 ring-rose-500/10 text-xs font-black text-slate-900 w-max transition group" title="Open Real-Time Live Visitor Monitoring">
-                            <span class="relative flex h-2.5 w-2.5 shrink-0">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    <style>
+                        .ldh-admin-telemetry-bar {
+                            display: flex;
+                            flex-wrap: wrap;
+                            align-items: center;
+                            gap: 10px;
+                        }
+                        .ldh-live-pill {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 10px;
+                            padding: 6px 8px 6px 10px;
+                            border-radius: 14px;
+                            background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+                            border: 1px solid #E2E8F0;
+                            box-shadow: 0 4px 14px -4px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+                            text-decoration: none;
+                            transition: all 0.18s ease;
+                        }
+                        .ldh-live-pill:hover {
+                            border-color: #F9A8D4;
+                            background: linear-gradient(180deg, #FFFFFF 0%, #FFF1F5 100%);
+                            box-shadow: 0 8px 22px -6px rgba(245, 0, 87, 0.22);
+                            transform: translateY(-1px);
+                        }
+                        .ldh-live-pulse-wrap {
+                            width: 26px;
+                            height: 26px;
+                            border-radius: 9px;
+                            background-color: #ECFDF5;
+                            border: 1px solid #A7F3D0;
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            flex-shrink: 0;
+                        }
+                        .ldh-live-count {
+                            font-size: 13px;
+                            font-weight: 900;
+                            color: #0F172A;
+                            line-height: 1;
+                        }
+                        .ldh-live-sub {
+                            font-size: 10px;
+                            font-weight: 700;
+                            color: #64748B;
+                            letter-spacing: 0.02em;
+                        }
+                        .ldh-live-cta {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 4px;
+                            padding: 5px 10px;
+                            border-radius: 9px;
+                            background-color: #F50057;
+                            color: #FFFFFF;
+                            font-size: 11px;
+                            font-weight: 800;
+                            white-space: nowrap;
+                            box-shadow: 0 2px 8px rgba(245, 0, 87, 0.28);
+                            transition: background-color 0.15s ease;
+                        }
+                        .ldh-live-pill:hover .ldh-live-cta {
+                            background-color: #D8004D;
+                        }
+                        .ldh-reset-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            height: 38px;
+                            padding: 0 14px;
+                            border-radius: 12px;
+                            background-color: #FFFFFF;
+                            border: 1px solid #FECDD3;
+                            color: #BE123C;
+                            font-size: 12px;
+                            font-weight: 700;
+                            cursor: pointer;
+                            white-space: nowrap;
+                            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+                            transition: all 0.15s ease;
+                        }
+                        .ldh-reset-btn:hover {
+                            background-color: #FFF1F2;
+                            border-color: #FDA4AF;
+                            box-shadow: 0 4px 12px rgba(225, 29, 72, 0.14);
+                        }
+                        .ldh-refresh-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            width: 38px;
+                            height: 38px;
+                            border-radius: 12px;
+                            background-color: #FFFFFF;
+                            border: 1px solid #E2E8F0;
+                            color: #475569;
+                            cursor: pointer;
+                            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+                            transition: all 0.15s ease;
+                        }
+                        .ldh-refresh-btn:hover {
+                            background-color: #FFF1F5;
+                            border-color: #FBCFE8;
+                            color: #F50057;
+                        }
+                    </style>
+                    <div class="ldh-admin-telemetry-bar">
+                        <a href="{{ route('admin.live-visitors') }}" class="ldh-live-pill" title="Open Real-Time Live Visitor Monitoring">
+                            <span class="ldh-live-pulse-wrap">
+                                <span class="relative flex h-2.5 w-2.5">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                                </span>
                             </span>
-                            <span>{{ $metrics['activeVisitorsNow'] }} Visitors Online Now · Auto-updating (10s)</span>
-                            <svg class="w-3.5 h-3.5 text-[#F20B83] group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                            <span class="flex items-center gap-2 whitespace-nowrap">
+                                <span class="ldh-live-count">{{ $metrics['activeVisitorsNow'] }} Visitors Online Now</span>
+                                <span class="ldh-live-sub">· Auto-updating (10s)</span>
+                            </span>
+                            <span class="ldh-live-cta">
+                                <span>Live Monitor</span>
+                                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                            </span>
                         </a>
                         @if($this->userCan('settings.manage'))
-                            <button type="button" wire:click="resetAllTrafficAndViewCounts" wire:confirm="Are you sure you want to reset all traffic views and listing view counters to 0?" class="px-3 py-1.5 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition shadow-xs" title="Reset All Views & Traffic to 0">
-                                ↺ Reset Views to 0
+                            <button type="button" wire:click="resetAllTrafficAndViewCounts" wire:confirm="Are you sure you want to reset all traffic views and listing view counters to 0?" class="ldh-reset-btn" title="Reset All Views & Traffic to 0">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v5h5"/></svg>
+                                <span>Reset Views to 0</span>
                             </button>
                         @endif
-                        <button type="button" wire:click="$refresh" class="p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition" title="Refresh Telemetry Now">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        <button type="button" wire:click="$refresh" class="ldh-refresh-btn" title="Refresh Telemetry Now" aria-label="Refresh Telemetry Now">
+                            <svg wire:loading.class="animate-spin" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                         </button>
                     </div>
                 </div>
