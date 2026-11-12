@@ -554,3 +554,14 @@ Route::middleware(['auth', 'admin.rbac'])->group(function () {
         Route::post('/{verification}/suspend', [\App\Http\Controllers\Admin\AdminVerificationController::class, 'suspend'])->name('suspend');
     });
 });
+
+// Encrypted Email Relay System (In-App Composer + Inbound/Status Webhooks)
+Route::post('/listings/{listing}/email-relay', [\App\Http\Controllers\EmailRelayController::class, 'send'])
+    ->middleware('throttle:15,1')
+    ->name('listings.email-relay.send');
+
+Route::post('/webhooks/email-relay/inbound/{provider?}', [\App\Http\Controllers\InboundEmailController::class, 'receive'])
+    ->name('webhooks.email-relay.inbound');
+
+Route::post('/webhooks/email-relay/status/{provider?}', [\App\Http\Controllers\EmailRelayWebhookController::class, 'handle'])
+    ->name('webhooks.email-relay.status');

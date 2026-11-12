@@ -185,6 +185,11 @@
                         'badge' => $failedNotificationsBadge > 0 ? $failedNotificationsBadge : null,
                     ],
                     [
+                        'key' => 'email_relay',
+                        'label' => 'Email Relay',
+                        'icon' => 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+                    ],
+                    [
                         'key' => 'staff',
                         'label' => 'Staff Management',
                         'icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
@@ -8405,6 +8410,187 @@
                     </tbody>
                 </table>
                 <div class="p-3">{{ $auditLogs->links() }}</div>
+            </div>
+        @endif
+
+        @if($tab === 'email_relay')
+            <div wire:poll.10s class="space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <h1 class="text-2xl font-black text-slate-900 tracking-tight">Encrypted Email Relay</h1>
+                        <p class="text-xs text-slate-500 mt-0.5">Real-time two-way email relay telemetry, delivery status tracking, and address controls (auto-refresh 10s).</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" wire:click="toggleGlobalEmailRelay" class="px-4 py-2 rounded-xl text-xs font-extrabold cursor-pointer transition {{ ($emailRelayEnabled ?? true) ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-rose-600 hover:bg-rose-500 text-white' }}">
+                            {{ ($emailRelayEnabled ?? true) ? '● Global Relay: ENABLED' : '○ Global Relay: DISABLED' }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Summary KPI Cards -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-3">
+                    <div class="bg-white rounded-2xl p-3.5 border border-slate-200">
+                        <div class="text-[10px] font-bold uppercase text-slate-400">Total Relay</div>
+                        <div class="text-xl font-black text-slate-900 mt-1">{{ number_format($emailRelayMetrics['total'] ?? 0) }}</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-3.5 border border-slate-200">
+                        <div class="text-[10px] font-bold uppercase text-slate-400">Inbound</div>
+                        <div class="text-xl font-black text-indigo-600 mt-1">{{ number_format($emailRelayMetrics['inbound'] ?? 0) }}</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-3.5 border border-slate-200">
+                        <div class="text-[10px] font-bold uppercase text-slate-400">Outbound</div>
+                        <div class="text-xl font-black text-sky-600 mt-1">{{ number_format($emailRelayMetrics['outbound'] ?? 0) }}</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-3.5 border border-slate-200">
+                        <div class="text-[10px] font-bold uppercase text-slate-400">Delivered</div>
+                        <div class="text-xl font-black text-emerald-600 mt-1">{{ number_format($emailRelayMetrics['delivered'] ?? 0) }}</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-3.5 border border-slate-200">
+                        <div class="text-[10px] font-bold uppercase text-slate-400">Failed</div>
+                        <div class="text-xl font-black text-rose-600 mt-1">{{ number_format($emailRelayMetrics['failed'] ?? 0) }}</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-3.5 border border-slate-200">
+                        <div class="text-[10px] font-bold uppercase text-slate-400">Bounced</div>
+                        <div class="text-xl font-black text-amber-600 mt-1">{{ number_format($emailRelayMetrics['bounced'] ?? 0) }}</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-3.5 border border-slate-200">
+                        <div class="text-[10px] font-bold uppercase text-slate-400">Active Relays</div>
+                        <div class="text-xl font-black text-slate-900 mt-1">{{ number_format($emailRelayMetrics['active_relays'] ?? 0) }}</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-3.5 border border-slate-200">
+                        <div class="text-[10px] font-bold uppercase text-slate-400">Spam / Blocked</div>
+                        <div class="text-xl font-black text-slate-700 mt-1">{{ number_format($emailRelayMetrics['blocked'] ?? 0) }}</div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="bg-white rounded-2xl p-4 border border-slate-200 grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    <input type="text" wire:model.live.debounce.300ms="relaySearch" placeholder="Search subject, relay address, listing..." class="{{ $input }}">
+                    <select wire:model.live="relayDirectionFilter" class="{{ $input }}">
+                        <option value="all">All Directions</option>
+                        <option value="inbound">Inbound</option>
+                        <option value="outbound">Outbound</option>
+                    </select>
+                    <select wire:model.live="relayStatusFilter" class="{{ $input }}">
+                        <option value="all">All Delivery Statuses</option>
+                        <option value="received">Received</option>
+                        <option value="queued">Queued</option>
+                        <option value="accepted">SMTP Accepted</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="bounced">Bounced</option>
+                        <option value="failed">Failed</option>
+                        <option value="blocked">Blocked / Spam</option>
+                    </select>
+                    <input type="text" wire:model.live.debounce.300ms="relayListingId" placeholder="Filter by Listing ID..." class="{{ $input }}">
+                </div>
+
+                <!-- Delivery Logs Table -->
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+                    <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
+                        <h3 class="text-sm font-black text-slate-900">Real-Time Email Delivery Logs</h3>
+                        <span class="text-[11px] font-semibold text-slate-400">Encrypted payloads · Latest 40 records</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-100 text-xs">
+                            <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
+                                <tr>
+                                    <th class="px-4 py-3 text-left">ID / Time</th>
+                                    <th class="px-4 py-3 text-left">Listing &amp; Relay</th>
+                                    <th class="px-4 py-3 text-left">Direction</th>
+                                    <th class="px-4 py-3 text-left">Subject</th>
+                                    <th class="px-4 py-3 text-left">Status</th>
+                                    <th class="px-4 py-3 text-left">Error</th>
+                                    <th class="px-4 py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                @forelse(($emailRelayMessages ?? collect()) as $rmsg)
+                                    <tr class="hover:bg-slate-50/70">
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            <div class="font-bold text-slate-900">#{{ $rmsg->id }}</div>
+                                            <div class="text-[10px] text-slate-400">{{ $rmsg->created_at?->diffForHumans() }}</div>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <div class="font-bold text-slate-900 truncate max-w-[200px]">{{ $rmsg->listing?->title ?: ('Listing #' . $rmsg->listing_id) }}</div>
+                                            <div class="text-[10px] font-mono text-slate-500">{{ $rmsg->contact?->masked_relay_email }}</div>
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase {{ $rmsg->direction === 'inbound' ? 'bg-indigo-50 text-indigo-700' : 'bg-sky-50 text-sky-700' }}">
+                                                {{ $rmsg->direction }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <div class="font-semibold text-slate-800 truncate max-w-[220px]">{{ $rmsg->subject }}</div>
+                                            <div class="text-[10px] text-slate-400">From: {{ $rmsg->sender_name ?: 'Sender' }} · {{ $rmsg->provider }}</div>
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase {{ match($rmsg->delivery_status) { 'delivered' => 'bg-emerald-50 text-emerald-700', 'accepted' => 'bg-teal-50 text-teal-700', 'failed', 'bounced', 'blocked' => 'bg-rose-50 text-rose-700', default => 'bg-amber-50 text-amber-700' } }}">
+                                                {{ $rmsg->delivery_status }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-[11px] text-rose-600 max-w-[220px] truncate" title="{{ $rmsg->error_message }}">
+                                            {{ $rmsg->error_message ?: '—' }}
+                                        </td>
+                                        <td class="px-4 py-3 text-right whitespace-nowrap">
+                                            @if(in_array($rmsg->delivery_status, ['failed', 'bounced'], true))
+                                                <button type="button" wire:click="retryRelayMessage({{ $rmsg->id }})" class="px-2.5 py-1 rounded-lg bg-[#F50057] hover:bg-[#D8004D] text-white text-[11px] font-bold cursor-pointer">
+                                                    Retry
+                                                </button>
+                                            @else
+                                                <span class="text-slate-400 text-[10px]">—</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="px-4 py-8 text-center text-slate-400 font-semibold">No relay messages recorded yet.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Listing Relay Addresses Table -->
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+                    <div class="px-5 py-3.5 border-b border-slate-100">
+                        <h3 class="text-sm font-black text-slate-900">Listing Relay Addresses</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-100 text-xs">
+                            <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
+                                <tr>
+                                    <th class="px-4 py-3 text-left">Listing</th>
+                                    <th class="px-4 py-3 text-left">Masked Relay Email</th>
+                                    <th class="px-4 py-3 text-left">Status</th>
+                                    <th class="px-4 py-3 text-right">Control</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                @forelse(($emailRelayContacts ?? collect()) as $rc)
+                                    <tr>
+                                        <td class="px-4 py-3 font-bold text-slate-900">{{ $rc->listing?->title ?: ('Listing #' . $rc->listing_id) }}</td>
+                                        <td class="px-4 py-3 font-mono text-slate-700">{{ $rc->masked_relay_email }}</td>
+                                        <td class="px-4 py-3">
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase {{ $rc->relay_status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
+                                                {{ $rc->relay_status }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-right">
+                                            <button type="button" wire:click="toggleListingRelayStatus({{ $rc->id }})" class="px-3 py-1 rounded-lg border text-[11px] font-bold cursor-pointer {{ $rc->relay_status === 'active' ? 'border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100' : 'border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100' }}">
+                                                {{ $rc->relay_status === 'active' ? 'Disable' : 'Enable' }}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-6 text-center text-slate-400">No relay addresses found.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         @endif
 

@@ -41,7 +41,10 @@ use App\Modules\Billing\Services\ReconciliationService;
 use App\Modules\Categories\Models\Category;
 use App\Modules\Categories\Models\CategoryAttribute;
 use App\Modules\Contact\Models\ContactMessage;
+use App\Modules\EmailRelay\Models\EmailRelayMessage;
+use App\Modules\EmailRelay\Services\EmailRelayService;
 use App\Modules\Listings\Models\Listing;
+use App\Modules\Listings\Models\ListingContact;
 use App\Modules\Listings\Models\ListingAnalytics;
 use App\Modules\Listings\Models\AnalyticsEvent;
 use App\Modules\Listings\Models\SearchTrend;
@@ -124,10 +127,16 @@ class AdminEnterpriseHub extends Component
         'settings'      => ['System Config', 'settings.manage', 'Administration'],
         'audit'         => ['Audit Logs', 'audit.view', 'Administration'],
         'notifications' => ['Notifications', 'settings.manage', 'Administration'],
+        'email_relay'   => ['Email Relay', 'settings.manage', 'Administration'],
     ];
 
     #[Url(as: 'tab')]
     public string $tab = 'dashboard';
+
+    public string $relaySearch = '';
+    public string $relayStatusFilter = 'all';
+    public string $relayDirectionFilter = 'all';
+    public string $relayListingId = '';
 
     // Dashboard Telemetry & Analytics Filters
     public string $dashboardLocationMode = 'countries'; // 'countries', 'states'
@@ -5024,6 +5033,133 @@ class AdminEnterpriseHub extends Component
         }
 
         return view('livewire.admin.admin-enterprise-hub', $data);
+    }
+
+    public function toggleGlobalEmailRelay(): void
+    {
+        $this->authorizePermission('settings.manage');
+
+        $service = app(EmailRelayService::class);
+        $next = !$service->isRelayGloballyEnabled();
+
+        SystemSetting::updateOrCreate(
+            ['key' => 'email_relay_enabled'],
+            ['value' => $next ? '1' : '0', 'group' => 'email_relay']
+        );
+
+        AdminAuditLog::create([
+            'admin_user_id' => Auth::id(),
+            'action' => 'email_relay.global_toggle',
+            'target_type' => SystemSetting::class,
+            'after_state' => ['enabled' => $next],
+            'ip_address' => request()->ip(),
+            'created_at' => now(),
+        ]);
+
+        session()->flash('admin_success', 'Global Encrypted Email Relay is now ' . ($next ? 'ENABLED' : 'DISABLED') . '.');
+    }
+
+    public function toggleListingRelayStatus(int $contactId): void
+    {
+        $this->authorizePermission('settings.manage');
+
+        $contact = ListingContact::findOrFail($contactId);
+        $nextStatus = $contact->relay_status === 'active' ? 'disabled' : 'active';
+        $contact->update([
+            'relay_status' => $nextStatus,
+            'allow_email_relay' => $nextStatus === 'active',
+        ]);
+
+        AdminAuditLog::create([
+            'admin_user_id' => Auth::id(),
+            'action' => 'email_relay.listing_toggle',
+            'target_type' => ListingContact::class,
+            'target_id' => $contact->id,
+            'after_state' => ['listing_id' => $contact->listing_id, 'relay_status' => $nextStatus],
+            'ip_address' => request()->ip(),
+            'created_at' => now(),
+        ]);
+
+        session()->flash('admin_success', "Relay address [{$contact->masked_relay_email}] is now {$nextStatus}.");
+    }
+
+    public function retryRelayMessage(int $messageId): void
+    {
+        $this->authorizePermission('settings.manage');
+
+        $message = EmailRelayMessage::findOrFail($messageId);
+        app(EmailRelayService::class)->retryMessage($message);
+
+        AdminAuditLog::create([
+            'admin_user_id' => Auth::id(),
+            'action' => 'email_relay.retry',
+            'target_type' => EmailRelayMessage::class,
+            'target_id' => $message->id,
+            'after_state' => ['listing_id' => $message->listing_id],
+            'ip_address' => request()->ip(),
+            'created_at' => now(),
+        ]);
+
+        session()->flash('admin_success', "Relay message #{$message->id} has been re-queued for delivery.");
+    }
+
+    protected function dataEmailRelay(): array
+    {
+        $service = app(EmailRelayService::class);
+
+        $metrics = [
+            'total' => EmailRelayMessage::count(),
+            'inbound' => EmailRelayMessage::where('direction', EmailRelayMessage::DIRECTION_INBOUND)->count(),
+            'outbound' => EmailRelayMessage::where('direction', EmailRelayMessage::DIRECTION_OUTBOUND)->count(),
+            'delivered' => EmailRelayMessage::where('delivery_status', EmailRelayMessage::STATUS_DELIVERED)->count(),
+            'accepted' => EmailRelayMessage::where('delivery_status', EmailRelayMessage::STATUS_ACCEPTED)->count(),
+            'failed' => EmailRelayMessage::where('delivery_status', EmailRelayMessage::STATUS_FAILED)->count(),
+            'bounced' => EmailRelayMessage::where('delivery_status', EmailRelayMessage::STATUS_BOUNCED)->count(),
+            'blocked' => EmailRelayMessage::where('delivery_status', EmailRelayMessage::STATUS_BLOCKED)->count(),
+            'active_relays' => ListingContact::where('allow_email_relay', true)->where('relay_status', 'active')->count(),
+        ];
+
+        $query = EmailRelayMessage::with(['listing:id,title,slug', 'contact:id,listing_id,masked_relay_email,relay_status'])
+            ->latest('id');
+
+        if ($this->relayStatusFilter !== 'all') {
+            $query->where('delivery_status', $this->relayStatusFilter);
+        }
+        if ($this->relayDirectionFilter !== 'all') {
+            $query->where('direction', $this->relayDirectionFilter);
+        }
+        if (trim($this->relayListingId) !== '' && is_numeric($this->relayListingId)) {
+            $query->where('listing_id', (int) $this->relayListingId);
+        }
+        if (trim($this->relaySearch) !== '') {
+            $term = '%' . trim($this->relaySearch) . '%';
+            $query->where(function ($q) use ($term): void {
+                $q->where('subject', 'like', $term)
+                    ->orWhere('message_id', 'like', $term)
+                    ->orWhere('sender_name', 'like', $term)
+                    ->orWhereHas('listing', fn ($lq) => $lq->where('title', 'like', $term))
+                    ->orWhereHas('contact', fn ($cq) => $cq->where('masked_relay_email', 'like', $term));
+            });
+        }
+
+        $contactsQuery = ListingContact::with('listing:id,title,slug')
+            ->whereNotNull('masked_relay_email')
+            ->latest('id');
+
+        if (trim($this->relaySearch) !== '') {
+            $term = '%' . trim($this->relaySearch) . '%';
+            $contactsQuery->where(function ($q) use ($term): void {
+                $q->where('masked_relay_email', 'like', $term)
+                    ->orWhereHas('listing', fn ($lq) => $lq->where('title', 'like', $term));
+            });
+        }
+
+        return [
+            'emailRelayEnabled' => $service->isRelayGloballyEnabled(),
+            'emailRelayMetrics' => $metrics,
+            'emailRelayMessages' => $query->take(40)->get(),
+            'emailRelayContacts' => $contactsQuery->take(25)->get(),
+        ];
     }
 
     protected function dataDashboard(): array
