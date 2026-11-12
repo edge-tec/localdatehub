@@ -146,6 +146,19 @@ class CampaignAutomationService
             'email_verified_at' => now(),
         ]);
 
+        try {
+            $user->preferences()->updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'notification_settings' => [
+                        'listing_approved' => false,
+                        'listing_submitted' => false,
+                    ],
+                ]
+            );
+        } catch (Throwable) {
+        }
+
         return ['user' => $user, 'created' => true];
     }
 

@@ -237,7 +237,12 @@ class EmailRelayService
         });
 
         if ($relayMessage->delivery_status === EmailRelayMessage::STATUS_QUEUED) {
-            ForwardRelayEmail::dispatch($relayMessage->id)->onQueue((string) config('email_relay.queue', 'default'));
+            try {
+                $this->sendRelayForward($relayMessage, false);
+            } catch (Throwable $e) {
+                Log::warning('Immediate in-app relay delivery failed, queued for retry: ' . $e->getMessage());
+                ForwardRelayEmail::dispatch($relayMessage->id)->onQueue((string) config('email_relay.queue', 'default'));
+            }
         }
 
         return $relayMessage;
@@ -343,7 +348,12 @@ class EmailRelayService
             });
 
             if ($message->delivery_status === EmailRelayMessage::STATUS_RECEIVED) {
-                ProcessRelayReply::dispatch($message->id, $isFromAdvertiser)->onQueue((string) config('email_relay.queue', 'default'));
+                try {
+                    $this->sendRelayForward($message, $isFromAdvertiser);
+                } catch (Throwable $e) {
+                    Log::warning('Immediate relay reply delivery failed, queued for retry: ' . $e->getMessage());
+                    ProcessRelayReply::dispatch($message->id, $isFromAdvertiser)->onQueue((string) config('email_relay.queue', 'default'));
+                }
             }
 
             return $message;
@@ -425,7 +435,12 @@ class EmailRelayService
         });
 
         if ($message->delivery_status === EmailRelayMessage::STATUS_RECEIVED) {
-            ProcessInboundRelayEmail::dispatch($message->id)->onQueue((string) config('email_relay.queue', 'default'));
+            try {
+                $this->sendRelayForward($message, false);
+            } catch (Throwable $e) {
+                Log::warning('Immediate inbound relay delivery failed, queued for retry: ' . $e->getMessage());
+                ProcessInboundRelayEmail::dispatch($message->id)->onQueue((string) config('email_relay.queue', 'default'));
+            }
         }
 
         return $message;
