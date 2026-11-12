@@ -44,27 +44,27 @@ class GeoLocationService
     ) {}
 
     /**
-     * Return the 5 supported marketplace ISO-2 country codes.
+     * Return the supported marketplace ISO-2 country codes.
      *
      * @return array<int, string>
      */
     public function supportedCountryCodes(): array
     {
-        return Country::FIVE_MARKETPLACES;
+        return ['US', 'GB', 'CA', 'AU', 'IE', 'NZ'];
     }
 
     /**
-     * Return the 5 supported marketplace URL slugs.
+     * Return the supported marketplace URL slugs.
      *
      * @return array<int, string>
      */
     public function supportedCountrySlugs(): array
     {
-        return Country::FIVE_MARKETPLACE_SLUGS;
+        return ['us', 'gb', 'ca', 'au', 'ie', 'nz'];
     }
 
     /**
-     * Check whether an ISO-2 country code is one of the 5 supported marketplaces.
+     * Check whether an ISO-2 country code is one of the supported marketplaces.
      */
     public function isSupportedCountry(?string $countryCode): bool
     {
@@ -72,7 +72,7 @@ class GeoLocationService
             return false;
         }
 
-        return in_array(strtoupper(trim($countryCode)), Country::FIVE_MARKETPLACES, true);
+        return in_array(strtoupper(trim($countryCode)), $this->supportedCountryCodes(), true);
     }
 
     /**
@@ -277,12 +277,12 @@ class GeoLocationService
             ];
         }
 
-        // 4. Visitor is outside the 5 supported countries -> show /choose-country
+        // 4. Visitor is outside the specific countries -> default directly to /us main dashboard (no country list)
         return [
-            'action' => 'choose_country',
-            'country_code' => null,
-            'country_slug' => null,
-            'redirect_url' => route('country.choose'),
+            'action' => 'marketplace',
+            'country_code' => 'US',
+            'country_slug' => 'us',
+            'redirect_url' => url('/us'),
             'source' => 'fallback',
             'detected_country_code' => $detectedCode,
         ];

@@ -95,11 +95,12 @@ class FiveCountryMarketplaceTest extends TestCase
         $ukListing = $this->createListingForCity($london, 'London West End Connection', 120.00);
         $caListing = $this->createListingForCity($toronto, 'Downtown Toronto Meetup', 150.00);
 
-        // /gb homepage
+        // /gb homepage uses main welcome dashboard design without country list
         $homeResp = $this->get('/gb');
         $homeResp->assertOk();
-        $homeResp->assertSee('United Kingdom Marketplace (GB)');
-        $homeResp->assertSee('GBP (£)');
+        $homeResp->assertSee('Privacy-First Adult Dating & Personals');
+        $homeResp->assertDontSee('Switch Country:');
+        $homeResp->assertSee('United Kingdom');
         $homeResp->assertSee('England');
         $homeResp->assertSee('Scotland');
         $homeResp->assertSee('Wales');
@@ -140,8 +141,9 @@ class FiveCountryMarketplaceTest extends TestCase
 
         $homeResp = $this->get('/ca');
         $homeResp->assertOk();
-        $homeResp->assertSee('Canada Marketplace (CA)');
-        $homeResp->assertSee('CAD (C$)');
+        $homeResp->assertSee('Privacy-First Adult Dating & Personals');
+        $homeResp->assertDontSee('Switch Country:');
+        $homeResp->assertSee('Canada');
         $homeResp->assertSee('Ontario');
         $homeResp->assertSee('Quebec');
         $homeResp->assertSee('British Columbia');
@@ -163,8 +165,9 @@ class FiveCountryMarketplaceTest extends TestCase
 
         $homeResp = $this->get('/au');
         $homeResp->assertOk();
-        $homeResp->assertSee('Australia Marketplace (AU)');
-        $homeResp->assertSee('AUD (A$)');
+        $homeResp->assertSee('Privacy-First Adult Dating & Personals');
+        $homeResp->assertDontSee('Switch Country:');
+        $homeResp->assertSee('Australia');
         $homeResp->assertSee('New South Wales');
         $homeResp->assertSee('Victoria');
         $homeResp->assertSee('Queensland');
@@ -191,8 +194,9 @@ class FiveCountryMarketplaceTest extends TestCase
         // /ie must show Republic of Ireland listing in EUR (€) and NEVER show Northern Ireland (Belfast) listing
         $ieResp = $this->get('/ie');
         $ieResp->assertOk();
-        $ieResp->assertSee('Ireland Marketplace (IE)');
-        $ieResp->assertSee('EUR (€)');
+        $ieResp->assertSee('Privacy-First Adult Dating & Personals');
+        $ieResp->assertDontSee('Switch Country:');
+        $ieResp->assertSee('Ireland');
         $ieResp->assertSee('County Cork');
         $ieResp->assertSee('County Dublin');
         $ieResp->assertSee($ieListing->title);
@@ -223,8 +227,9 @@ class FiveCountryMarketplaceTest extends TestCase
 
         $nzResp = $this->get('/nz');
         $nzResp->assertOk();
-        $nzResp->assertSee('New Zealand Marketplace (NZ)');
-        $nzResp->assertSee('NZD (NZ$)');
+        $nzResp->assertSee('Privacy-First Adult Dating & Personals');
+        $nzResp->assertDontSee('Switch Country:');
+        $nzResp->assertSee('New Zealand');
         $nzResp->assertSee('Auckland');
         $nzResp->assertSee('Wellington');
         $nzResp->assertSee('Canterbury');
@@ -236,25 +241,17 @@ class FiveCountryMarketplaceTest extends TestCase
 
     public function test_geoip_detection_redirects_supported_countries_and_sends_unsupported_to_choose_country(): void
     {
-        // Supported countries redirect to their respective marketplaces
+        // Supported countries redirect directly to their respective marketplaces (/us, /gb, /ca, /au, /ie, /nz)
+        $this->withHeader('CF-IPCountry', 'US')->get('/')->assertRedirect('/us');
         $this->withHeader('CF-IPCountry', 'GB')->get('/')->assertRedirect('/gb');
         $this->withHeader('CF-IPCountry', 'CA')->get('/')->assertRedirect('/ca');
         $this->withHeader('CF-IPCountry', 'AU')->get('/')->assertRedirect('/au');
         $this->withHeader('CF-IPCountry', 'IE')->get('/')->assertRedirect('/ie');
         $this->withHeader('CF-IPCountry', 'NZ')->get('/')->assertRedirect('/nz');
 
-        // Unsupported country (e.g. Germany DE) redirects to /choose-country
-        $this->withHeader('CF-IPCountry', 'DE')->get('/')->assertRedirect(route('country.choose'));
-
-        // /choose-country displays all 5 marketplaces
-        $chooseResp = $this->withHeader('CF-IPCountry', 'DE')->get('/choose-country');
-        $chooseResp->assertOk();
-        $chooseResp->assertSee('Choose Your Country Marketplace');
-        $chooseResp->assertSee('United Kingdom');
-        $chooseResp->assertSee('Canada');
-        $chooseResp->assertSee('Australia');
-        $chooseResp->assertSee('Ireland');
-        $chooseResp->assertSee('New Zealand');
+        // Any other country IP falls back directly to /us main dashboard without showing a country list
+        $this->withHeader('CF-IPCountry', 'DE')->get('/')->assertRedirect('/us');
+        $this->get('/us')->assertOk()->assertSee('Privacy-First Adult Dating & Personals');
     }
 
     public function test_search_engine_crawlers_are_never_force_redirected(): void

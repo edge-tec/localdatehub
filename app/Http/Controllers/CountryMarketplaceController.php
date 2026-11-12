@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SystemSetting;
+use App\Modules\Advertising\Models\AdCampaign;
+use App\Modules\Advertising\Services\AdDeliveryService;
 use App\Modules\Categories\Models\Category;
 use App\Modules\Locations\Models\Country;
 use App\Modules\Locations\Services\CountryMarketplaceService;
@@ -9,6 +12,7 @@ use App\Services\GeoLocationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class CountryMarketplaceController extends Controller
@@ -20,43 +24,32 @@ class CountryMarketplaceController extends Controller
 
     /**
      * Automatic IP-based country marketplace router.
-     * Redirects supported visitors to /gb, /ca, /au, /ie, or /nz;
-     * sends unsupported visitors to /choose-country.
+     * Redirects visitors directly to /us, /gb, /ca, /au, /ie, or /nz.
      */
     public function autoRoute(Request $request): RedirectResponse
     {
         $decision = $this->geoLocationService->resolveMarketplaceDecision($request);
+        $slug = $decision['country_slug'] ?: 'us';
 
-        if ($decision['action'] === 'marketplace' && ! empty($decision['country_slug'])) {
-            return redirect()->to('/' . $decision['country_slug']);
-        }
-
-        return redirect()->route('country.choose');
+        return redirect()->to('/' . $slug);
     }
 
     /**
-     * Display the Choose Country selector for visitors outside the 5 supported countries
-     * or visitors who want to switch marketplaces.
+     * Legacy /choose-country route redirects directly to the visitor's detected country dashboard (no country list).
      */
-    public function chooseCountry(Request $request): View
+    public function chooseCountry(Request $request): RedirectResponse
     {
-        $countries = $this->marketplaceService->getSupportedCountries(true);
         $geo = $this->geoLocationService->detectLocation($request);
-        $selectedCode = $this->geoLocationService->getManualCountry($request);
+        $code = strtoupper((string) ($geo['country_code'] ?? 'US'));
+        $slug = in_array($code, ['US', 'GB', 'CA', 'AU', 'IE', 'NZ'], true)
+            ? strtolower($code)
+            : 'us';
 
-        return view('country.choose', [
-            'countries' => $countries,
-            'detectedGeo' => $geo,
-            'selectedCountryCode' => $selectedCode,
-            'seoTitle' => 'Choose Your Country Marketplace | LocalDateHub (UK, Canada, Australia, Ireland, New Zealand)',
-            'seoDescription' => 'Select your LocalDateHub country marketplace: United Kingdom, Canada, Australia, Ireland, or New Zealand.',
-            'canonicalUrl' => route('country.choose'),
-            'hreflangLinks' => $this->buildHreflangLinks(),
-        ]);
+        return redirect()->to('/' . $slug);
     }
 
     /**
-     * Persist manual country selection in session & cookie and redirect to that country marketplace.
+     * Persist country selection in session & cookie and redirect to that country marketplace.
      */
     public function switchCountry(Request $request, string $countrySlug): RedirectResponse
     {
@@ -74,7 +67,9 @@ class CountryMarketplaceController extends Controller
     }
 
     /**
-     * Independent Country Marketplace Homepage (/gb, /ca, /au, /ie, /nz).
+     * Country Marketplace Landing Page (/us, /gb, /ca, /au, /ie, /nz).
+     * Uses the exact main LocalDateHub landing page design (resources/views/welcome.blade.php)
+     * scoped to the active country's states/regions, cities, listings, and currency.
      */
     public function home(Request $request, string $countrySlug): Response
     {
@@ -83,38 +78,89 @@ class CountryMarketplaceController extends Controller
             abort(404, 'Country marketplace not found or currently disabled.');
         }
 
-        if ($request->boolean('remember') || $request->has('switch')) {
-            $this->geoLocationService->setManualCountry($country->code);
-        }
-
-        $supportedCountries = $this->marketplaceService->getSupportedCountries(true);
-        $areas = $this->marketplaceService->getCountryAreas($country);
-        $popularCities = $this->marketplaceService->getPopularCities($country, 16);
-        $categories = $this->marketplaceService->getCountryCategories($country);
-        $featuredListings = $this->marketplaceService->getFeaturedListings($country, 6);
-        $latestListings = $this->marketplaceService->getLatestListings($country, 12);
-        $stats = $this->marketplaceService->getCountryStatistics($country);
+        $this->geoLocationService->setManualCountry($country->code);
         $slug = strtolower($country->slug ?: $country->code);
 
-        $response = response()->view('country.home', [
+        $allStates = $this->marketplaceService->getCountryAreas($country);
+        $popularStates = $allStates->take(10);
+        $popularCities = $this->marketplaceService->getPopularCities($country, 16);
+        $categories = $this->marketplaceService->getCountryCategories($country);
+        $featuredListings = $this->marketplaceService->getFeaturedListings($country, 4);
+        $latestListings = $this->marketplaceService->getLatestListings($country, 12);
+        $stats = $this->marketplaceService->getCountryStatistics($country);
+
+        $topCategoriesSlugs = [
+            'men-seeking-women' => ['title' => 'Men Seeking Women', 'subtitle' => '(M4W)', 'icon' => 'couple-mw'],
+            'men-seeking-men' => ['title' => 'Men Seeking Men', 'subtitle' => '(M4M)', 'icon' => 'users-male'],
+            'men-seeking-couples' => ['title' => 'Men Seeking Couples', 'subtitle' => '', 'icon' => 'users-group'],
+            'women-seeking-men' => ['title' => 'Women Seeking Men', 'subtitle' => '(W4M)', 'icon' => 'couple-wm'],
+            'women-seeking-women' => ['title' => 'Women Seeking Women', 'subtitle' => '(W4W)', 'icon' => 'users-female'],
+            'women-seeking-couples' => ['title' => 'Women Seeking Couples', 'subtitle' => '', 'icon' => 'users-group'],
+            'couples-seeking-men' => ['title' => 'Couples Seeking Men', 'subtitle' => '', 'icon' => 'couple-man'],
+            'couples-seeking-women' => ['title' => 'Couples Seeking Women', 'subtitle' => '', 'icon' => 'couple-woman'],
+            'couples-seeking-couples' => ['title' => 'Couples Seeking Couples', 'subtitle' => '', 'icon' => 'couples'],
+        ];
+
+        $homepageCategories = collect();
+        foreach ($topCategoriesSlugs as $catSlug => $meta) {
+            $cat = Category::where('slug', $catSlug)->first();
+            if ($cat) {
+                $homepageCategories->push([
+                    'id' => $cat->id,
+                    'name' => $cat->name,
+                    'title' => $meta['title'],
+                    'subtitle' => $meta['subtitle'],
+                    'slug' => $cat->slug,
+                    'icon' => $meta['icon'],
+                    'url' => $slug === 'us'
+                        ? route('categories.show', $cat->slug)
+                        : route('country.search', ['countrySlug' => $slug, 'category' => $cat->slug]),
+                ]);
+            }
+        }
+
+        $delivery = app(AdDeliveryService::class);
+        $latestListingsFeed = $delivery->injectIntoListings($latestListings, AdCampaign::SLOT_HOMEPAGE_FEED);
+        $homepageFeaturedAds = $delivery->getAdsForSlot(AdCampaign::SLOT_HOMEPAGE_FEATURED, [], 1);
+
+        $brand = $this->resolveBrandBannerSettings();
+
+        $seoTitle = $country->seo_title ?: "{$country->name} Marketplace ({$country->code}) — {$country->currency_code} ({$country->currency_symbol}) | LocalDateHub";
+        $seoDescription = $country->seo_description ?: "Browse verified local classifieds, dating personals, and community listings across {$country->name} ({$country->code}) in {$country->currency_code} ({$country->currency_symbol}).";
+        $canonicalUrl = url('/' . $slug);
+
+        $seo = (object) [
+            'title' => $seoTitle,
+            'description' => $seoDescription,
+            'canonicalUrl' => $canonicalUrl,
+            'robots' => 'index, follow',
+            'ogType' => 'website',
+            'ogImage' => $brand['heroImageUrl'],
+            'structuredData' => null,
+        ];
+
+        $response = response()->view('welcome', array_merge($brand, [
+            'activeCountry' => $country,
             'country' => $country,
             'countrySlug' => $slug,
-            'supportedCountries' => $supportedCountries,
-            'areas' => $areas,
-            'popularCities' => $popularCities,
             'categories' => $categories,
+            'homepageCategories' => $homepageCategories,
             'featuredListings' => $featuredListings,
+            'homepageFeaturedAds' => $homepageFeaturedAds,
             'latestListings' => $latestListings,
+            'latestListingsFeed' => $latestListingsFeed,
+            'popularStates' => $popularStates,
+            'allStates' => $allStates,
+            'popularCities' => $popularCities,
             'stats' => $stats,
-            'seoTitle' => $country->seo_title ?: "{$country->name} Classifieds & Local Dating Marketplace | LocalDateHub {$country->code}",
-            'seoDescription' => $country->seo_description ?: "Browse verified local classifieds, dating personals, and community listings across {$country->name} in {$country->currency_code} ({$country->currency_symbol}).",
-            'canonicalUrl' => url('/' . $slug),
+            'seo' => $seo,
+            'seoTitle' => $seoTitle,
+            'seoDescription' => $seoDescription,
+            'canonicalUrl' => $canonicalUrl,
             'hreflangLinks' => $this->buildHreflangLinks(),
-        ]);
+        ]));
 
-        if ($request->boolean('remember') || $request->has('switch')) {
-            $response->withCookie(cookie(GeoLocationService::COOKIE_COUNTRY_KEY, $country->code, 60 * 24 * 365, '/'));
-        }
+        $response->withCookie(cookie(GeoLocationService::COOKIE_COUNTRY_KEY, $country->code, 60 * 24 * 365, '/'));
 
         return $response;
     }
@@ -132,7 +178,8 @@ class CountryMarketplaceController extends Controller
         $filters = [
             'q' => $request->query('q'),
             'area_id' => $request->query('area_id'),
-            'area' => $request->query('area'),
+            'area' => $request->query('area') ?? $request->query('state'),
+            'state' => $request->query('state'),
             'city_id' => $request->query('city_id'),
             'city' => $request->query('city'),
             'category_id' => $request->query('category_id'),
@@ -160,6 +207,7 @@ class CountryMarketplaceController extends Controller
             : $this->marketplaceService->getPopularCities($country, 24);
 
         return view('country.search', [
+            'activeCountry' => $country,
             'country' => $country,
             'countrySlug' => $slug,
             'supportedCountries' => $supportedCountries,
@@ -201,7 +249,6 @@ class CountryMarketplaceController extends Controller
             'sort' => $request->query('sort', 'latest'),
         ];
 
-        // If this is an Irish province (e.g. Leinster) that has child counties, include child county listings too
         if ($area->children->isNotEmpty()) {
             $areaIds = $area->children->pluck('id')->push($area->id)->all();
             $listings = $this->marketplaceService->publicListingsQuery($country)
@@ -222,6 +269,7 @@ class CountryMarketplaceController extends Controller
         $slug = strtolower($country->slug ?: $country->code);
 
         return view('country.area', [
+            'activeCountry' => $country,
             'country' => $country,
             'countrySlug' => $slug,
             'supportedCountries' => $supportedCountries,
@@ -230,8 +278,8 @@ class CountryMarketplaceController extends Controller
             'categories' => $categories,
             'listings' => $listings,
             'filters' => $filters,
-            'seoTitle' => $area->seo_title ?: "{$area->name}, {$country->name} Classifieds & Local Dating | LocalDateHub",
-            'seoDescription' => $area->seo_description ?: "Browse verified local classifieds and dating listings in {$area->name}, {$country->name}. Explore cities and local ads in {$country->currency_code} ({$country->currency_symbol}).",
+            'seoTitle' => "{$area->name}, {$country->name} Classifieds & Local Dating | LocalDateHub",
+            'seoDescription' => "Browse verified local classifieds and dating listings in {$area->name}, {$country->name}. Explore cities and local ads in {$country->currency_code} ({$country->currency_symbol}).",
             'canonicalUrl' => url("/{$slug}/{$area->slug}"),
             'hreflangLinks' => $this->buildHreflangLinks(),
         ]);
@@ -295,6 +343,7 @@ class CountryMarketplaceController extends Controller
             : "/{$slug}/{$area->slug}/{$city->slug}";
 
         return view('country.city', [
+            'activeCountry' => $country,
             'country' => $country,
             'countrySlug' => $slug,
             'supportedCountries' => $supportedCountries,
@@ -383,20 +432,104 @@ class CountryMarketplaceController extends Controller
     }
 
     /**
-     * Build hreflang alternate links for the 5 supported English-speaking country marketplaces.
+     * Resolve admin-configured hero & sidebar promotional banner settings identically to HomeController.
+     */
+    private function resolveBrandBannerSettings(): array
+    {
+        $heroImageUrl = asset('images/hero-model.jpg');
+        $heroOfferLink = null;
+        $heroOfferNewTab = true;
+        $heroOfferAlt = 'LocalDateHub Dating Lifestyle';
+
+        $sidebarPromoImageUrl = asset('images/promo-banner.jpg');
+        $sidebarPromoIsCustom = false;
+        $sidebarPromoOfferLink = null;
+        $sidebarPromoOfferNewTab = true;
+        $sidebarPromoOfferAlt = 'Find Your Perfect Match';
+
+        try {
+            if (Schema::hasTable('system_settings')) {
+                $brandSettings = SystemSetting::whereIn('key', [
+                    'hero_image_url',
+                    'hero_offer_link',
+                    'hero_offer_new_tab',
+                    'hero_offer_alt',
+                    'sidebar_promo_image_url',
+                    'sidebar_promo_offer_link',
+                    'sidebar_promo_offer_new_tab',
+                    'sidebar_promo_offer_alt',
+                ])->pluck('value', 'key');
+
+                $rawHeroImage = trim((string) ($brandSettings['hero_image_url'] ?? ''));
+                if ($rawHeroImage !== '') {
+                    $heroImageUrl = (str_starts_with($rawHeroImage, 'http://') || str_starts_with($rawHeroImage, 'https://'))
+                        ? $rawHeroImage
+                        : asset(ltrim($rawHeroImage, '/'));
+                }
+
+                $rawHeroOffer = trim((string) ($brandSettings['hero_offer_link'] ?? ''));
+                if ($rawHeroOffer !== '') {
+                    $heroOfferLink = $rawHeroOffer;
+                }
+                if (isset($brandSettings['hero_offer_new_tab'])) {
+                    $heroOfferNewTab = filter_var($brandSettings['hero_offer_new_tab'], FILTER_VALIDATE_BOOLEAN);
+                }
+                $rawHeroAlt = trim((string) ($brandSettings['hero_offer_alt'] ?? ''));
+                if ($rawHeroAlt !== '') {
+                    $heroOfferAlt = $rawHeroAlt;
+                }
+
+                $rawSidebarImage = trim((string) ($brandSettings['sidebar_promo_image_url'] ?? ''));
+                if ($rawSidebarImage !== '') {
+                    $sidebarPromoImageUrl = (str_starts_with($rawSidebarImage, 'http://') || str_starts_with($rawSidebarImage, 'https://'))
+                        ? $rawSidebarImage
+                        : asset(ltrim($rawSidebarImage, '/'));
+                    $sidebarPromoIsCustom = ltrim($rawSidebarImage, '/') !== 'images/promo-banner.jpg';
+                }
+
+                $rawSidebarOffer = trim((string) ($brandSettings['sidebar_promo_offer_link'] ?? ''));
+                if ($rawSidebarOffer !== '') {
+                    $sidebarPromoOfferLink = $rawSidebarOffer;
+                }
+                if (isset($brandSettings['sidebar_promo_offer_new_tab'])) {
+                    $sidebarPromoOfferNewTab = filter_var($brandSettings['sidebar_promo_offer_new_tab'], FILTER_VALIDATE_BOOLEAN);
+                }
+                $rawSidebarAlt = trim((string) ($brandSettings['sidebar_promo_offer_alt'] ?? ''));
+                if ($rawSidebarAlt !== '') {
+                    $sidebarPromoOfferAlt = $rawSidebarAlt;
+                }
+            }
+        } catch (\Throwable) {
+        }
+
+        return [
+            'heroImageUrl' => $heroImageUrl,
+            'heroOfferLink' => $heroOfferLink,
+            'heroOfferNewTab' => $heroOfferNewTab,
+            'heroOfferAlt' => $heroOfferAlt,
+            'sidebarPromoImageUrl' => $sidebarPromoImageUrl,
+            'sidebarPromoIsCustom' => $sidebarPromoIsCustom,
+            'sidebarPromoOfferLink' => $sidebarPromoOfferLink,
+            'sidebarPromoOfferNewTab' => $sidebarPromoOfferNewTab,
+            'sidebarPromoOfferAlt' => $sidebarPromoOfferAlt,
+        ];
+    }
+
+    /**
+     * Build hreflang alternate links for the supported country marketplaces.
      *
      * @return array<int, array{hreflang: string, href: string}>
      */
     private function buildHreflangLinks(string $suffix = ''): array
     {
         return [
+            ['hreflang' => 'en-US', 'href' => url('/us' . $suffix)],
             ['hreflang' => 'en-GB', 'href' => url('/gb' . $suffix)],
             ['hreflang' => 'en-CA', 'href' => url('/ca' . $suffix)],
             ['hreflang' => 'en-AU', 'href' => url('/au' . $suffix)],
             ['hreflang' => 'en-IE', 'href' => url('/ie' . $suffix)],
             ['hreflang' => 'en-NZ', 'href' => url('/nz' . $suffix)],
-            ['hreflang' => 'x-default', 'href' => route('country.choose')],
+            ['hreflang' => 'x-default', 'href' => url('/us' . $suffix)],
         ];
     }
 }
-

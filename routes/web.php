@@ -576,7 +576,7 @@ Route::get('/marketplace/auto', [\App\Http\Controllers\CountryMarketplaceControl
     ->name('country.auto');
 
 Route::match(['get', 'post'], '/switch-country/{countrySlug}', [\App\Http\Controllers\CountryMarketplaceController::class, 'switchCountry'])
-    ->where('countrySlug', '^(?i)(gb|ca|au|ie|nz)$')
+    ->where('countrySlug', '^(?i)(us|gb|ca|au|ie|nz)$')
     ->name('country.switch');
 
 // Five-Country Cascading Location & GeoIP JSON APIs
@@ -598,9 +598,9 @@ Route::middleware(['auth', 'admin.rbac'])->prefix('admin/countries')->name('admi
     Route::post('/{countryCode}/cities', [\App\Http\Controllers\Admin\AdminCountryMarketplaceController::class, 'storeCity'])->name('cities.store');
 });
 
-// Independent Country Marketplaces: /gb, /ca, /au, /ie, /nz
+// Independent Country Marketplaces: /us, /gb, /ca, /au, /ie, /nz
 Route::prefix('{countrySlug}')
-    ->where(['countrySlug' => '^(?i)(gb|ca|au|ie|nz)$'])
+    ->where(['countrySlug' => '^(?i)(us|gb|ca|au|ie|nz)$'])
     ->group(function () {
         Route::get('/', [\App\Http\Controllers\CountryMarketplaceController::class, 'home'])
             ->name('country.home');

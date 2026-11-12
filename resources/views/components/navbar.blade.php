@@ -25,18 +25,47 @@
     $navCategories = collect();
     $navStates = collect();
     $navCities = collect();
+    $navCountry = null;
+    $navCountrySlug = strtolower((string) (request()->route('countrySlug') ?: session('marketplace_country_code', '')));
+    $navIsCustomCountry = in_array($navCountrySlug, ['gb', 'ca', 'au', 'ie', 'nz'], true);
+
+    try {
+        if ($navCountrySlug !== '') {
+            $navCountry = \App\Modules\Locations\Models\Country::where('code', strtoupper($navCountrySlug))
+                ->orWhere('slug', $navCountrySlug)
+                ->first();
+        } else {
+            $navCountry = \App\Modules\Locations\Models\Country::where('code', 'US')->first();
+        }
+    } catch (\Throwable $e) {
+    }
+
     try {
         $navCategories = Category::where('is_active', true)->orderBy('display_order')->orderBy('name')->get();
     } catch (\Throwable $e) {
     }
     try {
-        $navStates = State::orderBy('name')->get();
+        $stateQ = State::query()->where('is_active', true);
+        if ($navCountry) {
+            $stateQ->where('country_id', $navCountry->id);
+        }
+        $navStates = $stateQ->orderBy('name')->get();
     } catch (\Throwable $e) {
     }
     try {
-        $navCities = City::where('is_popular', true)->with('state')->orderBy('population', 'desc')->orderBy('name')->take(24)->get();
+        $cityQ = City::query()->where('is_active', true)->with('state');
+        if ($navCountry) {
+            $stateIds = $navStates->pluck('id')->all();
+            $cityQ->where(function ($q) use ($navCountry, $stateIds) {
+                $q->where('country_id', $navCountry->id);
+                if (!empty($stateIds)) {
+                    $q->orWhereIn('state_id', $stateIds);
+                }
+            });
+        }
+        $navCities = (clone $cityQ)->where('is_popular', true)->orderBy('population', 'desc')->orderBy('name')->take(24)->get();
         if ($navCities->isEmpty()) {
-            $navCities = City::with('state')->orderBy('population', 'desc')->orderBy('name')->take(24)->get();
+            $navCities = $cityQ->orderBy('population', 'desc')->orderBy('name')->take(24)->get();
         }
     } catch (\Throwable $e) {
     }
@@ -658,8 +687,13 @@
 
                         <div class="max-h-64 overflow-y-auto grid grid-cols-2 gap-1 pr-1">
                             @foreach($navStates as $st)
+                                @php
+                                    $navStateHref = $navIsCustomCountry
+                                        ? route('country.area', ['countrySlug' => $navCountrySlug, 'areaSlug' => $st->slug ?: strtolower($st->code)])
+                                        : route('locations.state', strtolower($st->code));
+                                @endphp
                                 <a
-                                    href="{{ route('locations.state', strtolower($st->code)) }}"
+                                    href="{{ $navStateHref }}"
                                     x-show="stateQuery.trim() === '' || '{{ strtolower($st->name . ' ' . $st->code) }}'.includes(stateQuery.toLowerCase().trim())"
                                     class="px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-700 hover:text-[#F50057] hover:bg-rose-50/80 transition truncate flex items-center justify-between gap-1"
                                 >
@@ -669,8 +703,8 @@
                             @endforeach
                         </div>
                         <div class="border-t border-slate-100 mt-2.5 pt-2 flex items-center justify-between">
-                            <span class="text-[10px] font-semibold text-slate-400">{{ $navStates->count() }} US States</span>
-                            <a href="{{ route('locations.index') }}" class="text-xs font-extrabold text-[#F50057] hover:underline">All Locations &rarr;</a>
+                            <span class="text-[10px] font-semibold text-slate-400">{{ $navStates->count() }} {{ $navCountry?->code && $navCountry->code !== 'US' ? $navCountry->name . ' Areas' : 'US States' }}</span>
+                            <a href="{{ $navIsCustomCountry ? route('country.search', ['countrySlug' => $navCountrySlug]) : route('locations.index') }}" class="text-xs font-extrabold text-[#F50057] hover:underline">All Locations &rarr;</a>
                         </div>
                     </div>
                 </div>
@@ -719,8 +753,13 @@
 
                         <div class="max-h-64 overflow-y-auto space-y-0.5 pr-1">
                             @foreach($navCities as $ct)
+                                @php
+                                    $navCityHref = $navIsCustomCountry
+                                        ? route('country.city', ['countrySlug' => $navCountrySlug, 'areaSlug' => $ct->state?->slug ?: strtolower($ct->state?->code ?? 'area'), 'citySlug' => $ct->slug])
+                                        : route('locations.city', ['stateCode' => strtolower($ct->state?->code ?? 'ca'), 'citySlug' => $ct->slug]);
+                                @endphp
                                 <a
-                                    href="{{ route('locations.city', ['stateCode' => strtolower($ct->state?->code ?? 'ca'), 'citySlug' => $ct->slug]) }}"
+                                    href="{{ $navCityHref }}"
                                     x-show="cityQuery.trim() === '' || '{{ strtolower($ct->name . ' ' . ($ct->state?->code ?? '') . ' ' . ($ct->state?->name ?? '')) }}'.includes(cityQuery.toLowerCase().trim())"
                                     class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-700 hover:text-[#F50057] hover:bg-rose-50/80 transition"
                                 >
@@ -730,7 +769,7 @@
                             @endforeach
                         </div>
                         <div class="border-t border-slate-100 mt-2.5 pt-2">
-                            <a href="{{ route('locations.index') }}" class="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold text-[#F50057] bg-rose-50/70 hover:bg-rose-100/70 transition">
+                            <a href="{{ $navIsCustomCountry ? route('country.search', ['countrySlug' => $navCountrySlug]) : route('locations.index') }}" class="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold text-[#F50057] bg-rose-50/70 hover:bg-rose-100/70 transition">
                                 <span>Explore All Cities &rarr;</span>
                             </a>
                         </div>
@@ -761,59 +800,6 @@
                     </svg>
                     <span>Contact</span>
                 </a>
-
-                <!-- Country Switcher Dropdown -->
-                <div class="relative" @click.away="if(activeDropdown === 'countries') activeDropdown = null" data-navbar-country-switcher>
-                    <button
-                        type="button"
-                        @click="toggle('countries')"
-                        :aria-expanded="activeDropdown === 'countries'"
-                        aria-haspopup="true"
-                        class="ldh-nav-item {{ request()->routeIs('country.*') ? 'is-active-soft' : '' }}"
-                    >
-                        <span>🌐</span>
-                        <span>Countries</span>
-                        <svg class="ldh-chevron" :class="{ 'rotate-180': activeDropdown === 'countries' }" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/>
-                        </svg>
-                    </button>
-
-                    <div
-                        x-show="activeDropdown === 'countries'"
-                        x-cloak
-                        style="box-shadow: var(--ldh-dropdown-shadow)"
-                        class="absolute right-0 mt-2.5 w-64 rounded-2xl bg-white p-2 z-50"
-                    >
-                        <div class="px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400">5 Country Marketplaces</div>
-                        <div class="space-y-0.5 text-xs font-semibold">
-                            <a href="{{ url('/switch-country/gb') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 hover:text-[#F50057] hover:bg-rose-50/80 transition">
-                                <span>🇬🇧 United Kingdom</span>
-                                <span class="text-[11px] font-bold text-slate-400">GBP (£)</span>
-                            </a>
-                            <a href="{{ url('/switch-country/ca') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 hover:text-[#F50057] hover:bg-rose-50/80 transition">
-                                <span>🇨🇦 Canada</span>
-                                <span class="text-[11px] font-bold text-slate-400">CAD (C$)</span>
-                            </a>
-                            <a href="{{ url('/switch-country/au') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 hover:text-[#F50057] hover:bg-rose-50/80 transition">
-                                <span>🇦🇺 Australia</span>
-                                <span class="text-[11px] font-bold text-slate-400">AUD (A$)</span>
-                            </a>
-                            <a href="{{ url('/switch-country/ie') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 hover:text-[#F50057] hover:bg-rose-50/80 transition">
-                                <span>🇮🇪 Ireland</span>
-                                <span class="text-[11px] font-bold text-slate-400">EUR (€)</span>
-                            </a>
-                            <a href="{{ url('/switch-country/nz') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 hover:text-[#F50057] hover:bg-rose-50/80 transition">
-                                <span>🇳🇿 New Zealand</span>
-                                <span class="text-[11px] font-bold text-slate-400">NZD (NZ$)</span>
-                            </a>
-                        </div>
-                        <div class="border-t border-slate-100 mt-1.5 pt-1.5">
-                            <a href="{{ url('/choose-country') }}" class="flex items-center justify-center px-3 py-1.5 rounded-xl text-xs font-extrabold text-[#F50057] bg-rose-50/70 hover:bg-rose-100/70 transition">
-                                Choose Country Marketplace &rarr;
-                            </a>
-                        </div>
-                    </div>
-                </div>
             </nav>
 
             <!-- RIGHT SECTION: DESKTOP ACTION CONTROLS -->

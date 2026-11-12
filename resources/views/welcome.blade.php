@@ -101,7 +101,8 @@
 
                                 this.loadingCities = true;
                                 try {
-                                    const res = await fetch(`/api/locations/states/${stateCode.toLowerCase()}/cities`);
+                                    const countryParam = '{{ isset($activeCountry) ? strtolower($activeCountry->code) : "us" }}';
+                                    const res = await fetch(`/api/locations/states/${stateCode.toLowerCase()}/cities?country=${countryParam}`);
                                     const json = await res.json();
                                     if (json.success && json.data && json.data.cities) {
                                         this.cities = json.data.cities;
@@ -197,7 +198,14 @@
                         }"
                         class="mt-6 sm:mt-8 bg-white rounded-2xl p-2 sm:p-2.5 shadow-2xl border border-white/20 relative z-30"
                     >
-                        <form action="{{ route('search.index') }}" method="GET" @submit="validateCity()" class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+                        @php
+                            $isCustomCountry = isset($activeCountry) && strtolower($activeCountry->code) !== 'us';
+                            $activeSlug = isset($activeCountry) ? strtolower($activeCountry->slug ?: $activeCountry->code) : 'us';
+                            $searchFormAction = $isCustomCountry
+                                ? route('country.search', ['countrySlug' => $activeSlug])
+                                : route('search.index');
+                        @endphp
+                        <form action="{{ $searchFormAction }}" method="GET" @submit="validateCity()" class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
                             
                             <!-- Select Category -->
                             <div class="sm:col-span-4 relative flex items-center px-3 py-1.5 sm:border-r border-slate-200">
@@ -619,7 +627,7 @@
                                 </span>
                                 <h2 class="text-xl sm:text-2xl font-black text-[#171923]">Featured Listings</h2>
                             </div>
-                            <a href="{{ route('search.index', ['featured' => 1]) }}" class="text-xs font-bold text-[#F20B65] hover:text-[#d90858] flex items-center gap-1 transition">
+                            <a href="{{ $isCustomCountry ? route('country.search', ['countrySlug' => $activeSlug, 'sort' => 'featured']) : route('search.index', ['featured' => 1]) }}" class="text-xs font-bold text-[#F20B65] hover:text-[#d90858] flex items-center gap-1 transition">
                                 <span>View All Featured</span>
                                 <span>→</span>
                             </a>
@@ -666,8 +674,8 @@
                                 </span>
                                 <h2 class="text-xl sm:text-2xl font-black text-[#171923]">Popular Locations</h2>
                             </div>
-                            <a href="{{ route('locations.index') }}" class="text-xs font-bold text-[#F20B65] hover:text-[#d90858] flex items-center gap-1 transition">
-                                <span>View All States</span>
+                            <a href="{{ $isCustomCountry ? route('country.search', ['countrySlug' => $activeSlug]) : route('locations.index') }}" class="text-xs font-bold text-[#F20B65] hover:text-[#d90858] flex items-center gap-1 transition">
+                                <span>View All {{ isset($activeCountry) ? $activeCountry->division_label . 's' : 'States' }}</span>
                                 <span>→</span>
                             </a>
                         </div>
@@ -675,7 +683,12 @@
                         <!-- Responsive State Grid with Full Names & High Contrast -->
                         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                             @foreach($popularStates as $st)
-                                <a href="{{ route('locations.state', strtolower($st->code)) }}" class="bg-white rounded-2xl border-2 border-slate-200/90 hover:border-[#F20B65] p-3 shadow-2xs hover:shadow-md transition-all group flex items-center gap-3">
+                                @php
+                                    $stateHref = $isCustomCountry
+                                        ? route('country.area', ['countrySlug' => $activeSlug, 'areaSlug' => $st->slug ?: strtolower($st->code)])
+                                        : route('locations.state', strtolower($st->code));
+                                @endphp
+                                <a href="{{ $stateHref }}" class="bg-white rounded-2xl border-2 border-slate-200/90 hover:border-[#F20B65] p-3 shadow-2xs hover:shadow-md transition-all group flex items-center gap-3">
                                     <span class="w-10 h-10 rounded-xl bg-pink-50 text-[#F20B65] font-black text-xs flex items-center justify-center shrink-0 border border-pink-100 group-hover:bg-[#F20B65] group-hover:text-white transition shadow-2xs">
                                         {{ $st->code }}
                                     </span>
@@ -685,7 +698,7 @@
                                         </div>
                                         <div class="text-[10px] text-slate-400 font-bold mt-0.5 flex items-center gap-1">
                                             <svg class="w-3 h-3 text-[#F20B65]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
-                                            <span>United States</span>
+                                            <span>{{ $activeCountry->name ?? 'United States' }}</span>
                                         </div>
                                     </div>
                                 </a>
@@ -785,7 +798,7 @@
                     <h2 class="text-2xl font-black text-[#171923]">Latest Local Listings</h2>
                     <p class="text-xs text-[#737784] mt-1">Recently posted personal advertisements in your area</p>
                 </div>
-                <a href="{{ route('search.index') }}" class="text-xs font-bold text-[#F20B65] hover:text-[#d90858] flex items-center gap-1 transition">
+                <a href="{{ $isCustomCountry ? route('country.search', ['countrySlug' => $activeSlug]) : route('search.index') }}" class="text-xs font-bold text-[#F20B65] hover:text-[#d90858] flex items-center gap-1 transition">
                     <span>Browse All Listings</span>
                     <span>→</span>
                 </a>
@@ -862,10 +875,10 @@
                 Ready to Discover Local Connections?
             </h2>
             <p class="text-sm text-slate-600 mt-3 max-w-lg mx-auto">
-                Join thousands of verified adults across the United States. Free registration, zero spam, and discrete personal ads.
+                Join thousands of verified adults across {{ $activeCountry->name ?? 'the United States' }}@if(isset($activeCountry)) ({{ $activeCountry->code }} • {{ $activeCountry->currency_code }} ({{ $activeCountry->currency_symbol }}))@endif. Free registration, zero spam, and discrete personal ads.
             </p>
             <div class="mt-8 flex flex-wrap justify-center gap-4">
-                <a href="{{ route('search.index') }}" class="bg-white hover:bg-slate-100 text-[#171923] px-6 py-3 rounded-xl text-xs font-extrabold shadow-lg transition">
+                <a href="{{ $isCustomCountry ? route('country.search', ['countrySlug' => $activeSlug]) : route('search.index') }}" class="bg-white hover:bg-slate-100 text-[#171923] px-6 py-3 rounded-xl text-xs font-extrabold shadow-lg transition">
                     Browse Listings
                 </a>
                 <a href="{{ route('listings.create') }}" class="bg-[#F20B65] hover:bg-[#d90858] text-white px-6 py-3 rounded-xl text-xs font-extrabold shadow-lg shadow-[#F20B65]/30 transition">

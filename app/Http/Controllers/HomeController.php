@@ -106,8 +106,14 @@ class HomeController extends Controller
         ];
 
         $req = request();
+        $clientIp = $req->ip();
+        $isPublicIp = is_string($clientIp)
+            && !in_array($clientIp, ['127.0.0.1', '::1'], true)
+            && filter_var($clientIp, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false;
+
         if (
             $req->boolean('auto_country')
+            || $isPublicIp
             || $req->hasHeader('X-Test-Country')
             || $req->hasHeader('CF-IPCountry')
             || $req->hasHeader('X-Country-Code')
@@ -118,9 +124,6 @@ class HomeController extends Controller
             $decision = $geoService->resolveMarketplaceDecision($req);
             if ($decision['action'] === 'marketplace' && !empty($decision['country_slug'])) {
                 return redirect()->to('/' . $decision['country_slug']);
-            }
-            if ($decision['action'] === 'choose_country') {
-                return redirect()->route('country.choose');
             }
         }
 

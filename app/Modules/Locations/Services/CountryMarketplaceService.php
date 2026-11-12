@@ -47,19 +47,41 @@ class CountryMarketplaceService
     }
 
     /**
-     * Resolve one of the 5 marketplaces by slug (`gb`, `ca`, `au`, `ie`, `nz`) or ISO code (`GB`, `CA`, `AU`, `IE`, `NZ`).
+     * Resolve a country marketplace by slug (`us`, `gb`, `ca`, `au`, `ie`, `nz`) or ISO code (`US`, `GB`, `CA`, `AU`, `IE`, `NZ`).
      */
     public function getCountryBySlugOrCode(string $slugOrCode, bool $requireEnabled = true): ?Country
     {
         $normalizedCode = strtoupper(trim($slugOrCode));
         $normalizedSlug = strtolower(trim($slugOrCode));
 
-        if (! in_array($normalizedCode, Country::FIVE_MARKETPLACES, true)
-            && ! in_array($normalizedSlug, Country::FIVE_MARKETPLACE_SLUGS, true)) {
+        $allowedCodes = array_merge(['US'], Country::FIVE_MARKETPLACES);
+        $allowedSlugs = array_merge(['us'], Country::FIVE_MARKETPLACE_SLUGS);
+
+        if (! in_array($normalizedCode, $allowedCodes, true)
+            && ! in_array($normalizedSlug, $allowedSlugs, true)) {
             return null;
         }
 
         $this->ensureFiveCountriesExist();
+
+        if ($normalizedCode === 'US' || $normalizedSlug === 'us') {
+            return Country::query()->firstOrCreate(
+                ['code' => 'US'],
+                [
+                    'slug' => 'us',
+                    'name' => 'United States',
+                    'iso3' => 'USA',
+                    'phone_code' => '+1',
+                    'currency_code' => 'USD',
+                    'currency_symbol' => '$',
+                    'flag' => '🇺🇸',
+                    'timezone' => 'America/New_York',
+                    'division_label' => 'State',
+                    'is_active' => true,
+                    'is_marketplace_enabled' => true,
+                ]
+            );
+        }
 
         $query = Country::query()
             ->where(function ($q) use ($normalizedCode, $normalizedSlug) {
@@ -317,10 +339,11 @@ class CountryMarketplaceService
         $query = $this->publicListingsQuery($country)
             ->with(['city', 'state', 'category', 'media', 'user']);
 
+        $areaFilter = $filters['area'] ?? $filters['state'] ?? null;
         if (! empty($filters['area_id'])) {
             $query->where('state_id', (int) $filters['area_id']);
-        } elseif (! empty($filters['area'])) {
-            $areaVal = trim((string) $filters['area']);
+        } elseif (! empty($areaFilter)) {
+            $areaVal = trim((string) $areaFilter);
             $area = State::query()
                 ->where('country_id', $country->id)
                 ->where(fn ($q) => $q->where('slug', strtolower($areaVal))->orWhere('code', strtoupper($areaVal)))

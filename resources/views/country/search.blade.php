@@ -1,8 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-    @include('country.partials.switcher-bar')
-
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8" data-country-search-page="{{ $country->code }}">
         {{-- Breadcrumbs --}}
         <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs font-semibold text-slate-500 flex-wrap">

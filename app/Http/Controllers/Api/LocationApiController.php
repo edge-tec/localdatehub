@@ -4,23 +4,262 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Locations\Models\City;
+use App\Modules\Locations\Models\Country;
 use App\Modules\Locations\Models\State;
 use App\Modules\Locations\Services\CountryMarketplaceService;
 use App\Modules\Locations\Services\LocationService;
 use App\Services\GeoLocationService;
+use App\Support\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class LocationApiController extends Controller
 {
     public function __construct(
-        private readonly LocationService $locationService,
-        private readonly CountryMarketplaceService $countryMarketplaceService,
-        private readonly GeoLocationService $geoLocationService
+        protected LocationService $locationService,
+        protected CountryMarketplaceService $countryMarketplaceService,
+        protected GeoLocationService $geoLocationService
     ) {}
 
     /**
-     * List the 5 supported marketplace countries with currency, flag, and counts.
+     * List all supported states (defaults to US or filters by ?country=).
+     */
+    public function indexStates(Request $request): JsonResponse
+    {
+        $countryParam = $request->query('country');
+        if (is_string($countryParam) && trim($countryParam) !== '' && strtoupper(trim($countryParam)) !== 'US') {
+            return $this->countryAreas($countryParam);
+        }
+
+        $states = $this->locationService->getStateDirectory();
+
+        return ApiResponse::success([
+            'count' => $states->count(),
+            'states' => $states->map(fn ($s) => [
+                'id' => $s->id,
+                'code' => $s->code,
+                'name' => $s->name,
+                'cities_count' => $s->cities_count,
+            ]),
+        ]);
+    }
+
+    /**
+     * List all active cities in a given state/region across US, GB, CA, AU, IE, NZ.
+     */
+    public function stateCities(Request $request, string $stateCode): JsonResponse
+    {
+        $countryParam = $request->query('country');
+        $state = null;
+
+        if (is_string($countryParam) && trim($countryParam) !== '' && strtoupper(trim($countryParam)) !== 'US') {
+            $country = $this->countryMarketplaceService->getCountryBySlugOrCode($countryParam, false);
+            if ($country) {
+                $state = State::query()
+                    ->where('country_id', $country->id)
+                    ->where('is_active', true)
+                    ->where(function ($q) use ($stateCode) {
+                        $q->where('code', strtoupper(trim($stateCode)))
+                            ->orWhere('slug', strtolower(trim($stateCode)));
+                    })
+                    ->with(['cities' => fn ($q) => $q->where('is_active', true)->orderByDesc('is_popular')->orderBy('name')])
+                    ->first();
+            }
+        }
+
+        if (! $state) {
+            $state = $this->locationService->getStateWithCities($stateCode);
+        }
+
+        if (! $state) {
+            $state = State::query()
+                ->where('is_active', true)
+                ->where(function ($q) use ($stateCode) {
+                    $q->where('code', strtoupper(trim($stateCode)))
+                        ->orWhere('slug', strtolower(trim($stateCode)));
+                })
+                ->with(['cities' => fn ($q) => $q->where('is_active', true)->orderByDesc('is_popular')->orderBy('name')])
+                ->first();
+        }
+
+        if (! $state) {
+            return ApiResponse::error("State [{$stateCode}] not found or inactive.", 404, 'STATE_NOT_FOUND');
+        }
+
+        return ApiResponse::success([
+            'state' => [
+                'code' => $state->code,
+                'name' => $state->name,
+            ],
+            'cities_count' => $state->cities->count(),
+            'cities' => $state->cities->map(fn ($c) => [
+                'id' => $c->id,
+                'name' => $c->name,
+                'slug' => $c->slug,
+                'latitude' => $c->latitude,
+                'longitude' => $c->longitude,
+                'population' => $c->population,
+                'is_popular' => $c->is_popular,
+            ]),
+        ]);
+    }
+
+    /**
+     * Get detailed information for a single city.
+     */
+    public function cityDetails(int $cityId): JsonResponse
+    {
+        $city = City::with(['state', 'county', 'zipCodes', 'aliases'])->find($cityId);
+        if (! $city) {
+            return ApiResponse::error("City ID [{$cityId}] not found.", 404, 'CITY_NOT_FOUND');
+        }
+
+        return ApiResponse::success([
+            'id' => $city->id,
+            'name' => $city->name,
+            'slug' => $city->slug,
+            'state' => [
+                'code' => $city->state?->code,
+                'name' => $city->state?->name,
+            ],
+            'county' => $city->county?->name,
+            'latitude' => $city->latitude,
+            'longitude' => $city->longitude,
+            'population' => $city->population,
+            'timezone' => $city->timezone,
+            'is_popular' => $city->is_popular,
+            'zip_codes' => $city->zipCodes->pluck('zip_code'),
+            'aliases' => $city->aliases->map(fn ($a) => [
+                'alias' => $a->alias,
+                'type' => $a->alias_type,
+            ]),
+        ]);
+    }
+
+    /**
+     * Search localities mapped to a given 5-digit ZIP code.
+     */
+    public function lookupZip(string $zip): JsonResponse
+    {
+        if (! preg_match('/^\d{5}$/', $zip)) {
+            return ApiResponse::error('ZIP code must be a 5-digit numeric string.', 422, 'INVALID_ZIP_FORMAT');
+        }
+
+        $localities = $this->locationService->lookupZipCode($zip);
+        if ($localities->isEmpty()) {
+            return ApiResponse::error("No localities found for ZIP code [{$zip}].", 404, 'ZIP_NOT_FOUND');
+        }
+
+        return ApiResponse::success([
+            'zip_code' => $zip,
+            'localities_count' => $localities->count(),
+            'localities' => $localities,
+        ]);
+    }
+
+    /**
+     * Fast autocomplete endpoint matching Cities, ZIPs, States, and Aliases.
+     */
+    public function autocomplete(Request $request): JsonResponse
+    {
+        $query = (string) $request->query('q', '');
+        $limit = min((int) $request->query('limit', 10), 25);
+
+        $results = $this->locationService->searchAutocomplete($query, $limit);
+
+        return ApiResponse::success([
+            'query' => $query,
+            'count' => $results->count(),
+            'results' => $results,
+        ]);
+    }
+
+    /**
+     * Search cities by name, optionally filtered by state code or slug.
+     */
+    public function searchCities(Request $request): JsonResponse
+    {
+        $query = trim((string) $request->query('q', ''));
+        $stateParam = $request->query('state');
+        $limit = min((int) $request->query('limit', 20), 100);
+
+        $cityQuery = City::with('state')->where('is_active', true);
+
+        if ($stateParam) {
+            $cityQuery->whereHas('state', function ($q) use ($stateParam) {
+                if (is_numeric($stateParam)) {
+                    $q->where('id', (int) $stateParam);
+                } else {
+                    $q->where('code', strtoupper($stateParam))
+                        ->orWhere('slug', strtolower($stateParam));
+                }
+            });
+        }
+
+        if ($query !== '') {
+            $cityQuery->where('name', 'like', "{$query}%");
+        }
+
+        $cities = $cityQuery->orderBy('is_popular', 'desc')
+            ->orderBy('name', 'asc')
+            ->take($limit)
+            ->get();
+
+        return ApiResponse::success([
+            'query' => $query,
+            'state' => $stateParam,
+            'count' => $cities->count(),
+            'cities' => $cities->map(fn ($c) => [
+                'id' => $c->id,
+                'name' => $c->name,
+                'slug' => $c->slug,
+                'state_code' => $c->state?->code,
+                'state_name' => $c->state?->name,
+                'latitude' => $c->latitude,
+                'longitude' => $c->longitude,
+                'is_popular' => (bool) $c->is_popular,
+            ]),
+        ]);
+    }
+
+    /**
+     * Radius geographic search for nearby cities.
+     */
+    public function nearby(Request $request): JsonResponse
+    {
+        $request->validate([
+            'lat' => ['required', 'numeric', 'between:-90,90'],
+            'lng' => ['required', 'numeric', 'between:-180,180'],
+            'radius' => ['nullable', 'numeric', 'min:1', 'max:250'],
+        ]);
+
+        $lat = (float) $request->query('lat');
+        $lng = (float) $request->query('lng');
+        $radius = (float) ($request->query('radius') ?: 35.0);
+
+        $cities = $this->locationService->findNearbyCities($lat, $lng, $radius);
+
+        return ApiResponse::success([
+            'center' => [
+                'latitude' => $lat,
+                'longitude' => $lng,
+            ],
+            'radius_miles' => $radius,
+            'count' => $cities->count(),
+            'cities' => $cities->map(fn ($c) => [
+                'id' => $c->id,
+                'name' => $c->name,
+                'slug' => $c->slug,
+                'state_code' => $c->state?->code,
+                'latitude' => $c->latitude,
+                'longitude' => $c->longitude,
+                'distance_miles' => $c->distance_miles,
+            ]),
+        ]);
+    }
+
+    /**
+     * List the supported marketplace countries with currency, flag, and counts.
      */
     public function indexCountries(): JsonResponse
     {
@@ -46,7 +285,7 @@ class LocationApiController extends Controller
     }
 
     /**
-     * List all administrative areas (states/provinces/regions/counties/nations) for a country.
+     * List all administrative areas for a country.
      */
     public function countryAreas(string $countryCode): JsonResponse
     {
@@ -75,12 +314,6 @@ class LocationApiController extends Controller
                 'code' => $area->code,
                 'slug' => $area->slug,
                 'administrative_level' => $area->administrative_level,
-                'parent' => $area->parent ? [
-                    'id' => $area->parent->id,
-                    'name' => $area->parent->name,
-                    'code' => $area->parent->code,
-                    'slug' => $area->parent->slug,
-                ] : null,
                 'cities_count' => (int) ($area->cities_count ?? 0),
                 'active_listings_count' => (int) ($area->active_listings_count ?? 0),
                 'url' => url('/' . $countrySlug . '/' . $area->slug),
@@ -124,9 +357,8 @@ class LocationApiController extends Controller
                 'id' => $city->id,
                 'name' => $city->name,
                 'slug' => $city->slug,
-                'county_name' => $city->county_name,
                 'population' => $city->population,
-                'is_major_city' => (bool) $city->is_major_city,
+                'is_popular' => (bool) $city->is_popular,
                 'active_listings_count' => (int) ($city->active_listings_count ?? 0),
                 'url' => url('/' . $countrySlug . '/' . $area->slug . '/' . $city->slug),
             ])->values(),
@@ -134,7 +366,7 @@ class LocationApiController extends Controller
     }
 
     /**
-     * Detect visitor's country and marketplace routing decision via GeoIP / manual selection.
+     * Detect visitor's country and marketplace routing decision via GeoIP.
      */
     public function detectCountry(Request $request): JsonResponse
     {
@@ -145,212 +377,6 @@ class LocationApiController extends Controller
             'status' => 'ok',
             'geolocation' => $geo,
             'marketplace' => $decision,
-        ]);
-    }
-
-    public function indexStates(Request $request): JsonResponse
-    {
-        $countryParam = $request->query('country');
-        if (is_string($countryParam) && trim($countryParam) !== '') {
-            return $this->countryAreas($countryParam);
-        }
-
-        $region = $request->query('region');
-        $states = $this->locationService->getStateDirectory(is_string($region) ? $region : null);
-
-        return response()->json([
-            'status' => 'ok',
-            'data' => $states->map(fn ($state) => [
-                'id' => $state->id,
-                'name' => $state->name,
-                'code' => $state->code,
-                'slug' => $state->slug,
-                'region' => $state->region,
-                'capital_city' => $state->capital_city,
-                'cities_count' => (int) ($state->cities_count ?? 0),
-                'active_listings_count' => (int) ($state->active_listings_count ?? 0),
-                'url' => route('locations.state', ['stateCode' => strtolower($state->code)]),
-            ])->values(),
-        ]);
-    }
-
-    public function showState(string $stateCode): JsonResponse
-    {
-        $state = $this->locationService->getStateWithCities($stateCode);
-        if (! $state) {
-            return response()->json(['status' => 'error', 'message' => 'State not found.'], 404);
-        }
-
-        return response()->json([
-            'status' => 'ok',
-            'data' => [
-                'id' => $state->id,
-                'name' => $state->name,
-                'code' => $state->code,
-                'slug' => $state->slug,
-                'region' => $state->region,
-                'capital_city' => $state->capital_city,
-                'active_listings_count' => (int) ($state->active_listings_count ?? 0),
-                'cities' => $state->cities->map(fn ($city) => [
-                    'id' => $city->id,
-                    'name' => $city->name,
-                    'slug' => $city->slug,
-                    'county_name' => $city->county_name,
-                    'population' => $city->population,
-                    'is_major_city' => (bool) $city->is_major_city,
-                    'active_listings_count' => (int) ($city->active_listings_count ?? 0),
-                    'url' => route('locations.city', [
-                        'stateCode' => strtolower($state->code),
-                        'citySlug' => $city->slug,
-                    ]),
-                ])->values(),
-            ],
-        ]);
-    }
-
-    public function showCity(string $stateCode, string $citySlug): JsonResponse
-    {
-        $result = $this->locationService->getCityWithDetails($stateCode, $citySlug);
-        if (! $result) {
-            return response()->json(['status' => 'error', 'message' => 'City not found.'], 404);
-        }
-
-        $state = $result['state'];
-        $city = $result['city'];
-
-        return response()->json([
-            'status' => 'ok',
-            'data' => [
-                'id' => $city->id,
-                'name' => $city->name,
-                'slug' => $city->slug,
-                'state' => [
-                    'name' => $state->name,
-                    'code' => $state->code,
-                    'region' => $state->region,
-                ],
-                'county_name' => $city->county_name,
-                'population' => $city->population,
-                'timezone' => $city->timezone,
-                'postal_codes' => $city->postal_codes,
-                'latitude' => $city->latitude,
-                'longitude' => $city->longitude,
-                'active_listings_count' => (int) ($city->active_listings_count ?? 0),
-            ],
-        ]);
-    }
-
-    public function nearbyCities(Request $request, string $stateCode, string $citySlug): JsonResponse
-    {
-        $result = $this->locationService->getCityWithDetails($stateCode, $citySlug);
-        if (! $result) {
-            return response()->json(['status' => 'error', 'message' => 'City not found.'], 404);
-        }
-
-        $radius = max(5, min(250, (int) $request->query('radius_miles', 60)));
-        $nearby = $this->locationService->getNearbyCities($result['city'], $radius, 12);
-
-        return response()->json([
-            'status' => 'ok',
-            'origin' => [
-                'city' => $result['city']->name,
-                'state_code' => $result['state']->code,
-            ],
-            'radius_miles' => $radius,
-            'data' => $nearby->map(fn ($c) => [
-                'id' => $c->id,
-                'name' => $c->name,
-                'slug' => $c->slug,
-                'state_code' => $c->state?->code,
-                'distance_miles' => $c->distance_miles,
-                'active_listings_count' => (int) ($c->active_listings_count ?? 0),
-            ])->values(),
-        ]);
-    }
-
-    public function autocomplete(Request $request): JsonResponse
-    {
-        $query = trim((string) $request->query('q', ''));
-        $limit = max(1, min(20, (int) $request->query('limit', 10)));
-        $countryCode = $request->query('country');
-
-        if (is_string($countryCode) && trim($countryCode) !== '') {
-            $country = $this->countryMarketplaceService->getCountryBySlugOrCode($countryCode, false);
-            if ($country) {
-                return $this->countryAutocomplete($country, $query, $limit);
-            }
-        }
-
-        return response()->json([
-            'status' => 'ok',
-            'query' => $query,
-            'results' => $this->locationService->autocomplete($query, $limit),
-        ]);
-    }
-
-    private function countryAutocomplete($country, string $query, int $limit): JsonResponse
-    {
-        $q = trim($query);
-        if (mb_strlen($q) < 2) {
-            return response()->json(['status' => 'ok', 'query' => $query, 'results' => []]);
-        }
-
-        $countrySlug = strtolower($country->slug ?: $country->code);
-        $results = [];
-
-        $areas = State::query()
-            ->where('country_id', $country->id)
-            ->where('is_active', true)
-            ->where(function ($sub) use ($q) {
-                $sub->where('name', 'like', $q . '%')
-                    ->orWhere('code', 'like', strtoupper($q) . '%');
-            })
-            ->limit(4)
-            ->get();
-
-        foreach ($areas as $area) {
-            $results[] = [
-                'type' => 'area',
-                'label' => "{$area->name}, {$country->name}",
-                'country_code' => $country->code,
-                'area_code' => $area->code,
-                'area_slug' => $area->slug,
-                'city_slug' => null,
-                'url' => url("/{$countrySlug}/{$area->slug}"),
-            ];
-        }
-
-        $cities = City::query()
-            ->where('country_id', $country->id)
-            ->where('is_active', true)
-            ->where('name', 'like', $q . '%')
-            ->with('state:id,name,code,slug')
-            ->orderByDesc('is_popular')
-            ->orderByDesc('population')
-            ->limit($limit)
-            ->get();
-
-        foreach ($cities as $city) {
-            if (! $city->state) {
-                continue;
-            }
-            $results[] = [
-                'type' => 'city',
-                'label' => "{$city->name}, {$city->state->name}",
-                'country_code' => $country->code,
-                'area_code' => $city->state->code,
-                'area_slug' => $city->state->slug,
-                'city_id' => $city->id,
-                'city_slug' => $city->slug,
-                'url' => url("/{$countrySlug}/{$city->state->slug}/{$city->slug}"),
-            ];
-        }
-
-        return response()->json([
-            'status' => 'ok',
-            'query' => $query,
-            'country' => $country->code,
-            'results' => array_slice($results, 0, $limit),
         ]);
     }
 }
