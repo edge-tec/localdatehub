@@ -267,88 +267,27 @@
                                 </div>
                             </div>
 
-                            <!-- Filter Tabs Grid: 100% Fully Visible, Never Cut Off, Overlapping, or Broken -->
-                            <div class="grid grid-cols-3 sm:grid-cols-5 gap-1.5 pb-3 mb-3 border-b border-slate-100 w-full shrink-0">
-                                <button 
-                                    type="button" 
-                                    @click="activeCategoryFilter = 'all'"
-                                    class="w-full min-w-0 py-2 px-1 rounded-xl text-[10px] sm:text-[11px] font-black transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs whitespace-nowrap overflow-hidden"
-                                    :class="activeCategoryFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
-                                    title="All Notifications"
-                                >
-                                    <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-                                    </svg>
-                                    <span>All</span>
-                                    <span class="px-1.5 py-0.5 rounded-full text-[9px] min-w-[16px] text-center font-bold shrink-0" :class="activeCategoryFilter === 'all' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'" x-text="items.length"></span>
-                                </button>
-
-                                <button 
-                                    type="button" 
-                                    @click="activeCategoryFilter = 'id_verification'"
-                                    class="w-full min-w-0 py-2 px-1 rounded-xl text-[10px] sm:text-[11px] font-black transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs whitespace-nowrap overflow-hidden"
-                                    :class="activeCategoryFilter === 'id_verification' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'"
-                                    title="ID Verification Requests"
-                                >
-                                    <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <rect width="18" height="18" x="3" y="3" rx="2"></rect>
-                                        <circle cx="9" cy="10" r="2"></circle>
-                                        <line x1="15" y1="8" x2="17" y2="8"></line>
-                                        <line x1="15" y1="12" x2="17" y2="12"></line>
-                                        <line x1="7" y1="16" x2="17" y2="16"></line>
-                                    </svg>
-                                    <span>IDs</span>
-                                    <span class="px-1.5 py-0.5 rounded-full text-[9px] min-w-[16px] text-center font-bold shrink-0" :class="activeCategoryFilter === 'id_verification' ? 'bg-white text-blue-700' : 'bg-blue-200 text-blue-900'" x-text="counts.id_verifications"></span>
-                                </button>
-
-                                <button 
-                                    type="button" 
-                                    @click="activeCategoryFilter = 'listing_pending'"
-                                    class="w-full min-w-0 py-2 px-1 rounded-xl text-[10px] sm:text-[11px] font-black transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs whitespace-nowrap overflow-hidden"
-                                    :class="activeCategoryFilter === 'listing_pending' ? 'bg-amber-600 text-white' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'"
-                                    title="Pending Classified Ads"
-                                >
-                                    <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-                                        <polyline points="14 2 14 8 20 8"></polyline>
-                                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                                        <line x1="10" y1="9" x2="8" y2="9"></line>
-                                    </svg>
-                                    <span>Ads</span>
-                                    <span class="px-1.5 py-0.5 rounded-full text-[9px] min-w-[16px] text-center font-bold shrink-0" :class="activeCategoryFilter === 'listing_pending' ? 'bg-white text-amber-700' : 'bg-amber-200 text-amber-900'" x-text="counts.pending_listings"></span>
-                                </button>
-
-                                <button 
-                                    type="button" 
-                                    @click="activeCategoryFilter = 'contact_message'"
-                                    class="w-full min-w-0 py-2 px-1 rounded-xl text-[10px] sm:text-[11px] font-black transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs whitespace-nowrap overflow-hidden"
-                                    :class="activeCategoryFilter === 'contact_message' ? 'bg-pink-600 text-white' : 'bg-pink-50 text-pink-700 hover:bg-pink-100'"
-                                    title="Messages & Inquiries"
-                                >
-                                    <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path>
-                                    </svg>
-                                    <span>Msgs</span>
-                                    <span class="px-1.5 py-0.5 rounded-full text-[9px] min-w-[16px] text-center font-bold shrink-0" :class="activeCategoryFilter === 'contact_message' ? 'bg-white text-pink-700' : 'bg-pink-200 text-pink-900'" x-text="counts.messages"></span>
-                                </button>
-
-                                <button 
-                                    type="button" 
-                                    @click="activeCategoryFilter = 'abuse_report'"
-                                    class="w-full min-w-0 py-2 px-1 rounded-xl text-[10px] sm:text-[11px] font-black transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs whitespace-nowrap overflow-hidden"
-                                    :class="activeCategoryFilter === 'abuse_report' ? 'bg-rose-600 text-white' : 'bg-rose-50 text-rose-700 hover:bg-rose-100'"
-                                    title="Abuse & Content Reports"
-                                >
-                                    <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path>
-                                        <line x1="12" y1="8" x2="12" y2="12"></line>
-                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                                    </svg>
-                                    <span class="hidden sm:inline">Reports</span>
-                                    <span class="sm:hidden">Rep</span>
-                                    <span class="px-1.5 py-0.5 rounded-full text-[9px] min-w-[16px] text-center font-bold shrink-0" :class="activeCategoryFilter === 'abuse_report' ? 'bg-white text-rose-700' : 'bg-rose-200 text-rose-900'" x-text="counts.reports"></span>
-                                </button>
+                            <!-- Filter Section Dropdown (Clean, Zero Overflow) -->
+                            <div class="pb-3 mb-3 border-b border-slate-100 w-full shrink-0">
+                                <label for="admin-notification-filter" class="sr-only">Filter notifications by category</label>
+                                <div class="relative">
+                                    <select
+                                        id="admin-notification-filter"
+                                        x-model="activeCategoryFilter"
+                                        class="w-full appearance-none rounded-xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200 text-slate-800 text-xs font-bold pl-3.5 pr-9 py-2.5 focus:outline-none focus:bg-white focus:border-[#F20B83] focus:ring-2 focus:ring-pink-100 transition cursor-pointer"
+                                    >
+                                        <option value="all" x-text="`All Notifications (${items.length})`">All Notifications</option>
+                                        <option value="id_verification" x-text="`ID Verifications (${counts.id_verifications})`">ID Verifications</option>
+                                        <option value="listing_pending" x-text="`Pending Classified Ads (${counts.pending_listings})`">Pending Classified Ads</option>
+                                        <option value="contact_message" x-text="`Messages & Inquiries (${counts.messages})`">Messages &amp; Inquiries</option>
+                                        <option value="abuse_report" x-text="`Abuse & Content Reports (${counts.reports})`">Abuse &amp; Content Reports</option>
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Notification Items List -->
