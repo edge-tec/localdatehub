@@ -29,13 +29,13 @@ class CountryMarketplaceService
         $this->ensureFiveCountriesExist();
 
         $query = Country::query()
-            ->whereIn('code', Country::FIVE_MARKETPLACES)
+            ->whereIn('code', Country::SIX_MARKETPLACES)
             ->withCount([
                 'states as areas_count' => fn ($q) => $q->where('is_active', true),
                 'cities as cities_count' => fn ($q) => $q->where('is_active', true),
                 'listings as active_listings_count' => fn ($q) => $this->applyPublicListingScope($q),
             ])
-            ->orderByRaw("CASE code WHEN 'GB' THEN 1 WHEN 'CA' THEN 2 WHEN 'AU' THEN 3 WHEN 'IE' THEN 4 WHEN 'NZ' THEN 5 ELSE 99 END")
+            ->orderByRaw("CASE code WHEN 'US' THEN 1 WHEN 'GB' THEN 2 WHEN 'CA' THEN 3 WHEN 'AU' THEN 4 WHEN 'IE' THEN 5 WHEN 'NZ' THEN 6 ELSE 99 END")
             ->orderBy('name');
 
         if ($onlyEnabled) {
@@ -484,15 +484,18 @@ class CountryMarketplaceService
             }
 
             $count = Country::query()
-                ->whereIn('code', Country::FIVE_MARKETPLACES)
+                ->whereIn('code', Country::SIX_MARKETPLACES)
                 ->where('is_marketplace_enabled', true)
                 ->count();
+
+            $us = Country::query()->where('code', 'US')->first();
+            $usStatesCount = $us ? State::query()->where('country_id', $us->id)->count() : 0;
 
             $au = Country::query()->where('code', 'AU')->first();
             $auStatesCount = $au ? State::query()->where('country_id', $au->id)->count() : 0;
             $auCitiesCount = $au ? City::query()->where('country_id', $au->id)->count() : 0;
 
-            if ($count < 5 || $auStatesCount < 8 || $auCitiesCount < 180) {
+            if ($count < 6 || $usStatesCount < 51 || $auStatesCount < 8 || $auCitiesCount < 180) {
                 $this->seederService->seedAll();
             }
         } catch (\Throwable) {

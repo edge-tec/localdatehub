@@ -31,7 +31,7 @@ class AdminCountryMarketplaceController extends Controller
         $this->marketplaceService->ensureFiveCountriesExist();
 
         $countries = Country::query()
-            ->whereIn('code', Country::FIVE_MARKETPLACES)
+            ->whereIn('code', Country::SIX_MARKETPLACES)
             ->withCount([
                 'states as areas_count' => fn ($q) => $q->where('is_active', true),
                 'cities as cities_count' => fn ($q) => $q->where('is_active', true),
@@ -40,7 +40,7 @@ class AdminCountryMarketplaceController extends Controller
                 'listings as pending_listings_count' => fn ($q) => $q->where('status', 'pending'),
                 'listings as featured_listings_count' => fn ($q) => $q->where('is_featured', true),
             ])
-            ->orderByRaw("CASE code WHEN 'GB' THEN 1 WHEN 'CA' THEN 2 WHEN 'AU' THEN 3 WHEN 'IE' THEN 4 WHEN 'NZ' THEN 5 ELSE 99 END")
+            ->orderByRaw("CASE code WHEN 'US' THEN 1 WHEN 'GB' THEN 2 WHEN 'CA' THEN 3 WHEN 'AU' THEN 4 WHEN 'IE' THEN 5 WHEN 'NZ' THEN 6 ELSE 99 END")
             ->get();
 
         // Country visitor counts from visitor_sessions / visitor_geolocation if tables exist
@@ -48,7 +48,7 @@ class AdminCountryMarketplaceController extends Controller
         try {
             $visitorCounts = DB::table('visitor_geolocation')
                 ->select('country_code', DB::raw('COUNT(*) as total'))
-                ->whereIn('country_code', Country::FIVE_MARKETPLACES)
+                ->whereIn('country_code', Country::SIX_MARKETPLACES)
                 ->groupBy('country_code')
                 ->pluck('total', 'country_code')
                 ->all();
@@ -107,6 +107,34 @@ class AdminCountryMarketplaceController extends Controller
             ->limit(20)
             ->get();
 
+        $popularCategories = Category::query()
+            ->whereNull('parent_id')
+            ->withCount(['listings' => fn ($q) => $q->where('country_id', $country->id)->where('status', 'active')])
+            ->orderByDesc('listings_count')
+            ->limit(6)
+            ->get();
+
+        $totalUsersCount = 0;
+        $visitorsCount = 0;
+        try {
+            $totalUsersCount = \App\Models\User::query()
+                ->whereHas('listings', fn ($q) => $q->where('country_id', $country->id))
+                ->count();
+            $visitorsCount = (int) DB::table('visitor_geolocation')
+                ->where('country_code', $country->code)
+                ->count();
+        } catch (\Throwable) {
+        }
+
+        $stats = [
+            'total_listings' => Listing::query()->where('country_id', $country->id)->count(),
+            'active_listings' => Listing::query()->where('country_id', $country->id)->where('status', 'active')->count(),
+            'pending_listings' => Listing::query()->where('country_id', $country->id)->where('status', 'pending')->count(),
+            'featured_listings' => Listing::query()->where('country_id', $country->id)->where('is_featured', true)->count(),
+            'total_users' => $totalUsersCount,
+            'total_visitors' => $visitorsCount,
+        ];
+
         return view('admin.countries.show', [
             'country' => $country,
             'areas' => $areas,
@@ -114,6 +142,8 @@ class AdminCountryMarketplaceController extends Controller
             'categories' => $categories,
             'disabledCategoryIds' => $disabledCategoryIds,
             'recentListings' => $recentListings,
+            'popularCategories' => $popularCategories,
+            'stats' => $stats,
         ]);
     }
 

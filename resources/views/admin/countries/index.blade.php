@@ -1,4 +1,4 @@
-<x-layouts.app title="Five-Country Marketplace Management — LocalDateHub Admin">
+<x-layouts.app title="Six-Country Marketplace Management — LocalDateHub Admin">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8" data-admin-countries-index>
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -6,10 +6,10 @@
                     <span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-[#F50057] border border-rose-500/20 uppercase tracking-wider">
                         Multi-Country Control
                     </span>
-                    <span class="text-xs text-slate-500">UK • Canada • Australia • Ireland • New Zealand</span>
+                    <span class="text-xs text-slate-500">United States (Primary) • UK • Canada • Australia • Ireland • New Zealand</span>
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                    Five-Country Marketplace Management
+                    Six-Country Marketplace Management
                 </h1>
             </div>
 
@@ -20,16 +20,9 @@
                         type="submit"
                         class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs transition"
                     >
-                        Sync / Seed 5-Country Geography
+                        Sync / Seed 6-Country Geography
                     </button>
                 </form>
-                <a
-                    href="{{ route('country.choose') }}"
-                    target="_blank"
-                    class="px-3.5 py-2 rounded-xl bg-white border border-slate-200 hover:border-[#F50057] text-xs font-bold text-slate-700 transition"
-                >
-                    View Public Country Selector ↗
-                </a>
             </div>
         </div>
 
@@ -38,15 +31,19 @@
                 @php
                     $slug = strtolower($country->slug ?: $country->code);
                     $visitors = (int) ($visitorCounts[$country->code] ?? 0);
+                    $isPrimary = strtoupper($country->code) === 'US';
                 @endphp
-                <div class="rounded-2xl bg-white border border-slate-200/90 p-6 shadow-xs flex flex-col justify-between space-y-5" data-admin-country-card="{{ $country->code }}">
+                <div class="rounded-2xl bg-white border {{ $isPrimary ? 'border-[#F50057]/50 ring-1 ring-[#F50057]/20' : 'border-slate-200/90' }} p-6 shadow-xs flex flex-col justify-between space-y-5" data-admin-country-card="{{ $country->code }}">
                     <div class="space-y-4">
                         <div class="flex items-start justify-between gap-3">
                             <div class="flex items-center gap-3">
                                 <span class="text-3xl">{{ $country->flag }}</span>
                                 <div>
-                                    <h2 class="text-lg font-extrabold text-slate-900">
-                                        {{ $country->name }} ({{ $country->code }})
+                                    <h2 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                                        <span>{{ $country->name }} ({{ $country->code }})</span>
+                                        @if($isPrimary)
+                                            <span class="px-2 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-[#F50057] text-[10px] font-black uppercase">Primary</span>
+                                        @endif
                                     </h2>
                                     <div class="text-xs text-slate-500">
                                         Route: <code class="font-bold text-[#F50057]">/{{ $slug }}</code> • {{ $country->currency_code }} ({{ $country->currency_symbol }})

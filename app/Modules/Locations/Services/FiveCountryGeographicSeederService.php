@@ -83,51 +83,87 @@ class FiveCountryGeographicSeederService
                 $summary['countries_seeded']++;
                 $countryAreas = 0;
                 $countryCities = 0;
+                $now = now();
 
+                $stateRows = [];
                 foreach ($countryData['areas'] as $areaData) {
                     $areaSlug = $areaData['slug'] ?? Str::slug($areaData['name']);
-                    $state = State::updateOrCreate(
-                        [
-                            'country_id' => $country->id,
-                            'code' => $areaData['code'],
-                        ],
-                        [
-                            'name' => $areaData['name'],
-                            'slug' => $areaSlug,
-                            'administrative_level' => $areaData['level'] ?? 'state',
-                            'is_territory' => (bool) ($areaData['is_territory'] ?? false),
-                            'latitude' => $areaData['lat'] ?? null,
-                            'longitude' => $areaData['lng'] ?? null,
-                            'is_active' => true,
-                        ]
-                    );
-
+                    $stateRows[] = [
+                        'country_id' => $country->id,
+                        'code' => strtoupper($areaData['code']),
+                        'name' => $areaData['name'],
+                        'slug' => $areaSlug,
+                        'administrative_level' => $areaData['level'] ?? 'state',
+                        'is_territory' => (bool) ($areaData['is_territory'] ?? false),
+                        'latitude' => $areaData['lat'] ?? null,
+                        'longitude' => $areaData['lng'] ?? null,
+                        'is_active' => true,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
                     $countryAreas++;
                     $summary['areas_seeded']++;
+                }
 
+                if (!empty($stateRows)) {
+                    State::upsert(
+                        $stateRows,
+                        ['country_id', 'code'],
+                        ['name', 'slug', 'administrative_level', 'is_territory', 'latitude', 'longitude', 'is_active', 'updated_at']
+                    );
+                }
+
+                $stateIdMap = State::where('country_id', $country->id)->pluck('id', 'code')->all();
+
+                $cityRows = [];
+                foreach ($countryData['areas'] as $areaData) {
+                    $stateId = $stateIdMap[strtoupper($areaData['code'])] ?? null;
+                    if (!$stateId) {
+                        continue;
+                    }
                     foreach ($areaData['cities'] as $cityData) {
                         $citySlug = $cityData['slug'] ?? Str::slug($cityData['name']);
-                        City::updateOrCreate(
-                            [
-                                'state_id' => $state->id,
-                                'slug' => $citySlug,
-                            ],
-                            [
-                                'country_id' => $country->id,
-                                'name' => $cityData['name'],
-                                'city_type' => 'city',
-                                'latitude' => $cityData['lat'],
-                                'longitude' => $cityData['lng'],
-                                'population' => $cityData['pop'] ?? 100000,
-                                'timezone' => $cityData['tz'] ?? $countryData['timezone'],
-                                'is_popular' => (bool) ($cityData['popular'] ?? false),
-                                'is_active' => true,
-                            ]
-                        );
-
+                        $cityRows[$stateId . '_' . $citySlug] = [
+                            'state_id' => $stateId,
+                            'slug' => $citySlug,
+                            'country_id' => $country->id,
+                            'name' => $cityData['name'],
+                            'city_type' => 'city',
+                            'latitude' => $cityData['lat'] ?? null,
+                            'longitude' => $cityData['lng'] ?? null,
+                            'population' => $cityData['pop'] ?? 100000,
+                            'timezone' => $cityData['tz'] ?? $countryData['timezone'],
+                            'is_popular' => (bool) ($cityData['popular'] ?? false),
+                            'is_active' => true,
+                            'created_at' => $now,
+                            'updated_at' => $now,
+                        ];
                         $countryCities++;
                         $summary['cities_seeded']++;
                     }
+                }
+
+                foreach (array_chunk(array_values($cityRows), 250) as $chunk) {
+                    City::upsert(
+                        $chunk,
+                        ['state_id', 'slug'],
+                        ['country_id', 'name', 'city_type', 'latitude', 'longitude', 'population', 'timezone', 'is_popular', 'is_active', 'updated_at']
+                    );
+                }
+
+                // Backfill country_id on any existing cities & listings belonging to this country's states
+                if (!empty($stateIdMap)) {
+                    $stateIds = array_values($stateIdMap);
+                    City::whereIn('state_id', $stateIds)
+                        ->whereNull('country_id')
+                        ->update(['country_id' => $country->id]);
+
+                    \App\Modules\Listings\Models\Listing::whereIn('state_id', $stateIds)
+                        ->whereNull('country_id')
+                        ->update([
+                            'country_id' => $country->id,
+                            'currency_code' => $country->currency_code,
+                        ]);
                 }
 
                 // Activate all existing platform categories for this country if not yet linked
@@ -184,14 +220,32 @@ class FiveCountryGeographicSeederService
     }
 
     /**
-     * Verified geographic dataset for the 5 supported country marketplaces.
+     * Verified geographic dataset for the 6 supported country marketplaces (US primary + GB, CA, AU, IE, NZ).
      *
      * @return array<int, array<string, mixed>>
      */
     public function getDatasetDefinitions(): array
     {
         return [
-            // 1. UNITED KINGDOM (GB)
+            // 1. UNITED STATES (US — PRIMARY TARGET MARKETPLACE)
+            [
+                'code' => 'US',
+                'slug' => 'us',
+                'name' => 'United States',
+                'iso3' => 'USA',
+                'phone_code' => '+1',
+                'currency_code' => 'USD',
+                'currency_symbol' => '$',
+                'flag' => '🇺🇸',
+                'timezone' => 'America/New_York',
+                'division_label' => 'State',
+                'sort_order' => 1,
+                'seo_title' => 'United States Classifieds & Local Dating Marketplace — LocalDateHub USA',
+                'seo_description' => 'Explore verified local personal classifieds, adult dating, and community connections across all 50 US states and Washington DC on LocalDateHub USA.',
+                'areas' => $this->getUnitedStatesAreasDataset(),
+            ],
+
+            // 2. UNITED KINGDOM (GB)
             [
                 'code' => 'GB',
                 'slug' => 'gb',
@@ -203,6 +257,7 @@ class FiveCountryGeographicSeederService
                 'flag' => '🇬🇧',
                 'timezone' => 'Europe/London',
                 'division_label' => 'Nation / Region',
+                'sort_order' => 2,
                 'seo_title' => 'United Kingdom Classifieds & Local Dating Marketplace — LocalDateHub UK',
                 'seo_description' => 'Explore verified local personal classifieds, dating, and connections across England, Scotland, Wales, and Northern Ireland on LocalDateHub UK.',
                 'areas' => [
@@ -967,5 +1022,79 @@ class FiveCountryGeographicSeederService
                 ],
             ],
         ];
+    }
+
+    /**
+     * Load all 50 US states + District of Columbia + verified major US cities
+     * from database/data/locations/us_states.json & us_cities.json (Census Bureau Gazetteer).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    protected function getUnitedStatesAreasDataset(): array
+    {
+        $statesPath = database_path('data/locations/us_states.json');
+        $citiesPath = database_path('data/locations/us_cities.json');
+
+        if (! file_exists($statesPath)) {
+            return [];
+        }
+
+        $statesJson = json_decode((string) file_get_contents($statesPath), true) ?: [];
+        $citiesByState = [];
+
+        if (file_exists($citiesPath)) {
+            $citiesJson = json_decode((string) file_get_contents($citiesPath), true) ?: [];
+            foreach ($citiesJson as $cityRow) {
+                $stCode = strtoupper((string) ($cityRow['state_code'] ?? ''));
+                $cityName = trim((string) ($cityRow['name'] ?? ''));
+                $cityType = $cityRow['city_type'] ?? 'city';
+                if ($stCode === '' || $cityName === '') {
+                    continue;
+                }
+                if (stripos($cityName, 'village') !== false || stripos($cityName, 'township') !== false) {
+                    continue;
+                }
+                if (! in_array($cityType, ['city', 'city and borough', 'municipality', 'consolidated government', 'metropolitan government', 'unified government', 'urban county', 'corporation'], true)) {
+                    continue;
+                }
+                $isPopular = ! empty($cityRow['is_popular']);
+                $pop = (int) ($cityRow['population'] ?? 0);
+                // Keep all popular cities + major cities (or cap per state for fast seeding; full 30k+ import via locations:import)
+                if (! $isPopular && $pop < 15000 && count($citiesByState[$stCode] ?? []) >= 15) {
+                    continue;
+                }
+                $citiesByState[$stCode][] = [
+                    'name' => $cityName,
+                    'slug' => $cityRow['slug'] ?? Str::slug($cityName),
+                    'lat' => $cityRow['latitude'] ?? null,
+                    'lng' => $cityRow['longitude'] ?? null,
+                    'pop' => $pop > 0 ? $pop : ($isPopular ? 500000 : 50000),
+                    'tz' => $cityRow['timezone'] ?? 'America/New_York',
+                    'popular' => $isPopular,
+                ];
+            }
+        }
+
+        $areas = [];
+        foreach ($statesJson as $st) {
+            $code = strtoupper((string) ($st['code'] ?? ''));
+            $name = trim((string) ($st['name'] ?? ''));
+            if ($code === '' || $name === '') {
+                continue;
+            }
+            $isTerritory = (bool) ($st['is_territory'] ?? false);
+            $areas[] = [
+                'code' => $code,
+                'name' => $name,
+                'slug' => $st['slug'] ?? Str::slug($name),
+                'level' => $isTerritory ? 'territory' : ($code === 'DC' ? 'district' : 'state'),
+                'is_territory' => $isTerritory,
+                'lat' => $st['latitude'] ?? null,
+                'lng' => $st['longitude'] ?? null,
+                'cities' => $citiesByState[$code] ?? [],
+            ];
+        }
+
+        return $areas;
     }
 }

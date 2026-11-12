@@ -83,11 +83,42 @@ class CountryMarketplaceController extends Controller
 
         $allStates = $this->marketplaceService->getCountryAreas($country);
         $popularStates = $allStates->take(10);
+        if ($slug === 'us') {
+            $targetCodes = ['CA', 'TX', 'FL', 'NY', 'IL', 'NV', 'WA', 'GA', 'CO', 'AZ'];
+            $byCode = $allStates->keyBy('code');
+            $ordered = collect($targetCodes)->map(fn ($c) => $byCode->get($c))->filter()->values();
+            if ($ordered->isNotEmpty()) {
+                $popularStates = $ordered;
+            }
+        }
         $popularCities = $this->marketplaceService->getPopularCities($country, 20);
         $allCountryCities = $slug === 'us'
             ? $popularCities
             : $this->marketplaceService->getPopularCities($country, 300);
         $categories = $this->marketplaceService->getCountryCategories($country);
+
+        // Optional GeoIP regional context (e.g., Florida -> Miami, California -> Los Angeles, New York -> New York City)
+        $geoContext = $this->geoLocationService->detectLocation($request);
+        $detectedArea = null;
+        $detectedCity = null;
+        if (strtoupper((string) ($geoContext['country_code'] ?? '')) === strtoupper($country->code)) {
+            $regionName = trim((string) ($geoContext['region_name'] ?? ''));
+            $cityName = trim((string) ($geoContext['city_name'] ?? ''));
+            if ($regionName !== '') {
+                $detectedArea = $allStates->first(fn ($st) => strcasecmp($st->name, $regionName) === 0 || strcasecmp($st->code, $regionName) === 0);
+            }
+            if ($cityName !== '') {
+                $cityQuery = \App\Modules\Locations\Models\City::query()
+                    ->where('country_id', $country->id)
+                    ->where('is_active', true)
+                    ->whereRaw('LOWER(name) = ?', [strtolower($cityName)]);
+                if ($detectedArea) {
+                    $cityQuery->where('state_id', $detectedArea->id);
+                }
+                $detectedCity = $cityQuery->with('state')->first();
+            }
+        }
+
         $featuredListings = $this->marketplaceService->getFeaturedListings($country, 4);
         $latestListings = $this->marketplaceService->getLatestListings($country, 12);
         $stats = $this->marketplaceService->getCountryStatistics($country);
@@ -156,6 +187,8 @@ class CountryMarketplaceController extends Controller
             'allStates' => $allStates,
             'popularCities' => $popularCities,
             'allCountryCities' => $allCountryCities,
+            'detectedArea' => $detectedArea,
+            'detectedCity' => $detectedCity,
             'stats' => $stats,
             'seo' => $seo,
             'seoTitle' => $seoTitle,

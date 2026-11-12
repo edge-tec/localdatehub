@@ -4,7 +4,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
                 <div class="flex items-center gap-2 text-xs text-slate-500 mb-1">
-                    <a href="{{ route('admin.countries.index') }}" class="hover:text-[#F50057] font-semibold">&larr; All 5 Country Marketplaces</a>
+                    <a href="{{ route('admin.countries.index') }}" class="hover:text-[#F50057] font-semibold">&larr; All 6 Country Marketplaces</a>
                     <span>/</span>
                     <span class="font-bold text-slate-800">{{ $country->name }} ({{ $country->code }})</span>
                 </div>
@@ -31,6 +31,35 @@
                 </a>
             </div>
         </div>
+
+        @if(isset($stats))
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-xs">
+                    <div class="text-xs font-bold text-slate-500">Total Listings</div>
+                    <div class="text-2xl font-black text-slate-900 mt-1">{{ number_format($stats['total_listings'] ?? 0) }}</div>
+                </div>
+                <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-xs">
+                    <div class="text-xs font-bold text-slate-500">Active Listings</div>
+                    <div class="text-2xl font-black text-emerald-600 mt-1">{{ number_format($stats['active_listings'] ?? 0) }}</div>
+                </div>
+                <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-xs">
+                    <div class="text-xs font-bold text-slate-500">Pending Listings</div>
+                    <div class="text-2xl font-black text-amber-600 mt-1">{{ number_format($stats['pending_listings'] ?? 0) }}</div>
+                </div>
+                <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-xs">
+                    <div class="text-xs font-bold text-slate-500">Featured Listings</div>
+                    <div class="text-2xl font-black text-[#F50057] mt-1">{{ number_format($stats['featured_listings'] ?? 0) }}</div>
+                </div>
+                <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-xs">
+                    <div class="text-xs font-bold text-slate-500">Total Users</div>
+                    <div class="text-2xl font-black text-slate-900 mt-1">{{ number_format($stats['total_users'] ?? 0) }}</div>
+                </div>
+                <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-xs">
+                    <div class="text-xs font-bold text-slate-500">Total Visitors</div>
+                    <div class="text-2xl font-black text-slate-900 mt-1">{{ number_format($stats['total_visitors'] ?? 0) }}</div>
+                </div>
+            </div>
+        @endif
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {{-- 1. Country Settings, Currency & SEO --}}

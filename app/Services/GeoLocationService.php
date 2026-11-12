@@ -209,7 +209,7 @@ class GeoLocationService
             }
 
             // Fallback to existing VisitorGeolocationService (which also caches in visitor_geolocation table)
-            return $this->visitorGeoService->resolve($ip, $request);
+            return $this->visitorGeoService->resolve($request, $ip);
         });
 
         return $this->formatLocationResult($resolved);

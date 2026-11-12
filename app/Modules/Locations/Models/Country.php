@@ -16,8 +16,11 @@ class Country extends Model
 {
     use HasFactory;
 
-    public const FIVE_MARKETPLACES = ['GB', 'CA', 'AU', 'IE', 'NZ'];
-    public const FIVE_MARKETPLACE_SLUGS = ['gb', 'ca', 'au', 'ie', 'nz'];
+    public const PRIMARY_MARKETPLACE = 'US';
+    public const SIX_MARKETPLACES = ['US', 'GB', 'CA', 'AU', 'IE', 'NZ'];
+    public const SIX_MARKETPLACE_SLUGS = ['us', 'gb', 'ca', 'au', 'ie', 'nz'];
+    public const FIVE_MARKETPLACES = ['US', 'GB', 'CA', 'AU', 'IE', 'NZ'];
+    public const FIVE_MARKETPLACE_SLUGS = ['us', 'gb', 'ca', 'au', 'ie', 'nz'];
 
     protected $fillable = [
         'code',

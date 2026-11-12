@@ -43,12 +43,18 @@ class FiveCountryMarketplaceTest extends TestCase
     public function test_seeder_populates_exact_five_countries_and_their_administrative_hierarchies(): void
     {
         $codes = Country::query()
-            ->whereIn('code', Country::FIVE_MARKETPLACES)
-            ->orderByRaw("CASE code WHEN 'GB' THEN 1 WHEN 'CA' THEN 2 WHEN 'AU' THEN 3 WHEN 'IE' THEN 4 WHEN 'NZ' THEN 5 ELSE 99 END")
+            ->whereIn('code', Country::SIX_MARKETPLACES)
+            ->orderByRaw("CASE code WHEN 'US' THEN 1 WHEN 'GB' THEN 2 WHEN 'CA' THEN 3 WHEN 'AU' THEN 4 WHEN 'IE' THEN 5 WHEN 'NZ' THEN 6 ELSE 99 END")
             ->pluck('code')
             ->all();
 
-        $this->assertSame(['GB', 'CA', 'AU', 'IE', 'NZ'], $codes);
+        $this->assertSame(['US', 'GB', 'CA', 'AU', 'IE', 'NZ'], $codes);
+
+        // 0. United States (Primary): 50 states + DC (+ territories)
+        $us = Country::query()->where('code', 'US')->firstOrFail();
+        $this->assertSame('USD', $us->currency_code);
+        $this->assertSame('$', $us->currency_symbol);
+        $this->assertGreaterThanOrEqual(51, State::query()->where('country_id', $us->id)->count());
 
         // 1. UK: 4 constituent nations (England, Scotland, Wales, Northern Ireland)
         $gb = Country::query()->where('code', 'GB')->firstOrFail();
@@ -299,7 +305,13 @@ class FiveCountryMarketplaceTest extends TestCase
         $countriesApi = $this->getJson('/api/locations/countries');
         $countriesApi->assertOk()
             ->assertJsonPath('status', 'ok')
-            ->assertJsonCount(5, 'data');
+            ->assertJsonCount(6, 'data')
+            ->assertJsonPath('data.0.code', 'US');
+
+        $usAreasApi = $this->getJson('/api/locations/countries/US/areas');
+        $usAreasApi->assertOk()
+            ->assertJsonPath('country.code', 'US');
+        $this->assertGreaterThanOrEqual(51, count($usAreasApi->json('data')));
 
         $gbAreasApi = $this->getJson('/api/locations/countries/GB/areas');
         $gbAreasApi->assertOk()
@@ -311,12 +323,67 @@ class FiveCountryMarketplaceTest extends TestCase
             ->assertJsonPath('country.code', 'GB')
             ->assertJsonPath('area.slug', 'england');
 
-        foreach (['gb', 'ca', 'au', 'ie', 'nz'] as $slug) {
+        foreach (['us', 'gb', 'ca', 'au', 'ie', 'nz'] as $slug) {
             $sitemap = $this->get("/{$slug}/sitemap.xml");
             $sitemap->assertOk();
             $this->assertStringContainsString('<urlset', $sitemap->getContent());
             $this->assertStringContainsString("/{$slug}", $sitemap->getContent());
         }
+    }
+
+    public function test_united_states_primary_marketplace_loads_50_states_dc_cities_listings_and_usd(): void
+    {
+        $us = Country::query()->where('code', 'US')->firstOrFail();
+        $this->assertSame('USD', $us->currency_code);
+        $this->assertSame('$', $us->currency_symbol);
+        $this->assertGreaterThanOrEqual(51, State::query()->where('country_id', $us->id)->count());
+
+        $fl = State::query()->where('country_id', $us->id)->where('code', 'FL')->firstOrFail();
+        $miami = City::query()->where('state_id', $fl->id)->where('slug', 'miami')->firstOrFail();
+
+        $caState = State::query()->where('country_id', $us->id)->where('code', 'CA')->firstOrFail();
+        $la = City::query()->where('state_id', $caState->id)->where('slug', 'los-angeles')->firstOrFail();
+
+        $nyState = State::query()->where('country_id', $us->id)->where('code', 'NY')->firstOrFail();
+        $nyc = City::query()->where('state_id', $nyState->id)->where('slug', 'new-york')->first()
+            ?? City::query()->where('state_id', $nyState->id)->firstOrFail();
+
+        $txState = State::query()->where('country_id', $us->id)->where('code', 'TX')->firstOrFail();
+        $houston = City::query()->where('state_id', $txState->id)->where('slug', 'houston')->firstOrFail();
+
+        $ilState = State::query()->where('country_id', $us->id)->where('code', 'IL')->firstOrFail();
+        $chicago = City::query()->where('state_id', $ilState->id)->where('slug', 'chicago')->firstOrFail();
+
+        $usListing = $this->createListingForCity($miami, 'Miami South Beach Connection', 150.00);
+        $gb = Country::query()->where('code', 'GB')->firstOrFail();
+        $england = State::query()->where('country_id', $gb->id)->where('slug', 'england')->firstOrFail();
+        $london = City::query()->where('state_id', $england->id)->where('slug', 'london')->firstOrFail();
+        $ukListing = $this->createListingForCity($london, 'London West End Listing', 110.00);
+
+        $usHome = $this->get('/us');
+        $usHome->assertOk();
+        $usHome->assertSee('Privacy-First Adult Dating & Personals');
+        $usHome->assertSee('United States');
+        $usHome->assertSee('California');
+        $usHome->assertSee('Florida');
+        $usHome->assertSee('Texas');
+        $usHome->assertSee('New York');
+        $usHome->assertSee('District of Columbia');
+        $usHome->assertSee($usListing->title);
+        $usHome->assertDontSee($ukListing->title);
+
+        $this->get('/us/florida/miami')->assertOk()->assertSee($usListing->title);
+        $this->get('/us/california/los-angeles')->assertOk();
+        $this->get('/us/texas/houston')->assertOk();
+        $this->get('/us/illinois/chicago')->assertOk();
+        $this->assertNotNull($nyc);
+
+        // Controlled GeoIP region/city headers resolve Florida -> Miami on /us
+        $this->withHeaders([
+            'CF-IPCountry' => 'US',
+            'X-Region-Name' => 'Florida',
+            'X-City-Name' => 'Miami',
+        ])->get('/us')->assertOk()->assertSee($usListing->title);
     }
 
     public function test_admin_can_manage_country_marketplaces_currencies_categories_and_locations(): void
@@ -328,9 +395,16 @@ class FiveCountryMarketplaceTest extends TestCase
         $this->actingAs($admin)
             ->get('/admin/countries')
             ->assertOk()
-            ->assertSee('Five-Country Marketplace Management')
+            ->assertSee('Six-Country Marketplace Management')
+            ->assertSee('United States (US)')
+            ->assertSee('Primary')
             ->assertSee('United Kingdom (GB)')
             ->assertSee('New Zealand (NZ)');
+
+        $this->actingAs($admin)
+            ->get('/admin/countries/us')
+            ->assertOk()
+            ->assertSee('United States Marketplace Configuration');
 
         $this->actingAs($admin)
             ->get('/admin/countries/gb')
