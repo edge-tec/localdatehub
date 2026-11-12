@@ -30,6 +30,10 @@ class NavbarRedesignTest extends TestCase
         $response->assertSee('Search popular cities...');
         $response->assertSee('mobileMenuOpen');
         $response->assertSee('Close menu');
+        $response->assertSee('white-space: nowrap', false);
+        $response->assertSee('flex-wrap: nowrap', false);
+        $response->assertSee('ldh-post-ad-btn', false);
+        $response->assertSee('ldh-desktop-nav', false);
         $response->assertDontSee('Admin Dashboard');
         $response->assertDontSee('Live Visitors Monitor');
         $response->assertDontSee('My Dashboard');
