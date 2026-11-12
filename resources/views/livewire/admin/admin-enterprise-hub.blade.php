@@ -1514,22 +1514,35 @@
                     </div>
                 @endif
 
-                <div class="{{ $card }} overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead>
-                            <tr>
-                                <th class="{{ $th }} w-10">
-                                    <span class="sr-only">Select</span>
-                                </th>
-                                <th class="{{ $th }}">Listing Content</th>
-                                <th class="{{ $th }}">Listing Owner</th>
-                                <th class="{{ $th }}">Automated Screening</th>
-                                <th class="{{ $th }}">Submitted</th>
-                                <th class="{{ $th }}">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        @forelse($pendingQueue as $l)
+                @if($pendingQueue->isEmpty())
+                    <div class="{{ $card }} p-6 sm:p-10 text-center bg-slate-50/50">
+                        <div class="max-w-md mx-auto space-y-2.5">
+                            <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto text-xl font-black">
+                                ✔
+                            </div>
+                            <h3 class="font-black text-slate-900 text-sm">Review Queue Is Clean</h3>
+                            <p class="text-xs text-slate-500 font-medium leading-relaxed">
+                                All classified listings submitted by advertisers have been processed. New listings awaiting moderation will appear here automatically.
+                            </p>
+                        </div>
+                    </div>
+                @else
+                    <div class="{{ $card }} overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr>
+                                    <th class="{{ $th }} w-10">
+                                        <span class="sr-only">Select</span>
+                                    </th>
+                                    <th class="{{ $th }}">Listing Content</th>
+                                    <th class="{{ $th }}">Listing Owner</th>
+                                    <th class="{{ $th }}">Automated Screening</th>
+                                    <th class="{{ $th }}">Submitted</th>
+                                    <th class="{{ $th }}">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach($pendingQueue as $l)
                             <tr class="border-t border-slate-100 hover:bg-slate-50/60 transition" wire:key="queue-{{ $l->id }}">
                                 <td class="{{ $td }}">
                                     <input
@@ -1663,25 +1676,12 @@
                                     @endif
                                 </td>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="p-8 text-center bg-slate-50/50">
-                                    <div class="max-w-md mx-auto space-y-2">
-                                        <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto text-xl font-black">
-                                            ✔
-                                        </div>
-                                        <h3 class="font-black text-slate-900 text-sm">Review Queue Is Clean</h3>
-                                        <p class="text-xs text-slate-500 font-medium">
-                                            All classified listings submitted by advertisers have been processed. New listings awaiting moderation will appear here automatically.
-                                        </p>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                        </tbody>
-                    </table>
-                    <div class="p-3">{{ $pendingQueue->links() }}</div>
-                </div>
+                            @endforeach
+                            </tbody>
+                        </table>
+                        <div class="p-3">{{ $pendingQueue->links() }}</div>
+                    </div>
+                @endif
             @endif
 
             {{-- ================= SUB-TAB 2: SUSPENSION APPEALS ================= --}}

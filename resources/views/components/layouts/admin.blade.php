@@ -226,12 +226,12 @@
                             x-transition:leave="transition ease-in duration-100"
                             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                             x-transition:leave-end="opacity-0 translate-y-2 scale-95"
-                            class="absolute right-0 mt-2.5 w-[calc(100vw-24px)] sm:w-[500px] max-w-[520px] rounded-3xl bg-white border border-slate-200/90 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.18)] p-3.5 sm:p-5 z-50 text-xs font-sans"
+                            class="fixed inset-x-3 top-[4.25rem] sm:inset-x-auto sm:top-auto sm:absolute sm:right-0 sm:mt-2.5 w-auto sm:w-[460px] md:w-[500px] max-w-[calc(100vw-1.5rem)] max-h-[calc(100dvh-5.5rem)] flex flex-col rounded-3xl bg-white border border-slate-200/90 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.18)] p-3.5 sm:p-5 z-50 text-xs font-sans"
                         >
                             <!-- Dropdown Header -->
-                            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
-                                <div>
-                                    <div class="font-black text-slate-900 text-sm tracking-tight flex items-center gap-2">
+                            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-100 shrink-0">
+                                <div class="min-w-0">
+                                    <div class="font-black text-slate-900 text-sm tracking-tight flex flex-wrap items-center gap-2">
                                         <span>Live Notifications</span>
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black">
                                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -240,12 +240,13 @@
                                     </div>
                                     <div class="text-[10px] font-medium text-slate-400 mt-0.5">Real-time alerts &amp; pending customer requests</div>
                                 </div>
-                                <div class="flex items-center gap-1.5">
+                                <div class="flex items-center gap-1.5 shrink-0">
                                     <button 
                                         type="button" 
                                         @click="pollLatest()" 
                                         class="p-1.5 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition cursor-pointer flex items-center gap-1 text-[11px] font-bold" 
                                         title="Refresh notifications"
+                                        aria-label="Refresh notifications"
                                     >
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
@@ -254,10 +255,10 @@
                                     <button 
                                         type="button" 
                                         @click="markAllSeen()" 
-                                        class="px-2.5 py-1 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer text-[10px] font-bold flex items-center gap-1 border border-slate-200" 
+                                        class="px-2.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer text-[10px] font-bold flex items-center gap-1 border border-slate-200 whitespace-nowrap" 
                                         title="Mark all notifications as read"
                                     >
-                                        <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                        <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                         </svg>
                                         <span>Mark Read</span>
@@ -266,7 +267,7 @@
                             </div>
 
                             <!-- Filter Tabs Grid: 100% Fully Visible, Never Cut Off, Overlapping, or Broken -->
-                            <div class="grid grid-cols-5 gap-1 sm:gap-1.5 pb-3 mb-3 border-b border-slate-100 w-full">
+                            <div class="grid grid-cols-3 sm:grid-cols-5 gap-1.5 pb-3 mb-3 border-b border-slate-100 w-full shrink-0">
                                 <button 
                                     type="button" 
                                     @click="activeCategoryFilter = 'all'"
@@ -350,7 +351,7 @@
                             </div>
 
                             <!-- Notification Items List -->
-                            <div class="space-y-2 max-h-84 overflow-y-auto pr-1 no-scrollbar">
+                            <div class="space-y-2 flex-1 min-h-0 max-h-80 overflow-y-auto pr-1 no-scrollbar">
                                 <template x-for="item in filteredItems()" :key="item.id">
                                     <a 
                                         :href="item.url" 
@@ -450,7 +451,7 @@
                             </div>
 
                             <!-- Dropdown Footer: Single Non-Duplicated Action to Full Audit Trail -->
-                            <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                            <div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs shrink-0">
                                 <div class="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
                                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                                     <span>Live Monitoring Active</span>
