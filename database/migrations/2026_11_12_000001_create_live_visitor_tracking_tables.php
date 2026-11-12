@@ -112,3 +112,4 @@ return new class extends Migration
         Schema::dropIfExists('visitor_geolocation');
     }
 };
+

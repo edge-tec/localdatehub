@@ -58,3 +58,4 @@ class EmailRelayConversation extends Model
         return 'reply-' . $this->conversation_token . '@' . $domain;
     }
 }
+

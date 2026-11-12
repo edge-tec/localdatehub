@@ -109,3 +109,4 @@ class VisitorSession extends Model
         return "{$hours}h {$remMinutes}m";
     }
 }
+

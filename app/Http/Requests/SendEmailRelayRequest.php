@@ -42,3 +42,4 @@ class SendEmailRelayRequest extends FormRequest
         ];
     }
 }
+

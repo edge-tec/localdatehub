@@ -37,3 +37,4 @@ class InboundEmailController extends Controller
         ], 202);
     }
 }
+

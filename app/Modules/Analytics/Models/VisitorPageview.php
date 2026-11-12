@@ -36,3 +36,4 @@ class VisitorPageview extends Model
         return $this->belongsTo(VisitorSession::class, 'visitor_session_id');
     }
 }
+

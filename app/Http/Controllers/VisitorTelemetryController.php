@@ -31,3 +31,4 @@ class VisitorTelemetryController extends Controller
         ]);
     }
 }
+

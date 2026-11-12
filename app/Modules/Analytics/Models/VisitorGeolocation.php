@@ -31,3 +31,4 @@ class VisitorGeolocation extends Model
         ];
     }
 }
+

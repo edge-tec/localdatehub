@@ -85,3 +85,4 @@ class EmailRelayMessage extends Model
         return $this->hasMany(EmailRelayEvent::class, 'relay_message_id');
     }
 }
+

@@ -453,3 +453,4 @@ class LiveVisitorTrackingService
         return Str::title(str_replace(['-', '_', '/'], ' ', $trimmed));
     }
 }
+

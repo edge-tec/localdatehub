@@ -33,3 +33,4 @@ class EmailRelayEvent extends Model
         return $this->belongsTo(EmailRelayMessage::class, 'relay_message_id');
     }
 }
+

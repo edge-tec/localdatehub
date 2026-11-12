@@ -30,3 +30,4 @@ class EmailRelayWebhookController extends Controller
         ]);
     }
 }
+

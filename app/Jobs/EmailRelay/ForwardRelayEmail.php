@@ -66,3 +66,4 @@ class ForwardRelayEmail implements ShouldQueue
         ]);
     }
 }
+
