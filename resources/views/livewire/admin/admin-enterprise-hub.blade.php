@@ -14,8 +14,18 @@
                 this.expandedMenus[name] = !this.expandedMenus[name];
             }
         }">
+        <style>
+            @media (max-width: 1023px) {
+                .ldh-admin-sidebar-nav { display: none; }
+                .ldh-admin-sidebar-nav.is-open { display: block; }
+            }
+            @media (min-width: 1024px) {
+                .ldh-admin-mobile-toggle { display: none !important; }
+                .ldh-admin-sidebar-nav { display: block !important; }
+            }
+        </style>
         {{-- Mobile Sidebar Toggle Bar --}}
-        <div class="lg:hidden mb-3">
+        <div class="ldh-admin-mobile-toggle lg:hidden mb-3">
             <button type="button"
                 @click="mobileMenuOpen = !mobileMenuOpen"
                 :aria-expanded="mobileMenuOpen.toString()"
@@ -37,9 +47,9 @@
             </button>
         </div>
 
-        <nav :class="mobileMenuOpen ? 'block' : 'hidden lg:block'"
+        <nav :class="{ 'is-open': mobileMenuOpen }"
             @click="if ($event.target.closest('button[wire\\:click], a[href]')) mobileMenuOpen = false"
-            class="bg-white border border-slate-200 rounded-2xl p-3.5 lg:sticky lg:top-24 space-y-1 shadow-sm">
+            class="ldh-admin-sidebar-nav bg-white border border-slate-200 rounded-2xl p-3.5 lg:sticky lg:top-24 space-y-1 shadow-sm">
             
             <!-- Admin Profile Card with Dropdown -->
             <div class="relative mb-3">
