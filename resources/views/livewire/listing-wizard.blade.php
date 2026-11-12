@@ -227,22 +227,29 @@
 
             <div class="space-y-6">
                 <!-- Title / Headline -->
-                <div class="rounded-2xl border border-slate-200/80 bg-slate-50/40 p-4 sm:p-5 space-y-2.5 transition focus-within:border-[#F20B83]/60 focus-within:bg-white focus-within:shadow-sm">
+                <div class="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-[0_2px_14px_-4px_rgba(15,23,42,0.06)] space-y-3 transition-all duration-200 focus-within:border-[#F20B83]/60 focus-within:shadow-[0_8px_24px_-6px_rgba(242,11,131,0.14)]">
                     <div class="flex items-center justify-between gap-2">
-                        <label class="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                            <span>Listing Headline / Title</span>
-                            <span class="text-[#F20B83]">*</span>
+                        <label class="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-lg bg-gradient-to-br from-[#F20B83]/15 to-rose-500/10 text-[#F20B83] flex items-center justify-center">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+                                </svg>
+                            </span>
+                            <span>Listing Headline / Title <span class="text-[#F20B83]">*</span></span>
                         </label>
-                        @php $titleLen = mb_strlen((string) $title); @endphp
-                        <span class="px-2 py-0.5 rounded-full text-[11px] font-bold {{ $titleLen >= 10 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500' }}">
-                            {{ $titleLen }}/120
+                        @php
+                            $titleLen = mb_strlen((string) $title);
+                            $titlePct = min(100, (int) round(($titleLen / 120) * 100));
+                        @endphp
+                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold {{ $titleLen >= 10 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200/70' }}">
+                            {{ $titleLen }} / 120
                         </span>
                     </div>
 
-                    <div class="relative">
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                    <div class="relative group">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 group-focus-within:text-[#F20B83] transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
                             </svg>
                         </div>
                         <input
@@ -250,8 +257,12 @@
                             wire:model.live.debounce.250ms="title"
                             maxlength="120"
                             placeholder="e.g., Warm & Genuine Professional Seeking Meaningful Connection"
-                            class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm font-medium placeholder:text-slate-400 focus:border-[#F20B83] focus:ring-4 focus:ring-[#F20B83]/10 outline-none transition"
+                            class="w-full pl-11 pr-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white text-slate-900 text-sm font-medium placeholder:text-slate-400 focus:border-[#F20B83] focus:ring-4 focus:ring-[#F20B83]/10 outline-none transition"
                         />
+                    </div>
+
+                    <div class="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all duration-300 {{ $titleLen >= 10 ? 'bg-gradient-to-r from-[#F20B83] to-emerald-500' : 'bg-[#F20B83]/70' }}" style="width: {{ $titlePct }}%;"></div>
                     </div>
 
                     <div class="flex items-center justify-between text-[11px] text-slate-500">
@@ -263,8 +274,10 @@
                         @endif
                     </div>
                     @error('title')
-                        <div class="flex items-center gap-1.5 text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-1.5">
-                            <span>⚠</span>
+                        <div class="flex items-center gap-2 text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl px-3.5 py-2">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                            </svg>
                             <span>{{ $message }}</span>
                         </div>
                     @enderror
@@ -273,12 +286,17 @@
                 <!-- Age & Gender Row -->
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
                     <!-- Interactive Age Stepper (18+) -->
-                    <div class="lg:col-span-4 rounded-2xl border border-slate-200/80 bg-slate-50/40 p-4 sm:p-5 space-y-3">
+                    <div class="lg:col-span-4 rounded-2xl border border-slate-200/90 bg-white p-5 shadow-[0_2px_14px_-4px_rgba(15,23,42,0.06)] space-y-3">
                         <div class="flex items-center justify-between">
-                            <label class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">
-                                Your Age (18+) <span class="text-[#F20B83]">*</span>
+                            <label class="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-lg bg-gradient-to-br from-[#F20B83]/15 to-rose-500/10 text-[#F20B83] flex items-center justify-center">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </span>
+                                <span>Your Age <span class="text-[#F20B83]">*</span></span>
                             </label>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-50 text-[#F20B83] border border-pink-200">18+ Only</span>
+                            <span class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-pink-50 text-[#F20B83] border border-pink-200">18+ Only</span>
                         </div>
 
                         <div
@@ -286,27 +304,31 @@
                                 dec() { let v = parseInt($wire.poster_age || 25, 10); if (v > 18) $wire.set('poster_age', v - 1); },
                                 inc() { let v = parseInt($wire.poster_age || 25, 10); if (v < 99) $wire.set('poster_age', v + 1); }
                             }"
-                            class="flex items-center gap-2 bg-white border border-slate-200 rounded-xl p-1.5 shadow-2xs focus-within:border-[#F20B83] focus-within:ring-4 focus-within:ring-[#F20B83]/10 transition"
+                            class="flex items-center gap-2 bg-slate-50/70 border border-slate-200 rounded-xl p-1.5 focus-within:bg-white focus-within:border-[#F20B83] focus-within:ring-4 focus-within:ring-[#F20B83]/10 transition"
                         >
                             <button
                                 type="button"
                                 @click="dec()"
-                                class="w-10 h-10 rounded-lg bg-slate-100 hover:bg-pink-50 hover:text-[#F20B83] text-slate-700 font-black text-lg flex items-center justify-center transition cursor-pointer"
+                                class="w-10 h-10 rounded-lg bg-white border border-slate-200/80 hover:border-[#F20B83]/50 hover:bg-pink-50 hover:text-[#F20B83] text-slate-700 font-black text-base flex items-center justify-center shadow-2xs transition cursor-pointer"
                                 aria-label="Decrease age"
-                            >−</button>
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14"/></svg>
+                            </button>
                             <input
                                 type="number"
                                 wire:model.live.debounce.200ms="poster_age"
                                 min="18"
                                 max="99"
-                                class="w-full text-center font-black text-lg text-slate-900 bg-transparent border-0 focus:ring-0 outline-none"
+                                class="w-full text-center font-black text-xl text-slate-900 bg-transparent border-0 focus:ring-0 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             />
                             <button
                                 type="button"
                                 @click="inc()"
-                                class="w-10 h-10 rounded-lg bg-slate-100 hover:bg-pink-50 hover:text-[#F20B83] text-slate-700 font-black text-lg flex items-center justify-center transition cursor-pointer"
+                                class="w-10 h-10 rounded-lg bg-white border border-slate-200/80 hover:border-[#F20B83]/50 hover:bg-pink-50 hover:text-[#F20B83] text-slate-700 font-black text-base flex items-center justify-center shadow-2xs transition cursor-pointer"
                                 aria-label="Increase age"
-                            >+</button>
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14"/></svg>
+                            </button>
                         </div>
                         <p class="text-[11px] text-slate-500">Must be 18 to 99 years old.</p>
                         @error('poster_age')
@@ -315,18 +337,23 @@
                     </div>
 
                     <!-- Interactive Gender Pill Cards -->
-                    <div class="lg:col-span-8 rounded-2xl border border-slate-200/80 bg-slate-50/40 p-4 sm:p-5 space-y-3">
-                        <label class="block text-xs font-extrabold text-slate-800 uppercase tracking-wider">
-                            Your Gender <span class="text-[#F20B83]">*</span>
+                    <div class="lg:col-span-8 rounded-2xl border border-slate-200/90 bg-white p-5 shadow-[0_2px_14px_-4px_rgba(15,23,42,0.06)] space-y-3">
+                        <label class="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-lg bg-gradient-to-br from-[#F20B83]/15 to-rose-500/10 text-[#F20B83] flex items-center justify-center">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                </svg>
+                            </span>
+                            <span>Your Gender <span class="text-[#F20B83]">*</span></span>
                         </label>
 
                         @php
                             $genderOptions = [
-                                ['value' => 'Male', 'label' => 'Male', 'icon' => '👨'],
-                                ['value' => 'Female', 'label' => 'Female', 'icon' => '👩'],
-                                ['value' => 'Non-Binary', 'label' => 'Non-Binary / Trans', 'icon' => '⚧️'],
-                                ['value' => 'Couple', 'label' => 'Couple', 'icon' => '💑'],
-                                ['value' => 'Other', 'label' => 'Other', 'icon' => '✨'],
+                                ['value' => 'Male', 'label' => 'Male', 'icon' => 'male'],
+                                ['value' => 'Female', 'label' => 'Female', 'icon' => 'female'],
+                                ['value' => 'Non-Binary', 'label' => 'Non-Binary / Trans', 'icon' => 'nonbinary'],
+                                ['value' => 'Couple', 'label' => 'Couple', 'icon' => 'couple'],
+                                ['value' => 'Other', 'label' => 'Other', 'icon' => 'other'],
                             ];
                         @endphp
 
@@ -336,9 +363,21 @@
                                 <button
                                     type="button"
                                     wire:click="$set('poster_gender', '{{ $gOpt['value'] }}')"
-                                    class="relative flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border-2 text-left transition cursor-pointer {{ $gActive ? 'border-[#F20B83] bg-pink-50/70 text-slate-900 shadow-xs' : 'border-slate-200 bg-white text-slate-700 hover:border-[#F20B83]/40 hover:bg-slate-50' }}"
+                                    class="group relative flex items-center gap-2.5 px-3 py-2.5 rounded-xl border-2 text-left transition-all duration-150 cursor-pointer {{ $gActive ? 'border-[#F20B83] bg-gradient-to-br from-pink-50/90 to-rose-50/50 text-slate-900 shadow-xs' : 'border-slate-200/90 bg-slate-50/40 text-slate-700 hover:border-[#F20B83]/40 hover:bg-white' }}"
                                 >
-                                    <span class="text-base leading-none">{{ $gOpt['icon'] }}</span>
+                                    <span class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition {{ $gActive ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-white border border-slate-200 text-slate-500 group-hover:text-[#F20B83]' }}">
+                                        @if($gOpt['icon'] === 'male')
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a7.5 7.5 0 0115 0"/></svg>
+                                        @elseif($gOpt['icon'] === 'female')
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14a5 5 0 100-10 5 5 0 000 10zm0 0v7m-3-3h6"/></svg>
+                                        @elseif($gOpt['icon'] === 'couple')
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+                                        @elseif($gOpt['icon'] === 'nonbinary')
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+                                        @else
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                                        @endif
+                                    </span>
                                     <span class="text-xs font-bold leading-tight truncate">{{ $gOpt['label'] }}</span>
                                     @if($gActive)
                                         <span class="ml-auto w-4 h-4 rounded-full bg-[#F20B83] text-white text-[10px] flex items-center justify-center shrink-0">✓</span>
@@ -353,30 +392,47 @@
                 </div>
 
                 <!-- Interactive Seeking Intent Cards -->
-                <div class="rounded-2xl border border-slate-200/80 bg-slate-50/40 p-4 sm:p-5 space-y-3">
-                    <label class="block text-xs font-extrabold text-slate-800 uppercase tracking-wider">
-                        Seeking Intent <span class="text-[#F20B83]">*</span>
+                <div class="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-[0_2px_14px_-4px_rgba(15,23,42,0.06)] space-y-3">
+                    <label class="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-lg bg-gradient-to-br from-[#F20B83]/15 to-rose-500/10 text-[#F20B83] flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                            </svg>
+                        </span>
+                        <span>Seeking Intent <span class="text-[#F20B83]">*</span></span>
                     </label>
 
                     @php
                         $intentOptions = [
-                            ['value' => 'dating', 'label' => 'Dating & Romance', 'desc' => 'Dates, chemistry & genuine sparks', 'icon' => '💘'],
-                            ['value' => 'long-term', 'label' => 'Long-Term Relationship', 'desc' => 'Committed partner & future together', 'icon' => '💍'],
-                            ['value' => 'activity', 'label' => 'Activity & Travel Partner', 'desc' => 'Events, dinners, trips & hobbies', 'icon' => '✈️'],
-                            ['value' => 'casual', 'label' => 'Casual Dating', 'desc' => 'Relaxed, no-pressure meetups', 'icon' => '🥂'],
-                            ['value' => 'friendship', 'label' => 'Friendship & Social', 'desc' => 'Local social circle & platonic hangs', 'icon' => '🤝'],
+                            ['value' => 'dating', 'label' => 'Dating & Romance', 'desc' => 'Dates, chemistry & genuine sparks', 'icon' => 'heart'],
+                            ['value' => 'long-term', 'label' => 'Long-Term Relationship', 'desc' => 'Committed partner & future together', 'icon' => 'ring'],
+                            ['value' => 'activity', 'label' => 'Activity & Travel Partner', 'desc' => 'Events, dinners, trips & hobbies', 'icon' => 'globe'],
+                            ['value' => 'casual', 'label' => 'Casual Dating', 'desc' => 'Relaxed, no-pressure meetups', 'icon' => 'spark'],
+                            ['value' => 'friendship', 'label' => 'Friendship & Social', 'desc' => 'Local social circle & platonic hangs', 'icon' => 'users'],
                         ];
                     @endphp
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         @foreach($intentOptions as $iOpt)
                             @php $iActive = ($intent === $iOpt['value']); @endphp
                             <button
                                 type="button"
                                 wire:click="$set('intent', '{{ $iOpt['value'] }}')"
-                                class="relative flex items-start gap-3 p-3 rounded-xl border-2 text-left transition cursor-pointer {{ $iActive ? 'border-[#F20B83] bg-pink-50/70 shadow-xs' : 'border-slate-200 bg-white hover:border-[#F20B83]/40 hover:bg-slate-50' }}"
+                                class="group relative flex items-start gap-3 p-3.5 rounded-xl border-2 text-left transition-all duration-150 cursor-pointer {{ $iActive ? 'border-[#F20B83] bg-gradient-to-br from-pink-50/90 to-rose-50/40 shadow-xs' : 'border-slate-200/90 bg-slate-50/40 hover:border-[#F20B83]/40 hover:bg-white' }}"
                             >
-                                <span class="text-lg leading-none mt-0.5">{{ $iOpt['icon'] }}</span>
+                                <span class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition {{ $iActive ? 'bg-[#F20B83] text-white shadow-xs' : 'bg-white border border-slate-200 text-slate-500 group-hover:text-[#F20B83]' }}">
+                                    @if($iOpt['icon'] === 'heart')
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>
+                                    @elseif($iOpt['icon'] === 'ring')
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+                                    @elseif($iOpt['icon'] === 'globe')
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253"/></svg>
+                                    @elseif($iOpt['icon'] === 'spark')
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z"/></svg>
+                                    @else
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.999-3.199a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    @endif
+                                </span>
                                 <div class="min-w-0 flex-1">
                                     <div class="text-xs font-extrabold text-slate-900 leading-snug">{{ $iOpt['label'] }}</div>
                                     <div class="text-[11px] text-slate-500 leading-tight mt-0.5">{{ $iOpt['desc'] }}</div>
@@ -393,14 +449,22 @@
                 </div>
 
                 <!-- Description -->
-                <div class="rounded-2xl border border-slate-200/80 bg-slate-50/40 p-4 sm:p-5 space-y-2.5 transition focus-within:border-[#F20B83]/60 focus-within:bg-white focus-within:shadow-sm">
+                <div class="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-[0_2px_14px_-4px_rgba(15,23,42,0.06)] space-y-3 transition-all duration-200 focus-within:border-[#F20B83]/60 focus-within:shadow-[0_8px_24px_-6px_rgba(242,11,131,0.14)]">
                     <div class="flex items-center justify-between gap-2">
-                        <label class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">
-                            Ad Description <span class="text-[#F20B83]">*</span>
+                        <label class="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-lg bg-gradient-to-br from-[#F20B83]/15 to-rose-500/10 text-[#F20B83] flex items-center justify-center">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
+                                </svg>
+                            </span>
+                            <span>Ad Description <span class="text-[#F20B83]">*</span></span>
                         </label>
-                        @php $descLen = mb_strlen((string) $description); @endphp
-                        <span class="px-2 py-0.5 rounded-full text-[11px] font-bold {{ $descLen >= 20 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500' }}">
-                            {{ $descLen }}/5000
+                        @php
+                            $descLen = mb_strlen((string) $description);
+                            $descPct = min(100, (int) round(($descLen / 5000) * 100));
+                        @endphp
+                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold {{ $descLen >= 20 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200/70' }}">
+                            {{ $descLen }} / 5000
                         </span>
                     </div>
 
@@ -409,8 +473,12 @@
                         rows="6"
                         maxlength="5000"
                         placeholder="Describe who you are, what activities you enjoy, and what you are looking for in a match..."
-                        class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm leading-relaxed placeholder:text-slate-400 focus:border-[#F20B83] focus:ring-4 focus:ring-[#F20B83]/10 outline-none transition"
+                        class="w-full px-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white text-slate-900 text-sm leading-relaxed placeholder:text-slate-400 focus:border-[#F20B83] focus:ring-4 focus:ring-[#F20B83]/10 outline-none transition"
                     ></textarea>
+
+                    <div class="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all duration-300 {{ $descLen >= 20 ? 'bg-gradient-to-r from-[#F20B83] to-emerald-500' : 'bg-[#F20B83]/70' }}" style="width: {{ max($descLen > 0 ? 4 : 0, $descPct) }}%;"></div>
+                    </div>
 
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] text-slate-500">
                         <span>Minimum 20 characters. Commercial solicitations and prostitution are strictly prohibited.</span>
@@ -421,8 +489,10 @@
                         @endif
                     </div>
                     @error('description')
-                        <div class="flex items-center gap-1.5 text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-1.5">
-                            <span>⚠</span>
+                        <div class="flex items-center gap-2 text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl px-3.5 py-2">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                            </svg>
                             <span>{{ $message }}</span>
                         </div>
                     @enderror
@@ -497,7 +567,9 @@
                         class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-left text-sm font-semibold text-slate-800 hover:border-[#F20B83]/50 focus:border-[#F20B83] focus:ring-4 focus:ring-[#F20B83]/10 transition cursor-pointer"
                     >
                         <span class="flex items-center gap-2 truncate">
-                            <span class="text-[#F20B83]">📍</span>
+                            <span class="w-5 h-5 rounded-md bg-pink-50 text-[#F20B83] flex items-center justify-center shrink-0">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+                            </span>
                             <span class="truncate" x-text="selectedLabel()"></span>
                         </span>
                         <svg class="w-4 h-4 text-slate-400 shrink-0 transition" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -570,7 +642,9 @@
                         class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-left text-sm font-semibold text-slate-800 hover:border-[#F20B83]/50 focus:border-[#F20B83] focus:ring-4 focus:ring-[#F20B83]/10 transition cursor-pointer"
                     >
                         <span class="flex items-center gap-2 truncate">
-                            <span class="text-[#F20B83]">🏙️</span>
+                            <span class="w-5 h-5 rounded-md bg-pink-50 text-[#F20B83] flex items-center justify-center shrink-0">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z"/></svg>
+                            </span>
                             <span class="truncate" x-text="selectedLabel()"></span>
                         </span>
                         <svg class="w-4 h-4 text-slate-400 shrink-0 transition" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -640,7 +714,7 @@
             <div class="bg-gradient-to-r from-slate-50 to-pink-50/40 border border-slate-200 rounded-2xl p-4 sm:p-5 flex items-center justify-between gap-4">
                 <div class="flex items-start gap-3">
                     <div class="w-9 h-9 rounded-xl bg-[#F20B83]/10 text-[#F20B83] flex items-center justify-center shrink-0">
-                        🛡️
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
                     </div>
                     <div>
                         <h4 class="text-xs sm:text-sm font-extrabold text-slate-900">Obfuscate Exact Location</h4>
