@@ -572,6 +572,9 @@ Route::post('/webhooks/email-relay/status/{provider?}', [\App\Http\Controllers\E
 Route::get('/choose-country', [\App\Http\Controllers\CountryMarketplaceController::class, 'chooseCountry'])
     ->name('country.choose');
 
+Route::get('/countries', [\App\Http\Controllers\CountryMarketplaceController::class, 'countriesIndex'])
+    ->name('countries.choose');
+
 Route::get('/marketplace/auto', [\App\Http\Controllers\CountryMarketplaceController::class, 'autoRoute'])
     ->name('country.auto');
 

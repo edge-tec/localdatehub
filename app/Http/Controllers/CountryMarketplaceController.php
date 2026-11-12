@@ -49,6 +49,22 @@ class CountryMarketplaceController extends Controller
     }
 
     /**
+     * Public all-countries marketplace directory (/countries).
+     */
+    public function countriesIndex(Request $request): View
+    {
+        $countries = $this->marketplaceService->getSupportedCountries(true);
+        $detectedGeo = $this->geoLocationService->detectLocation($request);
+        $selectedCountryCode = $this->geoLocationService->resolveMarketplaceDecision($request)['country_code'] ?? null;
+
+        return view('country.choose', [
+            'countries' => $countries,
+            'detectedGeo' => $detectedGeo,
+            'selectedCountryCode' => $selectedCountryCode,
+        ]);
+    }
+
+    /**
      * Persist country selection in session & cookie and redirect to that country marketplace.
      */
     public function switchCountry(Request $request, string $countrySlug): RedirectResponse

@@ -453,6 +453,20 @@ class FiveCountryMarketplaceTest extends TestCase
         ]);
     }
 
+    public function test_public_countries_directory_page_lists_all_six_countries(): void
+    {
+        $response = $this->get('/countries');
+
+        $response->assertOk()
+            ->assertSee('data-choose-country-page', false)
+            ->assertSee('United States')
+            ->assertSee('United Kingdom')
+            ->assertSee('Canada')
+            ->assertSee('Australia')
+            ->assertSee('Ireland')
+            ->assertSee('New Zealand');
+    }
+
     private function createListingForCity(City $city, string $title, float $price): Listing
     {
         return Listing::query()->create([

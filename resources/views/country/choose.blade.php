@@ -10,14 +10,14 @@
                 Choose Your Country Marketplace
             </h1>
             <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
-                LocalDateHub operates five dedicated country marketplaces, each with its own verified cities, administrative regions, local categories, and currency.
+                LocalDateHub operates six dedicated country marketplaces, each with its own verified cities, administrative regions, local categories, and currency.
             </p>
 
             @if(!empty($detectedGeo['country_code']))
                 <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700" data-detected-location>
                     <span>Detected Location: <strong>{{ $detectedGeo['country_name'] ?? $detectedGeo['country_code'] }} ({{ $detectedGeo['country_code'] }})</strong></span>
                     @if(!$detectedGeo['is_supported_marketplace'])
-                        <span class="text-amber-700">• Please select one of our 5 supported country marketplaces below.</span>
+                        <span class="text-amber-700">• Please select one of our 6 supported country marketplaces below.</span>
                     @endif
                 </div>
             @endif
