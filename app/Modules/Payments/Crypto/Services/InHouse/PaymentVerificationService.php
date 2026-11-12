@@ -3,6 +3,7 @@
 namespace App\Modules\Payments\Crypto\Services\InHouse;
 
 use App\Modules\Payments\Crypto\Models\CryptoPaymentInvoice;
+use App\Modules\Payments\Crypto\Models\CryptoPaymentSetting;
 use App\Modules\Payments\Crypto\Models\CryptoTransaction;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -88,13 +89,18 @@ class PaymentVerificationService
                 return ['status' => 'FAILED_VALIDATION', 'errors' => $errors];
             }
 
-            // Amount Comparison (Underpayment / Overpayment check)
-            $diff = bccomp($receivedAmount, $expectedAmount, 8);
-            $amountStatus = match ($diff) {
-                -1 => CryptoPaymentInvoice::STATUS_UNDERPAID,
-                1 => CryptoPaymentInvoice::STATUS_OVERPAID,
-                0 => 'EXACT',
-            };
+            // Amount Comparison (Underpayment / Overpayment check with configurable tolerance for exchange withdrawal fees)
+            $tolerancePct = (float) CryptoPaymentSetting::get('underpayment_threshold_percentage', 2.0);
+            $toleranceFactor = bcsub('1', bcdiv((string) max(0, min(10, $tolerancePct)), '100', 6), 6);
+            $minimumAcceptable = bcmul($expectedAmount, $toleranceFactor, 8);
+
+            if (bccomp($receivedAmount, $minimumAcceptable, 8) < 0) {
+                $amountStatus = CryptoPaymentInvoice::STATUS_UNDERPAID;
+            } elseif (bccomp($receivedAmount, $expectedAmount, 8) > 0) {
+                $amountStatus = CryptoPaymentInvoice::STATUS_OVERPAID;
+            } else {
+                $amountStatus = 'EXACT';
+            }
 
             // Update Invoice confirmations and received amount
             $invoice->update([

@@ -116,7 +116,14 @@ class CryptoPaymentService
             $payment->save();
 
             if ($payment->status === CryptoPayment::STATUS_COMPLETED) {
-                $this->boostService->activateBoost($payment);
+                if (!$payment->confirmed_at) {
+                    $payment->confirmed_at = now();
+                    $payment->save();
+                }
+
+                if (!empty($payment->listing_id)) {
+                    $this->boostService->activateBoost($payment);
+                }
             }
         }
 

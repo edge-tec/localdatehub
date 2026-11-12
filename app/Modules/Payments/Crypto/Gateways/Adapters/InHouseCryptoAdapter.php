@@ -11,6 +11,7 @@ use App\Modules\Payments\Crypto\Models\CryptoNetwork;
 use App\Modules\Payments\Crypto\Models\CryptoPayment;
 use App\Modules\Payments\Crypto\Models\CryptoPaymentInvoice;
 use App\Modules\Payments\Crypto\Models\PaymentGateway;
+use App\Modules\Payments\Crypto\Services\InHouse\BlockchainDepositScannerService;
 use App\Modules\Payments\Crypto\Services\InHouse\BlockchainRpcClient;
 use App\Modules\Payments\Crypto\Services\InHouse\CryptoInvoiceService;
 use App\Modules\Payments\Crypto\Services\InHouse\PaymentVerificationService;
@@ -23,11 +24,13 @@ class InHouseCryptoAdapter implements CryptoPaymentGatewayInterface
     public function __construct(
         protected ?CryptoInvoiceService $invoiceService = null,
         protected ?BlockchainRpcClient $rpcClient = null,
-        protected ?PaymentVerificationService $verificationService = null
+        protected ?PaymentVerificationService $verificationService = null,
+        protected ?BlockchainDepositScannerService $scannerService = null
     ) {
         $this->invoiceService = $invoiceService ?: app(CryptoInvoiceService::class);
         $this->rpcClient = $rpcClient ?: app(BlockchainRpcClient::class);
         $this->verificationService = $verificationService ?: app(PaymentVerificationService::class);
+        $this->scannerService = $scannerService ?: app(BlockchainDepositScannerService::class);
     }
 
     public function getIdentifier(): string
@@ -92,14 +95,22 @@ class InHouseCryptoAdapter implements CryptoPaymentGatewayInterface
 
     public function verifyPayment(CryptoPayment $payment, PaymentGateway $gateway): GatewayStatusResponse
     {
-        $invoiceId = $payment->metadata['inhouse_invoice_id'] ?? null;
-        $invoice = $invoiceId ? CryptoPaymentInvoice::find($invoiceId) : null;
+        $invoiceId = $payment->metadata['inhouse_invoice_id']
+            ?? $payment->metadata['gateway_response']['inhouse_invoice_id']
+            ?? $payment->provider_payment_id
+            ?? null;
+        $invoice = $invoiceId ? CryptoPaymentInvoice::with(['depositAddress.network', 'depositAddress.currency', 'creditPackage'])->find($invoiceId) : null;
 
         if (!$invoice) {
-            $invoice = CryptoPaymentInvoice::where('invoice_number', $payment->internal_order_id)->first();
+            $invoice = CryptoPaymentInvoice::with(['depositAddress.network', 'depositAddress.currency', 'creditPackage'])
+                ->where('invoice_number', $payment->internal_order_id)
+                ->first();
         }
 
         if ($invoice) {
+            // Perform real-time on-chain deposit verification when polled
+            $invoice = $this->scannerService->scanAndVerify($invoice);
+
             return GatewayStatusResponse::successful(
                 status: $this->mapInvoiceStatus($invoice->status),
                 receivedAmount: (string) $invoice->received_crypto_amount,

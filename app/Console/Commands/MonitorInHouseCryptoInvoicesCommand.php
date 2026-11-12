@@ -3,9 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Modules\Payments\Crypto\Models\CryptoPaymentInvoice;
-use App\Modules\Payments\Crypto\Services\InHouse\BlockchainRpcClient;
+use App\Modules\Payments\Crypto\Services\InHouse\BlockchainDepositScannerService;
 use App\Modules\Payments\Crypto\Services\InHouse\HybridTreasuryEngine;
-use App\Modules\Payments\Crypto\Services\InHouse\PaymentVerificationService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -15,8 +14,7 @@ class MonitorInHouseCryptoInvoicesCommand extends Command
     protected $description = 'Monitors in-house cryptocurrency deposit addresses and verifies on-chain transactions';
 
     public function handle(
-        BlockchainRpcClient $rpcClient,
-        PaymentVerificationService $verificationService,
+        BlockchainDepositScannerService $scannerService,
         HybridTreasuryEngine $treasuryEngine
     ): int {
         $loop = (bool) $this->option('loop');
@@ -25,7 +23,7 @@ class MonitorInHouseCryptoInvoicesCommand extends Command
         $this->info("Starting In-House Crypto Blockchain Monitoring Engine (" . ($loop ? "Continuous Daemon Mode" : "Single Run") . ")...");
 
         do {
-            $this->scanInvoices($rpcClient, $verificationService, $treasuryEngine);
+            $this->scanInvoices($scannerService, $treasuryEngine);
 
             if ($loop) {
                 sleep($interval);
@@ -36,11 +34,10 @@ class MonitorInHouseCryptoInvoicesCommand extends Command
     }
 
     protected function scanInvoices(
-        BlockchainRpcClient $rpcClient,
-        PaymentVerificationService $verificationService,
+        BlockchainDepositScannerService $scannerService,
         HybridTreasuryEngine $treasuryEngine
     ): void {
-        $invoices = CryptoPaymentInvoice::with(['depositAddress', 'currency', 'network'])
+        $invoices = CryptoPaymentInvoice::with(['depositAddress.network', 'depositAddress.currency', 'creditPackage'])
             ->whereIn('status', [
                 CryptoPaymentInvoice::STATUS_WAITING_FOR_PAYMENT,
                 CryptoPaymentInvoice::STATUS_DETECTED,
@@ -55,44 +52,17 @@ class MonitorInHouseCryptoInvoicesCommand extends Command
         $this->line("Scanning " . $invoices->count() . " active in-house invoice(s)...");
 
         foreach ($invoices as $invoice) {
-            // Check expiration
-            if ($invoice->expires_at && $invoice->expires_at->isPast() && $invoice->status === CryptoPaymentInvoice::STATUS_WAITING_FOR_PAYMENT) {
-                $invoice->update(['status' => CryptoPaymentInvoice::STATUS_EXPIRED]);
-                $this->warn("Invoice #{$invoice->invoice_number} expired.");
-                continue;
-            }
+            $updatedInvoice = $scannerService->scanAndVerify($invoice);
 
-            $depositAddress = $invoice->depositAddress?->public_address;
-            if (!$depositAddress) {
-                continue;
-            }
-
-            // Simulate / Check on-chain transaction for this deposit address
-            // If already has tx_hash and is confirming, check confirmations
-            if ($invoice->tx_hash && $invoice->network) {
-                $latestBlock = $rpcClient->getLatestBlockNumber($invoice->network);
-                $confirmations = max(1, $invoice->current_confirmations + 1);
-
-                $result = $verificationService->processDetectedTransaction(
-                    $invoice,
-                    $invoice->tx_hash,
-                    '0xSourceAddress',
-                    $depositAddress,
-                    $invoice->expected_crypto_amount,
-                    $confirmations,
-                    $invoice->contract_address,
-                    $latestBlock
-                );
-
-                if (($result['status'] ?? '') === 'COMPLETED') {
-                    $this->info("Invoice #{$invoice->invoice_number} COMPLETED on-chain. Credited user internal balance.");
-                    // Check auto-sweep
-                    try {
-                        $treasuryEngine->evaluateAutoSweep($invoice);
-                    } catch (\Throwable $e) {
-                        Log::warning("Auto-sweep evaluation error: {$e->getMessage()}");
-                    }
+            if ($updatedInvoice->status === CryptoPaymentInvoice::STATUS_COMPLETED) {
+                $this->info("Invoice #{$updatedInvoice->invoice_number} COMPLETED on-chain. Credited user internal balance.");
+                try {
+                    $treasuryEngine->evaluateAutoSweep($updatedInvoice);
+                } catch (\Throwable $e) {
+                    Log::warning("Auto-sweep evaluation error: {$e->getMessage()}");
                 }
+            } elseif ($updatedInvoice->status === CryptoPaymentInvoice::STATUS_EXPIRED) {
+                $this->warn("Invoice #{$updatedInvoice->invoice_number} expired.");
             }
         }
     }

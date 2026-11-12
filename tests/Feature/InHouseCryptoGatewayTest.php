@@ -408,5 +408,53 @@ class InHouseCryptoGatewayTest extends TestCase
             'sweep_type' => 'manual_admin',
         ]);
     }
+
+    public function test_realtime_evm_bnb_scanner_detects_deposit_within_fee_tolerance_and_credits_wallet()
+    {
+        $invoiceService = app(CryptoInvoiceService::class);
+        $scanner = app(\App\Modules\Payments\Crypto\Services\InHouse\BlockchainDepositScannerService::class);
+
+        $invoice = $invoiceService->createInvoice(
+            user: $this->user,
+            usdAmount: 1.65,
+            currencySymbol: 'BNB',
+            networkKey: 'BNB'
+        );
+
+        // Simulate 0.00254816 BNB received on-chain (within 2% tolerance of expected ~0.00257813 BNB)
+        $weiHex = '0x' . dechex((int) round(0.00254816 * 1e18));
+        $blockCall = 0;
+
+        \Illuminate\Support\Facades\Http::fake(function ($request) use ($weiHex, &$blockCall) {
+            $body = $request->data();
+            $method = $body['method'] ?? '';
+
+            if ($method === 'eth_blockNumber') {
+                $blockCall++;
+                // First scan at block 1000, second scan at block 1020 (>= 15 confirmations)
+                $blockHex = $blockCall === 1 ? '0x3e8' : '0x3fc';
+                return \Illuminate\Support\Facades\Http::response(['jsonrpc' => '2.0', 'id' => 1, 'result' => $blockHex], 200);
+            }
+
+            if ($method === 'eth_getBalance') {
+                return \Illuminate\Support\Facades\Http::response(['jsonrpc' => '2.0', 'id' => 1, 'result' => $weiHex], 200);
+            }
+
+            return \Illuminate\Support\Facades\Http::response(['jsonrpc' => '2.0', 'id' => 1, 'result' => null], 200);
+        });
+
+        // First poll detects deposit and sets CONFIRMING
+        $afterFirst = $scanner->scanAndVerify($invoice);
+        $this->assertEquals(CryptoPaymentInvoice::STATUS_CONFIRMING, $afterFirst->status);
+
+        // Second poll after 15+ blocks completes and credits wallet
+        $afterSecond = $scanner->scanAndVerify($afterFirst);
+        $this->assertEquals(CryptoPaymentInvoice::STATUS_COMPLETED, $afterSecond->status);
+        $this->assertNotNull($afterSecond->credited_at);
+
+        $wallet = UserWallet::where('user_id', $this->user->id)->first();
+        $this->assertNotNull($wallet);
+        $this->assertGreaterThan(0, $wallet->balance);
+    }
 }
 
