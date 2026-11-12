@@ -472,4 +472,43 @@ class ListingManagementEngineTest extends TestCase
             'status' => Listing::STATUS_PENDING_REVIEW,
         ]);
     }
+
+    public function test_pricing_page_shows_topup_options_for_paid_plans(): void
+    {
+        $user = User::factory()->create();
+
+        \App\Modules\Billing\Models\PricingPlan::query()->create([
+            'name' => 'Instant Bump to Top',
+            'slug' => 'instant-bump',
+            'plan_type' => 'boost',
+            'description' => 'Bump your listing to the top.',
+            'price_cents' => 165,
+            'duration_days' => 1,
+            'features' => ['Immediate bump'],
+            'is_active' => true,
+        ]);
+
+        \App\Modules\Monetization\Models\CreditPackage::query()->create([
+            'name' => 'Starter Top-Up',
+            'credits' => 1000,
+            'bonus_credits' => 100,
+            'price_usd' => 10.00,
+            'is_active' => true,
+            'is_popular' => true,
+            'display_order' => 1,
+        ]);
+
+        $this->get('/pricing')
+            ->assertOk()
+            ->assertSee('Instant Bump to Top')
+            ->assertSee('Top Up Wallet Credits')
+            ->assertSee('Wallet Top-Up Packages')
+            ->assertSee('Starter Top-Up');
+
+        $this->actingAs($user)
+            ->get('/pricing')
+            ->assertOk()
+            ->assertSee('Current Wallet Balance')
+            ->assertSee('Quick Top-Up Options');
+    }
 }

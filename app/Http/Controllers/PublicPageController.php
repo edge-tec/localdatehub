@@ -114,8 +114,28 @@ class PublicPageController extends Controller
             ->orderBy('price_cents')
             ->get();
 
+        $creditPackages = \App\Modules\Monetization\Models\CreditPackage::where('is_active', true)
+            ->orderBy('display_order')
+            ->get();
+
+        $wallet = null;
+        $userListings = collect();
+        if (auth()->check()) {
+            $wallet = app(\App\Modules\Monetization\Services\UserWalletService::class)
+                ->getOrCreateWallet(auth()->user());
+            $userListings = \App\Modules\Listings\Models\Listing::query()
+                ->where('user_id', auth()->id())
+                ->whereIn('status', ['active', 'pending_review', 'pending_moderation', 'draft'])
+                ->latest()
+                ->take(10)
+                ->get(['id', 'title', 'status', 'slug']);
+        }
+
         return view('pages.pricing', [
             'plans' => $plans,
+            'creditPackages' => $creditPackages,
+            'wallet' => $wallet,
+            'userListings' => $userListings,
         ]);
     }
 }
