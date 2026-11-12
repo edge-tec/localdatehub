@@ -81,6 +81,7 @@ class FiveCountryMarketplaceTest extends TestCase
         $this->assertSame('EUR', $ie->currency_code);
         $this->assertSame('€', $ie->currency_symbol);
         $this->assertSame(26, State::query()->where('country_id', $ie->id)->where('administrative_level', 'county')->count());
+        $this->assertGreaterThanOrEqual(110, City::query()->where('country_id', $ie->id)->count());
         $this->assertFalse(State::query()->where('country_id', $ie->id)->where('slug', 'northern-ireland')->exists());
 
         // 5. New Zealand: 16 regions

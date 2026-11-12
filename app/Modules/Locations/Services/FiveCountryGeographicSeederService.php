@@ -612,93 +612,7 @@ class FiveCountryGeographicSeederService
                 'division_label' => 'County',
                 'seo_title' => 'Ireland Classifieds & Local Dating Marketplace — LocalDateHub Ireland',
                 'seo_description' => 'Connect with local singles and browse verified personal classifieds across all 26 counties of the Republic of Ireland including Dublin, Cork, Galway, and Limerick.',
-                'areas' => [
-                    ['code' => 'DUB', 'name' => 'County Dublin', 'slug' => 'county-dublin', 'level' => 'county', 'lat' => 53.3498, 'lng' => -6.2603, 'cities' => [
-                        ['name' => 'Dublin', 'lat' => 53.3498, 'lng' => -6.2603, 'pop' => 592713, 'popular' => true],
-                        ['name' => 'Swords', 'lat' => 53.4597, 'lng' => -6.2181, 'pop' => 40776, 'popular' => false],
-                        ['name' => 'Dún Laoghaire', 'slug' => 'dun-laoghaire', 'lat' => 53.2944, 'lng' => -6.1339, 'pop' => 26525, 'popular' => false],
-                    ]],
-                    ['code' => 'COR', 'name' => 'County Cork', 'slug' => 'county-cork', 'level' => 'county', 'lat' => 51.8985, 'lng' => -8.4756, 'cities' => [
-                        ['name' => 'Cork', 'lat' => 51.8985, 'lng' => -8.4756, 'pop' => 224004, 'popular' => true],
-                        ['name' => 'Cobh', 'lat' => 51.8503, 'lng' => -8.2943, 'pop' => 14148, 'popular' => false],
-                    ]],
-                    ['code' => 'GAL', 'name' => 'County Galway', 'slug' => 'county-galway', 'level' => 'county', 'lat' => 53.2707, 'lng' => -9.0568, 'cities' => [
-                        ['name' => 'Galway', 'lat' => 53.2707, 'lng' => -9.0568, 'pop' => 83456, 'popular' => true],
-                        ['name' => 'Tuam', 'lat' => 53.5144, 'lng' => -8.8562, 'pop' => 9647, 'popular' => false],
-                    ]],
-                    ['code' => 'LIM', 'name' => 'County Limerick', 'slug' => 'county-limerick', 'level' => 'county', 'lat' => 52.6638, 'lng' => -8.6267, 'cities' => [
-                        ['name' => 'Limerick', 'lat' => 52.6638, 'lng' => -8.6267, 'pop' => 102287, 'popular' => true],
-                    ]],
-                    ['code' => 'WAT', 'name' => 'County Waterford', 'slug' => 'county-waterford', 'level' => 'county', 'lat' => 52.2593, 'lng' => -7.1101, 'cities' => [
-                        ['name' => 'Waterford', 'lat' => 52.2593, 'lng' => -7.1101, 'pop' => 60079, 'popular' => true],
-                    ]],
-                    ['code' => 'KIL', 'name' => 'County Kilkenny', 'slug' => 'county-kilkenny', 'level' => 'county', 'lat' => 52.6541, 'lng' => -7.2448, 'cities' => [
-                        ['name' => 'Kilkenny', 'lat' => 52.6541, 'lng' => -7.2448, 'pop' => 27184, 'popular' => true],
-                    ]],
-                    ['code' => 'WEX', 'name' => 'County Wexford', 'slug' => 'county-wexford', 'level' => 'county', 'lat' => 52.3369, 'lng' => -6.4633, 'cities' => [
-                        ['name' => 'Wexford', 'lat' => 52.3369, 'lng' => -6.4633, 'pop' => 21524, 'popular' => true],
-                    ]],
-                    ['code' => 'SLI', 'name' => 'County Sligo', 'slug' => 'county-sligo', 'level' => 'county', 'lat' => 54.2766, 'lng' => -8.4761, 'cities' => [
-                        ['name' => 'Sligo', 'lat' => 54.2766, 'lng' => -8.4761, 'pop' => 20608, 'popular' => true],
-                    ]],
-                    ['code' => 'WEM', 'name' => 'County Westmeath', 'slug' => 'county-westmeath', 'level' => 'county', 'lat' => 53.5259, 'lng' => -7.3389, 'cities' => [
-                        ['name' => 'Athlone', 'lat' => 53.4239, 'lng' => -7.9407, 'pop' => 22869, 'popular' => true],
-                        ['name' => 'Mullingar', 'lat' => 53.5259, 'lng' => -7.3389, 'pop' => 22667, 'popular' => false],
-                    ]],
-                    ['code' => 'LOU', 'name' => 'County Louth', 'slug' => 'county-louth', 'level' => 'county', 'lat' => 53.9508, 'lng' => -6.5406, 'cities' => [
-                        ['name' => 'Drogheda', 'lat' => 53.7179, 'lng' => -6.3561, 'pop' => 44135, 'popular' => true],
-                        ['name' => 'Dundalk', 'lat' => 54.0008, 'lng' => -6.4058, 'pop' => 43112, 'popular' => true],
-                    ]],
-                    ['code' => 'KER', 'name' => 'County Kerry', 'slug' => 'county-kerry', 'level' => 'county', 'lat' => 52.1545, 'lng' => -9.5669, 'cities' => [
-                        ['name' => 'Tralee', 'lat' => 52.2713, 'lng' => -9.6999, 'pop' => 26079, 'popular' => true],
-                        ['name' => 'Killarney', 'lat' => 52.0599, 'lng' => -9.5044, 'pop' => 14412, 'popular' => true],
-                    ]],
-                    ['code' => 'CLA', 'name' => 'County Clare', 'slug' => 'county-clare', 'level' => 'county', 'lat' => 52.8436, 'lng' => -8.9864, 'cities' => [
-                        ['name' => 'Ennis', 'lat' => 52.8436, 'lng' => -8.9864, 'pop' => 27923, 'popular' => true],
-                    ]],
-                    ['code' => 'KID', 'name' => 'County Kildare', 'slug' => 'county-kildare', 'level' => 'county', 'lat' => 53.1589, 'lng' => -6.9096, 'cities' => [
-                        ['name' => 'Naas', 'lat' => 53.2158, 'lng' => -6.6669, 'pop' => 26180, 'popular' => false],
-                    ]],
-                    ['code' => 'WIC', 'name' => 'County Wicklow', 'slug' => 'county-wicklow', 'level' => 'county', 'lat' => 52.9808, 'lng' => -6.0446, 'cities' => [
-                        ['name' => 'Bray', 'lat' => 53.2028, 'lng' => -6.0983, 'pop' => 33512, 'popular' => false],
-                    ]],
-                    ['code' => 'MEA', 'name' => 'County Meath', 'slug' => 'county-meath', 'level' => 'county', 'lat' => 53.6528, 'lng' => -6.6814, 'cities' => [
-                        ['name' => 'Navan', 'lat' => 53.6528, 'lng' => -6.6814, 'pop' => 33886, 'popular' => false],
-                    ]],
-                    ['code' => 'TIP', 'name' => 'County Tipperary', 'slug' => 'county-tipperary', 'level' => 'county', 'lat' => 52.4738, 'lng' => -8.1619, 'cities' => [
-                        ['name' => 'Clonmel', 'lat' => 52.3550, 'lng' => -7.7039, 'pop' => 18369, 'popular' => false],
-                    ]],
-                    ['code' => 'DON', 'name' => 'County Donegal', 'slug' => 'county-donegal', 'level' => 'county', 'lat' => 54.9548, 'lng' => -7.7342, 'cities' => [
-                        ['name' => 'Letterkenny', 'lat' => 54.9548, 'lng' => -7.7342, 'pop' => 22589, 'popular' => false],
-                    ]],
-                    ['code' => 'MAY', 'name' => 'County Mayo', 'slug' => 'county-mayo', 'level' => 'county', 'lat' => 53.8551, 'lng' => -9.2988, 'cities' => [
-                        ['name' => 'Castlebar', 'lat' => 53.8551, 'lng' => -9.2988, 'pop' => 13054, 'popular' => false],
-                    ]],
-                    ['code' => 'ROS', 'name' => 'County Roscommon', 'slug' => 'county-roscommon', 'level' => 'county', 'lat' => 53.6276, 'lng' => -8.1891, 'cities' => [
-                        ['name' => 'Roscommon', 'lat' => 53.6276, 'lng' => -8.1891, 'pop' => 6555, 'popular' => false],
-                    ]],
-                    ['code' => 'LAO', 'name' => 'County Laois', 'slug' => 'county-laois', 'level' => 'county', 'lat' => 53.0344, 'lng' => -7.2998, 'cities' => [
-                        ['name' => 'Portlaoise', 'lat' => 53.0344, 'lng' => -7.2998, 'pop' => 23494, 'popular' => false],
-                    ]],
-                    ['code' => 'OFF', 'name' => 'County Offaly', 'slug' => 'county-offaly', 'level' => 'county', 'lat' => 53.2738, 'lng' => -7.4889, 'cities' => [
-                        ['name' => 'Tullamore', 'lat' => 53.2738, 'lng' => -7.4889, 'pop' => 15598, 'popular' => false],
-                    ]],
-                    ['code' => 'CAR', 'name' => 'County Carlow', 'slug' => 'county-carlow', 'level' => 'county', 'lat' => 52.8365, 'lng' => -6.9341, 'cities' => [
-                        ['name' => 'Carlow', 'lat' => 52.8365, 'lng' => -6.9341, 'pop' => 27351, 'popular' => false],
-                    ]],
-                    ['code' => 'CAV', 'name' => 'County Cavan', 'slug' => 'county-cavan', 'level' => 'county', 'lat' => 53.9908, 'lng' => -7.3606, 'cities' => [
-                        ['name' => 'Cavan', 'lat' => 53.9908, 'lng' => -7.3606, 'pop' => 11741, 'popular' => false],
-                    ]],
-                    ['code' => 'MON', 'name' => 'County Monaghan', 'slug' => 'county-monaghan', 'level' => 'county', 'lat' => 54.2492, 'lng' => -6.9683, 'cities' => [
-                        ['name' => 'Monaghan', 'lat' => 54.2492, 'lng' => -6.9683, 'pop' => 7894, 'popular' => false],
-                    ]],
-                    ['code' => 'LOG', 'name' => 'County Longford', 'slug' => 'county-longford', 'level' => 'county', 'lat' => 53.7276, 'lng' => -7.7933, 'cities' => [
-                        ['name' => 'Longford', 'lat' => 53.7276, 'lng' => -7.7933, 'pop' => 10952, 'popular' => false],
-                    ]],
-                    ['code' => 'LEI', 'name' => 'County Leitrim', 'slug' => 'county-leitrim', 'level' => 'county', 'lat' => 53.9469, 'lng' => -8.0900, 'cities' => [
-                        ['name' => 'Carrick-on-Shannon', 'lat' => 53.9469, 'lng' => -8.0900, 'pop' => 4743, 'popular' => false],
-                    ]],
-                ],
+                'areas' => $this->getIrelandAreasDataset(),
             ],
 
             // 5. NEW ZEALAND (NZ — All 16 Regions)
@@ -1484,6 +1398,214 @@ class FiveCountryGeographicSeederService
                     ['name' => 'Cambridge Bay', 'lat' => 69.1169, 'lng' => -105.0597, 'pop' => 1760, 'popular' => false, 'tz' => 'America/Cambridge_Bay'],
                 ],
             ],
+        ];
+    }
+
+    /**
+     * Complete Republic of Ireland (IE) 26 counties and major cities/towns dataset.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function getIrelandAreasDataset(): array
+    {
+        return [
+            ['code' => 'DUB', 'name' => 'County Dublin', 'slug' => 'county-dublin', 'level' => 'county', 'lat' => 53.3498, 'lng' => -6.2603, 'cities' => [
+                ['name' => 'Dublin', 'lat' => 53.3498, 'lng' => -6.2603, 'pop' => 592713, 'popular' => true],
+                ['name' => 'Tallaght', 'lat' => 53.2859, 'lng' => -6.3734, 'pop' => 81000, 'popular' => true],
+                ['name' => 'Blanchardstown', 'lat' => 53.3881, 'lng' => -6.3756, 'pop' => 68000, 'popular' => false],
+                ['name' => 'Lucan', 'lat' => 53.3575, 'lng' => -6.4494, 'pop' => 49000, 'popular' => false],
+                ['name' => 'Swords', 'lat' => 53.4597, 'lng' => -6.2181, 'pop' => 40776, 'popular' => false],
+                ['name' => 'Clondalkin', 'lat' => 53.3217, 'lng' => -6.3958, 'pop' => 47000, 'popular' => false],
+                ['name' => 'Dún Laoghaire', 'slug' => 'dun-laoghaire', 'lat' => 53.2944, 'lng' => -6.1339, 'pop' => 26525, 'popular' => false],
+                ['name' => 'Balbriggan', 'lat' => 53.6108, 'lng' => -6.1819, 'pop' => 24322, 'popular' => false],
+                ['name' => 'Malahide', 'lat' => 53.4508, 'lng' => -6.1544, 'pop' => 18608, 'popular' => false],
+                ['name' => 'Skerries', 'lat' => 53.5825, 'lng' => -6.1083, 'pop' => 10743, 'popular' => false],
+                ['name' => 'Portmarnock', 'lat' => 53.4231, 'lng' => -6.1375, 'pop' => 10750, 'popular' => false],
+                ['name' => 'Rush', 'lat' => 53.5219, 'lng' => -6.0919, 'pop' => 10875, 'popular' => false],
+            ]],
+            ['code' => 'COR', 'name' => 'County Cork', 'slug' => 'county-cork', 'level' => 'county', 'lat' => 51.8985, 'lng' => -8.4756, 'cities' => [
+                ['name' => 'Cork', 'lat' => 51.8985, 'lng' => -8.4756, 'pop' => 224004, 'popular' => true],
+                ['name' => 'Carrigaline', 'lat' => 51.8117, 'lng' => -8.3986, 'pop' => 18239, 'popular' => false],
+                ['name' => 'Cobh', 'lat' => 51.8503, 'lng' => -8.2943, 'pop' => 14148, 'popular' => false],
+                ['name' => 'Midleton', 'lat' => 51.9153, 'lng' => -8.1753, 'pop' => 13906, 'popular' => false],
+                ['name' => 'Mallow', 'lat' => 52.1389, 'lng' => -8.6536, 'pop' => 13456, 'popular' => false],
+                ['name' => 'Youghal', 'lat' => 51.9500, 'lng' => -7.8506, 'pop' => 8564, 'popular' => false],
+                ['name' => 'Bandon', 'lat' => 51.7458, 'lng' => -8.7353, 'pop' => 8196, 'popular' => false],
+                ['name' => 'Fermoy', 'lat' => 52.1358, 'lng' => -8.2758, 'pop' => 6720, 'popular' => false],
+                ['name' => 'Kinsale', 'lat' => 51.7075, 'lng' => -8.5306, 'pop' => 5991, 'popular' => false],
+                ['name' => 'Clonakilty', 'lat' => 51.6231, 'lng' => -8.8706, 'pop' => 5112, 'popular' => false],
+                ['name' => 'Bantry', 'lat' => 51.6806, 'lng' => -9.4525, 'pop' => 2929, 'popular' => false],
+            ]],
+            ['code' => 'GAL', 'name' => 'County Galway', 'slug' => 'county-galway', 'level' => 'county', 'lat' => 53.2707, 'lng' => -9.0568, 'cities' => [
+                ['name' => 'Galway', 'lat' => 53.2707, 'lng' => -9.0568, 'pop' => 83456, 'popular' => true],
+                ['name' => 'Tuam', 'lat' => 53.5144, 'lng' => -8.8562, 'pop' => 9647, 'popular' => false],
+                ['name' => 'Ballinasloe', 'lat' => 53.3275, 'lng' => -8.2194, 'pop' => 6597, 'popular' => false],
+                ['name' => 'Loughrea', 'lat' => 53.1969, 'lng' => -8.5672, 'pop' => 6322, 'popular' => false],
+                ['name' => 'Oranmore', 'lat' => 53.2686, 'lng' => -8.9200, 'pop' => 5819, 'popular' => false],
+                ['name' => 'Athenry', 'lat' => 53.2981, 'lng' => -8.7469, 'pop' => 4603, 'popular' => false],
+                ['name' => 'Gort', 'lat' => 53.0661, 'lng' => -8.8172, 'pop' => 2870, 'popular' => false],
+                ['name' => 'Clifden', 'lat' => 53.4892, 'lng' => -10.0197, 'pop' => 1265, 'popular' => false],
+            ]],
+            ['code' => 'LIM', 'name' => 'County Limerick', 'slug' => 'county-limerick', 'level' => 'county', 'lat' => 52.6638, 'lng' => -8.6267, 'cities' => [
+                ['name' => 'Limerick', 'lat' => 52.6638, 'lng' => -8.6267, 'pop' => 102287, 'popular' => true],
+                ['name' => 'Newcastle West', 'lat' => 52.4489, 'lng' => -9.0611, 'pop' => 7209, 'popular' => false],
+                ['name' => 'Annacotty', 'lat' => 52.6681, 'lng' => -8.5322, 'pop' => 3398, 'popular' => false],
+                ['name' => 'Castleconnell', 'lat' => 52.7133, 'lng' => -8.4978, 'pop' => 2488, 'popular' => false],
+                ['name' => 'Abbeyfeale', 'lat' => 52.3853, 'lng' => -9.2997, 'pop' => 2206, 'popular' => false],
+                ['name' => 'Kilmallock', 'lat' => 52.4000, 'lng' => -8.5772, 'pop' => 1761, 'popular' => false],
+            ]],
+            ['code' => 'WAT', 'name' => 'County Waterford', 'slug' => 'county-waterford', 'level' => 'county', 'lat' => 52.2593, 'lng' => -7.1101, 'cities' => [
+                ['name' => 'Waterford', 'lat' => 52.2593, 'lng' => -7.1101, 'pop' => 60079, 'popular' => true],
+                ['name' => 'Tramore', 'lat' => 52.1614, 'lng' => -7.1528, 'pop' => 11277, 'popular' => false],
+                ['name' => 'Dungarvan', 'lat' => 52.0881, 'lng' => -7.6253, 'pop' => 10081, 'popular' => false],
+                ['name' => 'Dunmore East', 'lat' => 52.1489, 'lng' => -6.9933, 'pop' => 1731, 'popular' => false],
+                ['name' => 'Lismore', 'lat' => 52.1383, 'lng' => -7.9317, 'pop' => 1347, 'popular' => false],
+            ]],
+            ['code' => 'KIL', 'name' => 'County Kilkenny', 'slug' => 'county-kilkenny', 'level' => 'county', 'lat' => 52.6541, 'lng' => -7.2448, 'cities' => [
+                ['name' => 'Kilkenny', 'lat' => 52.6541, 'lng' => -7.2448, 'pop' => 27184, 'popular' => true],
+                ['name' => 'Thomastown', 'lat' => 52.5267, 'lng' => -7.1375, 'pop' => 2508, 'popular' => false],
+                ['name' => 'Callan', 'lat' => 52.5447, 'lng' => -7.3917, 'pop' => 2678, 'popular' => false],
+                ['name' => 'Castlecomer', 'lat' => 52.8058, 'lng' => -7.2114, 'pop' => 1656, 'popular' => false],
+                ['name' => 'Graiguenamanagh', 'lat' => 52.5403, 'lng' => -6.9547, 'pop' => 1543, 'popular' => false],
+            ]],
+            ['code' => 'WEX', 'name' => 'County Wexford', 'slug' => 'county-wexford', 'level' => 'county', 'lat' => 52.3369, 'lng' => -6.4633, 'cities' => [
+                ['name' => 'Wexford', 'lat' => 52.3369, 'lng' => -6.4633, 'pop' => 21524, 'popular' => true],
+                ['name' => 'Enniscorthy', 'lat' => 52.5008, 'lng' => -6.5664, 'pop' => 12310, 'popular' => false],
+                ['name' => 'Gorey', 'lat' => 52.6747, 'lng' => -6.2925, 'pop' => 11517, 'popular' => false],
+                ['name' => 'New Ross', 'lat' => 52.3967, 'lng' => -6.9439, 'pop' => 8610, 'popular' => false],
+                ['name' => 'Rosslare', 'lat' => 52.2536, 'lng' => -6.3408, 'pop' => 1762, 'popular' => false],
+            ]],
+            ['code' => 'SLI', 'name' => 'County Sligo', 'slug' => 'county-sligo', 'level' => 'county', 'lat' => 54.2766, 'lng' => -8.4761, 'cities' => [
+                ['name' => 'Sligo', 'lat' => 54.2766, 'lng' => -8.4761, 'pop' => 20608, 'popular' => true],
+                ['name' => 'Strandhill', 'lat' => 54.2708, 'lng' => -8.5900, 'pop' => 1982, 'popular' => false],
+                ['name' => 'Tubbercurry', 'lat' => 54.0533, 'lng' => -8.7294, 'pop' => 2307, 'popular' => false],
+                ['name' => 'Ballymote', 'lat' => 54.0889, 'lng' => -8.5167, 'pop' => 1711, 'popular' => false],
+            ]],
+            ['code' => 'WEM', 'name' => 'County Westmeath', 'slug' => 'county-westmeath', 'level' => 'county', 'lat' => 53.5259, 'lng' => -7.3389, 'cities' => [
+                ['name' => 'Athlone', 'lat' => 53.4239, 'lng' => -7.9407, 'pop' => 22869, 'popular' => true],
+                ['name' => 'Mullingar', 'lat' => 53.5259, 'lng' => -7.3389, 'pop' => 22667, 'popular' => false],
+                ['name' => 'Kinnegad', 'lat' => 53.4525, 'lng' => -7.0989, 'pop' => 3064, 'popular' => false],
+                ['name' => 'Moate', 'lat' => 53.3958, 'lng' => -7.7192, 'pop' => 3013, 'popular' => false],
+                ['name' => 'Castlepollard', 'lat' => 53.6797, 'lng' => -7.2953, 'pop' => 1368, 'popular' => false],
+            ]],
+            ['code' => 'LOU', 'name' => 'County Louth', 'slug' => 'county-louth', 'level' => 'county', 'lat' => 53.9508, 'lng' => -6.5406, 'cities' => [
+                ['name' => 'Drogheda', 'lat' => 53.7179, 'lng' => -6.3561, 'pop' => 44135, 'popular' => true],
+                ['name' => 'Dundalk', 'lat' => 54.0008, 'lng' => -6.4058, 'pop' => 43112, 'popular' => true],
+                ['name' => 'Ardee', 'lat' => 53.8569, 'lng' => -6.5411, 'pop' => 5478, 'popular' => false],
+                ['name' => 'Dunleer', 'lat' => 53.8314, 'lng' => -6.3944, 'pop' => 2149, 'popular' => false],
+                ['name' => 'Carlingford', 'lat' => 54.0414, 'lng' => -6.1856, 'pop' => 1656, 'popular' => false],
+            ]],
+            ['code' => 'KER', 'name' => 'County Kerry', 'slug' => 'county-kerry', 'level' => 'county', 'lat' => 52.1545, 'lng' => -9.5669, 'cities' => [
+                ['name' => 'Tralee', 'lat' => 52.2713, 'lng' => -9.6999, 'pop' => 26079, 'popular' => true],
+                ['name' => 'Killarney', 'lat' => 52.0599, 'lng' => -9.5044, 'pop' => 14412, 'popular' => true],
+                ['name' => 'Listowel', 'lat' => 52.4458, 'lng' => -9.4856, 'pop' => 4794, 'popular' => false],
+                ['name' => 'Castleisland', 'lat' => 52.2303, 'lng' => -9.4647, 'pop' => 2536, 'popular' => false],
+                ['name' => 'Kenmare', 'lat' => 51.8806, 'lng' => -9.5839, 'pop' => 2566, 'popular' => false],
+                ['name' => 'Dingle', 'lat' => 52.1408, 'lng' => -10.2689, 'pop' => 1671, 'popular' => false],
+            ]],
+            ['code' => 'CLA', 'name' => 'County Clare', 'slug' => 'county-clare', 'level' => 'county', 'lat' => 52.8436, 'lng' => -8.9864, 'cities' => [
+                ['name' => 'Ennis', 'lat' => 52.8436, 'lng' => -8.9864, 'pop' => 27923, 'popular' => true],
+                ['name' => 'Shannon', 'lat' => 52.7114, 'lng' => -8.8753, 'pop' => 10256, 'popular' => false],
+                ['name' => 'Kilrush', 'lat' => 52.6397, 'lng' => -9.4833, 'pop' => 2649, 'popular' => false],
+                ['name' => 'Newmarket-on-Fergus', 'lat' => 52.7564, 'lng' => -8.8947, 'pop' => 1898, 'popular' => false],
+                ['name' => 'Killaloe', 'lat' => 52.8067, 'lng' => -8.4439, 'pop' => 1666, 'popular' => false],
+            ]],
+            ['code' => 'KID', 'name' => 'County Kildare', 'slug' => 'county-kildare', 'level' => 'county', 'lat' => 53.1589, 'lng' => -6.9096, 'cities' => [
+                ['name' => 'Naas', 'lat' => 53.2158, 'lng' => -6.6669, 'pop' => 26180, 'popular' => true],
+                ['name' => 'Newbridge', 'lat' => 53.1819, 'lng' => -6.7967, 'pop' => 24366, 'popular' => false],
+                ['name' => 'Celbridge', 'lat' => 53.3389, 'lng' => -6.5419, 'pop' => 20601, 'popular' => false],
+                ['name' => 'Maynooth', 'lat' => 53.3817, 'lng' => -6.5919, 'pop' => 17259, 'popular' => false],
+                ['name' => 'Leixlip', 'lat' => 53.3642, 'lng' => -6.4944, 'pop' => 16733, 'popular' => false],
+                ['name' => 'Athy', 'lat' => 52.9914, 'lng' => -6.9803, 'pop' => 11035, 'popular' => false],
+                ['name' => 'Kildare Town', 'lat' => 53.1567, 'lng' => -6.9103, 'pop' => 10302, 'popular' => false],
+                ['name' => 'Clane', 'lat' => 53.2917, 'lng' => -6.6889, 'pop' => 8152, 'popular' => false],
+            ]],
+            ['code' => 'WIC', 'name' => 'County Wicklow', 'slug' => 'county-wicklow', 'level' => 'county', 'lat' => 52.9808, 'lng' => -6.0446, 'cities' => [
+                ['name' => 'Bray', 'lat' => 53.2028, 'lng' => -6.0983, 'pop' => 33512, 'popular' => true],
+                ['name' => 'Greystones', 'lat' => 53.1408, 'lng' => -6.0631, 'pop' => 22009, 'popular' => false],
+                ['name' => 'Arklow', 'lat' => 52.7931, 'lng' => -6.1414, 'pop' => 13399, 'popular' => false],
+                ['name' => 'Wicklow Town', 'lat' => 52.9750, 'lng' => -6.0494, 'pop' => 12957, 'popular' => false],
+                ['name' => 'Blessington', 'lat' => 53.1689, 'lng' => -6.5356, 'pop' => 5611, 'popular' => false],
+            ]],
+            ['code' => 'MEA', 'name' => 'County Meath', 'slug' => 'county-meath', 'level' => 'county', 'lat' => 53.6528, 'lng' => -6.6814, 'cities' => [
+                ['name' => 'Navan', 'lat' => 53.6528, 'lng' => -6.6814, 'pop' => 33886, 'popular' => true],
+                ['name' => 'Ashbourne', 'lat' => 53.5122, 'lng' => -6.3983, 'pop' => 15680, 'popular' => false],
+                ['name' => 'Laytown-Bettystown-Mornington', 'lat' => 53.6939, 'lng' => -6.2442, 'pop' => 15642, 'popular' => false],
+                ['name' => 'Ratoath', 'lat' => 53.5081, 'lng' => -6.4639, 'pop' => 10077, 'popular' => false],
+                ['name' => 'Trim', 'lat' => 53.5550, 'lng' => -6.7917, 'pop' => 9563, 'popular' => false],
+                ['name' => 'Dunboyne', 'lat' => 53.4189, 'lng' => -6.4736, 'pop' => 7155, 'popular' => false],
+                ['name' => 'Kells', 'lat' => 53.7267, 'lng' => -6.8792, 'pop' => 6608, 'popular' => false],
+            ]],
+            ['code' => 'TIP', 'name' => 'County Tipperary', 'slug' => 'county-tipperary', 'level' => 'county', 'lat' => 52.4738, 'lng' => -8.1619, 'cities' => [
+                ['name' => 'Clonmel', 'lat' => 52.3550, 'lng' => -7.7039, 'pop' => 18369, 'popular' => true],
+                ['name' => 'Nenagh', 'lat' => 52.8619, 'lng' => -8.1967, 'pop' => 9895, 'popular' => false],
+                ['name' => 'Thurles', 'lat' => 52.6792, 'lng' => -7.8022, 'pop' => 8185, 'popular' => false],
+                ['name' => 'Carrick-on-Suir', 'lat' => 52.3469, 'lng' => -7.4131, 'pop' => 5752, 'popular' => false],
+                ['name' => 'Roscrea', 'lat' => 52.9547, 'lng' => -7.8017, 'pop' => 5542, 'popular' => false],
+                ['name' => 'Tipperary Town', 'lat' => 52.4736, 'lng' => -8.1558, 'pop' => 5387, 'popular' => false],
+                ['name' => 'Cashel', 'lat' => 52.5158, 'lng' => -7.8856, 'pop' => 4805, 'popular' => false],
+            ]],
+            ['code' => 'DON', 'name' => 'County Donegal', 'slug' => 'county-donegal', 'level' => 'county', 'lat' => 54.9548, 'lng' => -7.7342, 'cities' => [
+                ['name' => 'Letterkenny', 'lat' => 54.9548, 'lng' => -7.7342, 'pop' => 22589, 'popular' => true],
+                ['name' => 'Buncrana', 'lat' => 55.1342, 'lng' => -7.4547, 'pop' => 6971, 'popular' => false],
+                ['name' => 'Ballybofey-Stranorlar', 'lat' => 54.8000, 'lng' => -7.7833, 'pop' => 5181, 'popular' => false],
+                ['name' => 'Donegal Town', 'lat' => 54.6539, 'lng' => -8.1100, 'pop' => 2749, 'popular' => false],
+                ['name' => 'Bundoran', 'lat' => 54.4778, 'lng' => -8.2806, 'pop' => 2599, 'popular' => false],
+                ['name' => 'Ballyshannon', 'lat' => 54.5025, 'lng' => -8.1908, 'pop' => 2246, 'popular' => false],
+            ]],
+            ['code' => 'MAY', 'name' => 'County Mayo', 'slug' => 'county-mayo', 'level' => 'county', 'lat' => 53.8551, 'lng' => -9.2988, 'cities' => [
+                ['name' => 'Castlebar', 'lat' => 53.8551, 'lng' => -9.2988, 'pop' => 13054, 'popular' => true],
+                ['name' => 'Ballina', 'lat' => 54.1136, 'lng' => -9.1567, 'pop' => 10556, 'popular' => false],
+                ['name' => 'Westport', 'lat' => 53.8000, 'lng' => -9.5167, 'pop' => 6872, 'popular' => false],
+                ['name' => 'Claremorris', 'lat' => 53.7203, 'lng' => -8.9986, 'pop' => 3857, 'popular' => false],
+                ['name' => 'Ballinrobe', 'lat' => 53.6272, 'lng' => -9.2256, 'pop' => 3148, 'popular' => false],
+            ]],
+            ['code' => 'ROS', 'name' => 'County Roscommon', 'slug' => 'county-roscommon', 'level' => 'county', 'lat' => 53.6276, 'lng' => -8.1891, 'cities' => [
+                ['name' => 'Roscommon', 'lat' => 53.6276, 'lng' => -8.1891, 'pop' => 6555, 'popular' => false],
+                ['name' => 'Boyle', 'lat' => 53.9722, 'lng' => -8.3039, 'pop' => 2915, 'popular' => false],
+                ['name' => 'Castlerea', 'lat' => 53.7667, 'lng' => -8.4939, 'pop' => 2348, 'popular' => false],
+                ['name' => 'Ballaghaderreen', 'lat' => 53.9006, 'lng' => -8.5797, 'pop' => 2387, 'popular' => false],
+            ]],
+            ['code' => 'LAO', 'name' => 'County Laois', 'slug' => 'county-laois', 'level' => 'county', 'lat' => 53.0344, 'lng' => -7.2998, 'cities' => [
+                ['name' => 'Portlaoise', 'lat' => 53.0344, 'lng' => -7.2998, 'pop' => 23494, 'popular' => false],
+                ['name' => 'Portarlington', 'lat' => 53.1619, 'lng' => -7.1917, 'pop' => 9288, 'popular' => false],
+                ['name' => 'Mountmellick', 'lat' => 53.1167, 'lng' => -7.3333, 'pop' => 4905, 'popular' => false],
+                ['name' => 'Abbeyleix', 'lat' => 52.9125, 'lng' => -7.3500, 'pop' => 1897, 'popular' => false],
+            ]],
+            ['code' => 'OFF', 'name' => 'County Offaly', 'slug' => 'county-offaly', 'level' => 'county', 'lat' => 53.2738, 'lng' => -7.4889, 'cities' => [
+                ['name' => 'Tullamore', 'lat' => 53.2738, 'lng' => -7.4889, 'pop' => 15598, 'popular' => false],
+                ['name' => 'Edenderry', 'lat' => 53.3442, 'lng' => -7.0489, 'pop' => 7888, 'popular' => false],
+                ['name' => 'Birr', 'lat' => 53.0958, 'lng' => -7.9133, 'pop' => 4726, 'popular' => false],
+                ['name' => 'Clara', 'lat' => 53.3417, 'lng' => -7.6147, 'pop' => 3403, 'popular' => false],
+            ]],
+            ['code' => 'CAR', 'name' => 'County Carlow', 'slug' => 'county-carlow', 'level' => 'county', 'lat' => 52.8365, 'lng' => -6.9341, 'cities' => [
+                ['name' => 'Carlow', 'lat' => 52.8365, 'lng' => -6.9341, 'pop' => 27351, 'popular' => false],
+                ['name' => 'Tullow', 'lat' => 52.8014, 'lng' => -6.7369, 'pop' => 5138, 'popular' => false],
+                ['name' => 'Bagenalstown', 'lat' => 52.7014, 'lng' => -6.9597, 'pop' => 3180, 'popular' => false],
+            ]],
+            ['code' => 'CAV', 'name' => 'County Cavan', 'slug' => 'county-cavan', 'level' => 'county', 'lat' => 53.9908, 'lng' => -7.3606, 'cities' => [
+                ['name' => 'Cavan', 'lat' => 53.9908, 'lng' => -7.3606, 'pop' => 11741, 'popular' => false],
+                ['name' => 'Virginia', 'lat' => 53.8339, 'lng' => -7.0794, 'pop' => 3211, 'popular' => false],
+                ['name' => 'Bailieborough', 'lat' => 53.9167, 'lng' => -6.9667, 'pop' => 2974, 'popular' => false],
+                ['name' => 'Kingscourt', 'lat' => 53.9078, 'lng' => -6.8056, 'pop' => 2722, 'popular' => false],
+            ]],
+            ['code' => 'MON', 'name' => 'County Monaghan', 'slug' => 'county-monaghan', 'level' => 'county', 'lat' => 54.2492, 'lng' => -6.9683, 'cities' => [
+                ['name' => 'Monaghan', 'lat' => 54.2492, 'lng' => -6.9683, 'pop' => 7894, 'popular' => false],
+                ['name' => 'Carrickmacross', 'lat' => 53.9728, 'lng' => -6.7186, 'pop' => 5745, 'popular' => false],
+                ['name' => 'Castleblayney', 'lat' => 54.1200, 'lng' => -6.7347, 'pop' => 3926, 'popular' => false],
+                ['name' => 'Clones', 'lat' => 54.1794, 'lng' => -7.2328, 'pop' => 1885, 'popular' => false],
+            ]],
+            ['code' => 'LOG', 'name' => 'County Longford', 'slug' => 'county-longford', 'level' => 'county', 'lat' => 53.7276, 'lng' => -7.7933, 'cities' => [
+                ['name' => 'Longford', 'lat' => 53.7276, 'lng' => -7.7933, 'pop' => 10952, 'popular' => false],
+                ['name' => 'Edgeworthstown', 'lat' => 53.6947, 'lng' => -7.6119, 'pop' => 2199, 'popular' => false],
+                ['name' => 'Ballymahon', 'lat' => 53.5625, 'lng' => -7.7647, 'pop' => 2180, 'popular' => false],
+                ['name' => 'Granard', 'lat' => 53.7789, 'lng' => -7.4956, 'pop' => 1020, 'popular' => false],
+            ]],
+            ['code' => 'LEI', 'name' => 'County Leitrim', 'slug' => 'county-leitrim', 'level' => 'county', 'lat' => 53.9469, 'lng' => -8.0900, 'cities' => [
+                ['name' => 'Carrick-on-Shannon', 'lat' => 53.9469, 'lng' => -8.0900, 'pop' => 4743, 'popular' => false],
+                ['name' => 'Manorhamilton', 'lat' => 54.3069, 'lng' => -8.1764, 'pop' => 1650, 'popular' => false],
+                ['name' => 'Ballinamore', 'lat' => 54.0539, 'lng' => -7.7989, 'pop' => 1126, 'popular' => false],
+            ]],
         ];
     }
 }
