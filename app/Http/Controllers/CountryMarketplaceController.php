@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SystemSetting;
+use App\Modules\Admin\Models\SystemSetting;
 use App\Modules\Advertising\Models\AdCampaign;
 use App\Modules\Advertising\Services\AdDeliveryService;
 use App\Modules\Categories\Models\Category;

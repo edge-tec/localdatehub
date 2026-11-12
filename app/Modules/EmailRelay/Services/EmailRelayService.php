@@ -5,7 +5,7 @@ namespace App\Modules\EmailRelay\Services;
 use App\Jobs\EmailRelay\ForwardRelayEmail;
 use App\Jobs\EmailRelay\ProcessInboundRelayEmail;
 use App\Jobs\EmailRelay\ProcessRelayReply;
-use App\Models\SystemSetting;
+use App\Modules\Admin\Models\SystemSetting;
 use App\Modules\EmailRelay\Models\EmailRelayConversation;
 use App\Modules\EmailRelay\Models\EmailRelayEvent;
 use App\Modules\EmailRelay\Models\EmailRelayMessage;

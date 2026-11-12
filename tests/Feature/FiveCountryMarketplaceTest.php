@@ -384,6 +384,26 @@ class FiveCountryMarketplaceTest extends TestCase
             'X-Region-Name' => 'Florida',
             'X-City-Name' => 'Miami',
         ])->get('/us')->assertOk()->assertSee($usListing->title);
+
+        // Admin-configured branding images (hero_image_url, sidebar_promo_image_url, site_logo_url) apply on country pages
+        \App\Modules\Admin\Models\SystemSetting::updateOrCreate(
+            ['key' => 'hero_image_url'],
+            ['value' => '/storage/branding/custom-hero-test.jpg', 'group' => 'branding', 'type' => 'string', 'is_public' => true]
+        );
+        \App\Modules\Admin\Models\SystemSetting::updateOrCreate(
+            ['key' => 'sidebar_promo_image_url'],
+            ['value' => '/storage/branding/custom-promo-test.jpg', 'group' => 'branding', 'type' => 'string', 'is_public' => true]
+        );
+        \App\Modules\Admin\Models\SystemSetting::updateOrCreate(
+            ['key' => 'site_logo_url'],
+            ['value' => '/storage/branding/custom-logo-test.png', 'group' => 'branding', 'type' => 'string', 'is_public' => true]
+        );
+
+        $this->get('/us')
+            ->assertOk()
+            ->assertSee('custom-hero-test.jpg')
+            ->assertSee('custom-promo-test.jpg')
+            ->assertSee('custom-logo-test.png');
     }
 
     public function test_admin_can_manage_country_marketplaces_currencies_categories_and_locations(): void

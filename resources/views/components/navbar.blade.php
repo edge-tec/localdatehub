@@ -1,5 +1,5 @@
 @php
-    use App\Models\SystemSetting;
+    use App\Modules\Admin\Models\SystemSetting;
     use App\Modules\Categories\Models\Category;
     use App\Modules\Listings\Models\ContactMessage;
     use App\Modules\Locations\Models\City;
