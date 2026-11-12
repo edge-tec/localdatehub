@@ -8117,11 +8117,6 @@
                                 <span>Super Admin Guarded</span>
                             </span>
                         </div>
-                            </div>
-                            <span class="px-2.5 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-900 border border-amber-300">
-                                🔒 Super Admin Restricted
-                            </span>
-                        </div>
 
                         <!-- Maintenance Mode Switch -->
                         <div class="p-4 rounded-2xl border {{ ($settingValues['maintenance_mode_enabled'] ?? 'false') === 'true' ? 'bg-rose-50 border-rose-300' : 'bg-white border-slate-200/90 shadow-2xs' }} flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
