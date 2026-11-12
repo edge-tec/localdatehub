@@ -98,34 +98,27 @@ class CampaignAutomationService
     }
 
     /**
-     * Resolve or create a single authorized advertiser profile for a folder without duplicating accounts.
+     * Resolve or create a single authorized advertiser profile for a folder without duplicating or mixing accounts.
      */
     public function resolveAdvertiserProfile(string $folderName, string $contactEmail, bool $dryRun = false): array
     {
         $cleanName = trim($folderName);
         $cleanEmail = strtolower(trim($contactEmail));
 
-        $existingByEmail = User::whereRaw('LOWER(email) = ?', [$cleanEmail])->first();
-        if ($existingByEmail) {
-            if (strcasecmp($existingByEmail->name, $cleanName) !== 0) {
-                throw new RuntimeException(
-                    "Contact email {$cleanEmail} is already assigned to '{$existingByEmail->name}'. "
-                    . "Refusing to create duplicate or mixed profile for '{$cleanName}'."
-                );
-            }
-
-            return ['user' => $existingByEmail, 'created' => false];
-        }
-
-        $existingByName = User::where('name', $cleanName)->first();
+        // Reuse existing profile for this exact folder name first (keeps profiles separate and idempotent)
+        $existingByName = User::whereRaw('LOWER(name) = ?', [strtolower($cleanName)])->first();
         if ($existingByName) {
             return ['user' => $existingByName, 'created' => false];
         }
 
+        // If the contact email is free, assign it directly; otherwise allocate a unique +alias account email
+        // so each folder gets its own separate User record while listings still use $contactEmail.
+        $accountEmail = $this->allocateUniqueAccountEmail($cleanEmail, $cleanName);
+
         if ($dryRun) {
             $virtualUser = new User([
                 'name' => $cleanName,
-                'email' => $cleanEmail,
+                'email' => $accountEmail,
                 'role' => 'user',
                 'account_status' => 'active',
                 'is_age_verified' => true,
@@ -145,7 +138,7 @@ class CampaignAutomationService
         $user = User::create([
             'name' => $cleanName,
             'username' => $username,
-            'email' => $cleanEmail,
+            'email' => $accountEmail,
             'password' => Hash::make(Str::random(32)),
             'role' => 'user',
             'account_status' => 'active',
@@ -154,6 +147,29 @@ class CampaignAutomationService
         ]);
 
         return ['user' => $user, 'created' => true];
+    }
+
+    /**
+     * Allocate a unique users.email without mixing separate folder profiles onto the same User row.
+     */
+    protected function allocateUniqueAccountEmail(string $contactEmail, string $folderName): string
+    {
+        if (!User::whereRaw('LOWER(email) = ?', [$contactEmail])->exists()) {
+            return $contactEmail;
+        }
+
+        [$local, $domain] = array_pad(explode('@', $contactEmail, 2), 2, 'localdatehub.com');
+        $baseLocal = explode('+', $local, 2)[0];
+        $slug = Str::slug($folderName, '-') ?: 'profile';
+
+        $candidate = strtolower("{$baseLocal}+{$slug}@{$domain}");
+        $suffix = 1;
+        while (User::whereRaw('LOWER(email) = ?', [$candidate])->exists()) {
+            $candidate = strtolower("{$baseLocal}+{$slug}-{$suffix}@{$domain}");
+            $suffix++;
+        }
+
+        return $candidate;
     }
 
     /**

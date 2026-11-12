@@ -182,16 +182,21 @@ class FolderCampaignAutomationTest extends TestCase
         $this->assertFileExists($report['report_files']['markdown']);
     }
 
-    public function test_it_prevents_mixing_different_profile_onto_same_email(): void
+    public function test_it_creates_separate_profile_with_aliased_account_email_when_contact_email_is_shared(): void
     {
         /** @var CampaignAutomationService $service */
         $service = app(CampaignAutomationService::class);
-        $service->resolveAdvertiserProfile('Maisy Lowe', 'manmarzi001@gmail.com');
+        $first = $service->resolveAdvertiserProfile('Maisy Lowe', 'manmarzi001@gmail.com');
+        $second = $service->resolveAdvertiserProfile('Joanna Nash', 'manmarzi001@gmail.com');
+        $reused = $service->resolveAdvertiserProfile('Joanna Nash', 'manmarzi001@gmail.com');
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('already assigned');
-
-        $service->resolveAdvertiserProfile('Other Profile', 'manmarzi001@gmail.com');
+        $this->assertTrue($first['created']);
+        $this->assertTrue($second['created']);
+        $this->assertFalse($reused['created']);
+        $this->assertNotSame($first['user']->id, $second['user']->id);
+        $this->assertSame($second['user']->id, $reused['user']->id);
+        $this->assertSame('manmarzi001@gmail.com', $first['user']->email);
+        $this->assertSame('manmarzi001+joanna-nash@gmail.com', $second['user']->email);
     }
 
     public function test_dry_run_command_previews_without_writing_database_records(): void
