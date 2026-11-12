@@ -499,7 +499,11 @@ class CountryMarketplaceService
             $gbStatesCount = $gb ? State::query()->where('country_id', $gb->id)->count() : 0;
             $gbCitiesCount = $gb ? City::query()->where('country_id', $gb->id)->count() : 0;
 
-            if ($count < 6 || $usStatesCount < 51 || $auStatesCount < 8 || $auCitiesCount < 180 || $gbStatesCount < 13 || $gbCitiesCount < 150) {
+            $ca = Country::query()->where('code', 'CA')->first();
+            $caStatesCount = $ca ? State::query()->where('country_id', $ca->id)->count() : 0;
+            $caCitiesCount = $ca ? City::query()->where('country_id', $ca->id)->count() : 0;
+
+            if ($count < 6 || $usStatesCount < 51 || $auStatesCount < 8 || $auCitiesCount < 180 || $gbStatesCount < 13 || $gbCitiesCount < 150 || $caStatesCount < 13 || $caCitiesCount < 150) {
                 $this->seederService->seedAll();
             }
         } catch (\Throwable) {

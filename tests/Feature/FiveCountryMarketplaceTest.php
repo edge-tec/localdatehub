@@ -68,6 +68,7 @@ class FiveCountryMarketplaceTest extends TestCase
         $this->assertSame('CAD', $ca->currency_code);
         $this->assertSame('C$', $ca->currency_symbol);
         $this->assertSame(13, State::query()->where('country_id', $ca->id)->count());
+        $this->assertGreaterThanOrEqual(150, City::query()->where('country_id', $ca->id)->count());
 
         // 3. Australia: 6 states + 2 territories = 8
         $au = Country::query()->where('code', 'AU')->firstOrFail();
