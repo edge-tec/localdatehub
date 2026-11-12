@@ -89,6 +89,7 @@ class FiveCountryMarketplaceTest extends TestCase
         $this->assertSame('NZD', $nz->currency_code);
         $this->assertSame('NZ$', $nz->currency_symbol);
         $this->assertSame(16, State::query()->where('country_id', $nz->id)->count());
+        $this->assertGreaterThanOrEqual(90, City::query()->where('country_id', $nz->id)->count());
     }
 
     public function test_united_kingdom_marketplace_loads_nations_cities_listings_and_gbp_currency(): void

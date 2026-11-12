@@ -629,64 +629,7 @@ class FiveCountryGeographicSeederService
                 'division_label' => 'Region',
                 'seo_title' => 'New Zealand Classifieds & Local Dating Marketplace — LocalDateHub NZ',
                 'seo_description' => 'Discover verified personal classifieds and local dating across all 16 New Zealand regions including Auckland, Wellington, Canterbury, Waikato, and Otago.',
-                'areas' => [
-                    ['code' => 'AUK', 'name' => 'Auckland', 'slug' => 'auckland', 'level' => 'region', 'lat' => -36.8485, 'lng' => 174.7633, 'cities' => [
-                        ['name' => 'Auckland', 'lat' => -36.8485, 'lng' => 174.7633, 'pop' => 1657200, 'popular' => true],
-                        ['name' => 'Manukau', 'lat' => -36.9928, 'lng' => 174.8799, 'pop' => 375600, 'popular' => false],
-                    ]],
-                    ['code' => 'WGN', 'name' => 'Wellington', 'slug' => 'wellington', 'level' => 'region', 'lat' => -41.2865, 'lng' => 174.7762, 'cities' => [
-                        ['name' => 'Wellington', 'lat' => -41.2865, 'lng' => 174.7762, 'pop' => 215900, 'popular' => true],
-                        ['name' => 'Lower Hutt', 'lat' => -41.2092, 'lng' => 174.9081, 'pop' => 111800, 'popular' => false],
-                    ]],
-                    ['code' => 'CAN', 'name' => 'Canterbury', 'slug' => 'canterbury', 'level' => 'region', 'lat' => -43.5321, 'lng' => 172.6362, 'cities' => [
-                        ['name' => 'Christchurch', 'lat' => -43.5321, 'lng' => 172.6362, 'pop' => 389300, 'popular' => true],
-                        ['name' => 'Timaru', 'lat' => -44.3904, 'lng' => 171.2373, 'pop' => 28700, 'popular' => false],
-                    ]],
-                    ['code' => 'WKO', 'name' => 'Waikato', 'slug' => 'waikato', 'level' => 'region', 'lat' => -37.7870, 'lng' => 175.2793, 'cities' => [
-                        ['name' => 'Hamilton', 'lat' => -37.7870, 'lng' => 175.2793, 'pop' => 179900, 'popular' => true],
-                        ['name' => 'Taupō', 'slug' => 'taupo', 'lat' => -38.6857, 'lng' => 176.0702, 'pop' => 26100, 'popular' => false],
-                    ]],
-                    ['code' => 'BOP', 'name' => 'Bay of Plenty', 'slug' => 'bay-of-plenty', 'level' => 'region', 'lat' => -37.6878, 'lng' => 176.1651, 'cities' => [
-                        ['name' => 'Tauranga', 'lat' => -37.6878, 'lng' => 176.1651, 'pop' => 158300, 'popular' => true],
-                        ['name' => 'Rotorua', 'lat' => -38.1368, 'lng' => 176.2497, 'pop' => 58800, 'popular' => true],
-                    ]],
-                    ['code' => 'OTA', 'name' => 'Otago', 'slug' => 'otago', 'level' => 'region', 'lat' => -45.8788, 'lng' => 170.5028, 'cities' => [
-                        ['name' => 'Dunedin', 'lat' => -45.8788, 'lng' => 170.5028, 'pop' => 130400, 'popular' => true],
-                        ['name' => 'Queenstown', 'lat' => -45.0312, 'lng' => 168.6626, 'pop' => 28900, 'popular' => true],
-                    ]],
-                    ['code' => 'HKB', 'name' => "Hawke's Bay", 'slug' => 'hawkes-bay', 'level' => 'region', 'lat' => -39.4928, 'lng' => 176.9120, 'cities' => [
-                        ['name' => 'Napier', 'lat' => -39.4928, 'lng' => 176.9120, 'pop' => 66800, 'popular' => true],
-                        ['name' => 'Hastings', 'lat' => -39.6381, 'lng' => 176.8492, 'pop' => 50400, 'popular' => true],
-                    ]],
-                    ['code' => 'MWT', 'name' => 'Manawatū-Whanganui', 'slug' => 'manawatu-whanganui', 'level' => 'region', 'lat' => -40.3523, 'lng' => 175.6082, 'cities' => [
-                        ['name' => 'Palmerston North', 'slug' => 'palmerston-north', 'lat' => -40.3523, 'lng' => 175.6082, 'pop' => 90400, 'popular' => true],
-                        ['name' => 'Whanganui', 'lat' => -39.9301, 'lng' => 175.0479, 'pop' => 42800, 'popular' => false],
-                    ]],
-                    ['code' => 'TKI', 'name' => 'Taranaki', 'slug' => 'taranaki', 'level' => 'region', 'lat' => -39.0556, 'lng' => 174.0752, 'cities' => [
-                        ['name' => 'New Plymouth', 'slug' => 'new-plymouth', 'lat' => -39.0556, 'lng' => 174.0752, 'pop' => 58500, 'popular' => true],
-                    ]],
-                    ['code' => 'NTL', 'name' => 'Northland', 'slug' => 'northland', 'level' => 'region', 'lat' => -35.7275, 'lng' => 174.3166, 'cities' => [
-                        ['name' => 'Whangārei', 'slug' => 'whangarei', 'lat' => -35.7275, 'lng' => 174.3166, 'pop' => 54900, 'popular' => true],
-                    ]],
-                    ['code' => 'NSN', 'name' => 'Nelson', 'slug' => 'nelson', 'level' => 'region', 'lat' => -41.2706, 'lng' => 173.2840, 'cities' => [
-                        ['name' => 'Nelson', 'lat' => -41.2706, 'lng' => 173.2840, 'pop' => 54500, 'popular' => true],
-                    ]],
-                    ['code' => 'STL', 'name' => 'Southland', 'slug' => 'southland', 'level' => 'region', 'lat' => -46.4132, 'lng' => 168.3538, 'cities' => [
-                        ['name' => 'Invercargill', 'lat' => -46.4132, 'lng' => 168.3538, 'pop' => 50200, 'popular' => true],
-                    ]],
-                    ['code' => 'TAS', 'name' => 'Tasman', 'slug' => 'tasman', 'level' => 'region', 'lat' => -41.3388, 'lng' => 173.1856, 'cities' => [
-                        ['name' => 'Richmond', 'lat' => -41.3388, 'lng' => 173.1856, 'pop' => 18850, 'popular' => false],
-                    ]],
-                    ['code' => 'MBH', 'name' => 'Marlborough', 'slug' => 'marlborough', 'level' => 'region', 'lat' => -41.5134, 'lng' => 173.9612, 'cities' => [
-                        ['name' => 'Blenheim', 'lat' => -41.5134, 'lng' => 173.9612, 'pop' => 29000, 'popular' => false],
-                    ]],
-                    ['code' => 'GIS', 'name' => 'Gisborne', 'slug' => 'gisborne', 'level' => 'region', 'lat' => -38.6623, 'lng' => 178.0176, 'cities' => [
-                        ['name' => 'Gisborne', 'lat' => -38.6623, 'lng' => 178.0176, 'pop' => 37700, 'popular' => false],
-                    ]],
-                    ['code' => 'WTC', 'name' => 'West Coast', 'slug' => 'west-coast', 'level' => 'region', 'lat' => -42.4504, 'lng' => 171.2108, 'cities' => [
-                        ['name' => 'Greymouth', 'lat' => -42.4504, 'lng' => 171.2108, 'pop' => 8320, 'popular' => false],
-                    ]],
-                ],
+                'areas' => $this->getNewZealandAreasDataset(),
             ],
         ];
     }
@@ -1605,6 +1548,150 @@ class FiveCountryGeographicSeederService
                 ['name' => 'Carrick-on-Shannon', 'lat' => 53.9469, 'lng' => -8.0900, 'pop' => 4743, 'popular' => false],
                 ['name' => 'Manorhamilton', 'lat' => 54.3069, 'lng' => -8.1764, 'pop' => 1650, 'popular' => false],
                 ['name' => 'Ballinamore', 'lat' => 54.0539, 'lng' => -7.7989, 'pop' => 1126, 'popular' => false],
+            ]],
+        ];
+    }
+
+    /**
+     * Complete New Zealand (NZ) 16 regions and major cities/towns dataset.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function getNewZealandAreasDataset(): array
+    {
+        return [
+            ['code' => 'AUK', 'name' => 'Auckland', 'slug' => 'auckland', 'level' => 'region', 'lat' => -36.8485, 'lng' => 174.7633, 'cities' => [
+                ['name' => 'Auckland', 'lat' => -36.8485, 'lng' => 174.7633, 'pop' => 1657200, 'popular' => true],
+                ['name' => 'Manukau', 'lat' => -36.9928, 'lng' => 174.8799, 'pop' => 375600, 'popular' => false],
+                ['name' => 'North Shore', 'lat' => -36.7972, 'lng' => 174.7495, 'pop' => 244000, 'popular' => false],
+                ['name' => 'Waitākere', 'slug' => 'waitakere', 'lat' => -36.9175, 'lng' => 174.6578, 'pop' => 208000, 'popular' => false],
+                ['name' => 'Papakura', 'lat' => -37.0656, 'lng' => 174.9439, 'pop' => 64400, 'popular' => false],
+                ['name' => 'Pukekohe', 'lat' => -37.2033, 'lng' => 174.9036, 'pop' => 26500, 'popular' => false],
+                ['name' => 'Hibiscus Coast', 'lat' => -36.6250, 'lng' => 174.7000, 'pop' => 60000, 'popular' => false],
+                ['name' => 'Orewa', 'lat' => -36.5856, 'lng' => 174.6961, 'pop' => 11200, 'popular' => false],
+                ['name' => 'Warkworth', 'lat' => -36.4000, 'lng' => 174.6667, 'pop' => 6270, 'popular' => false],
+                ['name' => 'Waiuku', 'lat' => -37.2489, 'lng' => 174.7303, 'pop' => 9800, 'popular' => false],
+            ]],
+            ['code' => 'WGN', 'name' => 'Wellington', 'slug' => 'wellington', 'level' => 'region', 'lat' => -41.2865, 'lng' => 174.7762, 'cities' => [
+                ['name' => 'Wellington', 'lat' => -41.2865, 'lng' => 174.7762, 'pop' => 215900, 'popular' => true],
+                ['name' => 'Lower Hutt', 'lat' => -41.2092, 'lng' => 174.9081, 'pop' => 111800, 'popular' => false],
+                ['name' => 'Porirua', 'lat' => -41.1333, 'lng' => 174.8500, 'pop' => 60400, 'popular' => false],
+                ['name' => 'Upper Hutt', 'lat' => -41.1244, 'lng' => 175.0708, 'pop' => 47300, 'popular' => false],
+                ['name' => 'Paraparaumu', 'lat' => -40.9167, 'lng' => 175.0000, 'pop' => 30100, 'popular' => false],
+                ['name' => 'Masterton', 'lat' => -40.9597, 'lng' => 175.6575, 'pop' => 22100, 'popular' => false],
+                ['name' => 'Waikanae', 'lat' => -40.8758, 'lng' => 175.0639, 'pop' => 13650, 'popular' => false],
+                ['name' => 'Carterton', 'lat' => -41.0247, 'lng' => 175.5275, 'pop' => 5900, 'popular' => false],
+                ['name' => 'Featherston', 'lat' => -41.1167, 'lng' => 175.3250, 'pop' => 2870, 'popular' => false],
+            ]],
+            ['code' => 'CAN', 'name' => 'Canterbury', 'slug' => 'canterbury', 'level' => 'region', 'lat' => -43.5321, 'lng' => 172.6362, 'cities' => [
+                ['name' => 'Christchurch', 'lat' => -43.5321, 'lng' => 172.6362, 'pop' => 389300, 'popular' => true],
+                ['name' => 'Timaru', 'lat' => -44.3904, 'lng' => 171.2373, 'pop' => 28700, 'popular' => false],
+                ['name' => 'Rolleston', 'lat' => -43.5917, 'lng' => 172.3833, 'pop' => 29400, 'popular' => false],
+                ['name' => 'Ashburton', 'lat' => -43.9000, 'lng' => 171.7500, 'pop' => 20900, 'popular' => false],
+                ['name' => 'Rangiora', 'lat' => -43.3000, 'lng' => 172.5833, 'pop' => 19550, 'popular' => false],
+                ['name' => 'Kaiapoi', 'lat' => -43.3833, 'lng' => 172.6500, 'pop' => 13000, 'popular' => false],
+                ['name' => 'Lincoln', 'lat' => -43.6417, 'lng' => 172.4833, 'pop' => 9800, 'popular' => false],
+                ['name' => 'Geraldine', 'lat' => -44.0933, 'lng' => 171.2439, 'pop' => 2950, 'popular' => false],
+                ['name' => 'Waimate', 'lat' => -44.7333, 'lng' => 171.0500, 'pop' => 3550, 'popular' => false],
+                ['name' => 'Kaikōura', 'slug' => 'kaikoura', 'lat' => -42.4000, 'lng' => 173.6833, 'pop' => 2350, 'popular' => false],
+            ]],
+            ['code' => 'WKO', 'name' => 'Waikato', 'slug' => 'waikato', 'level' => 'region', 'lat' => -37.7870, 'lng' => 175.2793, 'cities' => [
+                ['name' => 'Hamilton', 'lat' => -37.7870, 'lng' => 175.2793, 'pop' => 179900, 'popular' => true],
+                ['name' => 'Taupō', 'slug' => 'taupo', 'lat' => -38.6857, 'lng' => 176.0702, 'pop' => 26100, 'popular' => false],
+                ['name' => 'Cambridge', 'lat' => -37.8906, 'lng' => 175.4683, 'pop' => 21600, 'popular' => false],
+                ['name' => 'Te Awamutu', 'lat' => -38.0108, 'lng' => 175.3250, 'pop' => 13650, 'popular' => false],
+                ['name' => 'Tokoroa', 'lat' => -38.2333, 'lng' => 175.8667, 'pop' => 14500, 'popular' => false],
+                ['name' => 'Huntly', 'lat' => -37.5597, 'lng' => 175.1583, 'pop' => 8500, 'popular' => false],
+                ['name' => 'Morrinsville', 'lat' => -37.6561, 'lng' => 175.5250, 'pop' => 8900, 'popular' => false],
+                ['name' => 'Matamata', 'lat' => -37.8106, 'lng' => 175.7625, 'pop' => 8750, 'popular' => false],
+                ['name' => 'Thames', 'lat' => -37.1383, 'lng' => 175.5408, 'pop' => 7550, 'popular' => false],
+                ['name' => 'Whitianga', 'lat' => -36.8333, 'lng' => 175.7000, 'pop' => 6350, 'popular' => false],
+                ['name' => 'Raglan', 'lat' => -37.8000, 'lng' => 174.8833, 'pop' => 3800, 'popular' => false],
+            ]],
+            ['code' => 'BOP', 'name' => 'Bay of Plenty', 'slug' => 'bay-of-plenty', 'level' => 'region', 'lat' => -37.6878, 'lng' => 176.1651, 'cities' => [
+                ['name' => 'Tauranga', 'lat' => -37.6878, 'lng' => 176.1651, 'pop' => 158300, 'popular' => true],
+                ['name' => 'Rotorua', 'lat' => -38.1368, 'lng' => 176.2497, 'pop' => 58800, 'popular' => true],
+                ['name' => 'Whakatāne', 'slug' => 'whakatane', 'lat' => -37.9586, 'lng' => 176.9854, 'pop' => 16700, 'popular' => false],
+                ['name' => 'Te Puke', 'lat' => -37.7833, 'lng' => 176.3167, 'pop' => 10150, 'popular' => false],
+                ['name' => 'Kawerau', 'lat' => -38.1000, 'lng' => 176.7000, 'pop' => 7750, 'popular' => false],
+                ['name' => 'Katikati', 'lat' => -37.5500, 'lng' => 175.9167, 'pop' => 5650, 'popular' => false],
+                ['name' => 'Ōpōtiki', 'slug' => 'opotiki', 'lat' => -38.0092, 'lng' => 177.2872, 'pop' => 5100, 'popular' => false],
+            ]],
+            ['code' => 'OTA', 'name' => 'Otago', 'slug' => 'otago', 'level' => 'region', 'lat' => -45.8788, 'lng' => 170.5028, 'cities' => [
+                ['name' => 'Dunedin', 'lat' => -45.8788, 'lng' => 170.5028, 'pop' => 130400, 'popular' => true],
+                ['name' => 'Queenstown', 'lat' => -45.0312, 'lng' => 168.6626, 'pop' => 28900, 'popular' => true],
+                ['name' => 'Wānaka', 'slug' => 'wanaka', 'lat' => -44.7000, 'lng' => 169.1500, 'pop' => 12450, 'popular' => false],
+                ['name' => 'Mosgiel', 'lat' => -45.8750, 'lng' => 170.3483, 'pop' => 14800, 'popular' => false],
+                ['name' => 'Oamaru', 'lat' => -45.0975, 'lng' => 170.9708, 'pop' => 13900, 'popular' => false],
+                ['name' => 'Cromwell', 'lat' => -45.0383, 'lng' => 169.2000, 'pop' => 6850, 'popular' => false],
+                ['name' => 'Alexandra', 'lat' => -45.2492, 'lng' => 169.3797, 'pop' => 5800, 'popular' => false],
+                ['name' => 'Balclutha', 'lat' => -46.2389, 'lng' => 169.7400, 'pop' => 4250, 'popular' => false],
+                ['name' => 'Arrowtown', 'lat' => -44.9417, 'lng' => 168.8333, 'pop' => 3000, 'popular' => false],
+            ]],
+            ['code' => 'HKB', 'name' => "Hawke's Bay", 'slug' => 'hawkes-bay', 'level' => 'region', 'lat' => -39.4928, 'lng' => 176.9120, 'cities' => [
+                ['name' => 'Napier', 'lat' => -39.4928, 'lng' => 176.9120, 'pop' => 66800, 'popular' => true],
+                ['name' => 'Hastings', 'lat' => -39.6381, 'lng' => 176.8492, 'pop' => 50400, 'popular' => true],
+                ['name' => 'Havelock North', 'lat' => -39.6708, 'lng' => 176.8806, 'pop' => 15100, 'popular' => false],
+                ['name' => 'Waipukurau', 'lat' => -39.9972, 'lng' => 176.5556, 'pop' => 4750, 'popular' => false],
+                ['name' => 'Wairoa', 'lat' => -39.0417, 'lng' => 177.4167, 'pop' => 4650, 'popular' => false],
+            ]],
+            ['code' => 'MWT', 'name' => 'Manawatū-Whanganui', 'slug' => 'manawatu-whanganui', 'level' => 'region', 'lat' => -40.3523, 'lng' => 175.6082, 'cities' => [
+                ['name' => 'Palmerston North', 'slug' => 'palmerston-north', 'lat' => -40.3523, 'lng' => 175.6082, 'pop' => 90400, 'popular' => true],
+                ['name' => 'Whanganui', 'lat' => -39.9301, 'lng' => 175.0479, 'pop' => 42800, 'popular' => false],
+                ['name' => 'Levin', 'lat' => -40.6219, 'lng' => 175.2861, 'pop' => 19550, 'popular' => false],
+                ['name' => 'Feilding', 'lat' => -40.2250, 'lng' => 175.5667, 'pop' => 17600, 'popular' => false],
+                ['name' => 'Dannevirke', 'lat' => -40.2083, 'lng' => 176.1000, 'pop' => 5650, 'popular' => false],
+                ['name' => 'Marton', 'lat' => -40.0694, 'lng' => 175.3778, 'pop' => 5450, 'popular' => false],
+                ['name' => 'Foxton', 'lat' => -40.4717, 'lng' => 175.2858, 'pop' => 3350, 'popular' => false],
+                ['name' => 'Taumarunui', 'lat' => -38.8833, 'lng' => 175.2667, 'pop' => 4900, 'popular' => false],
+            ]],
+            ['code' => 'TKI', 'name' => 'Taranaki', 'slug' => 'taranaki', 'level' => 'region', 'lat' => -39.0556, 'lng' => 174.0752, 'cities' => [
+                ['name' => 'New Plymouth', 'slug' => 'new-plymouth', 'lat' => -39.0556, 'lng' => 174.0752, 'pop' => 58500, 'popular' => true],
+                ['name' => 'Hāwera', 'slug' => 'hawera', 'lat' => -39.5917, 'lng' => 174.2833, 'pop' => 10400, 'popular' => false],
+                ['name' => 'Waitara', 'lat' => -38.9958, 'lng' => 174.2383, 'pop' => 7550, 'popular' => false],
+                ['name' => 'Stratford (NZ)', 'slug' => 'stratford-nz', 'lat' => -39.3417, 'lng' => 174.2833, 'pop' => 6250, 'popular' => false],
+                ['name' => 'Inglewood', 'lat' => -39.1583, 'lng' => 174.2083, 'pop' => 3850, 'popular' => false],
+            ]],
+            ['code' => 'NTL', 'name' => 'Northland', 'slug' => 'northland', 'level' => 'region', 'lat' => -35.7275, 'lng' => 174.3166, 'cities' => [
+                ['name' => 'Whangārei', 'slug' => 'whangarei', 'lat' => -35.7275, 'lng' => 174.3166, 'pop' => 54900, 'popular' => true],
+                ['name' => 'Kerikeri', 'lat' => -35.2244, 'lng' => 173.9472, 'pop' => 8150, 'popular' => false],
+                ['name' => 'Kaitaia', 'lat' => -35.1125, 'lng' => 173.2628, 'pop' => 6300, 'popular' => false],
+                ['name' => 'Dargaville', 'lat' => -35.9333, 'lng' => 173.8833, 'pop' => 5200, 'popular' => false],
+                ['name' => 'Kaikohe', 'lat' => -35.4075, 'lng' => 173.7997, 'pop' => 4800, 'popular' => false],
+                ['name' => 'Paihia', 'lat' => -35.2822, 'lng' => 174.0911, 'pop' => 2350, 'popular' => false],
+            ]],
+            ['code' => 'NSN', 'name' => 'Nelson', 'slug' => 'nelson', 'level' => 'region', 'lat' => -41.2706, 'lng' => 173.2840, 'cities' => [
+                ['name' => 'Nelson', 'lat' => -41.2706, 'lng' => 173.2840, 'pop' => 54500, 'popular' => true],
+                ['name' => 'Stoke', 'lat' => -41.3144, 'lng' => 173.2353, 'pop' => 17800, 'popular' => false],
+                ['name' => 'Tāhunanui', 'slug' => 'tahunanui', 'lat' => -41.2875, 'lng' => 173.2417, 'pop' => 4500, 'popular' => false],
+            ]],
+            ['code' => 'STL', 'name' => 'Southland', 'slug' => 'southland', 'level' => 'region', 'lat' => -46.4132, 'lng' => 168.3538, 'cities' => [
+                ['name' => 'Invercargill', 'lat' => -46.4132, 'lng' => 168.3538, 'pop' => 50200, 'popular' => true],
+                ['name' => 'Gore', 'lat' => -46.1028, 'lng' => 168.9436, 'pop' => 8250, 'popular' => false],
+                ['name' => 'Te Anau', 'lat' => -45.4167, 'lng' => 167.7167, 'pop' => 2950, 'popular' => false],
+                ['name' => 'Winton', 'lat' => -46.1433, 'lng' => 168.3236, 'pop' => 2450, 'popular' => false],
+                ['name' => 'Bluff', 'lat' => -46.6000, 'lng' => 168.3333, 'pop' => 1850, 'popular' => false],
+            ]],
+            ['code' => 'TAS', 'name' => 'Tasman', 'slug' => 'tasman', 'level' => 'region', 'lat' => -41.3388, 'lng' => 173.1856, 'cities' => [
+                ['name' => 'Richmond', 'lat' => -41.3388, 'lng' => 173.1856, 'pop' => 18850, 'popular' => false],
+                ['name' => 'Motueka', 'lat' => -41.1167, 'lng' => 173.0167, 'pop' => 8450, 'popular' => false],
+                ['name' => 'Wakefield', 'lat' => -41.4044, 'lng' => 173.0472, 'pop' => 2700, 'popular' => false],
+                ['name' => 'Tākaka', 'slug' => 'takaka', 'lat' => -40.8500, 'lng' => 172.8000, 'pop' => 1450, 'popular' => false],
+            ]],
+            ['code' => 'MBH', 'name' => 'Marlborough', 'slug' => 'marlborough', 'level' => 'region', 'lat' => -41.5134, 'lng' => 173.9612, 'cities' => [
+                ['name' => 'Blenheim', 'lat' => -41.5134, 'lng' => 173.9612, 'pop' => 29000, 'popular' => false],
+                ['name' => 'Picton', 'lat' => -41.2931, 'lng' => 174.0006, 'pop' => 4850, 'popular' => false],
+                ['name' => 'Renwick', 'lat' => -41.5097, 'lng' => 173.8417, 'pop' => 2550, 'popular' => false],
+            ]],
+            ['code' => 'GIS', 'name' => 'Gisborne', 'slug' => 'gisborne', 'level' => 'region', 'lat' => -38.6623, 'lng' => 178.0176, 'cities' => [
+                ['name' => 'Gisborne', 'lat' => -38.6623, 'lng' => 178.0176, 'pop' => 37700, 'popular' => false],
+                ['name' => 'Tolaga Bay', 'lat' => -38.3717, 'lng' => 178.3000, 'pop' => 950, 'popular' => false],
+            ]],
+            ['code' => 'WTC', 'name' => 'West Coast', 'slug' => 'west-coast', 'level' => 'region', 'lat' => -42.4504, 'lng' => 171.2108, 'cities' => [
+                ['name' => 'Greymouth', 'lat' => -42.4504, 'lng' => 171.2108, 'pop' => 8320, 'popular' => false],
+                ['name' => 'Westport', 'lat' => -41.7581, 'lng' => 171.6022, 'pop' => 4650, 'popular' => false],
+                ['name' => 'Hokitika', 'lat' => -42.7167, 'lng' => 170.9667, 'pop' => 3450, 'popular' => false],
+                ['name' => 'Reefton', 'lat' => -42.1167, 'lng' => 171.8667, 'pop' => 1050, 'popular' => false],
             ]],
         ];
     }

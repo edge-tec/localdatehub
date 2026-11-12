@@ -507,7 +507,11 @@ class CountryMarketplaceService
             $ieStatesCount = $ie ? State::query()->where('country_id', $ie->id)->count() : 0;
             $ieCitiesCount = $ie ? City::query()->where('country_id', $ie->id)->count() : 0;
 
-            if ($count < 6 || $usStatesCount < 51 || $auStatesCount < 8 || $auCitiesCount < 180 || $gbStatesCount < 13 || $gbCitiesCount < 150 || $caStatesCount < 13 || $caCitiesCount < 150 || $ieStatesCount < 26 || $ieCitiesCount < 110) {
+            $nz = Country::query()->where('code', 'NZ')->first();
+            $nzStatesCount = $nz ? State::query()->where('country_id', $nz->id)->count() : 0;
+            $nzCitiesCount = $nz ? City::query()->where('country_id', $nz->id)->count() : 0;
+
+            if ($count < 6 || $usStatesCount < 51 || $auStatesCount < 8 || $auCitiesCount < 180 || $gbStatesCount < 13 || $gbCitiesCount < 150 || $caStatesCount < 13 || $caCitiesCount < 150 || $ieStatesCount < 26 || $ieCitiesCount < 110 || $nzStatesCount < 16 || $nzCitiesCount < 90) {
                 $this->seederService->seedAll();
             }
         } catch (\Throwable) {
