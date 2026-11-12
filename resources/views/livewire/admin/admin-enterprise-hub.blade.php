@@ -353,12 +353,14 @@
                         <p class="text-xs text-slate-500 mt-0.5">Welcome back, Super Admin! Real-time live platform telemetry and visitor tracking.</p>
                     </div>
                     <div class="flex items-center gap-2">
-                        <div class="inline-flex items-center gap-2 pl-1.5 pr-3.5 py-1 rounded-full bg-white/95 border border-rose-200/80 shadow-[0_6px_18px_-8px_rgba(242,11,131,0.3)] ring-1 ring-rose-500/10 text-xs font-black text-slate-900 w-max">
-                            <span class="w-5 h-5 rounded-full bg-gradient-to-br from-[#F20B83] via-rose-500 to-fuchsia-600 text-white flex items-center justify-center shrink-0">
-                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                        <a href="{{ route('admin.live-visitors') }}" class="inline-flex items-center gap-2 pl-2 pr-3.5 py-1.5 rounded-full bg-white/95 hover:bg-rose-50/70 border border-rose-200/80 shadow-[0_6px_18px_-8px_rgba(242,11,131,0.3)] ring-1 ring-rose-500/10 text-xs font-black text-slate-900 w-max transition group" title="Open Real-Time Live Visitor Monitoring">
+                            <span class="relative flex h-2.5 w-2.5 shrink-0">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                             </span>
                             <span>{{ $metrics['activeVisitorsNow'] }} Visitors Online Now · Auto-updating (10s)</span>
-                        </div>
+                            <svg class="w-3.5 h-3.5 text-[#F20B83] group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        </a>
                         @if($this->userCan('settings.manage'))
                             <button type="button" wire:click="resetAllTrafficAndViewCounts" wire:confirm="Are you sure you want to reset all traffic views and listing view counters to 0?" class="px-3 py-1.5 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition shadow-xs" title="Reset All Views & Traffic to 0">
                                 ↺ Reset Views to 0

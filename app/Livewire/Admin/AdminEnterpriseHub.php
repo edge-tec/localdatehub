@@ -5100,7 +5100,7 @@ class AdminEnterpriseHub extends Component
             ? round((($viewsLast7Days - $viewsPrior7Days) / $viewsPrior7Days) * 100, 1) 
             : ($viewsLast7Days > 0 ? 100.0 : 0.0);
 
-        $activeVisitorsCount = $baseTrafficQuery()->where('created_at', '>=', now()->subMinutes(5))->distinct('visitor_hash')->count('visitor_hash');
+        $activeVisitorsCount = app(\App\Modules\Analytics\Services\LiveVisitorTrackingService::class)->getOnlineCount();
         $activeVisitorsNow = $activeVisitorsCount;
         $todayGrossViews = $baseTrafficQuery()->whereDate('created_at', today())->count();
         $todayUniqueVisitors = $baseTrafficQuery()->whereDate('created_at', today())->distinct('visitor_hash')->count('visitor_hash');

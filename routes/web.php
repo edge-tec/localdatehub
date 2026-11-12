@@ -512,8 +512,14 @@ Route::middleware(['auth', 'admin.rbac'])->prefix('admin/crypto')->name('admin.c
     Route::post('/payments/{payment}/sync', [\App\Http\Controllers\Admin\AdminCryptoPaymentController::class, 'syncPayment'])->name('payments.sync');
 });
 
+// Public Visitor Telemetry Heartbeat (throttled, non-invasive)
+Route::post('/telemetry/heartbeat', [\App\Http\Controllers\VisitorTelemetryController::class, 'heartbeat'])
+    ->middleware('throttle:60,1')
+    ->name('telemetry.heartbeat');
+
 // 4. Admin Posting Monetization, Wallet & Verification Management
 Route::middleware(['auth', 'admin.rbac'])->group(function () {
+    Route::get('/admin/live-visitors', \App\Livewire\Admin\LiveVisitorMonitor::class)->name('admin.live-visitors');
     // Posting Policies & Monetization Control
     Route::prefix('admin/monetization')->name('admin.monetization.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\AdminPostingMonetizationController::class, 'index'])->name('index');

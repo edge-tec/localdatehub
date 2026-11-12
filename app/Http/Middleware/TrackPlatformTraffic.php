@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\PlatformTrafficLog;
+use App\Modules\Analytics\Services\LiveVisitorTrackingService;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -44,7 +45,22 @@ class TrackPlatformTraffic
         }
 
         try {
-            $this->recordTraffic($request, $path, $durationMs);
+            $cookieValue = $this->recordTraffic($request, $path, $durationMs);
+            if ($cookieValue !== null) {
+                $response->headers->setCookie(
+                    cookie(
+                        LiveVisitorTrackingService::VISITOR_COOKIE,
+                        $cookieValue,
+                        60 * 24 * 90,
+                        '/',
+                        null,
+                        $request->isSecure(),
+                        true,
+                        false,
+                        'Lax'
+                    )
+                );
+            }
         } catch (\Throwable $e) {
             // Telemetry must never crash primary user requests
         }
@@ -87,7 +103,7 @@ class TrackPlatformTraffic
         return false;
     }
 
-    protected function recordTraffic(Request $request, string $path, int $durationMs): void
+    protected function recordTraffic(Request $request, string $path, int $durationMs): ?string
     {
         $ip = $request->ip() ?: '127.0.0.1';
         $ua = substr($request->userAgent() ?: 'Mozilla/5.0 Direct/1.0', 0, 255);
@@ -164,7 +180,14 @@ class TrackPlatformTraffic
 
         $isBot = (bool) preg_match('/(bot|crawl|spider|slurp|facebookexternalhit|bingbot|googlebot|headless|lighthouse|pingdom|uptimerobot)/i', $ua);
         if ($isBot) {
-            return;
+            return null;
+        }
+
+        // Update real-time visitor session & activity without creating duplicate sessions on refresh
+        $liveCookie = null;
+        $liveResult = app(LiveVisitorTrackingService::class)->recordPageVisit($request, $path, $durationMs);
+        if ($liveResult['is_new_cookie']) {
+            $liveCookie = $liveResult['visitor_cookie_value'];
         }
 
         // Prevent URL reload inflation: if the same visitor_hash already loaded this exact path in the last 30 minutes, do not add a new view row
@@ -174,7 +197,7 @@ class TrackPlatformTraffic
             ->exists();
 
         if ($alreadyVisitedRecently) {
-            return;
+            return $liveCookie;
         }
 
         PlatformTrafficLog::create([
@@ -197,6 +220,8 @@ class TrackPlatformTraffic
             'response_time_ms' => $durationMs,
             'created_at' => now(),
         ]);
+
+        return $liveCookie;
     }
 
     protected function detectCountryFromAcceptLanguage(Request $request): string

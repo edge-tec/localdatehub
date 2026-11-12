@@ -169,5 +169,65 @@
     <x-footer />
 
     @livewireScripts
+    @unless(auth()->check() && (auth()->user()->is_admin || in_array(auth()->user()->role, ['super_admin', 'admin', 'moderator', 'support', 'finance_admin'], true)))
+        <script>
+            (function () {
+                const endpoint = @json(route('telemetry.heartbeat'));
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                let idleTimer = null;
+                let currentState = 'active';
+
+                function sendBeaconState(state) {
+                    const payload = JSON.stringify({
+                        state: state,
+                        screen_resolution: (window.screen?.width && window.screen?.height) ? (window.screen.width + 'x' + window.screen.height) : null,
+                        page_title: document.title ? document.title.slice(0, 255) : null,
+                        page_url: window.location.href.slice(0, 500),
+                        _token: csrf
+                    });
+                    if (state === 'left' && navigator.sendBeacon) {
+                        const blob = new Blob([payload], { type: 'application/json' });
+                        navigator.sendBeacon(endpoint, blob);
+                        return;
+                    }
+                    fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+                        body: payload,
+                        keepalive: true
+                    }).catch(function () {});
+                }
+
+                function resetIdleTimer() {
+                    if (currentState === 'idle') {
+                        currentState = 'active';
+                        sendBeaconState('active');
+                    }
+                    clearTimeout(idleTimer);
+                    idleTimer = setTimeout(function () {
+                        currentState = 'idle';
+                        sendBeaconState('idle');
+                    }, 120000);
+                }
+
+                ['mousemove', 'keydown', 'scroll', 'touchstart', 'click'].forEach(function (evt) {
+                    window.addEventListener(evt, resetIdleTimer, { passive: true });
+                });
+
+                document.addEventListener('DOMContentLoaded', function () {
+                    sendBeaconState('active');
+                    resetIdleTimer();
+                });
+                setInterval(function () {
+                    if (document.visibilityState === 'visible') {
+                        sendBeaconState(currentState);
+                    }
+                }, 25000);
+                window.addEventListener('pagehide', function () {
+                    sendBeaconState('left');
+                });
+            })();
+        </script>
+    @endunless
 </body>
 </html>
