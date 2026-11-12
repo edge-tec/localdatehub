@@ -71,12 +71,23 @@
                     </p>
 
                     <!-- Search Bar Panel (White pill box matching reference image) -->
+                    @php
+                        $preloadedCitiesSource = $allCountryCities ?? $popularCities ?? collect();
+                        $preloadedCitiesJson = $preloadedCitiesSource->map(fn($c) => [
+                            'id' => $c->id,
+                            'name' => $c->name,
+                            'slug' => $c->slug,
+                            'is_popular' => (bool) ($c->is_popular ?? false),
+                            'state_code' => strtolower($c->state->code ?? ''),
+                        ])->values();
+                    @endphp
                     <div 
                         x-data="{
                             selectedState: '{{ strtolower(request('state', '')) }}',
                             selectedCity: '{{ request('city', '') }}',
                             cityInput: '{{ request('city', '') }}',
-                            cities: [],
+                            defaultCities: {{ Js::from($preloadedCitiesJson) }},
+                            cities: {{ Js::from($preloadedCitiesJson) }},
                             cache: {},
                             loadingCities: false,
                             cityDropdownOpen: false,
@@ -86,9 +97,9 @@
                                 this.selectedState = stateCode;
                                 this.selectedCity = '';
                                 this.cityInput = '';
-                                this.cities = [];
 
                                 if (!stateCode) {
+                                    this.cities = this.defaultCities;
                                     this.cityDropdownOpen = false;
                                     return;
                                 }
@@ -109,7 +120,7 @@
                                         this.cache[stateCode] = json.data.cities;
                                         this.cityDropdownOpen = true;
                                     } else {
-                                        // Fallback to static static city database if API endpoint response fails
+                                        // Fallback to static city database if API endpoint response fails
                                         const fallbackRes = await fetch('/data/us-cities.json');
                                         const fallbackMap = await fallbackRes.json();
                                         if (fallbackMap && fallbackMap[stateCode.toLowerCase()]) {
@@ -141,7 +152,7 @@
                                     const q = this.cityInput.toLowerCase().trim();
                                     list = this.cities.filter(c => c.name.toLowerCase().includes(q));
                                 }
-                                return list.slice(0, 80);
+                                return list.slice(0, 120);
                             },
 
                             get totalMatches() {
@@ -150,18 +161,16 @@
                                 return this.cities.filter(c => c.name.toLowerCase().includes(q)).length;
                             },
 
-                            selectCity(name) {
+                            selectCity(name, stateCode = '') {
                                 this.selectedCity = name;
                                 this.cityInput = name;
+                                if (!this.selectedState && stateCode) {
+                                    this.selectedState = stateCode.toLowerCase();
+                                }
                                 this.cityDropdownOpen = false;
                             },
 
                             validateCity() {
-                                if (!this.selectedState) {
-                                    this.selectedCity = '';
-                                    this.cityInput = '';
-                                    return;
-                                }
                                 if (!this.cityInput || !this.cityInput.trim()) {
                                     this.selectedCity = '';
                                     this.cityInput = '';
@@ -172,13 +181,18 @@
                                 if (exact) {
                                     this.selectedCity = exact.name;
                                     this.cityInput = exact.name;
+                                    if (!this.selectedState && exact.state_code) {
+                                        this.selectedState = exact.state_code;
+                                    }
                                 } else {
                                     const match = this.cities.find(c => c.name.toLowerCase().startsWith(q));
                                     if (match) {
                                         this.selectedCity = match.name;
                                         this.cityInput = match.name;
+                                        if (!this.selectedState && match.state_code) {
+                                            this.selectedState = match.state_code;
+                                        }
                                     } else {
-                                        // City does not belong to selected state - clear to prevent invalid cross-state search
                                         this.selectedCity = '';
                                         this.cityInput = '';
                                     }
@@ -244,7 +258,7 @@
                                 class="sm:col-span-3 relative flex items-center px-3 py-1.5 cursor-pointer"
                                 @click.outside="cityDropdownOpen = false"
                                 @keydown.escape.window="cityDropdownOpen = false"
-                                @click="if(selectedState) { cityDropdownOpen = !cityDropdownOpen; }"
+                                @click="cityDropdownOpen = !cityDropdownOpen"
                             >
                                 <svg class="w-4 h-4 text-slate-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -258,12 +272,10 @@
                                     <input 
                                         type="text" 
                                         x-model="cityInput" 
-                                        @click.stop="if(selectedState) { cityDropdownOpen = true; }"
-                                        @input="selectedCity = cityInput; if(selectedState) { cityDropdownOpen = true; }"
-                                        :disabled="!selectedState"
-                                        :placeholder="loadingCities ? 'Loading cities...' : (!selectedState ? 'Select State first' : 'Select City in State...')" 
-                                        class="w-full bg-transparent text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none py-1 pr-6 truncate cursor-pointer"
-                                        :class="{ 'cursor-not-allowed opacity-60': !selectedState }"
+                                        @click.stop="cityDropdownOpen = true"
+                                        @input="selectedCity = cityInput; cityDropdownOpen = true;"
+                                        :placeholder="loadingCities ? 'Loading cities...' : 'Select City'" 
+                                        class="w-full bg-transparent text-xs font-semibold text-slate-800 placeholder-slate-700 focus:outline-none py-1 pr-6 truncate cursor-pointer"
                                         autocomplete="off"
                                     />
 
@@ -297,8 +309,8 @@
                                     class="absolute left-0 right-0 sm:left-auto sm:right-0 top-full mt-2 w-full sm:w-[380px] max-w-[calc(100vw-2rem)] sm:max-w-[420px] bg-white rounded-2xl shadow-2xl border border-slate-200/90 z-50 text-left flex flex-col overflow-hidden"
                                     style="box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(0, 0, 0, 0.05);"
                                 >
-                                    <!-- Prompt if no state selected yet -->
-                                    <template x-if="!selectedState">
+                                    <!-- Prompt if no state selected yet and no preloaded cities -->
+                                    <template x-if="!selectedState && cities.length === 0">
                                         <div class="p-4 text-center">
                                             <div class="text-2xl mb-1">📍</div>
                                             <div class="text-xs font-bold text-slate-800">Please select a State first</div>
@@ -306,8 +318,8 @@
                                         </div>
                                     </template>
 
-                                    <!-- When state is selected and cities are loaded -->
-                                    <template x-if="selectedState && cities.length > 0">
+                                    <!-- When cities are loaded (either country-wide or for the selected state) -->
+                                    <template x-if="cities.length > 0">
                                         <div class="flex flex-col">
                                             <!-- STICKY TOP HEADER: Search bar & All Cities shortcut (Never scrolls away!) -->
                                             <div class="sticky top-0 bg-white border-b border-slate-100 p-2.5 z-20 space-y-2 bg-gradient-to-b from-white to-slate-50/70">
@@ -318,7 +330,7 @@
                                                         @click="selectCity('')"
                                                         class="text-[11px] font-bold text-[#F20B65] hover:underline flex items-center gap-1"
                                                     >
-                                                        <span>All Cities in State</span>
+                                                        <span>All Cities</span>
                                                         <span class="text-slate-400 font-normal">↺</span>
                                                     </button>
                                                 </div>
@@ -352,11 +364,16 @@
                                                 <template x-for="c in filteredCities" :key="c.id">
                                                     <button 
                                                         type="button" 
-                                                        @click="selectCity(c.name)"
+                                                        @click="selectCity(c.name, c.state_code || '')"
                                                         class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-pink-50 hover:text-[#F20B65] rounded-xl font-semibold flex items-center justify-between transition-colors"
                                                         :class="{ 'bg-pink-50/80 text-[#F20B65] font-bold ring-1 ring-[#F20B65]/30': selectedCity === c.name }"
                                                     >
-                                                        <span x-text="c.name"></span>
+                                                        <span class="flex items-center gap-1.5">
+                                                            <span x-text="c.name"></span>
+                                                            <template x-if="!selectedState && c.state_code">
+                                                                <span class="text-[10px] font-bold uppercase text-slate-400" x-text="'(' + c.state_code.toUpperCase() + ')'"></span>
+                                                            </template>
+                                                        </span>
                                                         <template x-if="c.is_popular">
                                                             <span class="text-[9px] px-2 py-0.5 rounded-full bg-pink-100 text-[#F20B65] font-extrabold uppercase tracking-wide">Popular</span>
                                                         </template>
@@ -704,6 +721,40 @@
                                 </a>
                             @endforeach
                         </div>
+
+                        @if(isset($popularCities) && $popularCities->isNotEmpty())
+                            <div class="mt-6">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="text-sm sm:text-base font-black text-slate-800">
+                                        Popular Cities in {{ $activeCountry->name ?? 'United States' }}
+                                    </h3>
+                                </div>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-2.5">
+                                    @foreach($popularCities->take(20) as $cityItem)
+                                        @php
+                                            $cityStateSlug = $cityItem->state ? ($cityItem->state->slug ?: strtolower($cityItem->state->code)) : 'all';
+                                            $cityStateCode = $cityItem->state ? strtolower($cityItem->state->code) : 'ca';
+                                            $cityHref = $isCustomCountry
+                                                ? route('country.city', ['countrySlug' => $activeSlug, 'areaSlug' => $cityStateSlug, 'citySlug' => $cityItem->slug])
+                                                : route('locations.city', [$cityStateCode, $cityItem->slug]);
+                                        @endphp
+                                        <a href="{{ $cityHref }}" class="bg-white rounded-xl border border-slate-200/90 hover:border-[#F20B65] px-3 py-2 shadow-2xs hover:shadow-sm transition-all group flex items-center justify-between gap-2">
+                                            <div class="min-w-0">
+                                                <div class="text-xs font-bold text-slate-800 group-hover:text-[#F20B65] truncate">
+                                                    {{ $cityItem->name }}
+                                                </div>
+                                                @if($cityItem->state)
+                                                    <div class="text-[10px] text-slate-400 font-semibold truncate">
+                                                        {{ $cityItem->state->name }} ({{ $cityItem->state->code }})
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            <span class="text-[11px] font-bold text-slate-300 group-hover:text-[#F20B65] shrink-0">→</span>
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                     </div>
 
                 </div>

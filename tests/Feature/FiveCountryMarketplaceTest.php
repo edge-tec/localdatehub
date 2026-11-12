@@ -171,8 +171,27 @@ class FiveCountryMarketplaceTest extends TestCase
         $homeResp->assertSee('New South Wales');
         $homeResp->assertSee('Victoria');
         $homeResp->assertSee('Queensland');
+        $homeResp->assertSee('Western Australia');
+        $homeResp->assertSee('South Australia');
+        $homeResp->assertSee('Tasmania');
+        $homeResp->assertSee('Australian Capital Territory');
+        $homeResp->assertSee('Northern Territory');
+        $homeResp->assertSee('Sydney');
+        $homeResp->assertSee('Melbourne');
+        $homeResp->assertSee('Brisbane');
+        $homeResp->assertSee('Perth');
+        $homeResp->assertSee('Adelaide');
+        $homeResp->assertSee('Hobart');
+        $homeResp->assertSee('Canberra');
+        $homeResp->assertSee('Darwin');
         $homeResp->assertSee($auListing->title);
         $homeResp->assertSee('A$140');
+
+        $this->assertGreaterThanOrEqual(200, City::query()->where('country_id', $au->id)->count());
+
+        $nswApi = $this->getJson('/api/locations/states/nsw/cities?country=au');
+        $nswApi->assertOk()->assertJsonPath('success', true);
+        $this->assertGreaterThanOrEqual(45, count($nswApi->json('data.cities')));
 
         $this->get('/au/victoria')->assertOk()->assertSee('Melbourne')->assertSee($auListing->title);
         $this->get('/au/victoria/melbourne')->assertOk()->assertSee($auListing->title);

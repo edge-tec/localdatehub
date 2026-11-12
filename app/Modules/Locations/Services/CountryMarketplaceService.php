@@ -469,7 +469,8 @@ class CountryMarketplaceService
     }
 
     /**
-     * Automatically migrate (if needed) and seed the 5 countries if they haven't been seeded yet.
+     * Automatically migrate (if needed) and seed the 5 countries if they haven't been seeded yet
+     * or if the expanded Australian city dataset has not been seeded yet.
      */
     public function ensureFiveCountriesExist(): void
     {
@@ -486,7 +487,12 @@ class CountryMarketplaceService
                 ->whereIn('code', Country::FIVE_MARKETPLACES)
                 ->where('is_marketplace_enabled', true)
                 ->count();
-            if ($count < 5) {
+
+            $au = Country::query()->where('code', 'AU')->first();
+            $auStatesCount = $au ? State::query()->where('country_id', $au->id)->count() : 0;
+            $auCitiesCount = $au ? City::query()->where('country_id', $au->id)->count() : 0;
+
+            if ($count < 5 || $auStatesCount < 8 || $auCitiesCount < 180) {
                 $this->seederService->seedAll();
             }
         } catch (\Throwable) {

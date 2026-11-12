@@ -83,7 +83,10 @@ class CountryMarketplaceController extends Controller
 
         $allStates = $this->marketplaceService->getCountryAreas($country);
         $popularStates = $allStates->take(10);
-        $popularCities = $this->marketplaceService->getPopularCities($country, 16);
+        $popularCities = $this->marketplaceService->getPopularCities($country, 20);
+        $allCountryCities = $slug === 'us'
+            ? $popularCities
+            : $this->marketplaceService->getPopularCities($country, 300);
         $categories = $this->marketplaceService->getCountryCategories($country);
         $featuredListings = $this->marketplaceService->getFeaturedListings($country, 4);
         $latestListings = $this->marketplaceService->getLatestListings($country, 12);
@@ -152,6 +155,7 @@ class CountryMarketplaceController extends Controller
             'popularStates' => $popularStates,
             'allStates' => $allStates,
             'popularCities' => $popularCities,
+            'allCountryCities' => $allCountryCities,
             'stats' => $stats,
             'seo' => $seo,
             'seoTitle' => $seoTitle,

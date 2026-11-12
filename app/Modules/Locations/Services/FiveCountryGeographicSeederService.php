@@ -31,6 +31,8 @@ class FiveCountryGeographicSeederService
 
     public function seedAll(?string $onlyCountryCode = null): array
     {
+        $this->ensureStatesSchemaCompatibility();
+
         $datasets = $this->getDatasetDefinitions();
         if ($onlyCountryCode) {
             $upper = strtoupper(trim($onlyCountryCode));
@@ -153,6 +155,32 @@ class FiveCountryGeographicSeederService
         }
 
         return $summary;
+    }
+
+    /**
+     * Ensure states table on MySQL/SQLite allows multi-country state codes (e.g. WA, NT, TAS, NSW, VIC, QLD, ACT).
+     */
+    protected function ensureStatesSchemaCompatibility(): void
+    {
+        try {
+            if (DB::getDriverName() === 'mysql') {
+                $indexes = DB::select("SHOW INDEX FROM states WHERE Column_name = 'code' AND Non_unique = 0");
+                foreach ($indexes as $idx) {
+                    $keyName = $idx->Key_name ?? '';
+                    if ($keyName !== '' && $keyName !== 'PRIMARY' && $keyName !== 'states_country_id_code_unique') {
+                        try {
+                            DB::statement("ALTER TABLE states DROP INDEX `{$keyName}`");
+                        } catch (\Throwable) {
+                        }
+                    }
+                }
+                try {
+                    DB::statement("ALTER TABLE states MODIFY `code` VARCHAR(16) NOT NULL");
+                } catch (\Throwable) {
+                }
+            }
+        } catch (\Throwable) {
+        }
     }
 
     /**
@@ -470,7 +498,59 @@ class FiveCountryGeographicSeederService
                             ['name' => 'Sydney', 'lat' => -33.8688, 'lng' => 151.2093, 'pop' => 5312163, 'popular' => true],
                             ['name' => 'Newcastle', 'lat' => -32.9283, 'lng' => 151.7817, 'pop' => 322278, 'popular' => true],
                             ['name' => 'Wollongong', 'lat' => -34.4278, 'lng' => 150.8931, 'pop' => 302739, 'popular' => true],
-                            ['name' => 'Central Coast', 'lat' => -33.4250, 'lng' => 151.3414, 'pop' => 346596, 'popular' => false],
+                            ['name' => 'Central Coast', 'lat' => -33.4250, 'lng' => 151.3414, 'pop' => 346596, 'popular' => true],
+                            ['name' => 'Parramatta', 'lat' => -33.8150, 'lng' => 151.0011, 'pop' => 256729, 'popular' => true],
+                            ['name' => 'Penrith', 'lat' => -33.7507, 'lng' => 150.6877, 'pop' => 219149, 'popular' => false],
+                            ['name' => 'Blacktown', 'lat' => -33.7688, 'lng' => 150.9051, 'pop' => 396776, 'popular' => false],
+                            ['name' => 'Liverpool', 'lat' => -33.9200, 'lng' => 150.9231, 'pop' => 233446, 'popular' => false],
+                            ['name' => 'Campbelltown', 'lat' => -34.0650, 'lng' => 150.8142, 'pop' => 176519, 'popular' => false],
+                            ['name' => 'Bankstown', 'lat' => -33.9173, 'lng' => 151.0353, 'pop' => 185000, 'popular' => false],
+                            ['name' => 'Chatswood', 'lat' => -33.7969, 'lng' => 151.1803, 'pop' => 26000, 'popular' => false],
+                            ['name' => 'Bondi', 'lat' => -33.8915, 'lng' => 151.2767, 'pop' => 45000, 'popular' => false],
+                            ['name' => 'Manly', 'lat' => -33.7971, 'lng' => 151.2880, 'pop' => 44000, 'popular' => false],
+                            ['name' => 'Cronulla', 'lat' => -34.0574, 'lng' => 151.1522, 'pop' => 42000, 'popular' => false],
+                            ['name' => 'Hornsby', 'lat' => -33.7047, 'lng' => 151.0987, 'pop' => 152000, 'popular' => false],
+                            ['name' => 'Hurstville', 'lat' => -33.9667, 'lng' => 151.1000, 'pop' => 135000, 'popular' => false],
+                            ['name' => 'Sutherland', 'lat' => -34.0315, 'lng' => 151.0574, 'pop' => 230000, 'popular' => false],
+                            ['name' => 'Gosford', 'lat' => -33.4267, 'lng' => 151.3417, 'pop' => 178000, 'popular' => false],
+                            ['name' => 'Wyong', 'lat' => -33.2833, 'lng' => 151.4167, 'pop' => 92000, 'popular' => false],
+                            ['name' => 'Maitland', 'lat' => -32.7333, 'lng' => 151.5500, 'pop' => 90226, 'popular' => false],
+                            ['name' => 'Cessnock', 'lat' => -32.8333, 'lng' => 151.3500, 'pop' => 63632, 'popular' => false],
+                            ['name' => 'Lake Macquarie', 'lat' => -33.0333, 'lng' => 151.5667, 'pop' => 213845, 'popular' => false],
+                            ['name' => 'Port Stephens', 'lat' => -32.7167, 'lng' => 152.0500, 'pop' => 75276, 'popular' => false],
+                            ['name' => 'Nelson Bay', 'lat' => -32.7150, 'lng' => 152.1511, 'pop' => 28000, 'popular' => false],
+                            ['name' => 'Tweed Heads', 'lat' => -28.1833, 'lng' => 153.5500, 'pop' => 68000, 'popular' => false],
+                            ['name' => 'Byron Bay', 'lat' => -28.6474, 'lng' => 153.6020, 'pop' => 36000, 'popular' => true],
+                            ['name' => 'Ballina', 'lat' => -28.8667, 'lng' => 153.5667, 'pop' => 46000, 'popular' => false],
+                            ['name' => 'Lismore', 'lat' => -28.8135, 'lng' => 153.2773, 'pop' => 44000, 'popular' => false],
+                            ['name' => 'Grafton', 'lat' => -29.6909, 'lng' => 152.9333, 'pop' => 19000, 'popular' => false],
+                            ['name' => 'Coffs Harbour', 'lat' => -30.2963, 'lng' => 153.1157, 'pop' => 78759, 'popular' => false],
+                            ['name' => 'Port Macquarie', 'lat' => -31.4333, 'lng' => 152.9000, 'pop' => 86762, 'popular' => false],
+                            ['name' => 'Taree', 'lat' => -31.9000, 'lng' => 152.4667, 'pop' => 26000, 'popular' => false],
+                            ['name' => 'Forster', 'lat' => -32.1833, 'lng' => 152.5167, 'pop' => 21000, 'popular' => false],
+                            ['name' => 'Tamworth', 'lat' => -31.0927, 'lng' => 150.9320, 'pop' => 63000, 'popular' => false],
+                            ['name' => 'Armidale', 'lat' => -30.5129, 'lng' => 151.6694, 'pop' => 29000, 'popular' => false],
+                            ['name' => 'Inverell', 'lat' => -29.7725, 'lng' => 151.1139, 'pop' => 17000, 'popular' => false],
+                            ['name' => 'Moree', 'lat' => -29.4658, 'lng' => 149.8339, 'pop' => 13000, 'popular' => false],
+                            ['name' => 'Dubbo', 'lat' => -32.2430, 'lng' => 148.6048, 'pop' => 54922, 'popular' => false],
+                            ['name' => 'Orange', 'lat' => -33.2833, 'lng' => 149.1000, 'pop' => 43512, 'popular' => false],
+                            ['name' => 'Bathurst', 'lat' => -33.4193, 'lng' => 149.5775, 'pop' => 43567, 'popular' => false],
+                            ['name' => 'Lithgow', 'lat' => -33.4833, 'lng' => 150.1500, 'pop' => 21000, 'popular' => false],
+                            ['name' => 'Mudgee', 'lat' => -32.5944, 'lng' => 149.5886, 'pop' => 25000, 'popular' => false],
+                            ['name' => 'Parkes', 'lat' => -33.1369, 'lng' => 148.1764, 'pop' => 14000, 'popular' => false],
+                            ['name' => 'Broken Hill', 'lat' => -31.9539, 'lng' => 141.4539, 'pop' => 17588, 'popular' => false],
+                            ['name' => 'Wagga Wagga', 'lat' => -35.1082, 'lng' => 147.3598, 'pop' => 67609, 'popular' => false],
+                            ['name' => 'Albury', 'lat' => -36.0737, 'lng' => 146.9135, 'pop' => 56093, 'popular' => false],
+                            ['name' => 'Griffith', 'lat' => -34.2897, 'lng' => 146.0508, 'pop' => 27000, 'popular' => false],
+                            ['name' => 'Goulburn', 'lat' => -34.7515, 'lng' => 149.7209, 'pop' => 32000, 'popular' => false],
+                            ['name' => 'Queanbeyan', 'lat' => -35.3533, 'lng' => 149.2342, 'pop' => 63000, 'popular' => false],
+                            ['name' => 'Nowra', 'lat' => -34.8742, 'lng' => 150.6028, 'pop' => 39000, 'popular' => false],
+                            ['name' => 'Ulladulla', 'lat' => -35.3586, 'lng' => 150.4731, 'pop' => 17000, 'popular' => false],
+                            ['name' => 'Batemans Bay', 'lat' => -35.7081, 'lng' => 150.1744, 'pop' => 17000, 'popular' => false],
+                            ['name' => 'Bega', 'lat' => -36.6739, 'lng' => 149.8419, 'pop' => 35000, 'popular' => false],
+                            ['name' => 'Cooma', 'lat' => -36.2350, 'lng' => 149.1258, 'pop' => 10000, 'popular' => false],
+                            ['name' => 'Bowral', 'lat' => -34.4792, 'lng' => 150.4181, 'pop' => 52000, 'popular' => false],
+                            ['name' => 'Katoomba', 'lat' => -33.7123, 'lng' => 150.3119, 'pop' => 78000, 'popular' => false],
                         ],
                     ],
                     [
@@ -483,8 +563,44 @@ class FiveCountryGeographicSeederService
                         'cities' => [
                             ['name' => 'Melbourne', 'lat' => -37.8136, 'lng' => 144.9631, 'pop' => 5078193, 'popular' => true, 'tz' => 'Australia/Melbourne'],
                             ['name' => 'Geelong', 'lat' => -38.1499, 'lng' => 144.3617, 'pop' => 268984, 'popular' => true, 'tz' => 'Australia/Melbourne'],
-                            ['name' => 'Ballarat', 'lat' => -37.5622, 'lng' => 143.8503, 'pop' => 111702, 'popular' => false, 'tz' => 'Australia/Melbourne'],
-                            ['name' => 'Bendigo', 'lat' => -36.7570, 'lng' => 144.2794, 'pop' => 102499, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Ballarat', 'lat' => -37.5622, 'lng' => 143.8503, 'pop' => 111702, 'popular' => true, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Bendigo', 'lat' => -36.7570, 'lng' => 144.2794, 'pop' => 102499, 'popular' => true, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Frankston', 'lat' => -38.1414, 'lng' => 145.1225, 'pop' => 142000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Dandenong', 'lat' => -37.9875, 'lng' => 145.2147, 'pop' => 168000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'St Kilda', 'lat' => -37.8676, 'lng' => 144.9810, 'pop' => 45000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'South Yarra', 'lat' => -37.8389, 'lng' => 144.9922, 'pop' => 38000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Richmond', 'lat' => -37.8183, 'lng' => 144.9986, 'pop' => 35000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Fitzroy', 'lat' => -37.7997, 'lng' => 144.9786, 'pop' => 28000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Brunswick', 'lat' => -37.7667, 'lng' => 144.9600, 'pop' => 42000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Footscray', 'lat' => -37.7992, 'lng' => 144.9006, 'pop' => 92000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Box Hill', 'lat' => -37.8190, 'lng' => 145.1223, 'pop' => 178000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Ringwood', 'lat' => -37.8150, 'lng' => 145.2289, 'pop' => 118000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Werribee', 'lat' => -37.9000, 'lng' => 144.6611, 'pop' => 292000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Point Cook', 'lat' => -37.9167, 'lng' => 144.7500, 'pop' => 68000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Melton', 'lat' => -37.6833, 'lng' => 144.5833, 'pop' => 178000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Sunbury', 'lat' => -37.5811, 'lng' => 144.7139, 'pop' => 44000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Craigieburn', 'lat' => -37.6000, 'lng' => 144.9333, 'pop' => 240000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Epping', 'lat' => -37.6517, 'lng' => 145.0197, 'pop' => 230000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Cranbourne', 'lat' => -38.0996, 'lng' => 145.2834, 'pop' => 365000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Pakenham', 'lat' => -38.0712, 'lng' => 145.4851, 'pop' => 118000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Berwick', 'lat' => -38.0314, 'lng' => 145.3447, 'pop' => 58000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Mornington', 'lat' => -38.2194, 'lng' => 145.0392, 'pop' => 169000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Rosebud', 'lat' => -38.3564, 'lng' => 144.9044, 'pop' => 25000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Warrnambool', 'lat' => -38.3818, 'lng' => 142.4880, 'pop' => 35519, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Mildura', 'lat' => -34.1855, 'lng' => 142.1625, 'pop' => 56969, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Shepparton', 'lat' => -36.3833, 'lng' => 145.4000, 'pop' => 68409, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Wodonga', 'lat' => -36.1214, 'lng' => 146.8881, 'pop' => 43253, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Wangaratta', 'lat' => -36.3584, 'lng' => 146.3125, 'pop' => 29808, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Traralgon', 'lat' => -38.1958, 'lng' => 146.5403, 'pop' => 29000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Morwell', 'lat' => -38.2333, 'lng' => 146.4000, 'pop' => 15000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Sale', 'lat' => -38.1065, 'lng' => 147.0680, 'pop' => 15000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Bairnsdale', 'lat' => -37.8333, 'lng' => 147.6167, 'pop' => 16000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Warragul', 'lat' => -38.1589, 'lng' => 145.9311, 'pop' => 23000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Horsham', 'lat' => -36.7118, 'lng' => 142.1998, 'pop' => 20429, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Torquay', 'lat' => -38.3306, 'lng' => 144.3264, 'pop' => 24000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Echuca', 'lat' => -36.1400, 'lng' => 144.7500, 'pop' => 15000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Swan Hill', 'lat' => -35.3378, 'lng' => 143.5544, 'pop' => 11000, 'popular' => false, 'tz' => 'Australia/Melbourne'],
+                            ['name' => 'Castlemaine', 'lat' => -37.0636, 'lng' => 144.2172, 'pop' => 11500, 'popular' => false, 'tz' => 'Australia/Melbourne'],
                         ],
                     ],
                     [
@@ -497,9 +613,42 @@ class FiveCountryGeographicSeederService
                         'cities' => [
                             ['name' => 'Brisbane', 'lat' => -27.4705, 'lng' => 153.0260, 'pop' => 2568927, 'popular' => true, 'tz' => 'Australia/Brisbane'],
                             ['name' => 'Gold Coast', 'slug' => 'gold-coast', 'lat' => -28.0167, 'lng' => 153.4000, 'pop' => 699266, 'popular' => true, 'tz' => 'Australia/Brisbane'],
-                            ['name' => 'Cairns', 'lat' => -16.9186, 'lng' => 145.7781, 'pop' => 153952, 'popular' => true, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Sunshine Coast', 'lat' => -26.6500, 'lng' => 153.0667, 'pop' => 348389, 'popular' => true, 'tz' => 'Australia/Brisbane'],
                             ['name' => 'Townsville', 'lat' => -19.2590, 'lng' => 146.8169, 'pop' => 180820, 'popular' => true, 'tz' => 'Australia/Brisbane'],
-                            ['name' => 'Sunshine Coast', 'lat' => -26.6500, 'lng' => 153.0667, 'pop' => 348389, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Cairns', 'lat' => -16.9186, 'lng' => 145.7781, 'pop' => 153952, 'popular' => true, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Toowoomba', 'lat' => -27.5598, 'lng' => 151.9507, 'pop' => 173204, 'popular' => true, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Mackay', 'lat' => -21.1411, 'lng' => 149.1860, 'pop' => 121691, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Rockhampton', 'lat' => -23.3791, 'lng' => 150.5100, 'pop' => 82884, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Bundaberg', 'lat' => -24.8661, 'lng' => 152.3489, 'pop' => 99215, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Hervey Bay', 'lat' => -25.2986, 'lng' => 152.8535, 'pop' => 57722, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Gladstone', 'lat' => -23.8489, 'lng' => 151.2575, 'pop' => 63515, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Maryborough', 'lat' => -25.5407, 'lng' => 152.7049, 'pop' => 28000, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Gympie', 'lat' => -26.1900, 'lng' => 152.6650, 'pop' => 53242, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Noosa', 'lat' => -26.3886, 'lng' => 153.0908, 'pop' => 56587, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Maroochydore', 'lat' => -26.6564, 'lng' => 153.0894, 'pop' => 60000, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Caloundra', 'lat' => -26.8044, 'lng' => 153.1253, 'pop' => 52000, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Caboolture', 'lat' => -27.0847, 'lng' => 152.9511, 'pop' => 76000, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Redcliffe', 'lat' => -27.2267, 'lng' => 153.1128, 'pop' => 62000, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Logan', 'lat' => -27.6389, 'lng' => 153.1094, 'pop' => 345098, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Ipswich', 'lat' => -27.6146, 'lng' => 152.7608, 'pop' => 229208, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Southport', 'lat' => -27.9672, 'lng' => 153.4000, 'pop' => 36000, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Surfers Paradise', 'lat' => -28.0023, 'lng' => 153.4145, 'pop' => 26000, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Broadbeach', 'lat' => -28.0272, 'lng' => 153.4311, 'pop' => 18000, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Burleigh Heads', 'lat' => -28.0989, 'lng' => 153.4508, 'pop' => 24000, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Coolangatta', 'lat' => -28.1681, 'lng' => 153.5364, 'pop' => 15000, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Robina', 'lat' => -28.0772, 'lng' => 153.3853, 'pop' => 29000, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Mount Isa', 'lat' => -20.7256, 'lng' => 139.4927, 'pop' => 18727, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Emerald', 'lat' => -23.5275, 'lng' => 148.1647, 'pop' => 14000, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Yeppoon', 'lat' => -23.1333, 'lng' => 150.7333, 'pop' => 21000, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Airlie Beach', 'lat' => -20.2678, 'lng' => 148.7169, 'pop' => 15000, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Bowen', 'lat' => -20.0156, 'lng' => 148.2481, 'pop' => 11000, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Innisfail', 'lat' => -17.5236, 'lng' => 146.0292, 'pop' => 10000, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Port Douglas', 'lat' => -16.4838, 'lng' => 145.4673, 'pop' => 8500, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Atherton', 'lat' => -17.2686, 'lng' => 145.4781, 'pop' => 12000, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Warwick', 'lat' => -28.2153, 'lng' => 152.0350, 'pop' => 15500, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Dalby', 'lat' => -27.1817, 'lng' => 151.2625, 'pop' => 12700, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Kingaroy', 'lat' => -26.5392, 'lng' => 151.8400, 'pop' => 10500, 'popular' => false, 'tz' => 'Australia/Brisbane'],
+                            ['name' => 'Roma', 'lat' => -26.5733, 'lng' => 148.7869, 'pop' => 7000, 'popular' => false, 'tz' => 'Australia/Brisbane'],
                         ],
                     ],
                     [
@@ -511,8 +660,31 @@ class FiveCountryGeographicSeederService
                         'lng' => 121.6283,
                         'cities' => [
                             ['name' => 'Perth', 'lat' => -31.9505, 'lng' => 115.8605, 'pop' => 2125114, 'popular' => true, 'tz' => 'Australia/Perth'],
-                            ['name' => 'Fremantle', 'lat' => -32.0569, 'lng' => 115.7439, 'pop' => 31930, 'popular' => false, 'tz' => 'Australia/Perth'],
-                            ['name' => 'Bunbury', 'lat' => -33.3256, 'lng' => 115.6396, 'pop' => 75319, 'popular' => false, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Fremantle', 'lat' => -32.0569, 'lng' => 115.7439, 'pop' => 31930, 'popular' => true, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Mandurah', 'lat' => -32.5269, 'lng' => 115.7217, 'pop' => 90306, 'popular' => true, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Bunbury', 'lat' => -33.3256, 'lng' => 115.6396, 'pop' => 75319, 'popular' => true, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Rockingham', 'lat' => -32.2767, 'lng' => 115.7297, 'pop' => 135678, 'popular' => false, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Joondalup', 'lat' => -31.7450, 'lng' => 115.7661, 'pop' => 160003, 'popular' => false, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Armadale', 'lat' => -32.1533, 'lng' => 116.0150, 'pop' => 94000, 'popular' => false, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Midland', 'lat' => -31.8897, 'lng' => 116.0097, 'pop' => 152000, 'popular' => false, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Scarborough', 'lat' => -31.8944, 'lng' => 115.7586, 'pop' => 22000, 'popular' => false, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Subiaco', 'lat' => -31.9489, 'lng' => 115.8267, 'pop' => 18000, 'popular' => false, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Cannington', 'lat' => -32.0167, 'lng' => 115.9333, 'pop' => 96000, 'popular' => false, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Wanneroo', 'lat' => -31.7475, 'lng' => 115.8028, 'pop' => 209000, 'popular' => false, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Busselton', 'lat' => -33.6555, 'lng' => 115.3500, 'pop' => 40640, 'popular' => false, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Margaret River', 'lat' => -33.9536, 'lng' => 115.0739, 'pop' => 16000, 'popular' => false, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Albany', 'lat' => -35.0269, 'lng' => 117.8837, 'pop' => 38763, 'popular' => false, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Geraldton', 'lat' => -28.7744, 'lng' => 114.6089, 'pop' => 39489, 'popular' => false, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Kalgoorlie', 'lat' => -30.7490, 'lng' => 121.4660, 'pop' => 29306, 'popular' => false, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Broome', 'lat' => -17.9614, 'lng' => 122.2359, 'pop' => 16959, 'popular' => false, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Karratha', 'lat' => -20.7364, 'lng' => 116.8463, 'pop' => 22199, 'popular' => false, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Port Hedland', 'lat' => -20.3106, 'lng' => 118.6061, 'pop' => 15698, 'popular' => false, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Esperance', 'lat' => -33.8614, 'lng' => 121.8914, 'pop' => 13883, 'popular' => false, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Northam', 'lat' => -31.6531, 'lng' => 116.6661, 'pop' => 11500, 'popular' => false, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Carnarvon', 'lat' => -24.8839, 'lng' => 113.6611, 'pop' => 5500, 'popular' => false, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Exmouth', 'lat' => -21.9314, 'lng' => 114.1281, 'pop' => 3000, 'popular' => false, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Kununurra', 'lat' => -15.7783, 'lng' => 128.7439, 'pop' => 5500, 'popular' => false, 'tz' => 'Australia/Perth'],
+                            ['name' => 'Collie', 'lat' => -33.3631, 'lng' => 116.1558, 'pop' => 8800, 'popular' => false, 'tz' => 'Australia/Perth'],
                         ],
                     ],
                     [
@@ -524,7 +696,26 @@ class FiveCountryGeographicSeederService
                         'lng' => 136.2092,
                         'cities' => [
                             ['name' => 'Adelaide', 'lat' => -34.9285, 'lng' => 138.6007, 'pop' => 1387290, 'popular' => true, 'tz' => 'Australia/Adelaide'],
-                            ['name' => 'Mount Gambier', 'lat' => -37.8284, 'lng' => 140.7804, 'pop' => 27433, 'popular' => false, 'tz' => 'Australia/Adelaide'],
+                            ['name' => 'Mount Gambier', 'lat' => -37.8284, 'lng' => 140.7804, 'pop' => 27433, 'popular' => true, 'tz' => 'Australia/Adelaide'],
+                            ['name' => 'Glenelg', 'lat' => -34.9806, 'lng' => 138.5150, 'pop' => 38000, 'popular' => false, 'tz' => 'Australia/Adelaide'],
+                            ['name' => 'Norwood', 'lat' => -34.9206, 'lng' => 138.6328, 'pop' => 37000, 'popular' => false, 'tz' => 'Australia/Adelaide'],
+                            ['name' => 'Port Adelaide', 'lat' => -34.8475, 'lng' => 138.5081, 'pop' => 128000, 'popular' => false, 'tz' => 'Australia/Adelaide'],
+                            ['name' => 'Salisbury', 'lat' => -34.7639, 'lng' => 138.6422, 'pop' => 145000, 'popular' => false, 'tz' => 'Australia/Adelaide'],
+                            ['name' => 'Elizabeth', 'lat' => -34.7167, 'lng' => 138.6667, 'pop' => 98000, 'popular' => false, 'tz' => 'Australia/Adelaide'],
+                            ['name' => 'Noarlunga', 'lat' => -35.1419, 'lng' => 138.4969, 'pop' => 174000, 'popular' => false, 'tz' => 'Australia/Adelaide'],
+                            ['name' => 'Mount Barker', 'lat' => -35.0689, 'lng' => 138.8594, 'pop' => 39000, 'popular' => false, 'tz' => 'Australia/Adelaide'],
+                            ['name' => 'Gawler', 'lat' => -34.5981, 'lng' => 138.7450, 'pop' => 25000, 'popular' => false, 'tz' => 'Australia/Adelaide'],
+                            ['name' => 'Victor Harbor', 'lat' => -35.5525, 'lng' => 138.6214, 'pop' => 16000, 'popular' => false, 'tz' => 'Australia/Adelaide'],
+                            ['name' => 'Whyalla', 'lat' => -33.0333, 'lng' => 137.5667, 'pop' => 21868, 'popular' => false, 'tz' => 'Australia/Adelaide'],
+                            ['name' => 'Murray Bridge', 'lat' => -35.1197, 'lng' => 139.2764, 'pop' => 22041, 'popular' => false, 'tz' => 'Australia/Adelaide'],
+                            ['name' => 'Port Lincoln', 'lat' => -34.7240, 'lng' => 135.8588, 'pop' => 14404, 'popular' => false, 'tz' => 'Australia/Adelaide'],
+                            ['name' => 'Port Pirie', 'lat' => -33.1858, 'lng' => 138.0169, 'pop' => 17281, 'popular' => false, 'tz' => 'Australia/Adelaide'],
+                            ['name' => 'Port Augusta', 'lat' => -32.4936, 'lng' => 137.7658, 'pop' => 14102, 'popular' => false, 'tz' => 'Australia/Adelaide'],
+                            ['name' => 'Renmark', 'lat' => -34.1753, 'lng' => 140.7447, 'pop' => 10000, 'popular' => false, 'tz' => 'Australia/Adelaide'],
+                            ['name' => 'Barossa Valley', 'lat' => -34.5333, 'lng' => 138.9500, 'pop' => 25000, 'popular' => false, 'tz' => 'Australia/Adelaide'],
+                            ['name' => 'Clare', 'lat' => -33.8342, 'lng' => 138.6108, 'pop' => 9000, 'popular' => false, 'tz' => 'Australia/Adelaide'],
+                            ['name' => 'Naracoorte', 'lat' => -36.9578, 'lng' => 140.7428, 'pop' => 8800, 'popular' => false, 'tz' => 'Australia/Adelaide'],
+                            ['name' => 'Coober Pedy', 'lat' => -29.0135, 'lng' => 134.7544, 'pop' => 1800, 'popular' => false, 'tz' => 'Australia/Adelaide'],
                         ],
                     ],
                     [
@@ -536,7 +727,21 @@ class FiveCountryGeographicSeederService
                         'lng' => 145.9707,
                         'cities' => [
                             ['name' => 'Hobart', 'lat' => -42.8821, 'lng' => 147.3272, 'pop' => 247086, 'popular' => true, 'tz' => 'Australia/Hobart'],
-                            ['name' => 'Launceston', 'lat' => -41.4332, 'lng' => 147.1441, 'pop' => 88884, 'popular' => false, 'tz' => 'Australia/Hobart'],
+                            ['name' => 'Launceston', 'lat' => -41.4332, 'lng' => 147.1441, 'pop' => 88884, 'popular' => true, 'tz' => 'Australia/Hobart'],
+                            ['name' => 'Devonport', 'lat' => -41.1789, 'lng' => 146.3514, 'pop' => 26150, 'popular' => false, 'tz' => 'Australia/Hobart'],
+                            ['name' => 'Burnie', 'lat' => -41.0525, 'lng' => 145.9069, 'pop' => 19918, 'popular' => false, 'tz' => 'Australia/Hobart'],
+                            ['name' => 'Glenorchy', 'lat' => -42.8333, 'lng' => 147.2750, 'pop' => 50411, 'popular' => false, 'tz' => 'Australia/Hobart'],
+                            ['name' => 'Clarence', 'lat' => -42.8667, 'lng' => 147.4000, 'pop' => 61531, 'popular' => false, 'tz' => 'Australia/Hobart'],
+                            ['name' => 'Kingston', 'lat' => -42.9769, 'lng' => 147.3083, 'pop' => 40086, 'popular' => false, 'tz' => 'Australia/Hobart'],
+                            ['name' => 'Ulverstone', 'lat' => -41.1583, 'lng' => 146.1750, 'pop' => 15000, 'popular' => false, 'tz' => 'Australia/Hobart'],
+                            ['name' => 'Sorell', 'lat' => -42.7833, 'lng' => 147.5667, 'pop' => 16700, 'popular' => false, 'tz' => 'Australia/Hobart'],
+                            ['name' => 'New Norfolk', 'lat' => -42.7828, 'lng' => 147.0594, 'pop' => 11000, 'popular' => false, 'tz' => 'Australia/Hobart'],
+                            ['name' => 'Wynyard', 'lat' => -40.9889, 'lng' => 145.7264, 'pop' => 14000, 'popular' => false, 'tz' => 'Australia/Hobart'],
+                            ['name' => 'Smithton', 'lat' => -40.8442, 'lng' => 145.1200, 'pop' => 8200, 'popular' => false, 'tz' => 'Australia/Hobart'],
+                            ['name' => 'George Town', 'lat' => -41.1067, 'lng' => 146.8247, 'pop' => 7000, 'popular' => false, 'tz' => 'Australia/Hobart'],
+                            ['name' => 'St Helens', 'lat' => -41.3219, 'lng' => 148.2481, 'pop' => 6800, 'popular' => false, 'tz' => 'Australia/Hobart'],
+                            ['name' => 'Queenstown', 'lat' => -42.0806, 'lng' => 145.5556, 'pop' => 4200, 'popular' => false, 'tz' => 'Australia/Hobart'],
+                            ['name' => 'Huonville', 'lat' => -43.0292, 'lng' => 147.0469, 'pop' => 18000, 'popular' => false, 'tz' => 'Australia/Hobart'],
                         ],
                     ],
                     [
@@ -549,6 +754,16 @@ class FiveCountryGeographicSeederService
                         'lng' => 149.0124,
                         'cities' => [
                             ['name' => 'Canberra', 'lat' => -35.2809, 'lng' => 149.1300, 'pop' => 453558, 'popular' => true],
+                            ['name' => 'Belconnen', 'lat' => -35.2389, 'lng' => 149.0661, 'pop' => 106000, 'popular' => false],
+                            ['name' => 'Gungahlin', 'lat' => -35.1831, 'lng' => 149.1331, 'pop' => 88000, 'popular' => false],
+                            ['name' => 'Tuggeranong', 'lat' => -35.4244, 'lng' => 149.0888, 'pop' => 89000, 'popular' => false],
+                            ['name' => 'Woden', 'lat' => -35.3453, 'lng' => 149.0853, 'pop' => 39000, 'popular' => false],
+                            ['name' => 'Civic', 'lat' => -35.2819, 'lng' => 149.1286, 'pop' => 25000, 'popular' => false],
+                            ['name' => 'Braddon', 'lat' => -35.2722, 'lng' => 149.1328, 'pop' => 12000, 'popular' => false],
+                            ['name' => 'Kingston', 'lat' => -35.3158, 'lng' => 149.1444, 'pop' => 11000, 'popular' => false],
+                            ['name' => 'Manuka', 'lat' => -35.3203, 'lng' => 149.1333, 'pop' => 9500, 'popular' => false],
+                            ['name' => 'Dickson', 'lat' => -35.2506, 'lng' => 149.1394, 'pop' => 10000, 'popular' => false],
+                            ['name' => 'Weston Creek', 'lat' => -35.3414, 'lng' => 149.0519, 'pop' => 24000, 'popular' => false],
                         ],
                     ],
                     [
@@ -561,7 +776,15 @@ class FiveCountryGeographicSeederService
                         'lng' => 132.5510,
                         'cities' => [
                             ['name' => 'Darwin', 'lat' => -12.4634, 'lng' => 130.8456, 'pop' => 147255, 'popular' => true, 'tz' => 'Australia/Darwin'],
-                            ['name' => 'Alice Springs', 'lat' => -23.6980, 'lng' => 133.8807, 'pop' => 26534, 'popular' => false, 'tz' => 'Australia/Darwin'],
+                            ['name' => 'Alice Springs', 'lat' => -23.6980, 'lng' => 133.8807, 'pop' => 26534, 'popular' => true, 'tz' => 'Australia/Darwin'],
+                            ['name' => 'Palmerston', 'lat' => -12.4860, 'lng' => 130.9833, 'pop' => 40000, 'popular' => false, 'tz' => 'Australia/Darwin'],
+                            ['name' => 'Katherine', 'lat' => -14.4652, 'lng' => 132.2635, 'pop' => 10656, 'popular' => false, 'tz' => 'Australia/Darwin'],
+                            ['name' => 'Nhulunbuy', 'lat' => -12.1825, 'lng' => 136.7819, 'pop' => 3500, 'popular' => false, 'tz' => 'Australia/Darwin'],
+                            ['name' => 'Tennant Creek', 'lat' => -19.6497, 'lng' => 134.1914, 'pop' => 3100, 'popular' => false, 'tz' => 'Australia/Darwin'],
+                            ['name' => 'Casuarina', 'lat' => -12.3742, 'lng' => 130.8825, 'pop' => 15000, 'popular' => false, 'tz' => 'Australia/Darwin'],
+                            ['name' => 'Nightcliff', 'lat' => -12.3822, 'lng' => 130.8517, 'pop' => 12000, 'popular' => false, 'tz' => 'Australia/Darwin'],
+                            ['name' => 'Humpty Doo', 'lat' => -12.5736, 'lng' => 131.1044, 'pop' => 9000, 'popular' => false, 'tz' => 'Australia/Darwin'],
+                            ['name' => 'Yulara', 'lat' => -25.2406, 'lng' => 130.9889, 'pop' => 1500, 'popular' => false, 'tz' => 'Australia/Darwin'],
                         ],
                     ],
                 ],

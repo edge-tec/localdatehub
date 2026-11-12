@@ -88,9 +88,23 @@ class DependentLocationSelector extends Component
         ]);
     }
 
+    protected function resolveActiveCountryId(): ?int
+    {
+        $code = strtoupper((string) session('marketplace_country_code', 'US'));
+        if ($code === '') {
+            $code = 'US';
+        }
+
+        return \App\Modules\Locations\Models\Country::where('code', $code)->value('id');
+    }
+
     public function getStatesProperty(): Collection
     {
         $query = State::where('is_active', true);
+        $countryId = $this->resolveActiveCountryId();
+        if ($countryId) {
+            $query->where('country_id', $countryId);
+        }
         if (!$this->includeTerritories) {
             $query->where('is_territory', false);
         }
@@ -112,7 +126,12 @@ class DependentLocationSelector extends Component
             return collect();
         }
 
-        $state = State::where('code', $this->selectedState)->first();
+        $stateQuery = State::where('code', $this->selectedState);
+        $countryId = $this->resolveActiveCountryId();
+        if ($countryId) {
+            $stateQuery->where('country_id', $countryId);
+        }
+        $state = $stateQuery->first() ?? State::where('code', $this->selectedState)->first();
         if (!$state) {
             return collect();
         }
