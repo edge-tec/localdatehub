@@ -68,7 +68,7 @@
             <div class="flex items-center justify-between h-18">
                 
                 <!-- Left: Logo & Tagline -->
-                <div class="flex items-center space-x-3 w-64 shrink-0">
+                <div class="flex items-center space-x-3 sm:w-64 shrink-0">
                     <a href="{{ route('admin.dashboard') }}" class="flex items-center space-x-2.5 group">
                         @if($hasCustomAdminLogo)
                             <img src="{{ asset($adminLogoUrl) }}" alt="LocalDateHub" class="h-10 max-w-[180px] object-contain" onerror="this.style.display='none'">

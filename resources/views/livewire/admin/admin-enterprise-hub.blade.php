@@ -2,6 +2,7 @@
     {{-- ================= Sidebar Navigation (Matching Pure White Theme) ================= --}}
     <aside class="lg:w-64 shrink-0" aria-label="Administrative modules"
         x-data="{
+            mobileMenuOpen: false,
             adminProfileOpen: false,
             expandedMenus: {
                 listings: {{ in_array($tab, ['listings', 'moderation', 'featured']) ? 'true' : 'false' }},
@@ -13,7 +14,32 @@
                 this.expandedMenus[name] = !this.expandedMenus[name];
             }
         }">
-        <nav class="bg-white border border-slate-200 rounded-2xl p-3.5 lg:sticky lg:top-24 space-y-1 shadow-sm">
+        {{-- Mobile Sidebar Toggle Bar --}}
+        <div class="lg:hidden mb-3">
+            <button type="button"
+                @click="mobileMenuOpen = !mobileMenuOpen"
+                :aria-expanded="mobileMenuOpen.toString()"
+                class="w-full flex items-center justify-between gap-3 px-4 py-3 bg-white border border-slate-200 rounded-2xl shadow-sm text-left transition hover:border-pink-200">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <span class="w-8 h-8 rounded-xl bg-pink-50 border border-pink-100 text-[#F20B83] flex items-center justify-center shrink-0">
+                        <svg x-show="!mobileMenuOpen" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                        <svg x-show="mobileMenuOpen" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </span>
+                    <div class="min-w-0">
+                        <div class="text-xs font-extrabold text-slate-900 leading-tight">Admin Navigation</div>
+                        <div class="text-[11px] font-semibold text-[#F20B83] truncate">{{ ucwords(str_replace(['_', '-'], ' ', $tab)) }}</div>
+                    </div>
+                </div>
+                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg shrink-0">
+                    <span x-text="mobileMenuOpen ? 'Hide' : 'Menu'">Menu</span>
+                    <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="mobileMenuOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                </span>
+            </button>
+        </div>
+
+        <nav :class="mobileMenuOpen ? 'block' : 'hidden lg:block'"
+            @click="if ($event.target.closest('button[wire\\:click], a[href]')) mobileMenuOpen = false"
+            class="bg-white border border-slate-200 rounded-2xl p-3.5 lg:sticky lg:top-24 space-y-1 shadow-sm">
             
             <!-- Admin Profile Card with Dropdown -->
             <div class="relative mb-3">
@@ -368,6 +394,8 @@
                             display: inline-flex;
                             align-items: center;
                             gap: 10px;
+                            max-width: 100%;
+                            min-width: 0;
                             padding: 6px 8px 6px 10px;
                             border-radius: 14px;
                             background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
@@ -375,6 +403,15 @@
                             box-shadow: 0 4px 14px -4px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
                             text-decoration: none;
                             transition: all 0.18s ease;
+                        }
+                        @media (max-width: 639px) {
+                            .ldh-live-pill {
+                                gap: 8px;
+                                padding: 6px 8px;
+                            }
+                            .ldh-live-count {
+                                font-size: 12px;
+                            }
                         }
                         .ldh-live-pill:hover {
                             border-color: #F9A8D4;
@@ -472,9 +509,9 @@
                                     <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                                 </span>
                             </span>
-                            <span class="flex items-center gap-2 whitespace-nowrap">
+                            <span class="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-wrap">
                                 <span class="ldh-live-count">{{ $metrics['activeVisitorsNow'] }} Visitors Online Now</span>
-                                <span class="ldh-live-sub">· Auto-updating (10s)</span>
+                                <span class="ldh-live-sub hidden sm:inline">· Auto-updating (10s)</span>
                             </span>
                             <span class="ldh-live-cta">
                                 <span>Live Monitor</span>
