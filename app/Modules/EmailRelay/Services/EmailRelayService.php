@@ -489,17 +489,16 @@ class EmailRelayService
                 ->replyTo($replyAddress, $fromName)
                 ->subject($subjectLine);
 
-            $mail->withSymfonyMessage(function (Email $symfonyMessage) use ($outboundMessageId, $inReplyTo, $references): void {
-                $headers = $symfonyMessage->getHeaders();
-                $headers->remove('Message-ID');
-                $headers->addIdHeader('Message-ID', trim($outboundMessageId, '<>'));
-                if ($inReplyTo) {
-                    $headers->addIdHeader('In-Reply-To', trim($inReplyTo, '<>'));
-                }
-                if ($references) {
-                    $headers->addTextHeader('References', $references);
-                }
-            });
+            $symfonyMessage = $mail->getSymfonyMessage();
+            $headers = $symfonyMessage->getHeaders();
+            $headers->remove('Message-ID');
+            $headers->addIdHeader('Message-ID', trim($outboundMessageId, '<>'));
+            if ($inReplyTo) {
+                $headers->addIdHeader('In-Reply-To', trim($inReplyTo, '<>'));
+            }
+            if ($references) {
+                $headers->addTextHeader('References', $references);
+            }
 
             foreach ((array) $relayMessage->attachments_meta as $attachment) {
                 $diskPath = $attachment['storage_path'] ?? null;
