@@ -133,7 +133,7 @@ class AdminDashboardController extends Controller
                 'icon_type' => 'contact_message',
                 'title' => "Message: " . ($m->sender_name ?: 'Visitor'),
                 'snippet' => \Illuminate\Support\Str::limit($m->subject ?: $m->message_encrypted, 55),
-                'url' => route('admin.dashboard', ['tab' => 'moderation_messages']),
+                'url' => route('admin.dashboard', ['tab' => $m->listing_id === null ? 'support_tickets' : 'abuse']),
                 'timestamp' => $m->created_at->timestamp,
                 'time_ago' => $m->created_at->diffForHumans(),
                 'is_unread' => true,

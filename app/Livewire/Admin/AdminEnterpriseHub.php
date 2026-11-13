@@ -107,7 +107,8 @@ class AdminEnterpriseHub extends Component
         'moderation'    => ['Moderation', 'moderation.view', 'Trust & Safety'],
         'verification'  => ['Age Verification', 'verification.manage', 'Trust & Safety'],
         'reports'       => ['Reports', 'reports.manage', 'Trust & Safety'],
-        'abuse'         => ['Contact Abuse', 'moderation.view', 'Trust & Safety'],
+        'abuse'           => ['Contact Abuse', 'moderation.view', 'Trust & Safety'],
+        'support_tickets' => ['Support Tickets', 'moderation.view', 'Trust & Safety'],
         'dmca'          => ['DMCA Takedowns', 'reports.manage', 'Trust & Safety'],
         'legal'         => ['Legal Requests', 'verification.manage', 'Trust & Safety'],
         'compliance'    => ['State Compliance', 'settings.manage', 'Trust & Safety'],
@@ -6246,6 +6247,16 @@ class AdminEnterpriseHub extends Component
     protected function dataAbuse(): array
     {
         return ['abuseMessages' => ContactMessage::where('is_flagged', true)->with(['listing', 'recipient'])->latest()->paginate(15, ['*'], 'abusePage')];
+    }
+
+    protected function dataSupportTickets(): array
+    {
+        return [
+            'supportTickets' => ContactMessage::whereNull('listing_id')
+                ->with(['sender'])
+                ->latest()
+                ->paginate(15, ['*'], 'supportPage'),
+        ];
     }
 
     protected function dataCategories(): array

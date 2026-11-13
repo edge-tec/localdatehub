@@ -3329,6 +3329,66 @@
             </div>
         @endif
 
+        {{-- ================= 9B. SUPPORT TICKETS ================= --}}
+        @if($tab === 'support_tickets')
+            <div class="{{ $card }} overflow-x-auto">
+                <div class="p-4 flex flex-wrap justify-between items-center gap-2 border-b border-slate-100">
+                    <div>
+                        <h2 class="font-bold text-slate-900">Support Tickets &amp; Contact Inquiries</h2>
+                        <p class="text-xs text-slate-500">Encrypted tickets submitted via the public Contact / Support form.</p>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">AES-256 Decrypted for Authorized Staff</span>
+                </div>
+                <table class="min-w-full">
+                    <thead>
+                        <tr>
+                            <th class="{{ $th }}">#</th>
+                            <th class="{{ $th }}">Sender</th>
+                            <th class="{{ $th }}">Topic</th>
+                            <th class="{{ $th }}">Subject</th>
+                            <th class="{{ $th }}">Status</th>
+                            <th class="{{ $th }}">Received</th>
+                            <th class="{{ $th }} text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @forelse($supportTickets as $t)
+                        <tr class="border-t border-slate-200 {{ $t->is_read ? '' : 'bg-rose-50/30' }}" wire:key="support-ticket-{{ $t->id }}">
+                            <td class="{{ $td }} font-bold">#{{ $t->id }}</td>
+                            <td class="{{ $td }}">
+                                <div class="font-bold text-slate-900">{{ $t->sender_name ?: ($t->sender?->name ?? 'Visitor') }}</div>
+                                <div class="text-[11px] text-slate-500">{{ $t->sender_email_encrypted }}</div>
+                                @if($t->sender_phone_encrypted)
+                                    <div class="text-[11px] text-slate-400">{{ $t->sender_phone_encrypted }}</div>
+                                @endif
+                            </td>
+                            <td class="{{ $td }}">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-700 border border-slate-200">
+                                    {{ str_replace('_', ' ', $t->inquiry_type ?: 'general') }}
+                                </span>
+                            </td>
+                            <td class="{{ $td }} font-semibold text-slate-800">{{ \Illuminate\Support\Str::limit($t->subject ?: 'Support Ticket', 60) }}</td>
+                            <td class="{{ $td }}">
+                                @if($t->is_read)
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">✓✓ SEEN {{ $t->read_at ? '· ' . $t->read_at->diffForHumans() : '' }}</span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-700 border border-rose-200">● UNREAD</span>
+                                @endif
+                            </td>
+                            <td class="{{ $td }}">{{ $t->created_at?->diffForHumans() }}</td>
+                            <td class="{{ $td }} text-right whitespace-nowrap">
+                                <button type="button" wire:click="inspectAbuseMessage({{ $t->id }})" class="{{ $btn }} bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 font-bold">Read Ticket</button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="7" class="{{ $td }} text-center text-slate-400 py-8">No support tickets yet.</td></tr>
+                    @endforelse
+                    </tbody>
+                </table>
+                <div class="p-3">{{ $supportTickets->links() }}</div>
+            </div>
+        @endif
+
         {{-- ================= DMCA TAKEDOWNS (Phase 12) ================= --}}
         @if($tab === 'dmca')
             <div class="{{ $card }} p-4 mb-4 md:w-1/3">
