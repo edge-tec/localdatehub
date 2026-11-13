@@ -436,4 +436,13 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->account_status === 'suspended';
     }
+
+    /**
+     * Determine whether the user has been active within the given online window.
+     */
+    public function isOnline(int $minutes = 5): bool
+    {
+        return $this->last_active_at !== null
+            && $this->last_active_at->gt(now()->subMinutes($minutes));
+    }
 }

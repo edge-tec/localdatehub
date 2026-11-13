@@ -156,6 +156,10 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        if ($user = Auth::user()) {
+            $user->forceFill(['last_active_at' => now()->subMinutes(10)])->saveQuietly();
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

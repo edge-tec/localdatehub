@@ -573,11 +573,7 @@
                 $posterName = $posterUser?->name ?? 'Anonymous Poster';
                 $posterInitial = strtoupper(substr($posterName, 0, 1));
                 $posterAvatarUrl = $posterUser?->avatar_url;
-                $posterLastActive = $posterUser?->last_active_at;
-                $posterIsOnline = !$posterLastActive || $posterLastActive->gt(now()->subMinutes(30));
-                $posterActiveLabel = $posterIsOnline
-                    ? 'Active Now'
-                    : 'Active ' . $posterLastActive->diffForHumans(short: true);
+                $posterIsOnline = $posterUser?->isOnline() ?? false;
                 $posterAdsCount = max(1, (int) ($posterActiveListingsCount ?? 1));
                 $isListingOwner = auth()->check() && (auth()->id() === $listing->user_id || auth()->user()->hasRole('admin'));
                 $cityBrowseUrl = ($listing->city?->slug && $listing->state?->code)
@@ -598,15 +594,15 @@
                             <span class="ldh-card-heading text-xs font-black uppercase tracking-wider text-slate-700">Advertiser Profile</span>
                         </div>
 
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border {{ $posterIsOnline ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80' : 'bg-slate-50 text-slate-600 border-slate-200' }}">
-                            <span class="relative flex h-2 w-2 shrink-0" aria-hidden="true">
-                                @if($posterIsOnline)
+                        @if($posterIsOnline)
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border bg-emerald-50 text-emerald-700 border-emerald-200/80">
+                                <span class="relative flex h-2 w-2 shrink-0" aria-hidden="true">
                                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                @endif
-                                <span class="relative inline-flex rounded-full h-2 w-2 {{ $posterIsOnline ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                </span>
+                                <span>Active Now</span>
                             </span>
-                            <span>{{ $posterActiveLabel }}</span>
-                        </span>
+                        @endif
                     </header>
 
                     <!-- Member Identity & Avatar Row -->
@@ -637,11 +633,13 @@
                                     {{ $posterInitial }}
                                 </div>
                             @endif
-                            <span
-                                class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white shadow-xs {{ $posterIsOnline ? 'bg-emerald-500' : 'bg-slate-400' }}"
-                                title="{{ $posterActiveLabel }}"
-                                aria-hidden="true"
-                            ></span>
+                            @if($posterIsOnline)
+                                <span
+                                    class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white shadow-xs bg-emerald-500"
+                                    title="Active Now"
+                                    aria-hidden="true"
+                                ></span>
+                            @endif
                         </div>
 
                         <div class="min-w-0 flex-1 space-y-1">
