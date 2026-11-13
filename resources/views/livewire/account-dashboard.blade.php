@@ -929,6 +929,12 @@
                                     </button>
                                 @endif
 
+                                @if($listing->status === 'active')
+                                    <a href="{{ route('boost.checkout', $listing->id) }}" class="px-3.5 py-1.5 rounded-xl bg-pink-50 hover:bg-pink-100 text-[#F20B83] border border-pink-200 text-xs font-black transition shadow-2xs">
+                                        ⚡ Bump
+                                    </a>
+                                @endif
+
                                 @if(!$listing->is_featured && $listing->status === 'active')
                                     <button wire:click="openPromoteModal({{ $listing->id }})" class="px-3.5 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-300 text-xs font-black transition shadow-2xs">
                                         Promote

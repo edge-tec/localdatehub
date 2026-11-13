@@ -44,6 +44,10 @@
             x-data="{
                 selectedPlanId: {{ $plans->first()?->id ?? 1 }},
                 selectedPlanPrice: {{ $plans->first()?->price ?? 4.99 }},
+                walletBalance: {{ (int) ($walletBalance ?? 0) }},
+                get requiredCredits() {
+                    return this.selectedPlanPrice > 0 ? Math.max(1, Math.round(this.selectedPlanPrice * 10)) : 0;
+                },
                 selectedGatewayId: {{ $gateways->first()?->id ?? 1 }},
                 selectedCurrency: 'USDT',
                 selectedNetwork: 'TRC20',
@@ -81,6 +85,7 @@
 
             <!-- Hidden Inputs -->
             <input type="hidden" name="boost_plan_id" :value="selectedPlanId">
+            <input type="hidden" name="boost_plan_id" :value="selectedPlanId" form="wallet-credits-boost-form">
             <input type="hidden" name="gateway_id" :value="selectedGatewayId">
             <input type="hidden" name="currency" :value="selectedCurrency">
             <input type="hidden" name="network" :value="selectedNetwork">
@@ -125,6 +130,40 @@
                             </div>
                         </div>
                     @endforeach
+                </div>
+            </div>
+
+            <!-- Instant Bump Using Wallet Credits -->
+            <div class="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-black uppercase tracking-wider text-emerald-900">Instant Bump with Wallet Credits</span>
+                        <span class="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold">
+                            Balance: {{ number_format((int) ($walletBalance ?? 0)) }} Credits
+                        </span>
+                    </div>
+                    <p class="text-xs text-emerald-800">
+                        Selected plan costs <strong x-text="requiredCredits"></strong> credits.
+                        <span x-show="walletBalance >= requiredCredits">Click below to bump &amp; feature your ad immediately without waiting for blockchain confirmation.</span>
+                        <span x-show="walletBalance < requiredCredits" class="text-amber-800 font-semibold">Insufficient credits for this plan — pay with Crypto below or top up your wallet.</span>
+                    </p>
+                </div>
+                <div class="shrink-0">
+                    <button
+                        type="submit"
+                        form="wallet-credits-boost-form"
+                        x-show="walletBalance >= requiredCredits"
+                        class="w-full sm:w-auto px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-sm transition cursor-pointer"
+                    >
+                        ⚡ Bump Now (<span x-text="requiredCredits"></span> Credits)
+                    </button>
+                    <a
+                        href="{{ route('account.wallet.index') }}"
+                        x-show="walletBalance < requiredCredits"
+                        class="inline-block px-4 py-2.5 rounded-xl bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100 text-xs font-bold transition"
+                    >
+                        + Top Up Credits
+                    </a>
                 </div>
             </div>
 
@@ -256,6 +295,10 @@
                 </div>
             </div>
 
+        </form>
+
+        <form id="wallet-credits-boost-form" action="{{ route('boost.pay-with-credits', $listing->id) }}" method="POST" class="hidden">
+            @csrf
         </form>
 
     </div>

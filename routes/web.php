@@ -474,6 +474,7 @@ Route::prefix('webhooks/crypto')->name('webhooks.crypto.')->group(function () {
 Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/listings/{listing}/boost', [\App\Http\Controllers\Payments\BoostCheckoutController::class, 'show'])->name('boost.checkout');
     Route::post('/listings/{listing}/boost/checkout', [\App\Http\Controllers\Payments\BoostCheckoutController::class, 'createPayment'])->name('boost.create');
+    Route::post('/listings/{listing}/boost/wallet-credits', [\App\Http\Controllers\Payments\BoostCheckoutController::class, 'payWithCredits'])->name('boost.pay-with-credits');
     Route::get('/payments/crypto/{orderId}', [\App\Http\Controllers\Payments\BoostCheckoutController::class, 'showInvoice'])->name('boost.invoice');
     Route::get('/payments/crypto/{orderId}/status', [\App\Http\Controllers\Payments\BoostCheckoutController::class, 'checkStatus'])->name('boost.status');
     Route::get('/account/payments', [\App\Http\Controllers\Payments\BoostCheckoutController::class, 'userHistory'])->name('account.payments.index');

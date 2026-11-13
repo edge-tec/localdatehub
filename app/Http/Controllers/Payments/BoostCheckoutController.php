@@ -4,14 +4,20 @@ namespace App\Http\Controllers\Payments;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Listings\Models\Listing;
+use App\Modules\Monetization\Models\WalletTransaction;
+use App\Modules\Monetization\Services\UserWalletService;
 use App\Modules\Payments\Crypto\Models\BoostPlan;
 use App\Modules\Payments\Crypto\Models\CryptoPayment;
 use App\Modules\Payments\Crypto\Models\PaymentGateway;
 use App\Modules\Payments\Crypto\Services\CryptoPaymentService;
+use App\Modules\Payments\Crypto\Services\ListingBoostService;
 use App\Modules\Payments\Crypto\Support\CryptoCurrencyRegistry;
+use App\Support\Exceptions\InsufficientCreditsException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class BoostCheckoutController extends Controller
@@ -34,6 +40,7 @@ class BoostCheckoutController extends Controller
         }
         $currencies = CryptoCurrencyRegistry::getSupportedCurrencies();
         $networks = CryptoCurrencyRegistry::getSupportedNetworks();
+        $walletBalance = app(UserWalletService::class)->getOrCreateWallet(auth()->user())->balance;
 
         return view('boost.checkout', [
             'listing' => $listing,
@@ -42,6 +49,7 @@ class BoostCheckoutController extends Controller
             'currencies' => $currencies,
             'networks' => $networks,
             'activeBoost' => $listing->activeBoost,
+            'walletBalance' => $walletBalance,
         ]);
     }
 
@@ -89,6 +97,66 @@ class BoostCheckoutController extends Controller
         }
 
         return redirect()->route('boost.invoice', $payment->internal_order_id);
+    }
+
+    /**
+     * Pay for a listing boost/bump immediately using the user's wallet credit balance.
+     */
+    public function payWithCredits(Request $request, Listing $listing): RedirectResponse
+    {
+        $this->authorizeListingOwner($listing);
+
+        $validated = $request->validate([
+            'boost_plan_id' => ['required', 'exists:boost_plans,id'],
+        ]);
+
+        $plan = BoostPlan::where('is_active', true)->findOrFail($validated['boost_plan_id']);
+        $user = auth()->user();
+        $requiredCredits = (float) $plan->price > 0 ? max(1, (int) round(((float) $plan->price) * 10)) : 0;
+
+        try {
+            DB::transaction(function () use ($user, $listing, $plan, $requiredCredits) {
+                if ($requiredCredits > 0) {
+                    app(UserWalletService::class)->debit(
+                        user: $user,
+                        amount: $requiredCredits,
+                        type: WalletTransaction::TYPE_POST_BOOST_DEBIT,
+                        description: "Listing boost ({$plan->name}) for ad #{$listing->id}",
+                        listingId: $listing->id,
+                        actorId: $user->id
+                    );
+                }
+
+                $gateway = PaymentGateway::where('provider', 'inhouse')->first()
+                    ?? PaymentGateway::firstOrFail();
+
+                $payment = CryptoPayment::create([
+                    'user_id' => $user->id,
+                    'listing_id' => $listing->id,
+                    'boost_plan_id' => $plan->id,
+                    'gateway_id' => $gateway->id,
+                    'internal_order_id' => 'WLT-' . strtoupper(Str::random(10)),
+                    'payment_currency' => 'CREDITS',
+                    'payment_network' => 'WALLET',
+                    'expected_amount' => $requiredCredits,
+                    'received_amount' => $requiredCredits,
+                    'fiat_amount' => $plan->price,
+                    'fiat_currency' => $plan->currency ?: 'USD',
+                    'status' => CryptoPayment::STATUS_COMPLETED,
+                    'expires_at' => now()->addMinutes(30),
+                    'confirmed_at' => now(),
+                    'metadata' => ['payment_method' => 'wallet_credits'],
+                ]);
+
+                app(ListingBoostService::class)->activateBoost($payment);
+            });
+        } catch (InsufficientCreditsException $e) {
+            return back()->withErrors(['wallet' => $e->getMessage()]);
+        }
+
+        return redirect()
+            ->route('account.dashboard', ['tab' => 'listings'])
+            ->with('success', "Listing [{$listing->title}] bumped & boosted for {$plan->duration_days} day(s) using {$requiredCredits} wallet credits!");
     }
 
     /**
