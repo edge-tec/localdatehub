@@ -85,12 +85,12 @@
                             <span class="text-2xl font-black text-slate-950 block">
                                 ${{ number_format($package->price_usd, 2) }}
                             </span>
-                            <div class="mt-1.5 px-3 py-1 rounded-xl bg-pink-50 border border-pink-200 text-[#F20B65] text-xs font-bold inline-flex items-center gap-1.5">
+                            <div class="mt-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-pink-50 to-rose-50 border border-pink-200/80 text-[#F20B65] text-xs font-bold inline-flex items-center gap-2 shadow-xs">
                                 <svg class="w-3.5 h-3.5 text-orange-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
-                                <span>Est. Amount:</span>
-                                <span class="font-mono font-black" x-text="((typeof estimates[selectedCurrency] === 'object' && estimates[selectedCurrency] !== null ? estimates[selectedCurrency].crypto_amount : estimates[selectedCurrency]) || '1.00') + ' ' + selectedCurrency"></span>
+                                <span class="text-rose-700/90">Est. Amount:</span>
+                                <span class="font-mono font-black tracking-tight text-[#F20B65]" x-text="((typeof estimates[selectedCurrency] === 'object' && estimates[selectedCurrency] !== null ? estimates[selectedCurrency].crypto_amount : estimates[selectedCurrency]) || '1.00') + ' ' + selectedCurrency"></span>
                             </div>
                         </div>
                     </div>
@@ -106,9 +106,13 @@
                                 <p class="text-xs text-slate-500">Direct on-chain Trust Wallet settlements &amp; verified in-house engine.</p>
                             </div>
                         </div>
-                        <span class="self-start sm:self-auto text-[11px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 inline-flex items-center gap-1.5 shrink-0">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            Zero 3rd-Party Fees &middot; In-House Gateway
+                        <span class="self-start sm:self-auto inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/80 text-emerald-800 text-[11px] font-bold shadow-xs shrink-0">
+                            <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                            </svg>
+                            <span>Zero 3rd-Party Fees</span>
+                            <span class="h-3 w-px bg-emerald-300/80" aria-hidden="true"></span>
+                            <span class="text-teal-700">In-House Gateway</span>
                         </span>
                     </div>
 

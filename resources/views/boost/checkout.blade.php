@@ -177,9 +177,13 @@
                         </h2>
                         <p class="text-xs text-slate-500 mt-0.5">Secure, non-custodial direct crypto settlement</p>
                     </div>
-                    <span class="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-extrabold flex items-center gap-1.5 shadow-2xs">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        Zero 3rd-Party Middleman · 100% In-House
+                    <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/80 text-emerald-800 text-[11px] font-bold shadow-xs shrink-0">
+                        <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                        </svg>
+                        <span>Zero 3rd-Party Middleman</span>
+                        <span class="h-3 w-px bg-emerald-300/80" aria-hidden="true"></span>
+                        <span class="text-teal-700">100% In-House</span>
                     </span>
                 </div>
 
