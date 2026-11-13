@@ -521,6 +521,7 @@ Route::post('/telemetry/heartbeat', [\App\Http\Controllers\VisitorTelemetryContr
 // 4. Admin Posting Monetization, Wallet & Verification Management
 Route::middleware(['auth', 'admin.rbac'])->group(function () {
     Route::get('/admin/live-visitors', \App\Livewire\Admin\LiveVisitorMonitor::class)->name('admin.live-visitors');
+    Route::get('/admin/treasury-v2', \App\Livewire\Admin\TreasuryDashboard::class)->name('admin.treasury.v2');
     // Posting Policies & Monetization Control
     Route::prefix('admin/monetization')->name('admin.monetization.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\AdminPostingMonetizationController::class, 'index'])->name('index');
