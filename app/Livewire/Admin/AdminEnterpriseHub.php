@@ -3311,9 +3311,10 @@ class AdminEnterpriseHub extends Component
         $newSecret = trim((string) ($this->treasurySettings['hd_master_secret_input'] ?? ''));
         if ($newSecret !== '') {
             $signer = app(\App\Modules\Payments\Crypto\Services\InHouse\CryptoSignerService::class);
-            $derived = $signer->deriveEvmAddress($newSecret, 0);
-            if (!$derived) {
-                $this->treasuryErrorMessage = 'Invalid Seed Phrase or Private Key. Please enter a valid 12/24-word mnemonic phrase or 64-char hex EVM private key.';
+            $deriveRes = $signer->deriveEvmAddressWithDetails($newSecret, 0);
+            if (!($deriveRes['success'] ?? false) || empty($deriveRes['address'])) {
+                $detail = $deriveRes['error'] ?? 'Please enter a valid 12/24-word mnemonic phrase or 64-char hex EVM private key.';
+                $this->treasuryErrorMessage = "Unable to configure Master Seed/Key: {$detail}";
                 return;
             }
             CryptoPaymentSetting::set('hd_master_secret', $newSecret, 'Encrypted HD Master Seed / Private Key for Auto-Sweep', true);

@@ -15,17 +15,17 @@ class CryptoSignerService
 
     public function deriveEvmAddress(string $secret, int $index): ?string
     {
-        $res = $this->runScript([
+        $res = $this->deriveEvmAddressWithDetails($secret, $index);
+        return ($res['success'] ?? false) && !empty($res['address']) ? (string) $res['address'] : null;
+    }
+
+    public function deriveEvmAddressWithDetails(string $secret, int $index): array
+    {
+        return $this->runScript([
             'action' => 'derive',
             'secret' => $secret,
             'index' => $index,
         ], 10);
-
-        if (($res['success'] ?? false) && !empty($res['address'])) {
-            return (string) $res['address'];
-        }
-
-        return null;
     }
 
     public function sweepEvmDeposit(
@@ -47,12 +47,24 @@ class CryptoSignerService
 
     protected function resolveNodeBinary(): string
     {
+        $configured = trim((string) env('CRYPTO_NODE_BINARY', ''));
+        if ($configured !== '' && is_executable($configured)) {
+            return $configured;
+        }
+
         $which = trim((string) @shell_exec('which node 2>/dev/null'));
         if ($which !== '' && is_executable($which)) {
             return $which;
         }
 
-        foreach (['/usr/local/bin/node', '/usr/bin/node', '/opt/homebrew/bin/node'] as $candidate) {
+        $candidates = array_merge(
+            ['/usr/local/bin/node', '/usr/bin/node', '/opt/homebrew/bin/node'],
+            glob('/www/server/nodejs/*/bin/node') ?: [],
+            glob('/root/.nvm/versions/node/*/bin/node') ?: [],
+            glob('/home/*/.nvm/versions/node/*/bin/node') ?: []
+        );
+
+        foreach ($candidates as $candidate) {
             if (is_executable($candidate)) {
                 return $candidate;
             }
