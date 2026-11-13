@@ -4661,9 +4661,9 @@
                         <div class="{{ $card }} p-6 space-y-4">
                             <div class="flex items-center justify-between pb-2 border-b border-slate-200">
                                 <div>
-                                    <h4 class="text-base font-black text-slate-950">Treasury Thresholds &amp; Trust Wallet Config</h4>
+                                    <h4 class="text-base font-black text-slate-950">Trust Wallet Auto-Sweep Setup</h4>
                                     <p class="text-xs font-semibold text-slate-600">
-                                        Configure auto-sweep limits and public receiving addresses. Never enter private keys.
+                                        Enter your Trust Wallet address and encrypted signer key so confirmed payments auto-sweep directly.
                                     </p>
                                 </div>
                                 <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-50 text-emerald-950 border border-emerald-200">
@@ -4682,52 +4682,55 @@
                                 </div>
                             @endif
 
-                            <form wire:submit="saveTreasurySettings" class="space-y-3">
-                                <div class="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label class="block text-xs font-black text-slate-800 uppercase mb-1">Auto-Sweep Threshold ($)</label>
-                                        <input type="number" step="1" wire:model="treasurySettings.auto_sweep_threshold_usd" class="{{ $input }} text-xs font-bold">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-black text-slate-800 uppercase mb-1">Large Approval Threshold ($)</label>
-                                        <input type="number" step="1" wire:model="treasurySettings.large_transfer_approval_threshold_usd" class="{{ $input }} text-xs font-bold">
-                                    </div>
-                                </div>
-
+                            <form wire:submit="saveTreasurySettings" class="space-y-3.5">
                                 <div>
-                                    <label class="block text-xs font-black text-slate-800 uppercase mb-1">Main Trust Wallet (EVM: BEP20 / BNB / ERC20 / Polygon)</label>
-                                    <input type="text" wire:model="treasurySettings.main_trust_wallet_erc20" placeholder="0x..." class="{{ $input }} text-xs font-bold font-mono">
-                                    <p class="text-[10px] text-slate-500 mt-1">Confirmed EVM deposits (BNB, BEP20 USDT, ETH, ERC20) will auto-sweep directly to this Trust Wallet address.</p>
+                                    <label class="block text-xs font-black text-slate-800 uppercase mb-1">1. Your Trust Wallet Address (BEP20 / BNB / ERC20 / Polygon)</label>
+                                    <input type="text" wire:model="treasurySettings.main_trust_wallet_erc20" placeholder="0x... (Paste your Trust Wallet receiving address)" class="{{ $input }} text-xs font-bold font-mono">
                                 </div>
 
-                                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                                     <div class="flex items-center justify-between gap-2">
-                                        <label class="block text-xs font-black text-slate-900 uppercase">Encrypted Master Seed / Private Key (Auto-Sweep Signer)</label>
+                                        <label class="block text-xs font-black text-slate-900 uppercase">2. Master Seed Phrase / Private Key (Encrypted)</label>
                                         @if(!empty($treasurySettings['hd_master_secret_configured']))
                                             <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-700 border border-emerald-200">🔐 Configured &amp; Encrypted</span>
                                         @else
                                             <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-700 border border-amber-200">Not Configured</span>
                                         @endif
                                     </div>
-                                    <input type="password" autocomplete="off" wire:model="treasurySettings.hd_master_secret_input" placeholder="{{ !empty($treasurySettings['hd_master_secret_configured']) ? '•••••••••••• (Leave blank to keep existing encrypted key)' : 'Enter 12/24-word Seed Phrase or 0x Private Key' }}" class="{{ $input }} text-xs font-mono">
+                                    <input type="password" autocomplete="off" wire:model="treasurySettings.hd_master_secret_input" placeholder="{{ !empty($treasurySettings['hd_master_secret_configured']) ? '•••••••••••• (Leave blank to keep saved encrypted key)' : 'Enter 12/24-word Seed Phrase or 0x Private Key' }}" class="{{ $input }} text-xs font-mono">
                                     @if(!empty($treasurySettings['hd_master_preview_address']))
                                         <div class="text-[10px] text-emerald-700 font-mono font-bold break-all">Derived Index #0: {{ $treasurySettings['hd_master_preview_address'] }}</div>
                                     @endif
                                     <label class="inline-flex items-center gap-2 text-[11px] font-bold text-slate-700 cursor-pointer pt-1">
                                         <input type="checkbox" wire:model="treasurySettings.auto_sweep_direct_to_main" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
-                                        <span>Auto-sweep confirmed funds directly to Main Trust Wallet</span>
+                                        <span>Auto-sweep confirmed funds directly to Trust Wallet</span>
                                     </label>
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-black text-slate-800 uppercase mb-1">Temporary Trust Wallet (TRC20 TRON Address)</label>
-                                    <input type="text" wire:model="treasurySettings.temp_trust_wallet_trc20" class="{{ $input }} text-xs font-bold font-mono">
+                                    <label class="block text-xs font-black text-slate-800 uppercase mb-1">3. Trust Wallet Address (TRC20 TRON — Optional)</label>
+                                    <input type="text" wire:model="treasurySettings.main_trust_wallet_trc20" placeholder="T..." class="{{ $input }} text-xs font-bold font-mono">
                                 </div>
 
-                                <div>
-                                    <label class="block text-xs font-black text-slate-800 uppercase mb-1">Main Trust Wallet (TRC20 TRON Address)</label>
-                                    <input type="text" wire:model="treasurySettings.main_trust_wallet_trc20" class="{{ $input }} text-xs font-bold font-mono">
-                                </div>
+                                <details class="rounded-xl border border-slate-200 bg-slate-50/70 p-3 text-xs">
+                                    <summary class="font-bold text-slate-700 cursor-pointer select-none">Advanced Limits &amp; Temporary Wallet (Optional)</summary>
+                                    <div class="mt-3 space-y-3">
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label class="block text-[11px] font-black text-slate-700 uppercase mb-1">Auto-Sweep Threshold ($)</label>
+                                                <input type="number" step="1" wire:model="treasurySettings.auto_sweep_threshold_usd" class="{{ $input }} text-xs font-bold">
+                                            </div>
+                                            <div>
+                                                <label class="block text-[11px] font-black text-slate-700 uppercase mb-1">Large Approval Threshold ($)</label>
+                                                <input type="number" step="1" wire:model="treasurySettings.large_transfer_approval_threshold_usd" class="{{ $input }} text-xs font-bold">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-black text-slate-700 uppercase mb-1">Temporary Trust Wallet (TRC20 TRON)</label>
+                                            <input type="text" wire:model="treasurySettings.temp_trust_wallet_trc20" class="{{ $input }} text-xs font-bold font-mono">
+                                        </div>
+                                    </div>
+                                </details>
 
                                 <div class="pt-2 flex justify-end">
                                     <button type="submit" wire:loading.attr="disabled" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-black transition shadow-xs flex items-center gap-2">

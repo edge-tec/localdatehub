@@ -3263,6 +3263,11 @@ class AdminEnterpriseHub extends Component
                 ->deriveEvmAddress((string) $masterSecret, 0);
         }
 
+        $mainErc20 = CryptoTreasuryWallet::where('tier', CryptoTreasuryWallet::TIER_MAIN_TRUST_WALLET)->where('network_key', 'ERC20')->value('public_receiving_address') ?? '';
+        if (str_ends_with(strtolower($mainErc20), 'beef') || str_contains($mainErc20, 'PLACEHOLDER')) {
+            $mainErc20 = '';
+        }
+
         $this->treasurySettings = [
             'auto_sweep_threshold_usd' => CryptoPaymentSetting::get('auto_sweep_threshold_usd', 100.00),
             'large_transfer_approval_threshold_usd' => CryptoPaymentSetting::get('large_transfer_approval_threshold_usd', 500.00),
@@ -3277,7 +3282,7 @@ class AdminEnterpriseHub extends Component
             'temp_trust_wallet_trc20' => CryptoTreasuryWallet::where('tier', CryptoTreasuryWallet::TIER_TEMPORARY_TRUST_WALLET)->where('network_key', 'TRC20')->value('public_receiving_address') ?? '',
             'temp_trust_wallet_erc20' => CryptoTreasuryWallet::where('tier', CryptoTreasuryWallet::TIER_TEMPORARY_TRUST_WALLET)->where('network_key', 'ERC20')->value('public_receiving_address') ?? '',
             'main_trust_wallet_trc20' => CryptoTreasuryWallet::where('tier', CryptoTreasuryWallet::TIER_MAIN_TRUST_WALLET)->where('network_key', 'TRC20')->value('public_receiving_address') ?? '',
-            'main_trust_wallet_erc20' => CryptoTreasuryWallet::where('tier', CryptoTreasuryWallet::TIER_MAIN_TRUST_WALLET)->where('network_key', 'ERC20')->value('public_receiving_address') ?? '',
+            'main_trust_wallet_erc20' => $mainErc20,
         ];
 
         if (empty($this->manualSweepDestination)) {
