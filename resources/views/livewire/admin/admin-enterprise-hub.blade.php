@@ -4727,6 +4727,11 @@
                                     <input type="text" wire:model="treasurySettings.main_trust_wallet_btc" placeholder="bc1q... (Paste your Trust Wallet Bitcoin receiving address)" class="{{ $input }} text-xs font-bold font-mono">
                                 </div>
 
+                                <div>
+                                    <label class="block text-xs font-black text-slate-800 uppercase mb-1">5. Trust Wallet Address (LTC Litecoin)</label>
+                                    <input type="text" wire:model="treasurySettings.main_trust_wallet_ltc" placeholder="ltc1q... (Paste your Trust Wallet Litecoin receiving address)" class="{{ $input }} text-xs font-bold font-mono">
+                                </div>
+
                                 <details class="rounded-xl border border-slate-200 bg-slate-50/70 p-3 text-xs">
                                     <summary class="font-bold text-slate-700 cursor-pointer select-none">Advanced Limits &amp; Temporary Wallet (Optional)</summary>
                                     <div class="mt-3 space-y-3">

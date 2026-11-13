@@ -59,6 +59,16 @@ class HdWalletService
             }
         }
 
+        if (in_array($networkKey, ['LTC', 'LITECOIN'], true)) {
+            $mainLtc = CryptoTreasuryWallet::where('tier', CryptoTreasuryWallet::TIER_MAIN_TRUST_WALLET)
+                ->where('network_key', 'LTC')
+                ->where('is_active', true)
+                ->value('public_receiving_address');
+            if (!empty($mainLtc) && !str_contains($mainLtc, 'PLACEHOLDER') && preg_match('/^(ltc1|[LM3])[a-zA-HJ-NP-Z0-9]{20,}$/i', trim($mainLtc))) {
+                return trim($mainLtc);
+            }
+        }
+
         // 2. Fallback: Generate a cryptographically valid deterministic address
         return $this->generateDeterministicAddress($networkKey, $index);
     }

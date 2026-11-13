@@ -50,6 +50,8 @@ class BlockchainDepositScannerService
                 $this->scanTron($invoice, $network, $publicAddress);
             } elseif (in_array($netKey, ['BTC', 'BITCOIN'], true)) {
                 $this->scanBitcoin($invoice, $network, $publicAddress);
+            } elseif (in_array($netKey, ['LTC', 'LITECOIN'], true)) {
+                $this->scanLitecoin($invoice, $network, $publicAddress);
             } elseif ($network->chain_id !== null || in_array($netKey, ['BEP20', 'BNB', 'ERC20', 'ETH', 'POLYGON', 'MATIC', 'BASE', 'ARBITRUM'], true)) {
                 $this->scanEvm($invoice, $network, $publicAddress);
             }
@@ -236,11 +238,40 @@ class BlockchainDepositScannerService
 
     protected function scanBitcoin(CryptoPaymentInvoice $invoice, CryptoNetwork $network, string $publicAddress): void
     {
+        $this->scanUtxoEsplora(
+            $invoice,
+            $network,
+            $publicAddress,
+            ['https://mempool.space/api', 'https://blockstream.info/api'],
+            'BitcoinSender'
+        );
+    }
+
+    protected function scanLitecoin(CryptoPaymentInvoice $invoice, CryptoNetwork $network, string $publicAddress): void
+    {
+        $this->scanUtxoEsplora(
+            $invoice,
+            $network,
+            $publicAddress,
+            ['https://litecoinspace.org/api'],
+            'LitecoinSender'
+        );
+    }
+
+    /**
+     * Scan an Esplora-compatible UTXO explorer API (mempool.space / litecoinspace.org) for incoming transactions.
+     */
+    protected function scanUtxoEsplora(
+        CryptoPaymentInvoice $invoice,
+        CryptoNetwork $network,
+        string $publicAddress,
+        array $defaultEndpoints,
+        string $senderLabel
+    ): void {
         $endpoints = array_filter([
             $network->rpc_endpoint_primary,
             $network->rpc_endpoint_fallback,
-            'https://mempool.space/api',
-            'https://blockstream.info/api',
+            ...$defaultEndpoints,
         ]);
 
         $txs = null;
@@ -263,7 +294,7 @@ class BlockchainDepositScannerService
         foreach ($txs as $tx) {
             $sats = 0;
             foreach ($tx['vout'] ?? [] as $vout) {
-                if (($vout['scriptpubkey_address'] ?? '') === $publicAddress) {
+                if (strtolower((string) ($vout['scriptpubkey_address'] ?? '')) === strtolower($publicAddress)) {
                     $sats += (int) ($vout['value'] ?? 0);
                 }
             }
@@ -279,7 +310,7 @@ class BlockchainDepositScannerService
             $this->verificationService->processDetectedTransaction(
                 invoice: $invoice,
                 txHash: (string) $tx['txid'],
-                fromAddress: 'BitcoinSender',
+                fromAddress: $senderLabel,
                 toAddress: $publicAddress,
                 amount: $amount,
                 confirmations: $confirmations,
