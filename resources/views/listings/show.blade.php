@@ -1316,15 +1316,19 @@
                 x-data="{
                     reason: @js(old('report_reason', '')),
                     details: @js(old('report_details', '')),
+                    dropdownOpen: false,
                     submitting: false,
                     categories: [
-                        { value: 'underage_minor', title: 'Underage / Minor Content', desc: 'Immediate 24/7 escalation', badge: 'Critical', color: 'rose' },
-                        { value: 'commercial_sex', title: 'Commercial Sex / Escort', desc: 'FOSTA-SESTA violation', badge: 'Critical', color: 'rose' },
-                        { value: 'non_consensual_content', title: 'Non-Consensual / Stolen Photos', desc: 'Unauthorized imagery', badge: 'High', color: 'amber' },
-                        { value: 'fraud_scam', title: 'Scam, Wire or Impersonation', desc: 'Financial fraud attempt', badge: 'High', color: 'amber' },
-                        { value: 'harassment', title: 'Harassment or Hate Speech', desc: 'Abusive or threatening behavior', badge: 'Safety', color: 'slate' },
-                        { value: 'other', title: 'Other Policy Violation', desc: 'Spam or community rules', badge: 'General', color: 'slate' }
-                    ]
+                        { value: 'underage_minor', title: 'Underage or Minor-Related Content', desc: 'Immediate 24/7 escalation to law enforcement', badge: 'Critical', color: 'rose', icon: 'shield' },
+                        { value: 'commercial_sex', title: 'Commercial Sex, Prostitution or Escort', desc: 'Strict FOSTA-SESTA policy violation', badge: 'Critical', color: 'rose', icon: 'ban' },
+                        { value: 'non_consensual_content', title: 'Non-Consensual or Stolen Photos', desc: 'Unauthorized private or stolen imagery', badge: 'High', color: 'amber', icon: 'eye' },
+                        { value: 'fraud_scam', title: 'Financial Scam, Wire or Impersonation', desc: 'Money request, catfish, or fake profile', badge: 'High', color: 'amber', icon: 'alert' },
+                        { value: 'harassment', title: 'Harassment, Stalking or Hate Speech', desc: 'Abusive, threatening, or hateful conduct', badge: 'Safety', color: 'indigo', icon: 'chat' },
+                        { value: 'other', title: 'Other Community Standards Violation', desc: 'Spam, duplicate, or general rule breach', badge: 'General', color: 'slate', icon: 'flag' }
+                    ],
+                    selectedCategory() {
+                        return this.categories.find(c => c.value === this.reason) || null;
+                    }
                 }"
                 @submit="if (reason && details.trim().length >= 10) submitting = true"
             >
@@ -1334,10 +1338,10 @@
                 <input type="hidden" name="report_reason" x-model="reason">
 
                 <!-- Trust & Safety Header Banner -->
-                <div class="flex items-start gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-rose-50 via-pink-50/70 to-amber-50/60 border border-rose-200/70">
-                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#F20B65] to-rose-600 text-white flex items-center justify-center shrink-0 shadow-sm">
-                        <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286zm0 13.036h.008v.008H12v-.008z" />
+                <div class="flex items-start gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-rose-50 via-pink-50/70 to-amber-50/50 border border-rose-200/70">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#F20B65] via-rose-600 to-orange-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-rose-500/20">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
                         </svg>
                     </div>
                     <div class="text-xs leading-relaxed">
@@ -1346,41 +1350,154 @@
                     </div>
                 </div>
 
-                <!-- Step 1: Visual Violation Category Cards -->
-                <div>
-                    <div class="flex items-center justify-between mb-2">
+                <!-- Step 1: Advanced Custom Dropdown with Icons & Severity Badges -->
+                <div class="relative" @click.outside="dropdownOpen = false" @keydown.escape.window="dropdownOpen = false">
+                    <div class="flex items-center justify-between mb-1.5">
                         <label class="text-[11px] font-extrabold text-slate-800 uppercase tracking-wider">
-                            1. Select Violation Category <span class="text-[#F20B65]">*</span>
+                            1. Violation Category <span class="text-[#F20B65]">*</span>
                         </label>
-                        <span x-show="!reason" class="text-[11px] font-semibold text-rose-500">Required</span>
+                        <span x-show="!reason" class="text-[11px] font-semibold text-rose-500">Select a reason</span>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <button
+                        type="button"
+                        @click="dropdownOpen = !dropdownOpen"
+                        :class="dropdownOpen ? 'border-[#F20B65] ring-2 ring-[#F20B65]/20 bg-white' : 'border-slate-200 bg-slate-50/80 hover:bg-white hover:border-slate-300'"
+                        class="w-full rounded-xl border px-3.5 py-2.5 text-left transition flex items-center justify-between gap-3"
+                    >
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <template x-if="!selectedCategory()">
+                                <span class="w-7 h-7 rounded-lg bg-slate-200/70 text-slate-500 flex items-center justify-center shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0l2.77-.693a9 9 0 016.208.682l.108.054a9 9 0 006.086.71l3.114-.732a48.524 48.524 0 01-.005-10.499l-3.11.732a9 9 0 01-6.085-.711l-.108-.054a9 9 0 00-6.208-.682L3 4.5M3 15V4.5" />
+                                    </svg>
+                                </span>
+                            </template>
+                            <template x-if="selectedCategory()">
+                                <span
+                                    :class="{
+                                        'bg-rose-100 text-rose-600': selectedCategory().color === 'rose',
+                                        'bg-amber-100 text-amber-600': selectedCategory().color === 'amber',
+                                        'bg-indigo-100 text-indigo-600': selectedCategory().color === 'indigo',
+                                        'bg-slate-200 text-slate-600': selectedCategory().color === 'slate'
+                                    }"
+                                    class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                                    </svg>
+                                </span>
+                            </template>
+
+                            <div class="min-w-0">
+                                <div
+                                    class="text-xs font-bold truncate"
+                                    :class="selectedCategory() ? 'text-slate-900' : 'text-slate-500'"
+                                    x-text="selectedCategory() ? selectedCategory().title : 'Select Primary Violation Reason...'"
+                                ></div>
+                                <div
+                                    x-show="selectedCategory()"
+                                    class="text-[11px] text-slate-500 truncate"
+                                    x-text="selectedCategory() ? selectedCategory().desc : ''"
+                                ></div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 shrink-0">
+                            <template x-if="selectedCategory()">
+                                <span
+                                    :class="{
+                                        'bg-rose-100 text-rose-700': selectedCategory().color === 'rose',
+                                        'bg-amber-100 text-amber-800': selectedCategory().color === 'amber',
+                                        'bg-indigo-100 text-indigo-700': selectedCategory().color === 'indigo',
+                                        'bg-slate-200 text-slate-700': selectedCategory().color === 'slate'
+                                    }"
+                                    class="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide"
+                                    x-text="selectedCategory().badge"
+                                ></span>
+                            </template>
+                            <svg
+                                class="w-4 h-4 text-slate-400 transition-transform duration-150"
+                                :class="dropdownOpen ? 'rotate-180 text-[#F20B65]' : ''"
+                                fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true"
+                            >
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                            </svg>
+                        </div>
+                    </button>
+
+                    <!-- Floating Dropdown Options Menu -->
+                    <div
+                        x-show="dropdownOpen"
+                        x-transition:enter="transition ease-out duration-120"
+                        x-transition:enter-start="opacity-0 -translate-y-1"
+                        x-transition:enter-end="opacity-100 translate-y-0"
+                        x-transition:leave="transition ease-in duration-100"
+                        x-transition:leave-start="opacity-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 -translate-y-1"
+                        style="display: none;"
+                        class="absolute left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl shadow-slate-900/10 z-50 overflow-hidden divide-y divide-slate-100 max-h-64 overflow-y-auto"
+                    >
                         <template x-for="cat in categories" :key="cat.value">
                             <button
                                 type="button"
-                                @click="reason = cat.value"
-                                :class="reason === cat.value
-                                    ? 'border-[#F20B65] bg-pink-50/70 ring-2 ring-[#F20B65]/20 shadow-xs'
-                                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70'"
-                                class="text-left p-2.5 rounded-xl border transition-all duration-150 flex items-start justify-between gap-2 group"
+                                @click="reason = cat.value; dropdownOpen = false"
+                                :class="reason === cat.value ? 'bg-pink-50/70' : 'hover:bg-slate-50'"
+                                class="w-full px-3.5 py-2.5 text-left flex items-center justify-between gap-3 transition"
                             >
-                                <div class="min-w-0">
-                                    <div class="text-xs font-bold text-slate-900 truncate" x-text="cat.title"></div>
-                                    <div class="text-[11px] text-slate-500 truncate mt-0.5" x-text="cat.desc"></div>
+                                <div class="flex items-center gap-2.5 min-w-0">
+                                    <span
+                                        :class="{
+                                            'bg-rose-100 text-rose-600': cat.color === 'rose',
+                                            'bg-amber-100 text-amber-600': cat.color === 'amber',
+                                            'bg-indigo-100 text-indigo-600': cat.color === 'indigo',
+                                            'bg-slate-100 text-slate-600': cat.color === 'slate'
+                                        }"
+                                        class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                                    >
+                                        <template x-if="cat.icon === 'shield'">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286z" /></svg>
+                                        </template>
+                                        <template x-if="cat.icon === 'ban'">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+                                        </template>
+                                        <template x-if="cat.icon === 'eye'">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
+                                        </template>
+                                        <template x-if="cat.icon === 'alert'">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        </template>
+                                        <template x-if="cat.icon === 'chat'">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+                                        </template>
+                                        <template x-if="cat.icon === 'flag'">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0l2.77-.693a9 9 0 016.208.682l.108.054a9 9 0 006.086.71l3.114-.732a48.524 48.524 0 01-.005-10.499l-3.11.732a9 9 0 01-6.085-.711l-.108-.054a9 9 0 00-6.208-.682L3 4.5M3 15V4.5" /></svg>
+                                        </template>
+                                    </span>
+                                    <div class="min-w-0">
+                                        <div class="text-xs font-bold text-slate-900 truncate" x-text="cat.title"></div>
+                                        <div class="text-[11px] text-slate-500 truncate" x-text="cat.desc"></div>
+                                    </div>
                                 </div>
-                                <span
-                                    :class="{
-                                        'bg-rose-100 text-rose-700': cat.color === 'rose',
-                                        'bg-amber-100 text-amber-800': cat.color === 'amber',
-                                        'bg-slate-100 text-slate-600': cat.color === 'slate'
-                                    }"
-                                    class="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide shrink-0"
-                                    x-text="cat.badge"
-                                ></span>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <span
+                                        :class="{
+                                            'bg-rose-100 text-rose-700': cat.color === 'rose',
+                                            'bg-amber-100 text-amber-800': cat.color === 'amber',
+                                            'bg-indigo-100 text-indigo-700': cat.color === 'indigo',
+                                            'bg-slate-100 text-slate-600': cat.color === 'slate'
+                                        }"
+                                        class="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide"
+                                        x-text="cat.badge"
+                                    ></span>
+                                    <svg x-show="reason === cat.value" class="w-4 h-4 text-[#F20B65]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                </div>
                             </button>
                         </template>
                     </div>
+
                     @error('report_reason')
                         <p class="mt-1.5 text-xs font-semibold text-rose-600">{{ $message }}</p>
                     @enderror
@@ -1441,7 +1558,12 @@
 
                 <!-- Footer Actions -->
                 <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-3">
-                    <span class="text-[11px] text-slate-400 hidden sm:inline">Protected &amp; encrypted submission</span>
+                    <span class="text-[11px] text-slate-400 hidden sm:inline-flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                        </svg>
+                        Protected &amp; encrypted submission
+                    </span>
                     <div class="flex items-center gap-2.5 ml-auto">
                         <x-button type="button" variant="secondary" @click="$dispatch('close-modal', 'report-modal')">
                             Cancel
@@ -1454,7 +1576,7 @@
                             style="background: linear-gradient(135deg, #E11D48 0%, #BE123C 100%) !important;"
                         >
                             <svg x-show="!submitting" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0l2.77-.693a9 9 0 016.208.682l.108.054a9 9 0 006.086.71l3.114-.732a48.524 48.524 0 01-.005-10.499l-3.11.732a9 9 0 01-6.085-.711l-.108-.054a9 9 0 00-6.208-.682L3 4.5M3 15V4.5" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
                             </svg>
                             <span x-text="submitting ? 'Submitting...' : 'Submit Confidential Report'"></span>
                         </button>
