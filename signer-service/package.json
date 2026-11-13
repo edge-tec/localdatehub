@@ -1,0 +1,14 @@
+{
+  "name": "localdatehub-isolated-signer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Self-hosted isolated HD signing service. Never shares process or database with Laravel.",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "ethers": "^6.17.0"
+  }
+}
+

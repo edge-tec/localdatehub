@@ -18,6 +18,12 @@
             </div>
 
             <div class="flex items-center space-x-3">
+                <a
+                    href="{{ route('account.crypto-wallet.index') }}"
+                    class="border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-2.5 rounded-full text-xs font-bold transition flex items-center space-x-1.5"
+                >
+                    <span>Multi-Chain Crypto Wallet</span>
+                </a>
                 <a 
                     href="#packages-section" 
                     class="bg-[#F20B83] hover:bg-[#d90858] text-white px-5 py-2.5 rounded-full text-xs font-bold shadow-md transition flex items-center space-x-1.5"

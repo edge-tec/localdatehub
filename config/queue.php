@@ -73,6 +73,60 @@ return [
             'after_commit' => false,
         ],
 
+        'redis_monitoring' => [
+            'driver' => 'redis',
+            'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
+            'queue' => env('CRYPTO_QUEUE_MONITORING', 'monitoring'),
+            'retry_after' => 150,
+            'block_for' => 5,
+            'after_commit' => true,
+        ],
+
+        'redis_verification' => [
+            'driver' => 'redis',
+            'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
+            'queue' => env('CRYPTO_QUEUE_VERIFICATION', 'verification'),
+            'retry_after' => 120,
+            'block_for' => 5,
+            'after_commit' => true,
+        ],
+
+        'redis_crediting' => [
+            'driver' => 'redis',
+            'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
+            'queue' => env('CRYPTO_QUEUE_CREDITING', 'crediting'),
+            'retry_after' => 90,
+            'block_for' => 5,
+            'after_commit' => true,
+        ],
+
+        'redis_signing' => [
+            'driver' => 'redis',
+            'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
+            'queue' => env('CRYPTO_QUEUE_SIGNING', 'signing'),
+            'retry_after' => 90,
+            'block_for' => 2,
+            'after_commit' => true,
+        ],
+
+        'redis_sweeping' => [
+            'driver' => 'redis',
+            'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
+            'queue' => env('CRYPTO_QUEUE_SWEEPING', 'sweeping'),
+            'retry_after' => 120,
+            'block_for' => 5,
+            'after_commit' => true,
+        ],
+
+        'redis_recovery' => [
+            'driver' => 'redis',
+            'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
+            'queue' => env('CRYPTO_QUEUE_RECOVERY', 'recovery'),
+            'retry_after' => 150,
+            'block_for' => 5,
+            'after_commit' => true,
+        ],
+
         'deferred' => [
             'driver' => 'deferred',
         ],
