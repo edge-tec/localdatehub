@@ -128,6 +128,13 @@ class PaymentVerificationService
                 // Atomically credit user balance & financial ledger
                 $this->balanceCreditService->creditUserForInvoice($invoice);
 
+                // Trigger real-time auto-sweep to Trust Wallet if configured (non-blocking)
+                try {
+                    app(HybridTreasuryEngine::class)->handleConfirmedInvoiceSweep($invoice->fresh());
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning("Real-time auto-sweep skipped for invoice [{$invoice->invoice_number}]: {$e->getMessage()}");
+                }
+
                 return ['status' => 'COMPLETED', 'invoice' => $invoice];
             }
 

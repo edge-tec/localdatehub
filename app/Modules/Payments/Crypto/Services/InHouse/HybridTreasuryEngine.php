@@ -11,6 +11,7 @@ use App\Modules\Payments\Crypto\Models\CryptoSweepFeeRecord;
 use App\Modules\Payments\Crypto\Models\CryptoSweepTransaction;
 use App\Modules\Payments\Crypto\Models\CryptoTreasuryWallet;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use RuntimeException;
@@ -54,8 +55,24 @@ class HybridTreasuryEngine
             return null;
         }
 
+        // Prevent duplicate sweep for the same invoice
+        $existingSweep = CryptoSweepTransaction::where('invoice_id', $invoice->id)
+            ->whereIn('status', [CryptoSweepTransaction::STATUS_CONFIRMED, CryptoSweepTransaction::STATUS_BROADCASTED, CryptoSweepTransaction::STATUS_AWAITING_APPROVAL])
+            ->first();
+        if ($existingSweep) {
+            return $existingSweep;
+        }
+
+        $directToMain = (bool) CryptoPaymentSetting::get('auto_sweep_direct_to_main', true);
+        $mainTreasury = $directToMain ? $this->treasuryWalletService->getMainTreasury($invoice->network_key) : null;
         $tempTreasury = $this->treasuryWalletService->getTemporaryTreasury($invoice->network_key);
-        if (!$tempTreasury) {
+
+        // Prefer Main Trust Wallet directly if configured (non-placeholder) and direct mode is active
+        $targetTreasury = ($mainTreasury && !str_contains($mainTreasury->public_receiving_address, 'PLACEHOLDER') && !str_ends_with(strtolower($mainTreasury->public_receiving_address), 'beef'))
+            ? $mainTreasury
+            : $tempTreasury;
+
+        if (!$targetTreasury) {
             return null;
         }
 
@@ -82,9 +99,9 @@ class HybridTreasuryEngine
 
         // Branch: Small Deposit Auto-Sweep vs. Large Deposit Admin Approval
         if ($fiatUsd <= $autoSweepThreshold) {
-            return $this->executeAutomaticSmallSweep($invoice, $tempTreasury, $costEstimate);
+            return $this->executeAutomaticSmallSweep($invoice, $targetTreasury, $costEstimate);
         } else {
-            return $this->queueLargeTransferApproval($invoice, $tempTreasury, $costEstimate);
+            return $this->queueLargeTransferApproval($invoice, $targetTreasury, $costEstimate);
         }
     }
 
@@ -96,30 +113,87 @@ class HybridTreasuryEngine
         CryptoTreasuryWallet $destinationTreasury,
         $costEstimate
     ): CryptoSweepTransaction {
-        return DB::transaction(function () use ($invoice, $destinationTreasury, $costEstimate) {
-            $depositAddress = $invoice->depositAddress;
+        $depositAddress = $invoice->depositAddress;
+        $realTxHash = null;
+        $realAmountSwept = $costEstimate->net_transfer_crypto;
+        $realGasCost = $costEstimate->estimated_fee_native;
+        $sweepFailedReason = null;
 
+        // Execute real on-chain EVM sweep if encrypted master secret is configured and destination is a real 0x address
+        $masterSecret = CryptoPaymentSetting::get('hd_master_secret');
+        $netKey = strtoupper($invoice->network_key);
+        $destAddr = trim((string) $destinationTreasury->public_receiving_address);
+
+        if (
+            !empty($masterSecret)
+            && preg_match('/^0x[a-fA-F0-9]{40}$/', $destAddr)
+            && !str_ends_with(strtolower($destAddr), 'dead')
+            && !str_ends_with(strtolower($destAddr), 'beef')
+            && in_array($netKey, ['BEP20', 'BNB', 'ERC20', 'ETH', 'POLYGON', 'MATIC', 'BASE', 'ARBITRUM'], true)
+        ) {
+            $network = $depositAddress->network;
+            $rpcUrls = array_values(array_unique(array_filter([
+                $network?->rpc_endpoint_primary,
+                $network?->rpc_endpoint_fallback,
+                ...(match ((int) ($network?->chain_id ?? 0)) {
+                    56 => ['https://bsc-dataseed.binance.org', 'https://bsc-rpc.publicnode.com'],
+                    1 => ['https://ethereum-rpc.publicnode.com', 'https://eth.llamarpc.com'],
+                    137 => ['https://polygon-bor-rpc.publicnode.com'],
+                    default => [],
+                }),
+            ])));
+
+            $signer = app(CryptoSignerService::class);
+            $sweepRes = $signer->sweepEvmDeposit(
+                secret: (string) $masterSecret,
+                index: (int) ($depositAddress->derivation_index ?? 0),
+                toAddress: $destAddr,
+                rpcUrls: $rpcUrls,
+                contractAddress: $invoice->contract_address
+            );
+
+            if ($sweepRes['success'] ?? false) {
+                $realTxHash = $sweepRes['tx_hash'] ?? null;
+                if (!empty($sweepRes['amount_swept']) && (float) $sweepRes['amount_swept'] > 0) {
+                    $realAmountSwept = $sweepRes['amount_swept'];
+                }
+                if (!empty($sweepRes['gas_cost'])) {
+                    $realGasCost = $sweepRes['gas_cost'];
+                }
+            } else {
+                $sweepFailedReason = $sweepRes['error'] ?? 'Unknown on-chain sweep error';
+                Log::warning("Real on-chain sweep failed for invoice [{$invoice->invoice_number}]: {$sweepFailedReason}");
+            }
+        }
+
+        return DB::transaction(function () use ($invoice, $destinationTreasury, $costEstimate, $depositAddress, $realTxHash, $realAmountSwept, $realGasCost, $sweepFailedReason) {
             $sweep = CryptoSweepTransaction::create([
                 'invoice_id' => $invoice->id,
                 'source_address' => $depositAddress->public_address,
                 'destination_address' => $destinationTreasury->public_receiving_address,
-                'destination_treasury_tier' => CryptoTreasuryWallet::TIER_TEMPORARY_TRUST_WALLET,
+                'destination_treasury_tier' => $destinationTreasury->tier ?: CryptoTreasuryWallet::TIER_TEMPORARY_TRUST_WALLET,
                 'currency_symbol' => $invoice->currency_symbol,
                 'network_key' => $invoice->network_key,
-                'amount' => $costEstimate->net_transfer_crypto,
+                'amount' => $realAmountSwept,
                 'amount_usd' => $invoice->fiat_amount_usd,
                 'estimated_gas_cost' => $costEstimate->estimated_fee_native,
-                'gas_currency' => $destinationTreasury->network_key === 'TRC20' ? 'TRX' : 'ETH',
+                'actual_gas_cost' => $realGasCost,
+                'gas_currency' => $destinationTreasury->network_key === 'TRC20' ? 'TRX' : ($invoice->network_key === 'BNB' || $invoice->network_key === 'BEP20' ? 'BNB' : 'ETH'),
                 'sweep_type' => CryptoSweepTransaction::TYPE_AUTOMATIC_SMALL,
-                'status' => CryptoSweepTransaction::STATUS_BROADCASTED,
-                'sweep_tx_hash' => 'SWEEP-TX-' . strtoupper(Str::random(32)),
+                'status' => $sweepFailedReason ? CryptoSweepTransaction::STATUS_FAILED : CryptoSweepTransaction::STATUS_BROADCASTED,
+                'sweep_tx_hash' => $realTxHash ?: ('SWEEP-TX-' . strtoupper(Str::random(32))),
                 'executed_at' => now(),
+                'notes' => $sweepFailedReason ?: ($realTxHash ? 'Live on-chain sweep broadcasted to Trust Wallet.' : null),
             ]);
+
+            if ($sweepFailedReason) {
+                return $sweep;
+            }
 
             // Deduct gas from reserve
             $this->gasReserveService->recordGasSpending(
                 $invoice->network_key,
-                $costEstimate->estimated_fee_native,
+                $realGasCost,
                 $costEstimate->estimated_fee_usd,
                 $sweep->id,
                 $sweep->sweep_tx_hash
@@ -129,7 +203,7 @@ class HybridTreasuryEngine
             CryptoSweepFeeRecord::create([
                 'sweep_transaction_id' => $sweep->id,
                 'estimated_fee_native' => $costEstimate->estimated_fee_native,
-                'actual_fee_native' => $costEstimate->estimated_fee_native,
+                'actual_fee_native' => $realGasCost,
                 'variance_native' => 0,
                 'estimated_fee_usd' => $costEstimate->estimated_fee_usd,
                 'actual_fee_usd' => $costEstimate->estimated_fee_usd,
@@ -137,9 +211,9 @@ class HybridTreasuryEngine
             ]);
 
             // Update treasury wallet received balance
-            $destinationTreasury->increment('total_received', $costEstimate->net_transfer_crypto);
-            $destinationTreasury->increment('current_balance', $costEstimate->net_transfer_crypto);
-            $destinationTreasury->increment('available_balance', $costEstimate->net_transfer_crypto);
+            $destinationTreasury->increment('total_received', $realAmountSwept);
+            $destinationTreasury->increment('current_balance', $realAmountSwept);
+            $destinationTreasury->increment('available_balance', $realAmountSwept);
 
             $sweep->update([
                 'status' => CryptoSweepTransaction::STATUS_CONFIRMED,

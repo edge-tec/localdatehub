@@ -12,10 +12,20 @@ class TreasuryWalletService
      */
     public function getTemporaryTreasury(string $networkKey): ?CryptoTreasuryWallet
     {
-        return CryptoTreasuryWallet::where('tier', CryptoTreasuryWallet::TIER_TEMPORARY_TRUST_WALLET)
-            ->where('network_key', strtoupper($networkKey))
+        $key = strtoupper($networkKey);
+        $wallet = CryptoTreasuryWallet::where('tier', CryptoTreasuryWallet::TIER_TEMPORARY_TRUST_WALLET)
+            ->where('network_key', $key)
             ->where('is_active', true)
             ->first();
+
+        if (!$wallet && in_array($key, ['BNB', 'BEP20', 'ETH', 'ERC20', 'POLYGON', 'MATIC', 'BASE', 'ARBITRUM'], true)) {
+            $wallet = CryptoTreasuryWallet::where('tier', CryptoTreasuryWallet::TIER_TEMPORARY_TRUST_WALLET)
+                ->whereIn('network_key', ['BEP20', 'ERC20', 'BNB', 'ETH'])
+                ->where('is_active', true)
+                ->first();
+        }
+
+        return $wallet;
     }
 
     /**
@@ -23,10 +33,20 @@ class TreasuryWalletService
      */
     public function getMainTreasury(string $networkKey): ?CryptoTreasuryWallet
     {
-        return CryptoTreasuryWallet::where('tier', CryptoTreasuryWallet::TIER_MAIN_TRUST_WALLET)
-            ->where('network_key', strtoupper($networkKey))
+        $key = strtoupper($networkKey);
+        $wallet = CryptoTreasuryWallet::where('tier', CryptoTreasuryWallet::TIER_MAIN_TRUST_WALLET)
+            ->where('network_key', $key)
             ->where('is_active', true)
             ->first();
+
+        if (!$wallet && in_array($key, ['BNB', 'BEP20', 'ETH', 'ERC20', 'POLYGON', 'MATIC', 'BASE', 'ARBITRUM'], true)) {
+            $wallet = CryptoTreasuryWallet::where('tier', CryptoTreasuryWallet::TIER_MAIN_TRUST_WALLET)
+                ->whereIn('network_key', ['BEP20', 'ERC20', 'BNB', 'ETH'])
+                ->where('is_active', true)
+                ->first();
+        }
+
+        return $wallet;
     }
 
     /**

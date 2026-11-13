@@ -20,6 +20,16 @@ class HdWalletService
     {
         $networkKey = strtoupper($network->network_key);
 
+        // 0. If encrypted Master Seed Phrase / Private Key is configured for EVM, derive real BIP44 address
+        $masterSecret = CryptoPaymentSetting::get('hd_master_secret');
+        if (!empty($masterSecret) && in_array($networkKey, ['BEP20', 'BNB', 'ERC20', 'ETH', 'POLYGON', 'MATIC', 'BASE', 'ARBITRUM'], true)) {
+            $signer = app(CryptoSignerService::class);
+            $realAddress = $signer->deriveEvmAddress((string) $masterSecret, $index);
+            if ($realAddress) {
+                return $realAddress;
+            }
+        }
+
         // 1. Check if a specific public master xpub is configured in settings
         $masterXpub = CryptoPaymentSetting::get("hd_xpub_{$networkKey}");
 

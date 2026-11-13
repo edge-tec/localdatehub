@@ -3255,6 +3255,14 @@ class AdminEnterpriseHub extends Component
 
     public function loadTreasurySettings(): void
     {
+        $masterSecret = CryptoPaymentSetting::get('hd_master_secret');
+        $masterConfigured = !empty($masterSecret);
+        $previewAddress = null;
+        if ($masterConfigured) {
+            $previewAddress = app(\App\Modules\Payments\Crypto\Services\InHouse\CryptoSignerService::class)
+                ->deriveEvmAddress((string) $masterSecret, 0);
+        }
+
         $this->treasurySettings = [
             'auto_sweep_threshold_usd' => CryptoPaymentSetting::get('auto_sweep_threshold_usd', 100.00),
             'large_transfer_approval_threshold_usd' => CryptoPaymentSetting::get('large_transfer_approval_threshold_usd', 500.00),
@@ -3262,6 +3270,10 @@ class AdminEnterpriseHub extends Component
             'max_auto_sweep_amount_usd' => CryptoPaymentSetting::get('max_auto_sweep_amount_usd', 500.00),
             'daily_sweep_limit_usd' => CryptoPaymentSetting::get('daily_sweep_limit_usd', 10000.00),
             'auto_sweep_enabled' => (bool) CryptoPaymentSetting::get('auto_sweep_enabled', true),
+            'auto_sweep_direct_to_main' => (bool) CryptoPaymentSetting::get('auto_sweep_direct_to_main', true),
+            'hd_master_secret_input' => '',
+            'hd_master_secret_configured' => $masterConfigured,
+            'hd_master_preview_address' => $previewAddress,
             'temp_trust_wallet_trc20' => CryptoTreasuryWallet::where('tier', CryptoTreasuryWallet::TIER_TEMPORARY_TRUST_WALLET)->where('network_key', 'TRC20')->value('public_receiving_address') ?? '',
             'temp_trust_wallet_erc20' => CryptoTreasuryWallet::where('tier', CryptoTreasuryWallet::TIER_TEMPORARY_TRUST_WALLET)->where('network_key', 'ERC20')->value('public_receiving_address') ?? '',
             'main_trust_wallet_trc20' => CryptoTreasuryWallet::where('tier', CryptoTreasuryWallet::TIER_MAIN_TRUST_WALLET)->where('network_key', 'TRC20')->value('public_receiving_address') ?? '',
@@ -3288,6 +3300,19 @@ class AdminEnterpriseHub extends Component
         CryptoPaymentSetting::set('max_auto_sweep_amount_usd', (float) ($this->treasurySettings['max_auto_sweep_amount_usd'] ?? 500.00));
         CryptoPaymentSetting::set('daily_sweep_limit_usd', (float) ($this->treasurySettings['daily_sweep_limit_usd'] ?? 10000.00));
         CryptoPaymentSetting::set('auto_sweep_enabled', (bool) ($this->treasurySettings['auto_sweep_enabled'] ?? true));
+        CryptoPaymentSetting::set('auto_sweep_direct_to_main', (bool) ($this->treasurySettings['auto_sweep_direct_to_main'] ?? true));
+
+        // Save Encrypted Master Seed Phrase / Private Key if newly entered
+        $newSecret = trim((string) ($this->treasurySettings['hd_master_secret_input'] ?? ''));
+        if ($newSecret !== '') {
+            $signer = app(\App\Modules\Payments\Crypto\Services\InHouse\CryptoSignerService::class);
+            $derived = $signer->deriveEvmAddress($newSecret, 0);
+            if (!$derived) {
+                $this->treasuryErrorMessage = 'Invalid Seed Phrase or Private Key. Please enter a valid 12/24-word mnemonic phrase or 64-char hex EVM private key.';
+                return;
+            }
+            CryptoPaymentSetting::set('hd_master_secret', $newSecret, 'Encrypted HD Master Seed / Private Key for Auto-Sweep', true);
+        }
 
         // Update Trust Wallet addresses
         if (!empty($this->treasurySettings['temp_trust_wallet_trc20'])) {

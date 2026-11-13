@@ -456,5 +456,24 @@ class InHouseCryptoGatewayTest extends TestCase
         $this->assertNotNull($wallet);
         $this->assertGreaterThan(0, $wallet->balance);
     }
+
+    public function test_encrypted_master_seed_derives_real_bip44_evm_addresses_for_invoices()
+    {
+        CryptoPaymentSetting::set(
+            'hd_master_secret',
+            'test test test test test test test test test test test junk',
+            'Test encrypted mnemonic',
+            true
+        );
+
+        $hd = app(HdWalletService::class);
+        $bnbNetwork = CryptoNetwork::where('network_key', 'BNB')->firstOrFail();
+
+        $addr0 = $hd->derivePublicAddress($bnbNetwork, 0);
+        $addr1 = $hd->derivePublicAddress($bnbNetwork, 1);
+
+        $this->assertEquals('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', $addr0);
+        $this->assertEquals('0x70997970C51812dc3A010C7d01b50e0d17dc79C8', $addr1);
+    }
 }
 

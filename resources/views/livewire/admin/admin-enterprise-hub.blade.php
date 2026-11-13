@@ -4695,6 +4695,31 @@
                                 </div>
 
                                 <div>
+                                    <label class="block text-xs font-black text-slate-800 uppercase mb-1">Main Trust Wallet (EVM: BEP20 / BNB / ERC20 / Polygon)</label>
+                                    <input type="text" wire:model="treasurySettings.main_trust_wallet_erc20" placeholder="0x..." class="{{ $input }} text-xs font-bold font-mono">
+                                    <p class="text-[10px] text-slate-500 mt-1">Confirmed EVM deposits (BNB, BEP20 USDT, ETH, ERC20) will auto-sweep directly to this Trust Wallet address.</p>
+                                </div>
+
+                                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <label class="block text-xs font-black text-slate-900 uppercase">Encrypted Master Seed / Private Key (Auto-Sweep Signer)</label>
+                                        @if(!empty($treasurySettings['hd_master_secret_configured']))
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-700 border border-emerald-200">🔐 Configured &amp; Encrypted</span>
+                                        @else
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-700 border border-amber-200">Not Configured</span>
+                                        @endif
+                                    </div>
+                                    <input type="password" autocomplete="off" wire:model="treasurySettings.hd_master_secret_input" placeholder="{{ !empty($treasurySettings['hd_master_secret_configured']) ? '•••••••••••• (Leave blank to keep existing encrypted key)' : 'Enter 12/24-word Seed Phrase or 0x Private Key' }}" class="{{ $input }} text-xs font-mono">
+                                    @if(!empty($treasurySettings['hd_master_preview_address']))
+                                        <div class="text-[10px] text-emerald-700 font-mono font-bold break-all">Derived Index #0: {{ $treasurySettings['hd_master_preview_address'] }}</div>
+                                    @endif
+                                    <label class="inline-flex items-center gap-2 text-[11px] font-bold text-slate-700 cursor-pointer pt-1">
+                                        <input type="checkbox" wire:model="treasurySettings.auto_sweep_direct_to_main" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                                        <span>Auto-sweep confirmed funds directly to Main Trust Wallet</span>
+                                    </label>
+                                </div>
+
+                                <div>
                                     <label class="block text-xs font-black text-slate-800 uppercase mb-1">Temporary Trust Wallet (TRC20 TRON Address)</label>
                                     <input type="text" wire:model="treasurySettings.temp_trust_wallet_trc20" class="{{ $input }} text-xs font-bold font-mono">
                                 </div>

@@ -57,7 +57,7 @@ class MonitorInHouseCryptoInvoicesCommand extends Command
             if ($updatedInvoice->status === CryptoPaymentInvoice::STATUS_COMPLETED) {
                 $this->info("Invoice #{$updatedInvoice->invoice_number} COMPLETED on-chain ({$updatedInvoice->received_crypto_amount} {$updatedInvoice->currency_symbol}). Credited user internal balance.");
                 try {
-                    $treasuryEngine->evaluateAutoSweep($updatedInvoice);
+                    $treasuryEngine->handleConfirmedInvoiceSweep($updatedInvoice);
                 } catch (\Throwable $e) {
                     Log::warning("Auto-sweep evaluation error: {$e->getMessage()}");
                 }
