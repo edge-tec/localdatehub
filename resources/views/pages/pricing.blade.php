@@ -214,6 +214,7 @@
 
                                     <form action="{{ route('account.wallet.topup-amount') }}" method="GET" class="flex items-center gap-2 pt-1">
                                         <input type="hidden" name="plan" :value="selectedPlan.name">
+                                        <input type="hidden" name="custom" value="1">
                                         <div class="relative flex-1">
                                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">$</span>
                                             <input
@@ -221,9 +222,9 @@
                                                 name="amount"
                                                 x-model="customAmount"
                                                 step="0.01"
-                                                min="1"
+                                                min="10"
                                                 max="5000"
-                                                placeholder="Any amount (e.g. 5.00)"
+                                                placeholder="Min $10.00 (e.g. 10.00)"
                                                 class="w-full pl-7 pr-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:border-rose-500 outline-none"
                                                 required
                                             >

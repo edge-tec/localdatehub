@@ -66,8 +66,10 @@ class UserWalletController extends Controller
      */
     public function customTopup(Request $request)
     {
+        $minAmount = $request->boolean('custom') ? 10 : 1;
+
         $validated = $request->validate([
-            'amount' => 'required|numeric|min:1|max:5000',
+            'amount' => "required|numeric|min:{$minAmount}|max:5000",
             'plan' => 'nullable|string|max:120',
         ]);
 
