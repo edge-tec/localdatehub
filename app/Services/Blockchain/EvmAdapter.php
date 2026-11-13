@@ -162,11 +162,38 @@ class EvmAdapter implements BlockchainAdapterInterface
 
     public function estimateSweepFeeBaseUnits(BlockchainNetwork $network, CryptoAsset $asset): string
     {
+        return $this->getEip1559FeeParams($network, $asset)['total_max_fee_base_units'];
+    }
+
+    /**
+     * Compute EIP-1559 fee parameters and worst-case fee budget in base units.
+     *
+     * @return array{gas_limit: string, max_fee_per_gas: string, max_priority_fee_per_gas: string, total_max_fee_base_units: string}
+     */
+    public function getEip1559FeeParams(BlockchainNetwork $network, CryptoAsset $asset): array
+    {
         $res = $this->rpc->jsonRpc($this->endpoints($network), 'eth_gasPrice');
         $gasPriceWei = isset($res['result']) ? (int) hexdec((string) $res['result']) : 5000000000;
         $gasLimit = $asset->contract_address ? 65000 : 21000;
+        $priorityFee = max(100000000, min($gasPriceWei, 1500000000));
+        $maxFeePerGas = max($gasPriceWei * 2, $priorityFee + 1000000000);
+        $totalMaxFee = function_exists('bcmul')
+            ? bcmul((string) $gasLimit, (string) $maxFeePerGas, 0)
+            : (string) ($gasLimit * $maxFeePerGas);
 
-        return (string) ($gasPriceWei * $gasLimit);
+        return [
+            'gas_limit' => (string) $gasLimit,
+            'max_fee_per_gas' => (string) $maxFeePerGas,
+            'max_priority_fee_per_gas' => (string) $priorityFee,
+            'total_max_fee_base_units' => $totalMaxFee,
+        ];
+    }
+
+    public function getNextNonce(BlockchainNetwork $network, string $address): int
+    {
+        $res = $this->rpc->jsonRpc($this->endpoints($network), 'eth_getTransactionCount', [$address, 'pending']);
+
+        return isset($res['result']) ? (int) hexdec((string) $res['result']) : 0;
     }
 
     public function broadcastSignedTransaction(BlockchainNetwork $network, string $signedTx): string

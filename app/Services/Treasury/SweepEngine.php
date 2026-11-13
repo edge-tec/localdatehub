@@ -112,18 +112,32 @@ class SweepEngine
         }
 
         try {
+            $adapter = $this->monitor->adapterFor($network);
+            $isLiveRealCustody = $broadcastLive && $this->signingGateway->provider()->providerKey() !== 'mock';
+            $signingPayload = [
+                'chain_id' => $network->chain_id,
+                'from_address' => $walletAddress->address,
+                'derivation_path' => $walletAddress->derivation_path,
+                'derivation_index' => $walletAddress->derivation_index,
+                'contract_address' => $asset->contract_address,
+                'estimated_fee_base_units' => $estimatedFee,
+            ];
+
+            if ($isLiveRealCustody && method_exists($adapter, 'getNextNonce')) {
+                $signingPayload['nonce'] = $adapter->getNextNonce($network, $walletAddress->address);
+            }
+            if ($isLiveRealCustody && method_exists($adapter, 'getEip1559FeeParams')) {
+                $feeParams = $adapter->getEip1559FeeParams($network, $asset);
+                $signingPayload['gas_limit'] = $feeParams['gas_limit'];
+                $signingPayload['max_fee_per_gas'] = $feeParams['max_fee_per_gas'];
+                $signingPayload['max_priority_fee_per_gas'] = $feeParams['max_priority_fee_per_gas'];
+            }
+
             $signed = $this->signingGateway->signTreasurySweep(
                 network: $network,
                 destinationAddress: $treasury->wallet_address,
                 amountBaseUnits: $netTransfer,
-                signingPayload: [
-                    'chain_id' => $network->chain_id,
-                    'from_address' => $walletAddress->address,
-                    'derivation_path' => $walletAddress->derivation_path,
-                    'derivation_index' => $walletAddress->derivation_index,
-                    'contract_address' => $asset->contract_address,
-                    'estimated_fee_base_units' => $estimatedFee,
-                ]
+                signingPayload: $signingPayload
             );
 
             SigningRequest::create([
@@ -139,8 +153,8 @@ class SweepEngine
             ]);
 
             $txHash = $signed['tx_hash'];
-            if ($broadcastLive && empty($txHash) && !empty($signed['signed_tx'])) {
-                $txHash = $this->monitor->adapterFor($network)->broadcastSignedTransaction($network, $signed['signed_tx']);
+            if ($isLiveRealCustody && !empty($signed['signed_tx'])) {
+                $txHash = $adapter->broadcastSignedTransaction($network, $signed['signed_tx']);
             }
 
             $explorerUrl = (!empty($network->explorer_base_url) && !empty($txHash))
