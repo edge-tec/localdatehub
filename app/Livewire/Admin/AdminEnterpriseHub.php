@@ -3307,20 +3307,7 @@ class AdminEnterpriseHub extends Component
         CryptoPaymentSetting::set('auto_sweep_enabled', (bool) ($this->treasurySettings['auto_sweep_enabled'] ?? true));
         CryptoPaymentSetting::set('auto_sweep_direct_to_main', (bool) ($this->treasurySettings['auto_sweep_direct_to_main'] ?? true));
 
-        // Save Encrypted Master Seed Phrase / Private Key if newly entered
-        $newSecret = trim((string) ($this->treasurySettings['hd_master_secret_input'] ?? ''));
-        if ($newSecret !== '') {
-            $signer = app(\App\Modules\Payments\Crypto\Services\InHouse\CryptoSignerService::class);
-            $deriveRes = $signer->deriveEvmAddressWithDetails($newSecret, 0);
-            if (!($deriveRes['success'] ?? false) || empty($deriveRes['address'])) {
-                $detail = $deriveRes['error'] ?? 'Please enter a valid 12/24-word mnemonic phrase or 64-char hex EVM private key.';
-                $this->treasuryErrorMessage = "Unable to configure Master Seed/Key: {$detail}";
-                return;
-            }
-            CryptoPaymentSetting::set('hd_master_secret', $newSecret, 'Encrypted HD Master Seed / Private Key for Auto-Sweep', true);
-        }
-
-        // Update Trust Wallet addresses
+        // Update Trust Wallet addresses FIRST so receiving addresses always save cleanly
         if (!empty($this->treasurySettings['temp_trust_wallet_trc20'])) {
             CryptoTreasuryWallet::updateOrCreate(
                 ['tier' => CryptoTreasuryWallet::TIER_TEMPORARY_TRUST_WALLET, 'network_key' => 'TRC20'],
@@ -3347,6 +3334,19 @@ class AdminEnterpriseHub extends Component
                 ['tier' => CryptoTreasuryWallet::TIER_MAIN_TRUST_WALLET, 'network_key' => 'ERC20'],
                 ['wallet_name' => 'Main Trust Wallet EVM', 'public_receiving_address' => trim($this->treasurySettings['main_trust_wallet_erc20']), 'is_active' => true]
             );
+        }
+
+        // Save Encrypted Master Seed Phrase / Private Key if newly entered
+        $newSecret = trim((string) ($this->treasurySettings['hd_master_secret_input'] ?? ''));
+        if ($newSecret !== '') {
+            $signer = app(\App\Modules\Payments\Crypto\Services\InHouse\CryptoSignerService::class);
+            $deriveRes = $signer->deriveEvmAddressWithDetails($newSecret, 0);
+            if (!($deriveRes['success'] ?? false) || empty($deriveRes['address'])) {
+                $detail = $deriveRes['error'] ?? 'Please enter a valid 12/24-word mnemonic phrase or 64-char hex EVM private key.';
+                $this->treasuryErrorMessage = "Unable to configure Master Seed/Key: {$detail}";
+                return;
+            }
+            CryptoPaymentSetting::set('hd_master_secret', $newSecret, 'Encrypted HD Master Seed / Private Key for Auto-Sweep', true);
         }
 
         $this->loadTreasurySettings();

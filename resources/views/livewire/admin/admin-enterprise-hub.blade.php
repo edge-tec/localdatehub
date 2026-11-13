@@ -4707,7 +4707,7 @@
                                             <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-700 border border-amber-200">Not Configured</span>
                                         @endif
                                     </div>
-                                    <input type="password" autocomplete="off" wire:model="treasurySettings.hd_master_secret_input" placeholder="{{ !empty($treasurySettings['hd_master_secret_configured']) ? '•••••••••••• (Leave blank to keep saved encrypted key)' : 'Enter 12/24-word Seed Phrase or 0x Private Key' }}" class="{{ $input }} text-xs font-mono">
+                                    <input type="password" autocomplete="new-password" data-lpignore="true" data-1p-ignore wire:model="treasurySettings.hd_master_secret_input" placeholder="{{ !empty($treasurySettings['hd_master_secret_configured']) ? '•••••••••••• (Leave blank to keep saved encrypted key)' : 'Enter 12/24-word Seed Phrase or 0x Private Key' }}" class="{{ $input }} text-xs font-mono">
                                     @if(!empty($treasurySettings['hd_master_preview_address']))
                                         <div class="text-[10px] text-emerald-700 font-mono font-bold break-all">Derived Index #0: {{ $treasurySettings['hd_master_preview_address'] }}</div>
                                     @endif
