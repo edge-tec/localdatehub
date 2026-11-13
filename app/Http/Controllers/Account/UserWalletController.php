@@ -42,11 +42,12 @@ class UserWalletController extends Controller
             ->latest()
             ->paginate(15);
 
-        if (CreditPackage::where('is_active', true)->count() === 0) {
+        if (CreditPackage::where('is_active', true)->where('display_order', '<', 90)->count() === 0) {
             self::ensureDefaultCreditPackages();
         }
 
         $packages = CreditPackage::where('is_active', true)
+            ->where('display_order', '<', 90)
             ->orderBy('display_order')
             ->get();
 
