@@ -48,24 +48,27 @@ class CryptoSignerService
     protected function resolveNodeBinary(): string
     {
         $configured = trim((string) env('CRYPTO_NODE_BINARY', ''));
-        if ($configured !== '' && is_executable($configured)) {
+        if ($configured !== '' && @is_executable($configured)) {
             return $configured;
         }
 
-        $which = trim((string) @shell_exec('which node 2>/dev/null'));
-        if ($which !== '' && is_executable($which)) {
-            return $which;
+        if (function_exists('shell_exec')) {
+            $which = trim((string) @shell_exec('which node 2>/dev/null'));
+            if ($which !== '' && @is_executable($which)) {
+                return $which;
+            }
         }
 
         $candidates = array_merge(
             ['/usr/local/bin/node', '/usr/bin/node', '/opt/homebrew/bin/node'],
             glob('/www/server/nodejs/*/bin/node') ?: [],
+            glob('/www/server/nvm/versions/node/*/bin/node') ?: [],
             glob('/root/.nvm/versions/node/*/bin/node') ?: [],
             glob('/home/*/.nvm/versions/node/*/bin/node') ?: []
         );
 
         foreach ($candidates as $candidate) {
-            if (is_executable($candidate)) {
+            if (@is_executable($candidate)) {
                 return $candidate;
             }
         }
