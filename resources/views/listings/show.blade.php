@@ -1318,6 +1318,7 @@
                     details: @js(old('report_details', '')),
                     dropdownOpen: false,
                     submitting: false,
+                    hasReportErrors: @js($errors->hasAny(['report_reason', 'report_details', 'reporter_name', 'reporter_email', 'cf-turnstile-response'])),
                     categories: [
                         { value: 'underage_minor', title: 'Underage or Minor-Related Content', desc: 'Immediate 24/7 escalation to law enforcement', badge: 'Critical', color: 'rose', icon: 'shield' },
                         { value: 'commercial_sex', title: 'Commercial Sex, Prostitution or Escort', desc: 'Strict FOSTA-SESTA policy violation', badge: 'Critical', color: 'rose', icon: 'ban' },
@@ -1330,7 +1331,8 @@
                         return this.categories.find(c => c.value === this.reason) || null;
                     }
                 }"
-                @submit="if (reason && details.trim().length >= 10) submitting = true"
+                x-init="if (hasReportErrors) { $nextTick(() => $dispatch('open-modal', 'report-modal')); }"
+                @submit="if (!reason || details.trim().length < 10 || submitting) { $event.preventDefault(); return; } setTimeout(() => { submitting = true; }, 0);"
             >
                 @csrf
                 <!-- Anti-Spam Honeypot -->
@@ -1570,8 +1572,12 @@
                         </x-button>
                         <button
                             type="submit"
-                            :disabled="!reason || details.trim().length < 10 || submitting"
-                            :class="(!reason || details.trim().length < 10 || submitting) ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-95 shadow-md shadow-rose-500/20'"
+                            :disabled="!reason || details.trim().length < 10"
+                            :class="{
+                                'opacity-50 cursor-not-allowed': !reason || details.trim().length < 10,
+                                'opacity-80 pointer-events-none': submitting,
+                                'hover:opacity-95 shadow-md shadow-rose-500/20': reason && details.trim().length >= 10 && !submitting
+                            }"
                             class="px-5 py-2.5 rounded-xl font-extrabold text-xs text-white transition inline-flex items-center gap-2"
                             style="background: linear-gradient(135deg, #E11D48 0%, #BE123C 100%) !important;"
                         >
