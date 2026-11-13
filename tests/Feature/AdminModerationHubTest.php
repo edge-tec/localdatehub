@@ -197,4 +197,39 @@ class AdminModerationHubTest extends TestCase
             ->assertSet('viewListingData.id', $this->pendingListing->id)
             ->assertSet('viewListingData.status_history.0.actor', $this->admin->name);
     }
+
+    public function test_admin_can_view_and_reply_to_support_ticket_in_real_time(): void
+    {
+        $ticket = \App\Modules\Contact\Models\ContactMessage::create([
+            'listing_id' => null,
+            'sender_id' => $this->regularUser->id,
+            'inquiry_type' => 'account_profile',
+            'sender_name' => $this->regularUser->name,
+            'sender_email_encrypted' => $this->regularUser->email,
+            'subject' => 'Need help verifying my profile',
+            'message_encrypted' => 'Hello support, please check my account verification status.',
+            'is_read' => false,
+            'is_replied' => false,
+        ]);
+
+        Livewire::actingAs($this->admin)
+            ->test(AdminEnterpriseHub::class, ['initialTab' => 'support_tickets'])
+            ->assertSee('Need help verifying my profile')
+            ->call('inspectSupportTicket', $ticket->id)
+            ->assertSet('showSupportTicketModal', true)
+            ->assertSet('inspectSupportTicketData.id', $ticket->id)
+            ->set('supportReplyText', 'We have reviewed your profile and updated your verification status.')
+            ->call('replyToSupportTicket')
+            ->assertHasNoErrors()
+            ->assertSee('We have reviewed your profile and updated your verification status.');
+
+        $ticket->refresh();
+        $this->assertTrue($ticket->is_read);
+        $this->assertTrue($ticket->is_replied);
+        $this->assertSame(1, $ticket->replies()->count());
+        $this->assertDatabaseHas('notifications_log', [
+            'user_id' => $this->regularUser->id,
+            'notification_type' => 'support_ticket_reply',
+        ]);
+    }
 }

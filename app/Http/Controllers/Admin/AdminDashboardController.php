@@ -112,6 +112,7 @@ class AdminDashboardController extends Controller
                   ->orWhere('recipient_id', $admin->id)
                   ->orWhereNull('listing_id');
             })
+            ->whereNull('reply_to_id')
             ->where('is_read', false)
             ->latest('id')
             ->take(6)
@@ -121,6 +122,7 @@ class AdminDashboardController extends Controller
                   ->orWhere('recipient_id', $admin->id)
                   ->orWhereNull('listing_id');
             })
+            ->whereNull('reply_to_id')
             ->where('is_read', false)
             ->count();
 

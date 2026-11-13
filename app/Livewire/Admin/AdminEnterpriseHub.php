@@ -314,6 +314,11 @@ class AdminEnterpriseHub extends Component
     public bool $showInspectNotificationModal = false;
     public ?array $inspectNotificationData = null;
     public bool $showInspectAbuseModal = false;
+    public bool $showSupportTicketModal = false;
+    public ?int $inspectSupportTicketId = null;
+    public ?array $inspectSupportTicketData = null;
+    public string $supportReplyText = '';
+    public string $supportTicketFilter = 'all';
     public ?array $inspectAbuseData = null;
     public array $broadcastForm = [
         'target_audience' => 'all_users',
@@ -2304,6 +2309,131 @@ class AdminEnterpriseHub extends Component
 
         AdminAuditService::log('contact_abuse.dismiss', $message, ['is_flagged' => true], ['is_flagged' => false]);
         session()->flash('success', "Flag on message #{$message->id} dismissed and marked as seen.");
+    }
+
+    public function inspectSupportTicket(int $ticketId): void
+    {
+        $this->authorizePermission('moderation.view');
+        $ticket = ContactMessage::whereNull('listing_id')
+            ->whereNull('reply_to_id')
+            ->with(['sender', 'replies.sender'])
+            ->findOrFail($ticketId);
+
+        if (!$ticket->is_read) {
+            $ticket->is_read = true;
+            $ticket->read_at = now();
+            $ticket->save();
+        }
+
+        $this->inspectSupportTicketId = $ticket->id;
+        $this->inspectSupportTicketData = [
+            'id' => $ticket->id,
+            'sender_id' => $ticket->sender_id,
+            'sender_name' => $ticket->sender_name ?: ($ticket->sender?->name ?? 'Visitor'),
+            'sender_email' => $ticket->sender_email_encrypted,
+            'sender_phone' => $ticket->sender_phone_encrypted,
+            'inquiry_type' => $ticket->inquiry_type ?: 'general_support',
+            'subject' => $ticket->subject ?: "Support Ticket #{$ticket->id}",
+            'message' => $ticket->message_encrypted,
+            'is_read' => (bool) $ticket->is_read,
+            'is_replied' => (bool) $ticket->is_replied,
+            'read_at' => $ticket->read_at?->format('M j, Y H:i:s'),
+            'created_at' => $ticket->created_at?->format('M j, Y H:i:s'),
+            'client_ip' => $ticket->client_ip ?: '—',
+            'replies' => $ticket->replies->sortBy('created_at')->map(fn ($r) => [
+                'id' => $r->id,
+                'admin_name' => $r->sender?->name ?: ($r->sender_name ?: 'Support Team'),
+                'message' => $r->message_encrypted,
+                'created_at' => $r->created_at?->format('M j, Y (h:i A)'),
+            ])->values()->all(),
+        ];
+        $this->supportReplyText = '';
+        $this->showSupportTicketModal = true;
+    }
+
+    public function replyToSupportTicket(): void
+    {
+        $this->authorizePermission('moderation.act');
+        $this->validate([
+            'supportReplyText' => ['required', 'string', 'min:3', 'max:5000'],
+        ], [
+            'supportReplyText.required' => 'Please enter a reply message before sending.',
+            'supportReplyText.min' => 'Reply message must be at least 3 characters.',
+        ]);
+
+        if (!$this->inspectSupportTicketId) {
+            return;
+        }
+
+        $ticket = ContactMessage::whereNull('listing_id')
+            ->whereNull('reply_to_id')
+            ->findOrFail($this->inspectSupportTicketId);
+
+        $replyBody = trim($this->supportReplyText);
+        $adminUser = Auth::user();
+        $replySubject = 'Re: ' . ($ticket->subject ?: "Support Ticket #{$ticket->id}");
+
+        ContactMessage::create([
+            'listing_id' => null,
+            'sender_id' => $adminUser?->id,
+            'recipient_id' => $ticket->sender_id,
+            'reply_to_id' => $ticket->id,
+            'inquiry_type' => $ticket->inquiry_type,
+            'sender_name' => $adminUser?->name ?? 'LocalDateHub Support',
+            'sender_email_encrypted' => $adminUser?->email ?? (string) config('mail.from.address', 'support@localdatehub.com'),
+            'subject' => $replySubject,
+            'message_encrypted' => $replyBody,
+            'is_read' => true,
+            'read_at' => now(),
+            'is_replied' => true,
+            'client_ip' => request()->ip(),
+            'user_agent' => 'Admin Support Console',
+        ]);
+
+        $ticket->update([
+            'is_read' => true,
+            'read_at' => $ticket->read_at ?: now(),
+            'is_replied' => true,
+        ]);
+
+        $recipientEmail = trim((string) $ticket->sender_email_encrypted);
+        if (filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
+            try {
+                $emailBody = "Hello " . ($ticket->sender_name ?: 'there') . ",\n\n"
+                    . "Our support team has replied to your ticket (#{$ticket->id}: {$ticket->subject}):\n\n"
+                    . $replyBody . "\n\n"
+                    . "— LocalDateHub Support Team";
+                \Illuminate\Support\Facades\Mail::raw($emailBody, function ($mail) use ($recipientEmail, $replySubject) {
+                    $mail->to($recipientEmail)->subject($replySubject);
+                });
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Support ticket reply email failed', [
+                    'ticket_id' => $ticket->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        if ($ticket->sender_id) {
+            try {
+                NotificationLog::create([
+                    'user_id' => $ticket->sender_id,
+                    'channel' => 'system',
+                    'notification_type' => 'support_ticket_reply',
+                    'subject' => "Support Reply (#{$ticket->id}): " . ($ticket->subject ?: 'Your Support Ticket'),
+                    'message' => $replyBody,
+                    'recipient_target' => 'user',
+                    'status' => 'sent',
+                    'is_read' => false,
+                    'sent_at' => now(),
+                ]);
+            } catch (\Throwable $e) {}
+        }
+
+        AdminAuditService::log('support_ticket.reply', $ticket, ['is_replied' => false], ['is_replied' => true]);
+
+        $this->inspectSupportTicket($ticket->id);
+        session()->flash('support_reply_success', "Reply sent to {$recipientEmail} and recorded on Ticket #{$ticket->id}.");
     }
 
     public function quarantineReportedListing(int $reportId): void
@@ -6251,11 +6381,27 @@ class AdminEnterpriseHub extends Component
 
     protected function dataSupportTickets(): array
     {
+        $base = ContactMessage::whereNull('listing_id')->whereNull('reply_to_id');
+        $query = (clone $base)
+            ->with(['sender', 'replies'])
+            ->latest();
+
+        if ($this->supportTicketFilter === 'unread') {
+            $query->where('is_read', false);
+        } elseif ($this->supportTicketFilter === 'pending_reply') {
+            $query->where('is_replied', false);
+        } elseif ($this->supportTicketFilter === 'replied') {
+            $query->where('is_replied', true);
+        }
+
         return [
-            'supportTickets' => ContactMessage::whereNull('listing_id')
-                ->with(['sender'])
-                ->latest()
-                ->paginate(15, ['*'], 'supportPage'),
+            'supportTickets' => $query->paginate(15, ['*'], 'supportPage'),
+            'supportTicketCounts' => [
+                'all' => (clone $base)->count(),
+                'unread' => (clone $base)->where('is_read', false)->count(),
+                'pending_reply' => (clone $base)->where('is_replied', false)->count(),
+                'replied' => (clone $base)->where('is_replied', true)->count(),
+            ],
         ];
     }
 

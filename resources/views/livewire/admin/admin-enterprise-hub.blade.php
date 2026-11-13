@@ -3331,13 +3331,34 @@
 
         {{-- ================= 9B. SUPPORT TICKETS ================= --}}
         @if($tab === 'support_tickets')
-            <div class="{{ $card }} overflow-x-auto">
-                <div class="p-4 flex flex-wrap justify-between items-center gap-2 border-b border-slate-100">
+            <div class="{{ $card }} overflow-x-auto" wire:poll.5s>
+                <div class="p-4 flex flex-wrap justify-between items-center gap-3 border-b border-slate-100">
                     <div>
-                        <h2 class="font-bold text-slate-900">Support Tickets &amp; Contact Inquiries</h2>
-                        <p class="text-xs text-slate-500">Encrypted tickets submitted via the public Contact / Support form.</p>
+                        <div class="flex items-center gap-2">
+                            <h2 class="font-bold text-slate-900">Support Tickets &amp; Contact Inquiries</h2>
+                            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                LIVE
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-500">Real-time encrypted tickets submitted via the public Contact / Support form.</p>
                     </div>
-                    <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">AES-256 Decrypted for Authorized Staff</span>
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        @foreach([
+                            'all' => 'All (' . ($supportTicketCounts['all'] ?? 0) . ')',
+                            'unread' => 'Unread (' . ($supportTicketCounts['unread'] ?? 0) . ')',
+                            'pending_reply' => 'Needs Reply (' . ($supportTicketCounts['pending_reply'] ?? 0) . ')',
+                            'replied' => 'Replied (' . ($supportTicketCounts['replied'] ?? 0) . ')',
+                        ] as $fKey => $fLabel)
+                            <button
+                                type="button"
+                                wire:click="$set('supportTicketFilter', '{{ $fKey }}')"
+                                class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition {{ ($supportTicketFilter ?? 'all') === $fKey ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}"
+                            >
+                                {{ $fLabel }}
+                            </button>
+                        @endforeach
+                    </div>
                 </div>
                 <table class="min-w-full">
                     <thead>
@@ -3367,17 +3388,24 @@
                                     {{ str_replace('_', ' ', $t->inquiry_type ?: 'general') }}
                                 </span>
                             </td>
-                            <td class="{{ $td }} font-semibold text-slate-800">{{ \Illuminate\Support\Str::limit($t->subject ?: 'Support Ticket', 60) }}</td>
+                            <td class="{{ $td }} font-semibold text-slate-800">
+                                <div>{{ \Illuminate\Support\Str::limit($t->subject ?: 'Support Ticket', 60) }}</div>
+                                <div class="text-[11px] text-slate-400 truncate max-w-xs">{{ \Illuminate\Support\Str::limit($t->message_encrypted, 70) }}</div>
+                            </td>
                             <td class="{{ $td }}">
-                                @if($t->is_read)
-                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">✓✓ SEEN {{ $t->read_at ? '· ' . $t->read_at->diffForHumans() : '' }}</span>
-                                @else
-                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-700 border border-rose-200">● UNREAD</span>
-                                @endif
+                                <div class="flex flex-wrap items-center gap-1">
+                                    @if($t->is_replied)
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-sky-50 text-sky-700 border border-sky-200">↩ REPLIED ({{ $t->replies->count() }})</span>
+                                    @elseif($t->is_read)
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">✓✓ SEEN</span>
+                                    @else
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-700 border border-rose-200">● UNREAD</span>
+                                    @endif
+                                </div>
                             </td>
                             <td class="{{ $td }}">{{ $t->created_at?->diffForHumans() }}</td>
                             <td class="{{ $td }} text-right whitespace-nowrap">
-                                <button type="button" wire:click="inspectAbuseMessage({{ $t->id }})" class="{{ $btn }} bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 font-bold">Read Ticket</button>
+                                <button type="button" wire:click="inspectSupportTicket({{ $t->id }})" class="{{ $btn }} bg-pink-50 hover:bg-pink-100 text-[#F20B83] border border-pink-200 font-bold">Read &amp; Reply</button>
                             </td>
                         </tr>
                     @empty
@@ -8764,13 +8792,13 @@
             || $showPreservationModal || $showViewTransactionModal || $showViewCryptoModal
             || $showAssignSubscriptionModal || $showViewSubscriptionModal
             || $showInspectVerificationModal || $showManualVerifyModal || $showRejectVerificationModal || $showBroadcastModal
-            || $showInspectNotificationModal || $showInspectAbuseModal
+            || $showInspectNotificationModal || $showInspectAbuseModal || $showSupportTicketModal
             || $showPreviewCmsModal || $showDeleteAdModal || $showPreviewAdModal
             || $showCampaignModal || $showDeleteCampaignModal || $showPreviewCampaignModal || $showDiagnosticModal;
     @endphp
     @if($anyModal)
         <div class="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" wire:keydown.escape.window="closeModals">
-            <div class="w-full {{ ($showCampaignModal || $showPreviewCampaignModal || $showDiagnosticModal) ? 'max-w-4xl' : (($showViewListingModal || $showEditListingModal || $showViewUserModal || $showEditUserModal || $showInspectReportModal || $showViewTransactionModal || $showViewCryptoModal || $showViewSubscriptionModal || $showAssignSubscriptionModal || $showInspectVerificationModal || $showManualVerifyModal || $showBroadcastModal || $showInspectNotificationModal || $showInspectAbuseModal || $showPreviewCmsModal || $showPreviewAdModal) ? 'max-w-2xl' : 'max-w-xl') }} max-h-[90vh] overflow-y-auto rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl">
+            <div class="w-full {{ ($showCampaignModal || $showPreviewCampaignModal || $showDiagnosticModal) ? 'max-w-4xl' : (($showViewListingModal || $showEditListingModal || $showViewUserModal || $showEditUserModal || $showInspectReportModal || $showViewTransactionModal || $showViewCryptoModal || $showViewSubscriptionModal || $showAssignSubscriptionModal || $showInspectVerificationModal || $showManualVerifyModal || $showBroadcastModal || $showInspectNotificationModal || $showInspectAbuseModal || $showSupportTicketModal || $showPreviewCmsModal || $showPreviewAdModal) ? 'max-w-2xl' : 'max-w-xl') }} max-h-[90vh] overflow-y-auto rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl">
 
                 {{-- CREATE USER MODAL --}}
                 @if($showCreateUserModal)
@@ -10874,6 +10902,106 @@
                                 <button type="button" wire:click="closeModals" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition">Close</button>
                             </div>
                         </div>
+                    </div>
+                @endif
+
+                {{-- SUPPORT TICKET READ & REPLY MODAL --}}
+                @if($showSupportTicketModal && $inspectSupportTicketData)
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h3 class="text-lg font-black text-slate-950">Support Ticket #{{ $inspectSupportTicketData['id'] }}</h3>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-slate-100 text-slate-700 border border-slate-200">
+                                {{ str_replace('_', ' ', $inspectSupportTicketData['inquiry_type']) }}
+                            </span>
+                            @if($inspectSupportTicketData['is_replied'])
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-sky-50 text-sky-700 border border-sky-200">↩ REPLIED</span>
+                            @else
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">✓✓ SEEN</span>
+                            @endif
+                        </div>
+                        <button type="button" wire:click="closeModals" class="text-slate-400 hover:text-slate-700 font-bold text-lg">&times;</button>
+                    </div>
+
+                    <div class="space-y-4 text-xs text-slate-800">
+                        @if(session()->has('support_reply_success'))
+                            <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold">
+                                {{ session('support_reply_success') }}
+                            </div>
+                        @endif
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                            <div>
+                                <span class="text-[10px] font-bold uppercase text-slate-400 block">From</span>
+                                <span class="font-black text-slate-950 text-sm">{{ $inspectSupportTicketData['sender_name'] }}</span>
+                                <span class="block text-slate-600 font-mono text-[11px]">{{ $inspectSupportTicketData['sender_email'] }}</span>
+                                @if(!empty($inspectSupportTicketData['sender_phone']))
+                                    <span class="block text-slate-500 text-[11px] mt-0.5">Phone: {{ $inspectSupportTicketData['sender_phone'] }}</span>
+                                @endif
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold uppercase text-slate-400 block">Ticket Metadata</span>
+                                <span class="font-bold text-slate-900 block">{{ $inspectSupportTicketData['subject'] }}</span>
+                                <span class="block text-slate-500 text-[11px] mt-0.5">Received: {{ $inspectSupportTicketData['created_at'] }}</span>
+                                <span class="block text-slate-400 font-mono text-[10px]">IP: {{ $inspectSupportTicketData['client_ip'] }}</span>
+                            </div>
+                        </div>
+
+                        <!-- User's Original Message -->
+                        <div class="p-4 rounded-2xl bg-white border border-slate-200">
+                            <div class="text-[10px] font-bold uppercase text-slate-400 mb-1.5">User Message</div>
+                            <div class="text-xs text-slate-900 whitespace-pre-line leading-relaxed">{{ $inspectSupportTicketData['message'] }}</div>
+                        </div>
+
+                        <!-- Admin Reply Thread -->
+                        @if(!empty($inspectSupportTicketData['replies']))
+                            <div class="space-y-2">
+                                <div class="text-[10px] font-bold uppercase text-slate-400">Admin Replies ({{ count($inspectSupportTicketData['replies']) }})</div>
+                                @foreach($inspectSupportTicketData['replies'] as $rep)
+                                    <div class="p-3.5 rounded-2xl bg-sky-50/70 border border-sky-200/80">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="font-black text-sky-950 text-[11px]">{{ $rep['admin_name'] }} (Support Team)</span>
+                                            <span class="text-[10px] text-sky-700">{{ $rep['created_at'] }}</span>
+                                        </div>
+                                        <div class="text-xs text-slate-800 whitespace-pre-line leading-relaxed">{{ $rep['message'] }}</div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        <!-- Real-Time Reply Form -->
+                        @if($this->userCan('moderation.act'))
+                            <form wire:submit="replyToSupportTicket" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                                <label for="admin-support-reply-text" class="text-[11px] font-black uppercase tracking-wider text-slate-700 block">
+                                    Send Reply to {{ $inspectSupportTicketData['sender_email'] }}
+                                </label>
+                                <textarea
+                                    id="admin-support-reply-text"
+                                    wire:model="supportReplyText"
+                                    rows="4"
+                                    placeholder="Write your official support response here... It will be emailed directly to the user and logged on their account."
+                                    class="{{ $input }}"
+                                    required
+                                ></textarea>
+                                @error('supportReplyText')
+                                    <p class="text-xs text-rose-600 font-bold">{{ $message }}</p>
+                                @enderror
+                                <div class="flex items-center justify-end gap-2">
+                                    <button type="button" wire:click="closeModals" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition">Close</button>
+                                    <button
+                                        type="submit"
+                                        wire:loading.attr="disabled"
+                                        class="px-5 py-2 rounded-xl bg-[#F20B83] hover:bg-[#d00970] text-white text-xs font-black shadow-md transition disabled:opacity-60"
+                                    >
+                                        <span wire:loading.remove wire:target="replyToSupportTicket">Send Reply</span>
+                                        <span wire:loading wire:target="replyToSupportTicket">Sending...</span>
+                                    </button>
+                                </div>
+                            </form>
+                        @else
+                            <div class="flex justify-end pt-2">
+                                <button type="button" wire:click="closeModals" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition">Close</button>
+                            </div>
+                        @endif
                     </div>
                 @endif
             </div>
