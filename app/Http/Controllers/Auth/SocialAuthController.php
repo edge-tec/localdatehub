@@ -71,15 +71,10 @@ class SocialAuthController extends Controller
         }
 
         try {
-            // Attempt standard retrieval; fall back to stateless if state mismatch occurs
-            try {
-                $socialUser = Socialite::driver($provider)->user();
-            } catch (\Throwable $stateException) {
-                $socialUser = Socialite::driver($provider)->stateless()->user();
-            }
+            $socialUser = Socialite::driver($provider)->user();
         } catch (\Throwable $e) {
             Log::error("{$provider} OAuth callback retrieval error: " . $e->getMessage(), ['exception' => $e]);
-            return redirect()->route('login')->with('error', 'Failed to authenticate with ' . ucfirst($provider) . ': ' . $e->getMessage());
+            return redirect()->route('login')->with('error', 'Failed to authenticate with ' . ucfirst($provider) . '. Please try signing in again.');
         }
 
         $oauthId = (string) $socialUser->getId();

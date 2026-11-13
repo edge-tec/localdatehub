@@ -32,11 +32,27 @@ class SecurityHeadersMiddleware
         $response->headers->set('X-Permitted-Cross-Domain-Policies', 'none');
         $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
 
-        // 6. Content Security Policy (prevent frame hijacking, base-uri injection, and dangerous object plugins)
+        // 6. Content Security Policy (strict structural directives enforced + full policy in Report-Only)
         $response->headers->set(
             'Content-Security-Policy',
-            "frame-ancestors 'self'; base-uri 'self'; object-src 'none';"
+            "frame-ancestors 'self'; base-uri 'self'; object-src 'none'; form-action 'self';"
         );
+
+        $reportOnlyPolicy = implode('; ', [
+            "default-src 'self'",
+            "base-uri 'self'",
+            "object-src 'none'",
+            "frame-ancestors 'self'",
+            "form-action 'self'",
+            "script-src 'self' https://challenges.cloudflare.com",
+            "style-src 'self' https://fonts.googleapis.com",
+            "font-src 'self' https://fonts.gstatic.com data:",
+            "img-src 'self' data: https:",
+            "connect-src 'self' https://challenges.cloudflare.com",
+            "frame-src 'self' https://challenges.cloudflare.com",
+        ]) . ';';
+
+        $response->headers->set('Content-Security-Policy-Report-Only', $reportOnlyPolicy);
 
         // 7. Restrict sensitive browser APIs & hardware features
         $response->headers->set(
@@ -55,9 +71,10 @@ class SecurityHeadersMiddleware
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
         }
 
-        // 10. X-Robots-Tag header for private, admin, and authentication areas
-        if ($request->is('account*', 'admin*', 'checkout*', 'password*', 'email*', 'api*', 'webhooks*')) {
+        // 10. X-Robots-Tag & strict no-store Cache-Control for private, admin, auth, and API areas
+        if ($request->is('account*', 'admin*', 'checkout*', 'password*', 'email*', 'api*', 'webhooks*', 'login', 'register')) {
             $response->headers->set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+            $response->headers->set('Cache-Control', 'private, no-store, no-cache, must-revalidate, max-age=0');
         }
 
         return $response;

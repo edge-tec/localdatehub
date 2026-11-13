@@ -32,9 +32,13 @@ Route::prefix('v1')->group(function () {
         Route::get('/blockchain/health', [AdminTreasuryController::class, 'health']);
         Route::get('/wallet/addresses', [AdminTreasuryController::class, 'addresses']);
         Route::get('/wallet/audit-logs', [AdminTreasuryController::class, 'auditLogs']);
-        Route::post('/treasury/sweeps/{id}/retry', [AdminTreasuryController::class, 'retrySweep'])->whereNumber('id');
-        Route::post('/treasury/emergency-pause', [AdminTreasuryController::class, 'emergencyPause']);
-        Route::post('/treasury/emergency-resume', [AdminTreasuryController::class, 'emergencyResume']);
+        Route::post('/treasury/sweeps/{id}/retry', [AdminTreasuryController::class, 'retrySweep'])
+            ->whereNumber('id')
+            ->middleware('admin.rbac:treasury.manage');
+        Route::post('/treasury/emergency-pause', [AdminTreasuryController::class, 'emergencyPause'])
+            ->middleware('admin.rbac:treasury.manage');
+        Route::post('/treasury/emergency-resume', [AdminTreasuryController::class, 'emergencyResume'])
+            ->middleware('admin.rbac:treasury.manage');
     });
 });
 

@@ -272,8 +272,9 @@ class SitemapController extends Controller
     public function googleIndexingWebhook(\Illuminate\Http\Request $request)
     {
         \Illuminate\Support\Facades\Log::info('Inbound Google Webmaster/Indexing Webhook received', [
-            'payload' => $request->all(),
-            'headers' => $request->headers->all(),
+            'payload' => $request->only(['url', 'type', 'event', 'notifyTime']),
+            'user_agent' => $request->userAgent(),
+            'ip' => $request->ip(),
         ]);
 
         return response()->json(['status' => 'acknowledged', 'received_at' => now()->toIso8601String()]);

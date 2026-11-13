@@ -26,7 +26,7 @@ class LiveVisitorTrackingTest extends TestCase
             'REMOTE_ADDR' => '198.51.100.42',
         ];
 
-        $first = $this->withHeaders($headers)->get('/?utm_source=google&utm_campaign=spring');
+        $first = $this->withHeaders($headers)->get('/safety?utm_source=google&utm_campaign=spring');
         $first->assertStatus(200);
 
         $this->assertSame(1, VisitorSession::count());

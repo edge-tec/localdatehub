@@ -12,6 +12,7 @@ use App\Modules\Locations\Models\State;
 use App\Modules\Locations\Models\ZipCode;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -19,6 +20,7 @@ class ListingWizard extends Component
 {
     use WithFileUploads;
 
+    #[Locked]
     public ?int $listingId = null;
     public int $currentStep = 1;
     public int $totalSteps = 12;
@@ -210,29 +212,45 @@ class ListingWizard extends Component
 
     public function setPrimaryPhoto(int $mediaId): void
     {
-        if (!$this->listingId) return;
-
-        ListingMedia::where('listing_id', $this->listingId)->update(['is_primary' => false]);
-        ListingMedia::where('id', $mediaId)->where('listing_id', $this->listingId)->update(['is_primary' => true]);
-
-        $listing = Listing::find($this->listingId);
-        if ($listing) {
-            $this->loadMediaFromDb($listing);
+        if (!$this->listingId || !Auth::check()) {
+            return;
         }
+
+        $listing = Listing::where('id', $this->listingId)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if (!$listing) {
+            return;
+        }
+
+        ListingMedia::where('listing_id', $listing->id)->update(['is_primary' => false]);
+        ListingMedia::where('id', $mediaId)->where('listing_id', $listing->id)->update(['is_primary' => true]);
+
+        $this->loadMediaFromDb($listing);
     }
 
     public function removePhoto(int $mediaId): void
     {
+        if (!$this->listingId || !Auth::check()) {
+            return;
+        }
+
+        $listing = Listing::where('id', $this->listingId)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if (!$listing) {
+            return;
+        }
+
         $media = ListingMedia::where('id', $mediaId)
-            ->where('listing_id', $this->listingId)
+            ->where('listing_id', $listing->id)
             ->first();
 
         if ($media) {
             app(ListingMediaService::class)->deleteMedia($media);
-            $listing = Listing::find($this->listingId);
-            if ($listing) {
-                $this->loadMediaFromDb($listing);
-            }
+            $this->loadMediaFromDb($listing);
         }
     }
 

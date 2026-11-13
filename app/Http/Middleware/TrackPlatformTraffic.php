@@ -2,11 +2,13 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\PlatformTrafficLog;
+use App\Jobs\RecordPlatformTrafficJob;
 use App\Modules\Analytics\Services\LiveVisitorTrackingService;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 class TrackPlatformTraffic
@@ -183,31 +185,24 @@ class TrackPlatformTraffic
             return null;
         }
 
-        // Update real-time visitor session & activity without creating duplicate sessions on refresh
-        $liveCookie = null;
-        $liveResult = app(LiveVisitorTrackingService::class)->recordPageVisit($request, $path, $durationMs);
-        if ($liveResult['is_new_cookie']) {
-            $liveCookie = $liveResult['visitor_cookie_value'];
-        }
+        $existingCookie = trim((string) $request->cookie(LiveVisitorTrackingService::VISITOR_COOKIE, ''));
+        $isNewCookie = $existingCookie === '';
+        $visitorCookieId = $existingCookie !== '' ? substr($existingCookie, 0, 64) : ('v_' . Str::random(24));
 
-        // Prevent URL reload inflation: if the same visitor_hash already loaded this exact path in the last 30 minutes, do not add a new view row
-        $alreadyVisitedRecently = PlatformTrafficLog::where('visitor_hash', $hash)
-            ->where('path', substr($path, 0, 255))
-            ->where('created_at', '>=', now()->subMinutes(30))
-            ->exists();
+        $dedupTtl = max(60, (int) config('analytics.dedup_ttl_seconds', 1800));
+        $bucket = (int) floor(now()->timestamp / $dedupTtl);
+        $normalizedPath = substr($path, 0, 255);
+        $eventKey = hash('sha256', $hash . '|' . $normalizedPath . '|' . $bucket);
 
-        if ($alreadyVisitedRecently) {
-            return $liveCookie;
-        }
-
-        PlatformTrafficLog::create([
+        $payload = [
+            'event_id' => (string) Str::uuid(),
+            'event_key' => $eventKey,
             'ip_address' => $ip,
             'visitor_hash' => $hash,
             'country_code' => $countryCode,
             'country_name' => $countryName,
-            'city_name' => null,
-            'state_code' => null,
-            'path' => substr($path, 0, 255),
+            'path' => $normalizedPath,
+            'full_url' => substr($request->fullUrl(), 0, 500),
             'method' => $request->method(),
             'referrer' => substr($request->headers->get('referer', '') ?: '', 0, 255) ?: null,
             'user_agent' => $ua,
@@ -216,12 +211,35 @@ class TrackPlatformTraffic
             'os' => $os,
             'user_id' => Auth::id(),
             'session_id' => $request->hasSession() ? substr($request->session()->getId(), 0, 80) : null,
-            'is_bot' => $isBot,
-            'response_time_ms' => $durationMs,
-            'created_at' => now(),
-        ]);
+            'visitor_cookie_id' => $visitorCookieId,
+            'is_new_cookie' => $isNewCookie,
+            'duration_ms' => $durationMs,
+            'cf_country' => $request->header('CF-IPCountry') ?: $request->header('X-Country-Code') ?: $request->header('CloudFront-Viewer-Country'),
+            'cf_city' => $request->header('CF-IPCity') ?: $request->header('X-City'),
+            'cf_region' => $request->header('CF-Region') ?: $request->header('X-Region'),
+            'cf_lat' => $request->header('CF-IPLatitude'),
+            'cf_lon' => $request->header('CF-IPLongitude'),
+        ];
 
-        return $liveCookie;
+        $useAsync = (bool) config('analytics.async_enabled', true) && config('queue.default') !== 'sync';
+
+        if ($useAsync) {
+            try {
+                RecordPlatformTrafficJob::dispatch($payload)
+                    ->onQueue((string) config('analytics.queue', 'analytics'));
+            } catch (\Throwable $e) {
+                Log::warning('Analytics async queue dispatch failed; falling back to sync', [
+                    'event_id' => $payload['event_id'],
+                    'path' => $normalizedPath,
+                    'error' => $e->getMessage(),
+                ]);
+                RecordPlatformTrafficJob::dispatchSync($payload);
+            }
+        } else {
+            RecordPlatformTrafficJob::dispatchSync($payload);
+        }
+
+        return $isNewCookie ? $visitorCookieId : null;
     }
 
     protected function detectCountryFromAcceptLanguage(Request $request): string

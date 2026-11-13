@@ -15,6 +15,7 @@ class PlatformTrafficLog extends Model
     protected $fillable = [
         'ip_address',
         'visitor_hash',
+        'event_key',
         'country_code',
         'country_name',
         'city_name',

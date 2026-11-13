@@ -95,8 +95,8 @@ class AdUrlService
     }
 
     /**
-     * Sanitize optional HTML embed snippets, stripping script/event handlers if needed
-     * or only allowing trusted iframe/img/a markup.
+     * Sanitize optional HTML embed snippets using a strict DOM allowlist.
+     * Strips scripts, iframes, objects, embeds, SVG, event handlers, inline styles, and dangerous URI schemes.
      */
     public static function sanitizeHtmlSnippet(?string $html): ?string
     {
@@ -104,11 +104,148 @@ class AdUrlService
             return null;
         }
 
-        // Strip inline JS event handlers (onmouseover=, onclick=, onerror=, etc.) and javascript: URIs
-        $cleaned = preg_replace('/\bon[a-z]+\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $html) ?? $html;
-        $cleaned = preg_replace('/javascript\s*:/i', '#blocked:', $cleaned) ?? $cleaned;
+        $allowedTags = [
+            'div', 'span', 'p', 'a', 'strong', 'b', 'em', 'i', 'u', 'br',
+            'small', 'ul', 'ol', 'li', 'img', 'picture', 'source',
+        ];
+        $blockedWithChildren = [
+            'script', 'style', 'iframe', 'object', 'embed', 'applet',
+            'svg', 'math', 'form', 'input', 'button', 'textarea', 'select',
+            'link', 'meta', 'base', 'noscript', 'template',
+        ];
+        $globalAttrs = ['class', 'id', 'title', 'alt', 'width', 'height', 'loading', 'decoding', 'aria-label', 'aria-hidden'];
+        $tagAttrs = [
+            'a' => ['href', 'target', 'rel'],
+            'img' => ['src', 'srcset'],
+            'source' => ['src', 'srcset', 'media', 'type'],
+        ];
 
-        return trim($cleaned);
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $previous = libxml_use_internal_errors(true);
+        $wrapped = '<!DOCTYPE html><html><body><div id="__ldh_sanitize_root__">' . $html . '</div></body></html>';
+        $dom->loadHTML(mb_convert_encoding($wrapped, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING);
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+
+        $root = $dom->getElementById('__ldh_sanitize_root__');
+        if (!$root) {
+            return null;
+        }
+
+        self::sanitizeDomNode($root, $allowedTags, $blockedWithChildren, $globalAttrs, $tagAttrs);
+
+        $out = '';
+        foreach ($root->childNodes as $child) {
+            $out .= $dom->saveHTML($child);
+        }
+
+        $out = trim($out);
+        return $out === '' ? null : $out;
+    }
+
+    /**
+     * Recursively sanitize DOM child nodes in place.
+     */
+    protected static function sanitizeDomNode(
+        \DOMNode $node,
+        array $allowedTags,
+        array $blockedWithChildren,
+        array $globalAttrs,
+        array $tagAttrs
+    ): void {
+        if (!$node->hasChildNodes()) {
+            return;
+        }
+
+        $children = [];
+        foreach ($node->childNodes as $child) {
+            $children[] = $child;
+        }
+
+        foreach ($children as $child) {
+            if ($child instanceof \DOMComment) {
+                $node->removeChild($child);
+                continue;
+            }
+
+            if (!$child instanceof \DOMElement) {
+                continue;
+            }
+
+            $tag = strtolower($child->tagName);
+
+            if (in_array($tag, $blockedWithChildren, true)) {
+                $node->removeChild($child);
+                continue;
+            }
+
+            self::sanitizeDomNode($child, $allowedTags, $blockedWithChildren, $globalAttrs, $tagAttrs);
+
+            if (!in_array($tag, $allowedTags, true)) {
+                // Unwrap disallowed non-executable wrapper tags (e.g. font/center), preserving sanitized text/children
+                while ($child->firstChild) {
+                    $node->insertBefore($child->firstChild, $child);
+                }
+                $node->removeChild($child);
+                continue;
+            }
+
+            $permitted = array_merge($globalAttrs, $tagAttrs[$tag] ?? []);
+            $attrsToRemove = [];
+            foreach ($child->attributes as $attr) {
+                $attrName = strtolower($attr->nodeName);
+                if (str_starts_with($attrName, 'on') || !in_array($attrName, $permitted, true)) {
+                    $attrsToRemove[] = $attr->nodeName;
+                    continue;
+                }
+
+                if (in_array($attrName, ['href', 'src'], true)) {
+                    $cleanUrl = self::sanitizeSnippetUrl($attr->nodeValue ?? '');
+                    if ($cleanUrl === null) {
+                        $attrsToRemove[] = $attr->nodeName;
+                    } else {
+                        $child->setAttribute($attrName, $cleanUrl);
+                    }
+                } elseif ($attrName === 'srcset') {
+                    // Reject any javascript:/data:/vbscript: inside srcset
+                    if (preg_match('/(?:javascript|data|vbscript)\s*:/i', (string) $attr->nodeValue)) {
+                        $attrsToRemove[] = $attr->nodeName;
+                    }
+                }
+            }
+
+            foreach ($attrsToRemove as $attrName) {
+                $child->removeAttribute($attrName);
+            }
+
+            if ($tag === 'a' && $child->getAttribute('target') === '_blank') {
+                $child->setAttribute('rel', 'noopener noreferrer');
+            }
+        }
+    }
+
+    /**
+     * Allow only safe http(s) or relative URLs inside HTML snippets.
+     */
+    protected static function sanitizeSnippetUrl(string $url): ?string
+    {
+        $trimmed = trim(html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        if ($trimmed === '') {
+            return null;
+        }
+
+        // Strip ASCII control chars & whitespace often used to obfuscate javascript:
+        $normalized = preg_replace('/[\x00-\x20\x7f]+/', '', strtolower($trimmed)) ?? '';
+        if (str_starts_with($normalized, 'javascript:') || str_starts_with($normalized, 'data:') || str_starts_with($normalized, 'vbscript:')) {
+            return null;
+        }
+
+        if (str_starts_with($trimmed, '/') && !str_starts_with($trimmed, '//')) {
+            return $trimmed;
+        }
+
+        $scheme = strtolower((string) parse_url($trimmed, PHP_URL_SCHEME));
+        return in_array($scheme, ['http', 'https'], true) ? $trimmed : null;
     }
 }
 

@@ -19,7 +19,7 @@ class HealthCheckAuthMiddleware
         $expectedKey = config('localdatehub.health_check.secret_key');
         $providedKey = $request->header('X-Health-Key') ?? $request->query('key');
 
-        if (empty($expectedKey) || $providedKey !== $expectedKey) {
+        if (empty($expectedKey) || !is_string($providedKey) || !hash_equals((string) $expectedKey, $providedKey)) {
             return ApiResponse::forbidden('Access to detailed health metrics requires a valid authorization key.');
         }
 

@@ -5,8 +5,10 @@ namespace App\Modules\Analytics\Services;
 use App\Modules\Analytics\Models\VisitorActivity;
 use App\Modules\Analytics\Models\VisitorPageview;
 use App\Modules\Analytics\Models\VisitorSession;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class LiveVisitorTrackingService
@@ -66,61 +68,77 @@ class LiveVisitorTrackingService
                 $sessionToken = 's_' . Str::random(32);
             }
 
-            $session = VisitorSession::create([
-                'visitor_id' => $visitorId,
-                'session_token' => $sessionToken,
-                'user_id' => Auth::id(),
-                'ip_address' => $ip,
-                'country_code' => $geo['country_code'],
-                'country_name' => $geo['country_name'],
-                'region_name' => $geo['region_name'],
-                'city_name' => $geo['city_name'],
-                'latitude' => $geo['latitude'],
-                'longitude' => $geo['longitude'],
-                'isp' => $geo['isp'],
-                'organization' => $geo['organization'],
-                'device_type' => $device['device_type'],
-                'device_brand' => $device['device_brand'],
-                'device_model' => $device['device_model'],
-                'os_name' => $device['os_name'],
-                'os_version' => $device['os_version'],
-                'browser_name' => $device['browser_name'],
-                'browser_version' => $device['browser_version'],
-                'landing_page' => $fullUrl,
-                'current_page_url' => $fullUrl,
-                'current_page_title' => $pageTitle ?: $this->inferTitleFromPath($path),
-                'referrer_url' => $referrer,
-                'traffic_source' => $trafficSource,
-                'utm_source' => $utm['utm_source'],
-                'utm_medium' => $utm['utm_medium'],
-                'utm_campaign' => $utm['utm_campaign'],
-                'utm_term' => $utm['utm_term'],
-                'utm_content' => $utm['utm_content'],
-                'pageviews_count' => 1,
-                'is_returning' => $isReturning,
-                'status' => VisitorSession::STATUS_ONLINE,
-                'first_seen_at' => $now,
-                'last_activity_at' => $now,
-            ]);
+            $createdNewSession = false;
+            try {
+                $session = VisitorSession::create([
+                    'visitor_id' => $visitorId,
+                    'session_token' => $sessionToken,
+                    'user_id' => Auth::id(),
+                    'ip_address' => $ip,
+                    'country_code' => $geo['country_code'],
+                    'country_name' => $geo['country_name'],
+                    'region_name' => $geo['region_name'],
+                    'city_name' => $geo['city_name'],
+                    'latitude' => $geo['latitude'],
+                    'longitude' => $geo['longitude'],
+                    'isp' => $geo['isp'],
+                    'organization' => $geo['organization'],
+                    'device_type' => $device['device_type'],
+                    'device_brand' => $device['device_brand'],
+                    'device_model' => $device['device_model'],
+                    'os_name' => $device['os_name'],
+                    'os_version' => $device['os_version'],
+                    'browser_name' => $device['browser_name'],
+                    'browser_version' => $device['browser_version'],
+                    'landing_page' => $fullUrl,
+                    'current_page_url' => $fullUrl,
+                    'current_page_title' => $pageTitle ?: $this->inferTitleFromPath($path),
+                    'referrer_url' => $referrer,
+                    'traffic_source' => $trafficSource,
+                    'utm_source' => $utm['utm_source'],
+                    'utm_medium' => $utm['utm_medium'],
+                    'utm_campaign' => $utm['utm_campaign'],
+                    'utm_term' => $utm['utm_term'],
+                    'utm_content' => $utm['utm_content'],
+                    'pageviews_count' => 1,
+                    'is_returning' => $isReturning,
+                    'status' => VisitorSession::STATUS_ONLINE,
+                    'first_seen_at' => $now,
+                    'last_activity_at' => $now,
+                ]);
+                $createdNewSession = true;
+            } catch (QueryException $e) {
+                $sqlState = (string) ($e->errorInfo[0] ?? $e->getCode());
+                $driverCode = (int) ($e->errorInfo[1] ?? 0);
+                $isDuplicate = in_array($sqlState, ['23000', '23505'], true) || in_array($driverCode, [1062, 19], true);
+                if (!$isDuplicate) {
+                    throw $e;
+                }
+                $session = VisitorSession::where('session_token', $sessionToken)->first();
+                if (!$session) {
+                    throw $e;
+                }
+            }
 
-            VisitorActivity::create([
-                'visitor_session_id' => $session->id,
-                'event_type' => 'entered',
-                'page_url' => $fullUrl,
-                'page_title' => $session->current_page_title,
-                'details' => "Entered via {$trafficSource} ({$device['device_type']} · {$device['browser_name']})",
-                'occurred_at' => $now,
-                'created_at' => $now,
-            ]);
+            if ($createdNewSession) {
+                VisitorActivity::create([
+                    'visitor_session_id' => $session->id,
+                    'event_type' => 'entered',
+                    'page_url' => $fullUrl,
+                    'page_title' => $session->current_page_title,
+                    'details' => "Entered via {$trafficSource} ({$device['device_type']} · {$device['browser_name']})",
+                    'occurred_at' => $now,
+                    'created_at' => $now,
+                ]);
+            }
         } else {
             $previousUrl = $session->current_page_url;
             $eventType = $previousUrl === $fullUrl ? 'pageview' : 'navigated';
 
-            $session->update([
+            $session->increment('pageviews_count', 1, [
                 'user_id' => Auth::id() ?: $session->user_id,
                 'current_page_url' => $fullUrl,
                 'current_page_title' => $pageTitle ?: $this->inferTitleFromPath($path),
-                'pageviews_count' => $session->pageviews_count + 1,
                 'status' => VisitorSession::STATUS_ONLINE,
                 'last_activity_at' => $now,
                 'ended_at' => null,
@@ -153,6 +171,60 @@ class LiveVisitorTrackingService
             'visitor_cookie_value' => $visitorId,
             'is_new_cookie' => $isNewCookie,
         ];
+    }
+
+    /**
+     * Record a page visit from a serialized async job payload without needing the live HTTP Request.
+     *
+     * @param array<string, mixed> $payload
+     * @return array{session: VisitorSession, visitor_cookie_value: string, is_new_cookie: bool}
+     */
+    public function recordPageVisitFromPayload(array $payload): array
+    {
+        $fullUrl = (string) ($payload['full_url'] ?? 'http://localhost/');
+        $path = (string) ($payload['path'] ?? '/');
+        $durationMs = (int) ($payload['duration_ms'] ?? 0);
+        $ip = (string) ($payload['ip_address'] ?? '127.0.0.1');
+        $ua = (string) ($payload['user_agent'] ?? 'Mozilla/5.0');
+        $visitorId = (string) ($payload['visitor_cookie_id'] ?? ('v_' . Str::random(24)));
+        $isNewCookie = (bool) ($payload['is_new_cookie'] ?? false);
+
+        $server = array_filter([
+            'REMOTE_ADDR' => $ip,
+            'HTTP_USER_AGENT' => $ua,
+            'HTTP_REFERER' => $payload['referrer'] ?? null,
+            'HTTP_CF_IPCOUNTRY' => $payload['cf_country'] ?? null,
+            'HTTP_CF_IPCITY' => $payload['cf_city'] ?? null,
+            'HTTP_CF_REGION' => $payload['cf_region'] ?? null,
+            'HTTP_CF_IPLATITUDE' => $payload['cf_lat'] ?? null,
+            'HTTP_CF_IPLONGITUDE' => $payload['cf_lon'] ?? null,
+        ]);
+
+        $syntheticRequest = Request::create(
+            $fullUrl,
+            'GET',
+            [],
+            [self::VISITOR_COOKIE => $isNewCookie ? '' : $visitorId],
+            [],
+            $server
+        );
+
+        $maxAttempts = 3;
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            try {
+                return $this->recordPageVisit($syntheticRequest, $path, $durationMs, $payload['page_title'] ?? null);
+            } catch (QueryException $e) {
+                $sqlState = (string) ($e->errorInfo[0] ?? $e->getCode());
+                $driverCode = (int) ($e->errorInfo[1] ?? 0);
+                $isTransientLock = $sqlState === '40001' || in_array($driverCode, [1213, 1205], true);
+                if (!$isTransientLock || $attempt >= $maxAttempts) {
+                    throw $e;
+                }
+                usleep(random_int(10000, 40000) * $attempt);
+            }
+        }
+
+        return $this->recordPageVisit($syntheticRequest, $path, $durationMs, $payload['page_title'] ?? null);
     }
 
     /**

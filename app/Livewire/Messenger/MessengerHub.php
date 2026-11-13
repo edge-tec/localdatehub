@@ -510,7 +510,18 @@ class MessengerHub extends Component
      */
     public function setReplyTo(int $messageId): void
     {
-        $msg = ContactMessage::find($messageId);
+        $authId = Auth::id();
+        if (!$authId) {
+            return;
+        }
+
+        $msg = ContactMessage::where('id', $messageId)
+            ->where(function ($q) use ($authId) {
+                $q->where('sender_id', $authId)
+                  ->orWhere('recipient_id', $authId);
+            })
+            ->first();
+
         if ($msg) {
             $this->replyToMessageId = $msg->id;
             $this->replyToMessageSnippet = Str::limit($msg->message_encrypted ?: ($msg->attachment_name ?: 'Attachment'), 60);
@@ -540,7 +551,22 @@ class MessengerHub extends Component
     public function toggleReaction(int $messageId, string $emoji): void
     {
         $authId = Auth::id();
-        $message = ContactMessage::find($messageId);
+        if (!$authId) {
+            return;
+        }
+
+        $emoji = mb_substr(trim($emoji), 0, 16);
+        if ($emoji === '') {
+            return;
+        }
+
+        $message = ContactMessage::where('id', $messageId)
+            ->where(function ($q) use ($authId) {
+                $q->where('sender_id', $authId)
+                  ->orWhere('recipient_id', $authId);
+            })
+            ->first();
+
         if (!$message) {
             return;
         }
