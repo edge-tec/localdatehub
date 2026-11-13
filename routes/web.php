@@ -352,10 +352,13 @@ Route::get('/listings/{slug}', [ListingWebController::class, 'show'])->name('lis
 
 // Public Listing Inquiries, Abuse Reporting, and Favorites
 Route::post('/listings/{listing}/contact', [ListingContactWebController::class, 'submitInquiry'])
-    ->middleware('throttle:5,10')
+    ->middleware('throttle:20,5')
     ->name('listings.contact.submit');
+Route::get('/listings/{listing}/report', function (\App\Modules\Listings\Models\Listing $listing) {
+    return redirect()->route('listings.show', $listing->slug);
+});
 Route::post('/listings/{listing}/report', [ListingContactWebController::class, 'reportListing'])
-    ->middleware('throttle:5,10')
+    ->middleware('throttle:20,5')
     ->name('listings.report.submit');
 Route::post('/listings/{listing}/favorite', [ListingContactWebController::class, 'toggleFavorite'])
     ->name('listings.favorite.toggle');
