@@ -2759,6 +2759,8 @@ class AdminEnterpriseHub extends Component
             AdminAuditService::log('pricing.create', $plan, null, $attributes);
         }
 
+        $this->syncBoostPlanFromPricingPlan($plan);
+
         $this->showPlanModal = false;
         $this->resetPlanForm();
         session()->flash('success', "Pricing plan [{$plan->name}] saved.");
@@ -2772,8 +2774,36 @@ class AdminEnterpriseHub extends Component
         $plan->is_active = !$plan->is_active;
         $plan->save();
 
+        $this->syncBoostPlanFromPricingPlan($plan);
+
         AdminAuditService::log('pricing.toggle', $plan, $before, ['is_active' => $plan->is_active]);
         session()->flash('success', "Plan [{$plan->name}] is now " . ($plan->is_active ? 'active' : 'inactive') . '.');
+    }
+
+    /**
+     * Keep BoostPlan (used on /listings/{id}/boost) in sync with Admin PricingPlan edits.
+     */
+    protected function syncBoostPlanFromPricingPlan(PricingPlan $plan): void
+    {
+        if (!in_array($plan->plan_type, ['bump', 'featured_spot', 'listing_upgrade'], true)) {
+            return;
+        }
+
+        $boostPlan = \App\Modules\Payments\Crypto\Models\BoostPlan::where('slug', $plan->slug)->first();
+
+        if (!$boostPlan && $plan->plan_type === 'bump' && (int) $plan->duration_days === 1) {
+            $boostPlan = \App\Modules\Payments\Crypto\Models\BoostPlan::where('slug', 'boost-24h')->first();
+        }
+
+        if ($boostPlan) {
+            $boostPlan->update([
+                'name' => $plan->name,
+                'description' => $plan->description ?: $boostPlan->description,
+                'price' => round($plan->price_cents / 100, 2),
+                'duration_days' => (int) $plan->duration_days,
+                'is_active' => (bool) $plan->is_active,
+            ]);
+        }
     }
 
     public function deactivateFeatured(int $featuredId): void
