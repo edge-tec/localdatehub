@@ -17,6 +17,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/transactions', [WalletController::class, 'transactions']);
         Route::get('/balances', [WalletController::class, 'balances']);
         Route::get('/deposit/{id}', [WalletController::class, 'showDeposit'])->whereNumber('id');
+        Route::post('/checkout/orders', [WalletController::class, 'createCheckoutOrder']);
+        Route::get('/checkout/orders/{reference}', [WalletController::class, 'showCheckoutOrder']);
     });
 
     Route::middleware(['auth', 'admin.rbac', 'throttle:60,1'])->prefix('admin')->group(function () {

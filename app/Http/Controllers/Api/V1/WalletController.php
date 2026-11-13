@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Jobs\Wallet\ProcessIncomingTransaction;
 use App\Models\Wallet\BlockchainNetwork;
 use App\Models\Wallet\CryptoAsset;
+use App\Models\Wallet\CryptoCheckoutOrder;
 use App\Models\Wallet\Deposit;
 use App\Models\Wallet\LedgerEntry;
 use App\Models\Wallet\WalletAddress;
 use App\Services\Blockchain\BlockchainMonitor;
+use App\Services\Checkout\CryptoCheckoutService;
 use App\Services\Support\BaseUnitMath;
 use App\Services\Wallet\HDWalletService;
 use Illuminate\Http\JsonResponse;
@@ -210,6 +212,49 @@ class WalletController extends Controller
             'dispatched_count' => $dispatched,
             'address' => $walletAddress->address,
         ]);
+    }
+
+    public function createCheckoutOrder(Request $request, CryptoCheckoutService $checkout): JsonResponse
+    {
+        $validated = $request->validate([
+            'network_code' => ['required', 'string', 'max:32'],
+            'asset_symbol' => ['required', 'string', 'max:24'],
+            'expected_amount_base_units' => ['required', 'string', 'regex:/^[1-9][0-9]*$/'],
+            'title' => ['nullable', 'string', 'max:160'],
+            'ttl_minutes' => ['nullable', 'integer', 'min:5', 'max:120'],
+        ]);
+
+        $network = BlockchainNetwork::where('network_code', strtoupper($validated['network_code']))
+            ->where('is_enabled', true)
+            ->firstOrFail();
+
+        $asset = CryptoAsset::where('network_id', $network->id)
+            ->where('symbol', strtoupper($validated['asset_symbol']))
+            ->where('is_enabled', true)
+            ->firstOrFail();
+
+        $order = $checkout->createOrder(
+            user: $request->user(),
+            network: $network,
+            asset: $asset,
+            expectedAmountBaseUnits: $validated['expected_amount_base_units'],
+            title: (string) ($validated['title'] ?? 'LocalDateHub Crypto Payment'),
+            ttlMinutes: (int) ($validated['ttl_minutes'] ?? 30)
+        );
+
+        return response()->json([
+            'order' => $order->load(['network', 'asset', 'walletAddress']),
+        ], 201);
+    }
+
+    public function showCheckoutOrder(Request $request, string $reference): JsonResponse
+    {
+        $order = CryptoCheckoutOrder::where('order_reference', $reference)
+            ->where('user_id', $request->user()->id)
+            ->with(['network', 'asset', 'walletAddress', 'deposit.blockchainTransaction'])
+            ->firstOrFail();
+
+        return response()->json(['order' => $order]);
     }
 }
 

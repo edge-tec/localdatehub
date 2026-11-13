@@ -7,6 +7,7 @@ use App\Jobs\Wallet\DispatchAutomaticSweep;
 use App\Models\Wallet\Deposit;
 use App\Models\Wallet\LedgerEntry;
 use App\Models\Wallet\WalletAuditLog;
+use App\Services\Checkout\CryptoCheckoutService;
 use App\Services\Support\BaseUnitMath;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -72,7 +73,9 @@ class DepositCreditService
             return $ledger;
         });
 
-        event(new WalletDepositUpdated($deposit->fresh()));
+        $freshDeposit = $deposit->fresh();
+        app(CryptoCheckoutService::class)->reconcileDepositToOrder($freshDeposit);
+        event(new WalletDepositUpdated($freshDeposit));
 
         if ($dispatchSweep) {
             DispatchAutomaticSweep::dispatch($deposit->id)
