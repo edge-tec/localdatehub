@@ -67,6 +67,22 @@ class ListingContactWebController extends Controller
             $request->userAgent()
         );
 
+        $listing->refresh();
+
+        if (!$listing->isActive()) {
+            $redirect = ($listing->state && $listing->city)
+                ? redirect()->route('locations.city', [
+                    'stateCode' => $listing->state->code,
+                    'citySlug' => $listing->city->slug,
+                ])
+                : redirect()->route('home');
+
+            return $redirect->with(
+                'success',
+                'Thank you for reporting. This listing has been temporarily removed from public view for immediate Trust & Safety review.'
+            );
+        }
+
         return redirect()->back()->with('success', 'Thank you for reporting. Our Trust & Safety team has received your report and will take appropriate action.');
     }
 
