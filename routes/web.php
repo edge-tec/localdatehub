@@ -480,6 +480,7 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     // Credit Wallet & Packages
     Route::get('/account/wallet', [\App\Http\Controllers\Account\UserWalletController::class, 'index'])->name('account.wallet.index');
+    Route::get('/account/crypto-wallet', [\App\Http\Controllers\Account\CryptoWalletDashboardController::class, 'index'])->name('account.crypto-wallet.index');
     Route::get('/account/wallet/topup-amount', [\App\Http\Controllers\Account\UserWalletController::class, 'customTopup'])->name('account.wallet.topup-amount');
     Route::get('/account/wallet/checkout/{package}', [\App\Http\Controllers\Account\UserWalletController::class, 'checkout'])->name('account.wallet.checkout');
     Route::post('/account/wallet/checkout/{package}', [\App\Http\Controllers\Account\UserWalletController::class, 'storePayment'])->name('account.wallet.payment');
@@ -495,6 +496,15 @@ Route::middleware(['auth', 'active'])->group(function () {
 
 // 3. Admin Payment Gateway, Boost Plan & Transaction Management
 Route::middleware(['auth', 'admin.rbac'])->prefix('admin/crypto')->name('admin.crypto.')->group(function () {
+    // HD Wallet & Treasury Control Panel
+    Route::get('/treasury', [\App\Http\Controllers\Admin\AdminHdTreasuryController::class, 'index'])->name('treasury');
+    Route::post('/treasury/network/{id}/toggle', [\App\Http\Controllers\Admin\AdminHdTreasuryController::class, 'toggleNetwork'])->name('treasury.network.toggle');
+    Route::post('/treasury/network/{id}/threshold', [\App\Http\Controllers\Admin\AdminHdTreasuryController::class, 'updateNetworkThreshold'])->name('treasury.network.threshold');
+    Route::post('/treasury/asset/{id}/toggle', [\App\Http\Controllers\Admin\AdminHdTreasuryController::class, 'toggleAsset'])->name('treasury.asset.toggle');
+    Route::post('/treasury/sweep/{id}/retry', [\App\Http\Controllers\Admin\AdminHdTreasuryController::class, 'retrySweep'])->name('treasury.sweep.retry');
+    Route::post('/treasury/pause', [\App\Http\Controllers\Admin\AdminHdTreasuryController::class, 'pauseOutbound'])->name('treasury.pause');
+    Route::post('/treasury/resume', [\App\Http\Controllers\Admin\AdminHdTreasuryController::class, 'resumeOutbound'])->name('treasury.resume');
+
     // Gateways
     Route::get('/gateways', [\App\Http\Controllers\Admin\AdminCryptoPaymentController::class, 'indexGateways'])->name('gateways.index');
     Route::get('/gateways/{gateway}/edit', [\App\Http\Controllers\Admin\AdminCryptoPaymentController::class, 'editGateway'])->name('gateways.edit');

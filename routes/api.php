@@ -8,8 +8,11 @@ Route::prefix('v1')->group(function () {
     Route::middleware(['auth', 'active', 'throttle:60,1'])->prefix('wallet')->group(function () {
         Route::get('/overview', [WalletController::class, 'overview']);
         Route::get('/networks', [WalletController::class, 'networks']);
+        Route::get('/network-status', [WalletController::class, 'networkStatus']);
         Route::get('/assets', [WalletController::class, 'assets']);
+        Route::get('/supported-assets', [WalletController::class, 'supportedAssets']);
         Route::post('/deposit/address', [WalletController::class, 'requestDepositAddress']);
+        Route::post('/deposit/refresh', [WalletController::class, 'refreshDeposit'])->middleware('throttle:10,1');
         Route::get('/deposit/history', [WalletController::class, 'depositHistory']);
         Route::get('/transactions', [WalletController::class, 'transactions']);
         Route::get('/balances', [WalletController::class, 'balances']);

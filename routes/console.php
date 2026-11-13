@@ -83,3 +83,15 @@ Schedule::job(new \App\Modules\SEO\Jobs\SyncGoogleSearchConsoleJob)
 Schedule::command('ads:sync-lifecycle')
     ->everyFifteenMinutes()
     ->withoutOverlapping(5);
+
+Schedule::command('custody:scan-networks')
+    ->everyMinute()
+    ->withoutOverlapping(2)
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/scheduler-custody-scan.log'));
+
+Schedule::command('custody:health-check')
+    ->everyFiveMinutes()
+    ->withoutOverlapping(5)
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/scheduler-custody-health.log'));

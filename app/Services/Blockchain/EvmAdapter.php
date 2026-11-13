@@ -41,14 +41,14 @@ class EvmAdapter implements BlockchainAdapterInterface
         string $address,
         int $fromHeight = 0
     ): array {
-        if (empty($asset->contract_address)) {
-            return [];
-        }
-
         $endpoints = $this->endpoints($network);
         $latest = $this->getLatestBlockHeight($network);
         if ($latest <= 0) {
             return [];
+        }
+
+        if (empty($asset->contract_address)) {
+            return $this->fetchIncomingNativeTransactions($endpoints, $address, $fromHeight, $latest);
         }
 
         $startBlock = $fromHeight > 0 ? $fromHeight : max(0, $latest - 500);
@@ -88,6 +88,60 @@ class EvmAdapter implements BlockchainAdapterInterface
                 'confirmations' => $confs,
                 'is_reverted' => false,
             ];
+        }
+
+        return $items;
+    }
+
+    /**
+     * Scan recent blocks for native EVM coin transfers (ETH, BNB, POL) to a deposit address.
+     *
+     * @param array<int, string> $endpoints
+     * @return array<int, array<string, mixed>>
+     */
+    protected function fetchIncomingNativeTransactions(
+        array $endpoints,
+        string $address,
+        int $fromHeight,
+        int $latest
+    ): array {
+        $startBlock = $fromHeight > 0 ? max($fromHeight, $latest - 20) : max(0, $latest - 15);
+        $target = strtolower(trim($address));
+        $items = [];
+
+        for ($height = $startBlock; $height <= $latest; $height++) {
+            $blockRes = $this->rpc->jsonRpc($endpoints, 'eth_getBlockByNumber', ['0x' . dechex($height), true]);
+            $block = $blockRes['result'] ?? null;
+            if (!is_array($block) || empty($block['transactions']) || !is_array($block['transactions'])) {
+                continue;
+            }
+
+            foreach ($block['transactions'] as $tx) {
+                if (!is_array($tx) || empty($tx['to'])) {
+                    continue;
+                }
+                if (strtolower((string) $tx['to']) !== $target) {
+                    continue;
+                }
+
+                $amount = $this->hexToDec((string) ($tx['value'] ?? '0x0'));
+                if ($amount === '0') {
+                    continue;
+                }
+
+                $items[] = [
+                    'tx_hash' => (string) ($tx['hash'] ?? ''),
+                    'tx_index' => isset($tx['transactionIndex']) ? (int) hexdec((string) $tx['transactionIndex']) : 0,
+                    'block_height' => $height,
+                    'block_hash' => $block['hash'] ?? null,
+                    'from_address' => (string) ($tx['from'] ?? ''),
+                    'to_address' => $address,
+                    'contract_address' => null,
+                    'amount_base_units' => $amount,
+                    'confirmations' => max(1, $latest - $height + 1),
+                    'is_reverted' => false,
+                ];
+            }
         }
 
         return $items;
@@ -138,6 +192,37 @@ class EvmAdapter implements BlockchainAdapterInterface
         $confirmations = ($blockHeight !== null && $latest >= $blockHeight) ? ($latest - $blockHeight + 1) : 0;
         $reverted = is_array($receipt) && (($receipt['status'] ?? '0x1') === '0x0');
 
+        if (!empty($asset->contract_address) && is_array($receipt) && !empty($receipt['logs']) && is_array($receipt['logs'])) {
+            $transferTopic = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+            $expectedContract = strtolower(trim($asset->contract_address));
+
+            foreach ($receipt['logs'] as $log) {
+                if (strtolower((string) ($log['address'] ?? '')) !== $expectedContract) {
+                    continue;
+                }
+                $topics = $log['topics'] ?? [];
+                if (strtolower((string) ($topics[0] ?? '')) !== $transferTopic || count($topics) < 3) {
+                    continue;
+                }
+
+                $fromAddr = '0x' . substr((string) $topics[1], -40);
+                $toAddr = '0x' . substr((string) $topics[2], -40);
+                $amount = $this->hexToDec((string) ($log['data'] ?? '0x0'));
+
+                return [
+                    'exists' => true,
+                    'confirmations' => $confirmations,
+                    'block_height' => $blockHeight,
+                    'block_hash' => $tx['blockHash'] ?? null,
+                    'from_address' => $fromAddr,
+                    'to_address' => $toAddr,
+                    'contract_address' => $asset->contract_address,
+                    'amount_base_units' => $amount,
+                    'is_reverted' => $reverted,
+                ];
+            }
+        }
+
         return [
             'exists' => true,
             'confirmations' => $confirmations,
@@ -146,7 +231,7 @@ class EvmAdapter implements BlockchainAdapterInterface
             'from_address' => $tx['from'] ?? null,
             'to_address' => $tx['to'] ?? null,
             'contract_address' => $asset->contract_address,
-            'amount_base_units' => isset($tx['value']) ? (string) hexdec((string) $tx['value']) : '0',
+            'amount_base_units' => isset($tx['value']) ? $this->hexToDec((string) $tx['value']) : '0',
             'is_reverted' => $reverted,
         ];
     }
@@ -156,8 +241,18 @@ class EvmAdapter implements BlockchainAdapterInterface
         CryptoAsset $asset,
         string $address
     ): string {
+        if (!empty($asset->contract_address)) {
+            $data = '0x70a08231000000000000000000000000' . strtolower(ltrim(trim($address), '0x'));
+            $res = $this->rpc->jsonRpc($this->endpoints($network), 'eth_call', [[
+                'to' => $asset->contract_address,
+                'data' => $data,
+            ], 'latest']);
+
+            return isset($res['result']) ? $this->hexToDec((string) $res['result']) : '0';
+        }
+
         $res = $this->rpc->jsonRpc($this->endpoints($network), 'eth_getBalance', [$address, 'latest']);
-        return isset($res['result']) ? (string) hexdec((string) $res['result']) : '0';
+        return isset($res['result']) ? $this->hexToDec((string) $res['result']) : '0';
     }
 
     public function estimateSweepFeeBaseUnits(BlockchainNetwork $network, CryptoAsset $asset): string
