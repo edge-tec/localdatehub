@@ -178,4 +178,23 @@ class AdminModerationHubTest extends TestCase
             ->assertSee('Commercial Solicitation')
             ->assertSee('Soliciting commercial services in personals section.');
     }
+
+    public function test_admin_can_inspect_listing_with_status_history(): void
+    {
+        \App\Modules\Listings\Models\ListingStatusHistory::create([
+            'listing_id' => $this->pendingListing->id,
+            'from_status' => 'draft',
+            'to_status' => 'pending_review',
+            'reason' => 'Submitted for moderation review',
+            'changed_by_user_id' => $this->admin->id,
+            'created_at' => now(),
+        ]);
+
+        Livewire::actingAs($this->admin)
+            ->test(AdminEnterpriseHub::class, ['initialTab' => 'moderation'])
+            ->call('openViewListingModal', $this->pendingListing->id)
+            ->assertSet('showViewListingModal', true)
+            ->assertSet('viewListingData.id', $this->pendingListing->id)
+            ->assertSet('viewListingData.status_history.0.actor', $this->admin->name);
+    }
 }

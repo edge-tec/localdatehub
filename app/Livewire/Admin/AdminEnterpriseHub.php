@@ -1398,7 +1398,7 @@ class AdminEnterpriseHub extends Component
             'media',
             'contact',
             'attributes',
-            'statusHistory.changer',
+            'statusHistory.changedBy',
             'analytics',
             'boosts',
         ])->findOrFail($listingId);
@@ -1459,7 +1459,7 @@ class AdminEnterpriseHub extends Component
                 'from_status' => $h->from_status,
                 'to_status' => $h->to_status,
                 'reason' => $h->reason,
-                'actor' => $h->changer?->name ?? 'System',
+                'actor' => $h->changedBy?->name ?? 'System',
                 'created_at' => $h->created_at?->format('M j, Y H:i'),
             ])->all(),
         ];
