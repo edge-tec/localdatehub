@@ -1330,28 +1330,40 @@ class AccountDashboard extends Component
         $totalUnreadCount = ContactMessage::where('recipient_id', $userId)->where('is_read', false)->count();
         $totalRepliedCount = ContactMessage::where('recipient_id', $userId)->where('is_replied', true)->count();
         $totalFlaggedCount = ContactMessage::where('recipient_id', $userId)->where('is_flagged', true)->count();
-        $userListingsForMessages = Listing::where('user_id', $userId)->orderBy('title')->get(['id', 'title']);
+        $userListingsForMessages = $this->tab === 'messages'
+            ? Listing::where('user_id', $userId)->orderBy('title')->limit(200)->get(['id', 'title'])
+            : collect();
 
-        // Analytics Data
-        $analyticsListings = Listing::where('user_id', $userId)
-            ->with(['category', 'city.state'])
-            ->orderByDesc('view_count')
-            ->get();
+        // Analytics Data (lazy-loaded on analytics tab & capped to prevent memory exhaustion)
+        $analyticsListings = $this->tab === 'analytics'
+            ? Listing::where('user_id', $userId)
+                ->select(['id', 'user_id', 'title', 'slug', 'status', 'category_id', 'city_id', 'view_count', 'reply_count', 'favorite_count', 'created_at'])
+                ->with(['category', 'city.state'])
+                ->orderByDesc('view_count')
+                ->limit(50)
+                ->get()
+            : collect();
 
         // Promotions & Pricing Plans
-        $activePromotions = FeaturedListing::where('user_id', $userId)
-            ->with(['listing', 'plan'])
-            ->latest()
-            ->get();
+        $activePromotions = $this->tab === 'promotions'
+            ? FeaturedListing::where('user_id', $userId)
+                ->with(['listing:id,title,slug', 'plan'])
+                ->latest()
+                ->limit(50)
+                ->get()
+            : collect();
 
         $pricingPlans = PricingPlan::where('is_active', true)->get();
-        $userActiveListings = Listing::where('user_id', $userId)
-            ->where('status', Listing::STATUS_ACTIVE)
-            ->get(['id', 'title']);
+        $userActiveListings = ($this->showPromoteModal || $this->tab === 'promotions')
+            ? Listing::where('user_id', $userId)
+                ->where('status', Listing::STATUS_ACTIVE)
+                ->limit(200)
+                ->get(['id', 'title'])
+            : collect();
 
         // Billing History
         $billingTransactions = PaymentTransaction::where('user_id', $userId)
-            ->with(['plan', 'listing', 'invoice'])
+            ->with(['plan', 'listing:id,title,slug', 'invoice'])
             ->latest()
             ->paginate(10, ['*'], 'billingPage');
 
@@ -1359,6 +1371,7 @@ class AccountDashboard extends Component
         $blockedUsers = UserBlock::where('blocker_id', $userId)
             ->with('blocked')
             ->latest('created_at')
+            ->limit(100)
             ->get();
 
         $categories = Category::where('is_active', true)->orderBy('name')->get();
