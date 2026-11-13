@@ -18,13 +18,6 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-2.5 shrink-0">
-                <a
-                    href="{{ route('account.crypto-wallet.index') }}"
-                    class="inline-flex items-center gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-700 px-4 py-2.5 text-xs font-bold shadow-2xs transition"
-                >
-                    <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span>Multi-Chain Crypto Wallet</span>
-                </a>
                 <a 
                     href="#packages-section" 
                     class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-xl bg-gradient-to-r from-[#F20B83] to-rose-600 hover:from-[#d90858] hover:to-rose-700 text-white px-4 py-2.5 text-xs font-bold shadow-sm hover:shadow-md transition"
