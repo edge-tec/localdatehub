@@ -45,6 +45,22 @@ class CryptoSignerService
         ], 45);
     }
 
+    protected function resolveNodeBinary(): string
+    {
+        $which = trim((string) @shell_exec('which node 2>/dev/null'));
+        if ($which !== '' && is_executable($which)) {
+            return $which;
+        }
+
+        foreach (['/usr/local/bin/node', '/usr/bin/node', '/opt/homebrew/bin/node'] as $candidate) {
+            if (is_executable($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return 'node';
+    }
+
     protected function runScript(array $payload, int $timeoutSeconds = 20): array
     {
         if (!$this->isAvailable()) {
@@ -52,7 +68,7 @@ class CryptoSignerService
         }
 
         try {
-            $nodeBin = trim((string) shell_exec('which node')) ?: 'node';
+            $nodeBin = $this->resolveNodeBinary();
             $process = new Process([$nodeBin, base_path('scripts/crypto-signer.mjs')], base_path());
             $process->setInput(json_encode($payload));
             $process->setTimeout($timeoutSeconds);
@@ -75,3 +91,4 @@ class CryptoSignerService
         }
     }
 }
+

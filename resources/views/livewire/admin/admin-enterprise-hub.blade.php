@@ -4682,6 +4682,16 @@
                                 </div>
                             @endif
 
+                            @if($treasuryErrorMessage)
+                                <div class="p-3.5 rounded-xl bg-rose-50 border-2 border-rose-300 text-rose-900 font-bold text-xs flex items-center justify-between shadow-xs">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-base">⚠️</span>
+                                        <span class="leading-relaxed">{{ $treasuryErrorMessage }}</span>
+                                    </div>
+                                    <button type="button" wire:click="$set('treasuryErrorMessage', null)" class="text-rose-800 font-black text-sm px-1.5">&times;</button>
+                                </div>
+                            @endif
+
                             <form wire:submit="saveTreasurySettings" class="space-y-3.5">
                                 <div>
                                     <label class="block text-xs font-black text-slate-800 uppercase mb-1">1. Your Trust Wallet Address (BEP20 / BNB / ERC20 / Polygon)</label>
