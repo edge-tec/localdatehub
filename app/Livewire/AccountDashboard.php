@@ -17,11 +17,14 @@ use App\Modules\Categories\Models\Category;
 use App\Modules\Contact\Models\ContactMessage;
 use App\Modules\Listings\Models\Listing;
 use App\Modules\Listings\Models\ListingAnalytics;
+use App\Modules\Monetization\Models\WalletTransaction;
+use App\Modules\Monetization\Services\UserWalletService;
 use App\Modules\Notifications\Models\NotificationLog;
 use App\Modules\Verification\Models\IdentityVerification;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -778,19 +781,72 @@ class AccountDashboard extends Component
 
         $listing = Listing::where('user_id', Auth::id())->findOrFail($this->promoteListingId);
         $plan = PricingPlan::findOrFail($this->selectedPlanId);
+        $user = Auth::user();
+
+        $gatewayName = (string) config('monetization.default', 'sandbox');
+        $hasConfiguredDriver = !empty(config("monetization.gateways.{$gatewayName}.driver"));
+
+        if (!$hasConfiguredDriver) {
+            $requiredCredits = $plan->price_cents > 0 ? max(1, (int) round(($plan->price_cents / 100) * 10)) : 0;
+            $walletService = app(UserWalletService::class);
+            $wallet = $walletService->getOrCreateWallet($user);
+
+            if ($requiredCredits > 0 && $wallet->balance < $requiredCredits) {
+                $this->closePromoteModal();
+                $this->redirectRoute('boost.checkout', ['listing' => $listing->id]);
+                return;
+            }
+
+            $durationDays = $plan->duration_days ?: 7;
+            $startsAt = now();
+            $endsAt = now()->addDays($durationDays);
+
+            DB::transaction(function () use ($walletService, $user, $listing, $plan, $requiredCredits, $startsAt, $endsAt) {
+                if ($requiredCredits > 0) {
+                    $walletService->debit(
+                        user: $user,
+                        amount: $requiredCredits,
+                        type: WalletTransaction::TYPE_POST_BOOST_DEBIT,
+                        description: "Listing promotion ({$plan->name}) for [{$listing->title}]",
+                        listingId: $listing->id,
+                        actorId: $user->id
+                    );
+                }
+
+                FeaturedListing::create([
+                    'listing_id' => $listing->id,
+                    'user_id' => $user->id,
+                    'pricing_plan_id' => $plan->id,
+                    'placement' => $this->selectedPlacement,
+                    'status' => 'active',
+                    'starts_at' => $startsAt,
+                    'ends_at' => $endsAt,
+                    'is_active' => true,
+                ]);
+
+                $listing->is_featured = true;
+                $listing->promoted_until = $endsAt;
+                $listing->bumped_at = now();
+                $listing->save();
+            });
+
+            $this->closePromoteModal();
+            session()->flash('success', "Listing [{$listing->title}] has been promoted for {$durationDays} days using {$requiredCredits} wallet credits!");
+            return;
+        }
 
         $promotionService = app(PromotionService::class);
         $result = $promotionService->promoteListing(
             listing: $listing,
             plan: $plan,
             paymentData: [
-                'gateway' => config('monetization.default', 'sandbox'),
+                'gateway' => $gatewayName,
                 'payment_token' => 'tok_sandbox_default',
                 'card_last_four' => '4242',
                 'card_brand' => 'Visa',
                 'ip_address' => request()->ip() ?: '127.0.0.1',
             ],
-            user: Auth::user(),
+            user: $user,
             placement: $this->selectedPlacement
         );
 
@@ -816,12 +872,19 @@ class AccountDashboard extends Component
     public function subscribeToPlan(int $planId): void
     {
         $plan = PricingPlan::findOrFail($planId);
+        $gatewayName = (string) config('monetization.default', 'sandbox');
+
+        if (empty(config("monetization.gateways.{$gatewayName}.driver"))) {
+            $amount = number_format(max(1, $plan->price_cents / 100), 2, '.', '');
+            $this->redirectRoute('account.wallet.topup-amount', ['amount' => $amount, 'plan' => $plan->name]);
+            return;
+        }
 
         app(SubscriptionService::class)->createSubscription(
             user: Auth::user(),
             plan: $plan,
             paymentData: [
-                'gateway' => config('monetization.default', 'sandbox'),
+                'gateway' => $gatewayName,
                 'payment_token' => 'tok_sandbox_default',
                 'card_last_four' => '4242',
                 'card_brand' => 'Visa',
