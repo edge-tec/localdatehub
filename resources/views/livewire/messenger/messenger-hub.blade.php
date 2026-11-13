@@ -143,8 +143,11 @@
         <!-- Inbox Top Header -->
         <div class="p-4 border-b border-slate-100 flex items-center justify-between">
             <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-xl bg-pink-50 text-[#F20B65] flex items-center justify-center font-black shadow-xs">
-                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.145 2 11.258c0 2.91 1.455 5.518 3.736 7.208V22l3.418-1.874c.91.252 1.872.388 2.846.388 5.523 0 10-4.145 10-9.258C22 6.145 17.523 2 12 2zm1.05 12.443l-2.625-2.8-5.125 2.8 5.637-5.986 2.688 2.8 5.062-2.8-5.637 5.986z"/></svg>
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#F20B65] to-purple-600 text-white flex items-center justify-center font-black shadow-sm shadow-pink-500/20">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                        <path d="M8.5 12h.01M12 12h.01M15.5 12h.01" stroke-width="2.5"/>
+                    </svg>
                 </div>
                 <div>
                     <h2 class="text-base font-black text-slate-900 tracking-tight leading-none flex items-center gap-1.5">
@@ -169,9 +172,9 @@
                     class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-pink-50 text-slate-600 hover:text-[#F20B65] flex items-center justify-center transition"
                     title="Start New Conversation"
                 >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/>
                     </svg>
                 </button>
             </div>
@@ -239,7 +242,9 @@
                                 {{ strtoupper(substr($peer?->name ?? 'User', 0, 1)) }}
                             </div>
                         @endif
-                        <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow-xs"></span>
+                        @if($peer?->isOnline())
+                            <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow-xs" title="Active now"></span>
+                        @endif
                     </div>
 
                     <!-- Conversation Text & Meta -->
@@ -346,7 +351,9 @@
                                 {{ strtoupper(substr($activePeer->name, 0, 1)) }}
                             </div>
                         @endif
-                        <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white"></span>
+                        @if($activePeer->isOnline())
+                            <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" title="Active now"></span>
+                        @endif
                     </div>
 
                     <!-- Peer Details -->
@@ -365,51 +372,52 @@
                                 <svg class="w-3.5 h-3.5 text-blue-600 fill-blue-600" viewBox="0 0 24 24" title="Pinned"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
                             @endif
                         </div>
-                        <span class="text-[11px] font-semibold text-emerald-600 flex items-center gap-1 mt-0.5">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
-                            <span>Active now</span>
-                        </span>
+                        @if($activePeer->isOnline())
+                            <span class="text-[11px] font-semibold text-emerald-600 flex items-center gap-1 mt-0.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+                                <span>Active now</span>
+                            </span>
+                        @endif
                     </div>
                 </div>
 
                 <!-- Header Actions (Call icons, Info drawer toggle) -->
-                <div class="flex items-center gap-1 sm:gap-2">
+                <div class="flex items-center gap-1 sm:gap-1.5">
                     <!-- Voice Call Button -->
                     <button 
                         type="button" 
-                        class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition"
+                        class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-pink-50 text-slate-600 hover:text-[#F20B65] flex items-center justify-center transition"
                         title="Voice Call"
                         onclick="alert('Encrypted audio calling is enabled for verified members.')"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
                         </svg>
                     </button>
 
                     <!-- Video Call Button -->
                     <button 
                         type="button" 
-                        class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition"
+                        class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-pink-50 text-slate-600 hover:text-[#F20B65] flex items-center justify-center transition"
                         title="Video Call"
                         onclick="alert('Encrypted video calling is enabled for verified members.')"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <polygon points="23 7 16 12 23 17 23 7"></polygon>
-                            <rect width="15" height="14" x="1" y="5" rx="2" ry="2"></rect>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/>
+                            <rect x="2" y="6" width="14" height="12" rx="2"/>
                         </svg>
                     </button>
 
                     <!-- Toggle Conversation Details (Desktop toggle / Mobile view switch) -->
                     <button 
                         type="button" 
-                        class="hidden md:flex w-8 h-8 rounded-xl transition items-center justify-center {{ $showRightPanel ? 'bg-pink-50 text-[#F20B65]' : 'bg-slate-50 text-slate-600 hover:bg-slate-100' }}"
+                        class="hidden md:flex w-8 h-8 rounded-xl transition items-center justify-center {{ $showRightPanel ? 'bg-pink-50 text-[#F20B65]' : 'bg-slate-50 text-slate-600 hover:bg-pink-50 hover:text-[#F20B65]' }}"
                         wire:click="toggleRightPanel"
                         title="{{ $showRightPanel ? 'Hide Details' : 'Show Details' }}"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="16" x2="12" y2="12"></line>
-                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <rect width="18" height="18" x="3" y="3" rx="2"/>
+                            <path d="M15 3v18"/>
                         </svg>
                     </button>
 
@@ -645,8 +653,11 @@
                     </div>
                 @empty
                     <div class="h-full flex flex-col items-center justify-center text-center p-8 space-y-3">
-                        <div class="w-16 h-16 rounded-3xl bg-pink-50 text-[#F20B65] flex items-center justify-center">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/></svg>
+                        <div class="w-16 h-16 rounded-3xl bg-gradient-to-br from-pink-50 to-rose-100/80 border border-pink-200/70 text-[#F20B65] flex items-center justify-center shadow-xs">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                                <path d="M8.5 12h.01M12 12h.01M15.5 12h.01" stroke-width="2.4"/>
+                            </svg>
                         </div>
                         <h4 class="text-sm font-black text-slate-900">Start the conversation</h4>
                         <p class="text-xs text-slate-500 max-w-sm">
@@ -689,8 +700,8 @@
                         title="Attach Photo or Document"
                     >
                         <input type="file" wire:model="attachment" class="hidden" accept="image/*,.pdf,.doc,.docx" />
-                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <path d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551"/>
                         </svg>
                     </label>
 
@@ -859,15 +870,21 @@
                         class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-r from-[#F20B65] to-rose-600 hover:from-[#d90858] hover:to-rose-700 text-white flex items-center justify-center transition shrink-0 shadow-md cursor-pointer disabled:opacity-50"
                         title="Send Message"
                     >
-                        <svg class="w-4 h-4 fill-current rotate-45 -mr-0.5" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/>
+                            <path d="m21.854 2.147-10.94 10.939"/>
+                        </svg>
                     </button>
                 </form>
             </div>
         @else
             <!-- No Conversation Selected Empty State -->
             <div class="h-full flex flex-col items-center justify-center p-8 text-center space-y-4">
-                <div class="w-20 h-20 rounded-3xl bg-pink-50 text-[#F20B65] flex items-center justify-center shadow-xs">
-                    <svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/></svg>
+                <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-pink-50 to-rose-100/80 border border-pink-200/70 text-[#F20B65] flex items-center justify-center shadow-xs">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                        <path d="M8.5 12h.01M12 12h.01M15.5 12h.01" stroke-width="2.4"/>
+                    </svg>
                 </div>
                 <div>
                     <h3 class="text-base font-black text-slate-900 tracking-tight">Your Messages</h3>
@@ -933,7 +950,9 @@
                             {{ strtoupper(substr($activePeer->name, 0, 1)) }}
                         </div>
                     @endif
-                    <span class="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow-xs"></span>
+                    @if($activePeer->isOnline())
+                        <span class="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow-xs" title="Active now"></span>
+                    @endif
                 </div>
 
                 <div class="flex items-center gap-1.5 justify-center">

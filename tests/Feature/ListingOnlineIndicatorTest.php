@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Modules\Categories\Models\Category;
+use App\Modules\Contact\Models\ContactMessage;
 use App\Modules\Listings\Models\Listing;
 use App\Modules\Locations\Models\City;
 use App\Modules\Locations\Models\State;
@@ -94,5 +95,38 @@ class ListingOnlineIndicatorTest extends TestCase
 
         $user->refresh();
         $this->assertFalse($user->isOnline());
+    }
+
+    public function test_messenger_only_shows_online_indicator_when_peer_is_online(): void
+    {
+        $viewer = User::factory()->create(['last_active_at' => now()]);
+        $offlinePeer = User::factory()->create(['last_active_at' => null]);
+        $listing = $this->makeListing($offlinePeer);
+
+        ContactMessage::create([
+            'listing_id' => $listing->id,
+            'sender_id' => $viewer->id,
+            'recipient_id' => $offlinePeer->id,
+            'sender_name' => $viewer->name,
+            'sender_email_encrypted' => encrypt($viewer->email),
+            'message_encrypted' => encrypt('Hello there'),
+            'is_read' => false,
+        ]);
+
+        $this->actingAs($viewer)
+            ->withSession(['age_confirmed_18' => true])
+            ->get(route('account.messages.index'))
+            ->assertOk()
+            ->assertDontSee('Active now')
+            ->assertDontSee('title="Active now"', false);
+
+        $offlinePeer->forceFill(['last_active_at' => now()->subMinute()])->saveQuietly();
+
+        $this->actingAs($viewer)
+            ->withSession(['age_confirmed_18' => true])
+            ->get(route('account.messages.index'))
+            ->assertOk()
+            ->assertSee('Active now')
+            ->assertSee('title="Active now"', false);
     }
 }
