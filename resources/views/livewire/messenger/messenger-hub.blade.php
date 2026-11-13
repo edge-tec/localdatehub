@@ -880,7 +880,7 @@
                     </p>
                 </div>
                 <a 
-                    href="{{ route('listings.index') }}"
+                    href="{{ route('search.index') }}"
                     class="px-4 py-2 rounded-xl bg-[#F20B65] text-white text-xs font-black shadow-md transition hover:bg-[#d90858]"
                     style="background-color: #F20B65 !important; color: #ffffff !important;"
                 >
