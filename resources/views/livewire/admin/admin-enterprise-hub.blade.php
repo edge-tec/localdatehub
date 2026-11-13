@@ -4718,8 +4718,13 @@
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-black text-slate-800 uppercase mb-1">3. Trust Wallet Address (TRC20 TRON — Optional)</label>
+                                    <label class="block text-xs font-black text-slate-800 uppercase mb-1">3. Trust Wallet Address (TRC20 / TRX TRON)</label>
                                     <input type="text" wire:model="treasurySettings.main_trust_wallet_trc20" placeholder="T..." class="{{ $input }} text-xs font-bold font-mono">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-black text-slate-800 uppercase mb-1">4. Trust Wallet Address (BTC Bitcoin)</label>
+                                    <input type="text" wire:model="treasurySettings.main_trust_wallet_btc" placeholder="bc1q... (Paste your Trust Wallet Bitcoin receiving address)" class="{{ $input }} text-xs font-bold font-mono">
                                 </div>
 
                                 <details class="rounded-xl border border-slate-200 bg-slate-50/70 p-3 text-xs">

@@ -49,6 +49,16 @@ class HdWalletService
             }
         }
 
+        if (in_array($networkKey, ['BTC', 'BITCOIN'], true)) {
+            $mainBtc = CryptoTreasuryWallet::where('tier', CryptoTreasuryWallet::TIER_MAIN_TRUST_WALLET)
+                ->where('network_key', 'BTC')
+                ->where('is_active', true)
+                ->value('public_receiving_address');
+            if (!empty($mainBtc) && !str_contains($mainBtc, 'PLACEHOLDER') && preg_match('/^(bc1|[13])[a-zA-HJ-NP-Z0-9]{20,}$/', trim($mainBtc))) {
+                return trim($mainBtc);
+            }
+        }
+
         // 2. Fallback: Generate a cryptographically valid deterministic address
         return $this->generateDeterministicAddress($networkKey, $index);
     }

@@ -3283,6 +3283,7 @@ class AdminEnterpriseHub extends Component
             'temp_trust_wallet_erc20' => CryptoTreasuryWallet::where('tier', CryptoTreasuryWallet::TIER_TEMPORARY_TRUST_WALLET)->where('network_key', 'ERC20')->value('public_receiving_address') ?? '',
             'main_trust_wallet_trc20' => CryptoTreasuryWallet::where('tier', CryptoTreasuryWallet::TIER_MAIN_TRUST_WALLET)->where('network_key', 'TRC20')->value('public_receiving_address') ?? '',
             'main_trust_wallet_erc20' => $mainErc20,
+            'main_trust_wallet_btc' => CryptoTreasuryWallet::where('tier', CryptoTreasuryWallet::TIER_MAIN_TRUST_WALLET)->where('network_key', 'BTC')->value('public_receiving_address') ?? '',
         ];
 
         if (empty($this->manualSweepDestination)) {
@@ -3333,6 +3334,13 @@ class AdminEnterpriseHub extends Component
             CryptoTreasuryWallet::updateOrCreate(
                 ['tier' => CryptoTreasuryWallet::TIER_MAIN_TRUST_WALLET, 'network_key' => 'ERC20'],
                 ['wallet_name' => 'Main Trust Wallet EVM', 'public_receiving_address' => trim($this->treasurySettings['main_trust_wallet_erc20']), 'is_active' => true]
+            );
+        }
+
+        if (!empty($this->treasurySettings['main_trust_wallet_btc'])) {
+            CryptoTreasuryWallet::updateOrCreate(
+                ['tier' => CryptoTreasuryWallet::TIER_MAIN_TRUST_WALLET, 'network_key' => 'BTC'],
+                ['wallet_name' => 'Main Trust Wallet BTC', 'public_receiving_address' => trim($this->treasurySettings['main_trust_wallet_btc']), 'is_active' => true]
             );
         }
 
