@@ -51,9 +51,8 @@ class LocationAutocomplete extends Component
 
     public function selectHighlighted(): void
     {
-        if ($this->selectedIndex >= 0) {
-            $this->selectItem($this->selectedIndex);
-        }
+        $index = $this->selectedIndex >= 0 ? $this->selectedIndex : 0;
+        $this->selectItem($index);
     }
 
     public function incrementHighlight(): void

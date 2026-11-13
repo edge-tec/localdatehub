@@ -1,4 +1,4 @@
-<div class="relative w-full" x-data="{ open: @entangle('isOpen') }" @click.outside="open = false">
+<div class="relative w-full" x-data @click.outside="if ($wire.isOpen) $wire.set('isOpen', false)">
     <!-- Input Field -->
     <div class="relative flex items-center">
         <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -14,8 +14,9 @@
             wire:keydown.arrow-down.prevent="incrementHighlight"
             wire:keydown.arrow-up.prevent="decrementHighlight"
             wire:keydown.enter.prevent="selectHighlighted"
-            wire:keydown.escape="isOpen = false"
+            wire:keydown.escape="$set('isOpen', false)"
             placeholder="{{ $placeholder }}"
+            autocomplete="off"
             class="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-10 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition shadow-inner">
 
         <!-- Loading spinner -->
