@@ -504,7 +504,8 @@
                         <div class="flex items-end gap-1.5 max-w-[85%] sm:max-w-[75%] {{ $isOutgoing ? 'flex-row-reverse' : 'flex-row' }}">
                             <!-- Bubble -->
                             <div 
-                                class="rounded-2xl px-4 py-2.5 text-xs font-normal leading-relaxed break-words shadow-2xs relative {{ $isOutgoing ? 'bg-gradient-to-r from-[#F20B65] to-rose-600 text-white rounded-br-xs' : 'bg-slate-100 text-slate-900 border border-slate-200/80 rounded-bl-xs' }}"
+                                class="rounded-2xl px-4 py-2.5 text-[13px] leading-relaxed break-words shadow-2xs relative {{ $isOutgoing ? 'bg-gradient-to-r from-[#F20B65] to-rose-600 text-white font-semibold antialiased rounded-br-xs' : 'bg-slate-100 text-slate-900 font-medium border border-slate-200/80 rounded-bl-xs' }}"
+                                @if($isOutgoing) style="color: #ffffff !important;" @endif
                             >
                                 <!-- Attached File/Image Rendering -->
                                 @if($message->attachment_path)
@@ -537,7 +538,7 @@
 
                                 <!-- Message Text -->
                                 @if($message->message_encrypted)
-                                    <p class="whitespace-pre-wrap">{{ $message->message_encrypted }}</p>
+                                    <p class="whitespace-pre-wrap {{ $isOutgoing ? 'text-white font-semibold' : 'text-slate-900' }}" @if($isOutgoing) style="color: #ffffff !important;" @endif>{{ $message->message_encrypted }}</p>
                                 @endif
 
                                 <!-- Reactions on bubble -->
