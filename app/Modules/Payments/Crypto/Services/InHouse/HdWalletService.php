@@ -39,7 +39,7 @@ class HdWalletService
 
         // 1b. For TRON (TRC20/TRX), if a real Main Trust Wallet TRON address is configured (non-placeholder),
         // route deposits directly to Trust Wallet since on-chain TRON private-key sweeping is not enabled.
-        if (in_array($networkKey, ['TRC20', 'TRX'], true)) {
+        if (in_array($networkKey, ['TRC20', 'TRX', 'TRON'], true)) {
             $mainTrc20 = CryptoTreasuryWallet::where('tier', CryptoTreasuryWallet::TIER_MAIN_TRUST_WALLET)
                 ->where('network_key', 'TRC20')
                 ->where('is_active', true)

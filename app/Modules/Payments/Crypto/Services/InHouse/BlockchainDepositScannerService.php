@@ -46,7 +46,7 @@ class BlockchainDepositScannerService
         $netKey = strtoupper($network->network_key);
 
         try {
-            if (in_array($netKey, ['TRC20', 'TRX'], true)) {
+            if (in_array($netKey, ['TRC20', 'TRX', 'TRON'], true)) {
                 $this->scanTron($invoice, $network, $publicAddress);
             } elseif (in_array($netKey, ['BTC', 'BITCOIN'], true)) {
                 $this->scanBitcoin($invoice, $network, $publicAddress);
