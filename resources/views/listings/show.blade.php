@@ -1309,46 +1309,113 @@
 
         <!-- Report Listing Modal -->
         <x-modal name="report-modal" title="Report Listing Violations">
-            <form action="{{ route('listings.report.submit', $listing->id) }}" method="POST" class="space-y-4">
+            <form
+                action="{{ route('listings.report.submit', $listing->id) }}"
+                method="POST"
+                class="space-y-4"
+                x-data="{
+                    reason: @js(old('report_reason', '')),
+                    details: @js(old('report_details', '')),
+                    submitting: false,
+                    categories: [
+                        { value: 'underage_minor', title: 'Underage / Minor Content', desc: 'Immediate 24/7 escalation', badge: 'Critical', color: 'rose' },
+                        { value: 'commercial_sex', title: 'Commercial Sex / Escort', desc: 'FOSTA-SESTA violation', badge: 'Critical', color: 'rose' },
+                        { value: 'non_consensual_content', title: 'Non-Consensual / Stolen Photos', desc: 'Unauthorized imagery', badge: 'High', color: 'amber' },
+                        { value: 'fraud_scam', title: 'Scam, Wire or Impersonation', desc: 'Financial fraud attempt', badge: 'High', color: 'amber' },
+                        { value: 'harassment', title: 'Harassment or Hate Speech', desc: 'Abusive or threatening behavior', badge: 'Safety', color: 'slate' },
+                        { value: 'other', title: 'Other Policy Violation', desc: 'Spam or community rules', badge: 'General', color: 'slate' }
+                    ]
+                }"
+                @submit="if (reason && details.trim().length >= 10) submitting = true"
+            >
                 @csrf
                 <!-- Anti-Spam Honeypot -->
                 <input type="text" name="report_hp" style="display:none;" tabindex="-1" autocomplete="off">
+                <input type="hidden" name="report_reason" x-model="reason">
 
-                <div>
-                    <label for="report-reason" class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5">
-                        Violation Category <span class="text-[#F20B65]">*</span>
-                    </label>
-                    <select
-                        id="report-reason"
-                        name="report_reason"
-                        required
-                        class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2.5 text-xs text-slate-900 focus:ring-2 focus:ring-[#F20B65]"
-                    >
-                        <option value="">Select Primary Violation Reason</option>
-                        <option value="underage_minor">Underage or Minor-Related Content (Immediate Escalation)</option>
-                        <option value="commercial_sex">Commercial Sex Work, Prostitution, or Escort (FOSTA-SESTA)</option>
-                        <option value="non_consensual_content">Non-Consensual Imagery or Stolen Photos</option>
-                        <option value="fraud_scam">Financial Scam, Wire Request, or Impersonation</option>
-                        <option value="harassment">Harassment, Stalking, or Hate Speech</option>
-                        <option value="other">Other Community Standards Violation</option>
-                    </select>
+                <!-- Trust & Safety Header Banner -->
+                <div class="flex items-start gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-rose-50 via-pink-50/70 to-amber-50/60 border border-rose-200/70">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#F20B65] to-rose-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                        <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286zm0 13.036h.008v.008H12v-.008z" />
+                        </svg>
+                    </div>
+                    <div class="text-xs leading-relaxed">
+                        <p class="font-extrabold text-slate-900">Confidential Trust &amp; Safety Report</p>
+                        <p class="text-slate-600 mt-0.5">Reports involving minors or trafficking are escalated 24/7 to law enforcement &amp; NCMEC. Your identity stays private.</p>
+                    </div>
                 </div>
 
+                <!-- Step 1: Visual Violation Category Cards -->
                 <div>
-                    <label for="report-details" class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5">
-                        Explanation &amp; Context <span class="text-[#F20B65]">*</span>
-                    </label>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-[11px] font-extrabold text-slate-800 uppercase tracking-wider">
+                            1. Select Violation Category <span class="text-[#F20B65]">*</span>
+                        </label>
+                        <span x-show="!reason" class="text-[11px] font-semibold text-rose-500">Required</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <template x-for="cat in categories" :key="cat.value">
+                            <button
+                                type="button"
+                                @click="reason = cat.value"
+                                :class="reason === cat.value
+                                    ? 'border-[#F20B65] bg-pink-50/70 ring-2 ring-[#F20B65]/20 shadow-xs'
+                                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70'"
+                                class="text-left p-2.5 rounded-xl border transition-all duration-150 flex items-start justify-between gap-2 group"
+                            >
+                                <div class="min-w-0">
+                                    <div class="text-xs font-bold text-slate-900 truncate" x-text="cat.title"></div>
+                                    <div class="text-[11px] text-slate-500 truncate mt-0.5" x-text="cat.desc"></div>
+                                </div>
+                                <span
+                                    :class="{
+                                        'bg-rose-100 text-rose-700': cat.color === 'rose',
+                                        'bg-amber-100 text-amber-800': cat.color === 'amber',
+                                        'bg-slate-100 text-slate-600': cat.color === 'slate'
+                                    }"
+                                    class="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide shrink-0"
+                                    x-text="cat.badge"
+                                ></span>
+                            </button>
+                        </template>
+                    </div>
+                    @error('report_reason')
+                        <p class="mt-1.5 text-xs font-semibold text-rose-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Step 2: Explanation with Live Character Counter -->
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label for="report-details" class="text-[11px] font-extrabold text-slate-800 uppercase tracking-wider">
+                            2. Explanation &amp; Context <span class="text-[#F20B65]">*</span>
+                        </label>
+                        <span
+                            class="text-[11px] font-semibold"
+                            :class="details.trim().length >= 10 ? 'text-emerald-600' : 'text-amber-600'"
+                            x-text="details.trim().length < 10 ? (10 - details.trim().length) + ' more chars needed (min 10)' : details.length + ' / 3000 chars'"
+                        ></span>
+                    </div>
                     <textarea
                         id="report-details"
                         name="report_details"
-                        rows="4"
+                        x-model="details"
+                        rows="3"
+                        minlength="10"
+                        maxlength="3000"
                         required
-                        class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#F20B65]"
-                        placeholder="Please describe why this listing violates community standards..."
-                    >{{ old('report_details') }}</textarea>
+                        class="w-full bg-slate-50/80 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-[#F20B65] focus:ring-2 focus:ring-[#F20B65]/20 transition"
+                        placeholder="Please describe what happened or which policy this listing violates (minimum 10 characters)..."
+                    ></textarea>
+                    @error('report_details')
+                        <p class="mt-1 text-xs font-semibold text-rose-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Step 3: Optional Contact Info -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                     <x-input
                         name="reporter_name"
                         label="Your Name (Optional)"
@@ -1364,19 +1431,34 @@
                     />
                 </div>
 
-                <div class="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-950 font-medium">
-                    <strong>Notice:</strong> Reports concerning minors or human trafficking are prioritized 24/7 and referred to law enforcement and NCMEC.
+                <!-- Turnstile Security Check -->
+                <div class="rounded-xl bg-slate-50/70 border border-slate-200/80 p-2.5">
+                    <x-turnstile action="listing_report" />
+                    @error('cf-turnstile-response')
+                        <p class="mt-1 text-xs font-semibold text-rose-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
-                <x-turnstile action="listing_report" />
-
-                <div class="pt-2 flex justify-end gap-3">
-                    <x-button type="button" variant="secondary" @click="$dispatch('close-modal', 'report-modal')">
-                        Cancel
-                    </x-button>
-                    <x-button type="submit" variant="danger">
-                        Submit Confidential Report
-                    </x-button>
+                <!-- Footer Actions -->
+                <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-3">
+                    <span class="text-[11px] text-slate-400 hidden sm:inline">Protected &amp; encrypted submission</span>
+                    <div class="flex items-center gap-2.5 ml-auto">
+                        <x-button type="button" variant="secondary" @click="$dispatch('close-modal', 'report-modal')">
+                            Cancel
+                        </x-button>
+                        <button
+                            type="submit"
+                            :disabled="!reason || details.trim().length < 10 || submitting"
+                            :class="(!reason || details.trim().length < 10 || submitting) ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-95 shadow-md shadow-rose-500/20'"
+                            class="px-5 py-2.5 rounded-xl font-extrabold text-xs text-white transition inline-flex items-center gap-2"
+                            style="background: linear-gradient(135deg, #E11D48 0%, #BE123C 100%) !important;"
+                        >
+                            <svg x-show="!submitting" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0l2.77-.693a9 9 0 016.208.682l.108.054a9 9 0 006.086.71l3.114-.732a48.524 48.524 0 01-.005-10.499l-3.11.732a9 9 0 01-6.085-.711l-.108-.054a9 9 0 00-6.208-.682L3 4.5M3 15V4.5" />
+                            </svg>
+                            <span x-text="submitting ? 'Submitting...' : 'Submit Confidential Report'"></span>
+                        </button>
+                    </div>
                 </div>
             </form>
         </x-modal>
