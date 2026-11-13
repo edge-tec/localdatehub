@@ -164,20 +164,6 @@
                     <span class="text-[11px] font-semibold text-slate-400">LocalDateHub Messenger</span>
                 </div>
             </div>
-
-            <div class="flex items-center gap-1">
-                <button 
-                    type="button" 
-                    wire:click="$toggle('showNewMessageModal')"
-                    class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-pink-50 text-slate-600 hover:text-[#F20B65] flex items-center justify-center transition"
-                    title="Start New Conversation"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                        <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                        <path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/>
-                    </svg>
-                </button>
-            </div>
         </div>
 
         <!-- Search Input -->
@@ -892,14 +878,13 @@
                         Select a conversation from the sidebar to view active messages, or start a new inquiry on any verified classified listing.
                     </p>
                 </div>
-                <button 
-                    type="button" 
-                    wire:click="$toggle('showNewMessageModal')"
+                <a 
+                    href="{{ route('listings.index') }}"
                     class="px-4 py-2 rounded-xl bg-[#F20B65] text-white text-xs font-black shadow-md transition hover:bg-[#d90858]"
                     style="background-color: #F20B65 !important; color: #ffffff !important;"
                 >
-                    New Message
-                </button>
+                    Browse Classified Ads
+                </a>
             </div>
         @endif
     </main>
@@ -1183,67 +1168,6 @@
         </button>
         <img :src="lightboxUrl" alt="Enlarged photo" class="max-h-[90vh] max-w-[90vw] rounded-2xl shadow-2xl object-contain" />
     </div>
-
-    <!-- New Message Compose Modal -->
-    @if($showNewMessageModal)
-        <div class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div class="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-md p-6 space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <h3 class="text-sm font-black text-slate-900 tracking-tight">New Conversation</h3>
-                    <button wire:click="$set('showNewMessageModal', false)" class="text-slate-400 hover:text-slate-700 text-lg font-bold">&times;</button>
-                </div>
-
-                <div class="space-y-3">
-                    <!-- Recipient Selection -->
-                    <div>
-                        <label class="text-[11px] font-bold text-slate-600 block mb-1">Select Member</label>
-                        @php
-                            $availableUsers = \App\Models\User::where('id', '!=', Auth::id())->take(8)->get();
-                        @endphp
-                        <select wire:model="selectedRecipientIdForNew" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#F20B65]/20">
-                            <option value="">-- Choose Member --</option>
-                            @foreach($availableUsers as $u)
-                                <option value="{{ $u->id }}">{{ $u->name }} ({{ $u->username ?? $u->email }})</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Optional Listing Reference -->
-                    <div>
-                        <label class="text-[11px] font-bold text-slate-600 block mb-1">Attach to Classified Listing (Optional)</label>
-                        @php
-                            $availableAds = \App\Modules\Listings\Models\Listing::where('status', 'active')->latest()->take(10)->get();
-                        @endphp
-                        <select wire:model="selectedListingIdForNew" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#F20B65]/20">
-                            <option value="">-- Direct Chat (No Listing) --</option>
-                            @foreach($availableAds as $ad)
-                                <option value="{{ $ad->id }}">{{ $ad->title }} ({{ $ad->city?->name }})</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="pt-2 flex items-center justify-end gap-2">
-                        <button wire:click="$set('showNewMessageModal', false)" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs hover:bg-slate-200">
-                            Cancel
-                        </button>
-                        <button 
-                            type="button" 
-                            wire:click="
-                                @if($selectedRecipientIdForNew)
-                                    selectConversation('{{ $selectedRecipientIdForNew }}_{{ $selectedListingIdForNew ?: 0 }}');
-                                    $set('showNewMessageModal', false);
-                                @endif
-                            "
-                            class="px-4 py-2 rounded-xl bg-[#F20B65] text-white font-bold text-xs hover:bg-[#d90858]"
-                            style="background-color: #F20B65 !important; color: #ffffff !important;"
-                        >
-                            Open Chat
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
 
     <!-- Block User Confirmation Modal -->
     @if($blockConfirmModal)

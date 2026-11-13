@@ -117,6 +117,8 @@ class ListingOnlineIndicatorTest extends TestCase
             ->withSession(['age_confirmed_18' => true])
             ->get(route('account.messages.index'))
             ->assertOk()
+            ->assertDontSee('Select Member')
+            ->assertDontSee('Attach to Classified Listing')
             ->assertDontSee('Active now')
             ->assertDontSee('title="Active now"', false);
 
