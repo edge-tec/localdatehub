@@ -224,9 +224,9 @@
                     href="{{ route('account.dashboard', ['tab' => 'overview']) }}"
                     wire:click.prevent="setTab('overview')"
                     @click="close()"
-                    class="px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'overview' ? 'font-black shadow-xs bg-[#fff1f2] text-[#F20B65] border-2 border-[#F20B65]' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
+                    class="px-3.5 py-2 rounded-xl transition-all duration-150 flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $tab === 'overview' ? 'font-bold shadow-sm bg-slate-900 text-white' : 'bg-white text-slate-700 hover:text-slate-950 hover:bg-slate-50 border border-slate-200/90 font-semibold shadow-2xs' }}"
                 >
-                    <svg class="w-4 h-4 {{ $tab === 'overview' ? 'text-[#F20B65]' : 'text-slate-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                    <svg class="w-4 h-4 {{ $tab === 'overview' ? 'text-rose-400' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                     <span>Overview</span>
                 </a>
 
@@ -238,14 +238,14 @@
                     <button
                         type="button"
                         @click="toggle('listings')"
-                        class="px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $isListingsGroupActive ? 'font-black shadow-xs bg-[#fff1f2] text-[#F20B65] border-2 border-[#F20B65]' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
+                        class="px-3.5 py-2 rounded-xl transition-all duration-150 flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $isListingsGroupActive ? 'font-bold shadow-sm bg-slate-900 text-white' : 'bg-white text-slate-700 hover:text-slate-950 hover:bg-slate-50 border border-slate-200/90 font-semibold shadow-2xs' }}"
                     >
-                        <svg class="w-4 h-4 {{ $isListingsGroupActive ? 'text-[#F20B65]' : 'text-slate-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                        <svg class="w-4 h-4 {{ $isListingsGroupActive ? 'text-rose-400' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                         <span>Listings &amp; Ads</span>
-                        <span class="px-2 py-0.5 rounded-full text-[11px] font-black {{ $isListingsGroupActive ? 'bg-[#fce7f3] text-[#F20B65]' : 'bg-slate-200 text-slate-800' }}">
-                            {{ $totalListings }}
+                        <span class="px-2 py-0.5 rounded-md text-[11px] font-bold {{ $isListingsGroupActive ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-700' }}">
+                            {{ number_format($totalListings) }}
                         </span>
-                        <svg class="w-3.5 h-3.5 transition-transform duration-200 text-slate-500" :class="{ 'rotate-180': activeMenu === 'listings' }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                        <svg class="w-3.5 h-3.5 transition-transform duration-200 {{ $isListingsGroupActive ? 'text-slate-300' : 'text-slate-400' }}" :class="{ 'rotate-180': activeMenu === 'listings' }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                     </button>
 
                     <!-- Dropdown Menu -->
@@ -347,14 +347,14 @@
                     <button
                         type="button"
                         @click="toggle('account')"
-                        class="px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $isAccountGroupActive ? 'font-black shadow-xs bg-[#fff1f2] text-[#F20B65] border-2 border-[#F20B65]' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
+                        class="px-3.5 py-2 rounded-xl transition-all duration-150 flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $isAccountGroupActive ? 'font-bold shadow-sm bg-slate-900 text-white' : 'bg-white text-slate-700 hover:text-slate-950 hover:bg-slate-50 border border-slate-200/90 font-semibold shadow-2xs' }}"
                     >
-                        <svg class="w-4 h-4 {{ $isAccountGroupActive ? 'text-[#F20B65]' : 'text-slate-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        <svg class="w-4 h-4 {{ $isAccountGroupActive ? 'text-rose-400' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                         <span>Account &amp; Trust</span>
                         @if($isIdentityVerified)
                             <x-verified-badge variant="icon" size="w-4 h-4" />
                         @endif
-                        <svg class="w-3.5 h-3.5 transition-transform duration-200 text-slate-500" :class="{ 'rotate-180': activeMenu === 'account' }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                        <svg class="w-3.5 h-3.5 transition-transform duration-200 {{ $isAccountGroupActive ? 'text-slate-300' : 'text-slate-400' }}" :class="{ 'rotate-180': activeMenu === 'account' }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                     </button>
 
                     <!-- Dropdown Menu -->
@@ -496,14 +496,14 @@
                     <button
                         type="button"
                         @click="toggle('billing')"
-                        class="px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $isBillingGroupActive ? 'font-black shadow-xs bg-[#fff1f2] text-[#F20B65] border-2 border-[#F20B65]' : 'bg-slate-50 text-slate-800 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 font-bold shadow-2xs' }}"
+                        class="px-3.5 py-2 rounded-xl transition-all duration-150 flex items-center gap-2 shrink-0 cursor-pointer select-none {{ $isBillingGroupActive ? 'font-bold shadow-sm bg-slate-900 text-white' : 'bg-white text-slate-700 hover:text-slate-950 hover:bg-slate-50 border border-slate-200/90 font-semibold shadow-2xs' }}"
                     >
-                        <svg class="w-4 h-4 {{ $isBillingGroupActive ? 'text-[#F20B65]' : 'text-slate-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                        <svg class="w-4 h-4 {{ $isBillingGroupActive ? 'text-rose-400' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
                         <span>Plans &amp; Billing</span>
                         @if($activeSubscription)
-                            <span class="w-2 h-2 rounded-full bg-purple-500" title="Active Subscription"></span>
+                            <span class="w-2 h-2 rounded-full bg-purple-400" title="Active Subscription"></span>
                         @endif
-                        <svg class="w-3.5 h-3.5 transition-transform duration-200 text-slate-500" :class="{ 'rotate-180': activeMenu === 'billing' }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                        <svg class="w-3.5 h-3.5 transition-transform duration-200 {{ $isBillingGroupActive ? 'text-slate-300' : 'text-slate-400' }}" :class="{ 'rotate-180': activeMenu === 'billing' }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                     </button>
 
                     <!-- Dropdown Menu -->
@@ -563,29 +563,38 @@
                 </div>
             </div>
 
-            <!-- Right: Currently active status tag / quick breadcrumb -->
-            <div class="hidden md:flex items-center gap-2 text-xs text-slate-500 font-semibold">
-                <span class="text-slate-400">Current View:</span>
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black bg-rose-50 text-[#F20B65] border border-rose-200 shadow-2xs">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#F20B65] animate-pulse"></span>
-                    {{ match($tab) {
-                        'overview' => 'Overview',
-                        'listings', 'active', 'pending', 'rejected', 'expired', 'suspended' => 'My Listings (' . $totalListings . ')',
-                        'saved' => 'Saved Listings (' . $savedListingsCount . ')',
-                        'promotions' => 'Promotions & Boosts',
-                        'analytics' => 'Performance Analytics',
-                        'profile' => 'Profile Details',
-                        'age_assurance' => '18+ Age Assurance',
-                        'security' => 'Security & Password',
-                        'privacy' => 'Privacy Preferences',
-                        'blocked_users' => 'Blocked Users (' . count($blockedUsers) . ')',
-                        'subscription' => 'Subscription Plan',
-                        'billing' => 'Billing & Invoices',
-                        'messages' => 'Messages',
-                        'notifications' => 'Notifications',
-                        default => ucfirst(str_replace('_', ' ', $tab))
-                    } }}
-                </span>
+            <!-- Right: Clean Breadcrumb Indicator -->
+            <div class="hidden md:flex items-center gap-2 text-xs">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-600 font-semibold">
+                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                    <span class="text-slate-400">/</span>
+                    <span class="font-bold text-slate-900">
+                        {{ match($tab) {
+                            'overview' => 'Overview',
+                            'listings', 'active', 'pending', 'rejected', 'expired', 'suspended' => 'My Listings',
+                            'saved' => 'Saved Listings',
+                            'promotions' => 'Promotions & Boosts',
+                            'analytics' => 'Performance Analytics',
+                            'profile' => 'Profile Details',
+                            'age_assurance' => '18+ Age Assurance',
+                            'security' => 'Security & Password',
+                            'privacy' => 'Privacy Preferences',
+                            'blocked_users' => 'Blocked Users',
+                            'subscription' => 'Subscription Plan',
+                            'billing' => 'Billing & Invoices',
+                            'messages' => 'Messages',
+                            'notifications' => 'Notifications',
+                            default => ucfirst(str_replace('_', ' ', $tab))
+                        } }}
+                    </span>
+                    @if(in_array($tab, ['listings', 'active', 'pending', 'rejected', 'expired', 'suspended']))
+                        <span class="px-1.5 py-0.5 rounded-md bg-slate-900 text-white text-[10px] font-bold">{{ number_format($totalListings) }}</span>
+                    @elseif($tab === 'saved')
+                        <span class="px-1.5 py-0.5 rounded-md bg-slate-900 text-white text-[10px] font-bold">{{ number_format($savedListingsCount) }}</span>
+                    @elseif($tab === 'blocked_users')
+                        <span class="px-1.5 py-0.5 rounded-md bg-slate-900 text-white text-[10px] font-bold">{{ number_format(count($blockedUsers)) }}</span>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
