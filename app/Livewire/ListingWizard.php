@@ -104,13 +104,27 @@ class ListingWizard extends Component
                 }
             }
 
-            // Default location to TX / Austin if available
-            $defaultState = State::where('code', 'TX')->first() ?: State::first();
-            if ($defaultState) {
-                $this->state_id = $defaultState->id;
-                $defaultCity = City::where('state_id', $defaultState->id)->first();
-                if ($defaultCity) {
-                    $this->city_id = $defaultCity->id;
+            // Pre-select location from query params (e.g. "Post Ad in Akron") or default to TX / Austin
+            $requestedStateId = request()->integer('state_id');
+            $requestedCityId = request()->integer('city_id');
+
+            $selectedState = $requestedStateId ? State::find($requestedStateId) : null;
+            if ($selectedState) {
+                $this->state_id = $selectedState->id;
+                $selectedCity = $requestedCityId
+                    ? City::where('id', $requestedCityId)->where('state_id', $selectedState->id)->first()
+                    : City::where('state_id', $selectedState->id)->first();
+                if ($selectedCity) {
+                    $this->city_id = $selectedCity->id;
+                }
+            } else {
+                $defaultState = State::where('code', 'TX')->first() ?: State::first();
+                if ($defaultState) {
+                    $this->state_id = $defaultState->id;
+                    $defaultCity = City::where('state_id', $defaultState->id)->first();
+                    if ($defaultCity) {
+                        $this->city_id = $defaultCity->id;
+                    }
                 }
             }
         }
