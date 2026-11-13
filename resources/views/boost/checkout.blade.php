@@ -54,21 +54,15 @@
                         {'code': 'TRC20', 'name': 'Tron (TRC-20) - Low Fee', 'warning': 'Fastest confirmation & lowest fees.'},
                         {'code': 'BEP20', 'name': 'BNB Chain (BEP-20)', 'warning': 'Send only via BNB Smart Chain.'},
                         {'code': 'POLYGON', 'name': 'Polygon Network', 'warning': 'Ultra-low fees on Polygon.'},
-                        {'code': 'SOLANA', 'name': 'Solana Network', 'warning': 'Instant confirmation on Solana.'},
                         {'code': 'ERC20', 'name': 'Ethereum (ERC-20)', 'warning': 'High gas fees may apply.'}
                     ],
                     'USDC': [
                         {'code': 'ERC20', 'name': 'Ethereum (ERC-20)', 'warning': 'Send only ERC-20 USDC.'},
-                        {'code': 'POLYGON', 'name': 'Polygon Network', 'warning': 'Low fee on Polygon.'},
-                        {'code': 'SOLANA', 'name': 'Solana Network', 'warning': 'Fast SPL token transfer.'}
+                        {'code': 'POLYGON', 'name': 'Polygon Network', 'warning': 'Low fee on Polygon.'}
                     ],
                     'LTC': [{'code': 'LTC', 'name': 'Litecoin Mainnet', 'warning': 'Send only LTC via Litecoin network.'}],
                     'TRX': [{'code': 'TRON', 'name': 'TRON Network', 'warning': 'Send only TRX via TRON network.'}],
-                    'BNB': [{'code': 'BEP20', 'name': 'BNB Smart Chain', 'warning': 'Send only BNB via BEP-20.'}],
-                    'SOL': [{'code': 'SOLANA', 'name': 'Solana Network', 'warning': 'Send only SOL via Solana network.'}],
-                    'DOGE': [{'code': 'DOGE', 'name': 'Dogecoin Mainnet', 'warning': 'Send only DOGE via Dogecoin.'}],
-                    'BCH': [{'code': 'BCH', 'name': 'Bitcoin Cash Mainnet', 'warning': 'Send only BCH via Bitcoin Cash.'}],
-                    'XRP': [{'code': 'XRP', 'name': 'XRP Ledger', 'warning': 'Fast Ripple ledger payment.'}]
+                    'BNB': [{'code': 'BEP20', 'name': 'BNB Smart Chain', 'warning': 'Send only BNB via BEP-20.'}]
                 },
                 get currentNetworks() {
                     return this.availableNetworks[this.selectedCurrency] || [{'code': 'Native', 'name': 'Default Network', 'warning': ''}];

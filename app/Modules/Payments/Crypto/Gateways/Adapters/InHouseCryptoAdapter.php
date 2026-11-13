@@ -156,7 +156,7 @@ class InHouseCryptoAdapter implements CryptoPaymentGatewayInterface
 
     public function getSupportedCurrencies(): array
     {
-        return ['USDT', 'USDC', 'BTC', 'ETH', 'BNB', 'TRX', 'SOL', 'LTC'];
+        return ['USDT', 'USDC', 'BTC', 'ETH', 'BNB', 'TRX', 'LTC'];
     }
 
     public function getSupportedNetworks(string $currency): array
