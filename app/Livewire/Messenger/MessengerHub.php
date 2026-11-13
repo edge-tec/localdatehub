@@ -403,7 +403,7 @@ class MessengerHub extends Component
     {
         $this->validate([
             'messageText' => ['nullable', 'string', 'max:5000'],
-            'attachment' => ['nullable', 'file', 'max:15360'], // 15MB limit
+            'attachment' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf,doc,docx', 'max:15360'], // 15MB limit
         ]);
 
         $text = trim($this->messageText);
@@ -414,7 +414,29 @@ class MessengerHub extends Component
         $authId = Auth::id();
         $authUser = Auth::user();
 
-        if (!$this->activePeerId || !$authUser) {
+        if (!$this->activePeerId || !$authUser || $this->activePeerId === $authId) {
+            return;
+        }
+
+        $throttleKey = 'messenger_send:' . $authId;
+        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($throttleKey, 30)) {
+            $seconds = \Illuminate\Support\Facades\RateLimiter::availableIn($throttleKey);
+            $this->addError('messageText', "Too many messages sent. Please wait {$seconds} seconds.");
+            return;
+        }
+        \Illuminate\Support\Facades\RateLimiter::hit($throttleKey, 60);
+
+        $isBlocked = DB::table('user_blocks')
+            ->where(function ($q) use ($authId) {
+                $q->where('blocker_id', $authId)->where('blocked_id', $this->activePeerId);
+            })
+            ->orWhere(function ($q) use ($authId) {
+                $q->where('blocker_id', $this->activePeerId)->where('blocked_id', $authId);
+            })
+            ->exists();
+
+        if ($isBlocked) {
+            $this->addError('messageText', 'Messaging is unavailable because one of the participants has blocked the other.');
             return;
         }
 
@@ -424,11 +446,20 @@ class MessengerHub extends Component
         $attachmentSize = null;
 
         if ($this->attachment) {
-            $originalName = $this->attachment->getClientOriginalName();
-            $mime = $this->attachment->getMimeType();
+            $originalName = Str::limit(basename((string) $this->attachment->getClientOriginalName()), 180, '');
+            $mime = strtolower((string) $this->attachment->getMimeType());
             $size = $this->attachment->getSize();
             $isSanitizableImage = in_array($mime, ['image/jpeg', 'image/png', 'image/webp'], true);
-            $isImage = $isSanitizableImage || str_starts_with((string) $mime, 'image/');
+            $allowedDocMimes = [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            ];
+
+            if (!$isSanitizableImage && !in_array($mime, $allowedDocMimes, true)) {
+                $this->addError('attachment', 'Unsupported or unsafe file type. Only JPG, PNG, WebP, PDF, DOC, and DOCX files are allowed.');
+                return;
+            }
 
             if ($isSanitizableImage) {
                 try {
@@ -450,8 +481,8 @@ class MessengerHub extends Component
                 $attachmentSize = $size;
             }
 
-            $attachmentType = $isImage ? 'image' : 'file';
-            $attachmentName = $originalName;
+            $attachmentType = $isSanitizableImage ? 'image' : 'file';
+            $attachmentName = $originalName ?: 'attachment';
         }
 
         $subject = $this->activeListing

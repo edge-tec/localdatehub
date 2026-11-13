@@ -72,4 +72,55 @@ class SecurityAuditHardeningTest extends TestCase
         $response->assertSessionHas('error');
         $this->assertGuest();
     }
+
+    public function test_messenger_rejects_svg_and_html_file_uploads(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+        $sender = User::factory()->create();
+        $recipient = User::factory()->create();
+
+        $svgFile = \Illuminate\Http\UploadedFile::fake()->createWithContent(
+            'xss.svg',
+            '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'
+        );
+
+        Livewire::actingAs($sender)
+            ->test(MessengerHub::class, ['user' => $recipient->id])
+            ->set('attachment', $svgFile)
+            ->call('sendMessage')
+            ->assertHasErrors(['attachment']);
+
+        $htmlFile = \Illuminate\Http\UploadedFile::fake()->createWithContent(
+            'phish.html',
+            '<html><script>alert(1)</script></html>'
+        );
+
+        Livewire::actingAs($sender)
+            ->test(MessengerHub::class, ['user' => $recipient->id])
+            ->set('attachment', $htmlFile)
+            ->call('sendMessage')
+            ->assertHasErrors(['attachment']);
+
+        $this->assertSame(0, ContactMessage::where('sender_id', $sender->id)->count());
+    }
+
+    public function test_messenger_blocks_sending_when_either_user_is_blocked(): void
+    {
+        $sender = User::factory()->create();
+        $recipient = User::factory()->create();
+
+        \Illuminate\Support\Facades\DB::table('user_blocks')->insert([
+            'blocker_id' => $recipient->id,
+            'blocked_id' => $sender->id,
+            'created_at' => now(),
+        ]);
+
+        Livewire::actingAs($sender)
+            ->test(MessengerHub::class, ['user' => $recipient->id])
+            ->set('messageText', 'Bypass attempt message')
+            ->call('sendMessage')
+            ->assertHasErrors(['messageText']);
+
+        $this->assertSame(0, ContactMessage::where('sender_id', $sender->id)->count());
+    }
 }
