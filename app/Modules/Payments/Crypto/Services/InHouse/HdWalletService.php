@@ -37,6 +37,18 @@ class HdWalletService
             return $this->deriveFromXpub($masterXpub, $networkKey, $index);
         }
 
+        // 1b. For TRON (TRC20/TRX), if a real Main Trust Wallet TRON address is configured (non-placeholder),
+        // route deposits directly to Trust Wallet since on-chain TRON private-key sweeping is not enabled.
+        if (in_array($networkKey, ['TRC20', 'TRX'], true)) {
+            $mainTrc20 = CryptoTreasuryWallet::where('tier', CryptoTreasuryWallet::TIER_MAIN_TRUST_WALLET)
+                ->where('network_key', 'TRC20')
+                ->where('is_active', true)
+                ->value('public_receiving_address');
+            if (!empty($mainTrc20) && !str_contains($mainTrc20, 'PLACEHOLDER') && str_starts_with($mainTrc20, 'T')) {
+                return trim($mainTrc20);
+            }
+        }
+
         // 2. Fallback: Generate a cryptographically valid deterministic address
         return $this->generateDeterministicAddress($networkKey, $index);
     }

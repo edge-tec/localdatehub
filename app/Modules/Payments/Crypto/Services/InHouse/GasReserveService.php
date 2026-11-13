@@ -15,10 +15,31 @@ class GasReserveService
      * Check if a network's gas reserve can safely cover an estimated transaction fee
      * without breaching the protected emergency reserve threshold.
      */
-    public function canAffordGas(string $networkKey, float|string $estimatedFeeNative): bool
+    protected function resolveReserve(string $networkKey): ?CryptoGasReserve
     {
         $networkKey = strtoupper($networkKey);
         $reserve = CryptoGasReserve::where('network_key', $networkKey)->first();
+
+        if (!$reserve) {
+            $fallbackMap = [
+                'BNB' => 'BEP20',
+                'ETH' => 'ERC20',
+                'TRX' => 'TRC20',
+                'POLYGON' => 'ERC20',
+                'MATIC' => 'ERC20',
+            ];
+            if (isset($fallbackMap[$networkKey])) {
+                $reserve = CryptoGasReserve::where('network_key', $fallbackMap[$networkKey])->first();
+            }
+        }
+
+        return $reserve;
+    }
+
+    public function canAffordGas(string $networkKey, float|string $estimatedFeeNative): bool
+    {
+        $networkKey = strtoupper($networkKey);
+        $reserve = $this->resolveReserve($networkKey);
 
         if (!$reserve) {
             return false;
@@ -59,7 +80,10 @@ class GasReserveService
     ): CryptoGasTransaction {
         return DB::transaction(function () use ($networkKey, $feeNative, $feeUsd, $sweepTransactionId, $txHash) {
             $networkKey = strtoupper($networkKey);
-            $reserve = CryptoGasReserve::where('network_key', $networkKey)->lockForUpdate()->firstOrFail();
+            $resolved = $this->resolveReserve($networkKey);
+            $reserve = $resolved
+                ? CryptoGasReserve::where('id', $resolved->id)->lockForUpdate()->firstOrFail()
+                : CryptoGasReserve::where('network_key', $networkKey)->lockForUpdate()->firstOrFail();
 
             $fee = (float) $feeNative;
             $reserve->current_balance = max(0, (float) $reserve->current_balance - $fee);

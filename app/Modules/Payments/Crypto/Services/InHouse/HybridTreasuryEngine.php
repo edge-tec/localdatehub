@@ -83,6 +83,7 @@ class HybridTreasuryEngine
 
         $fiatUsd = (float) $invoice->fiat_amount_usd;
         $autoSweepThreshold = (float) CryptoPaymentSetting::get('auto_sweep_threshold_usd', 100.00);
+        $hasMasterSecret = !empty(CryptoPaymentSetting::get('hd_master_secret'));
 
         // Evaluate sweep cost & gas
         $costEstimate = $this->sweepCostCalculator->evaluateSweepEligibility(
@@ -91,6 +92,12 @@ class HybridTreasuryEngine
             $invoice->received_crypto_amount,
             $invoice->fiat_amount_usd
         );
+
+        // When real encrypted Master Seed/Key + Direct-to-Main Trust Wallet mode is active,
+        // sweep EVERY verified payment immediately regardless of $15 min_sweep_amount_usd.
+        if ($hasMasterSecret && $directToMain && $targetTreasury->id === ($mainTreasury?->id ?? -1)) {
+            return $this->executeAutomaticSmallSweep($invoice, $targetTreasury, $costEstimate);
+        }
 
         if (!$costEstimate->passes_admin_threshold) {
             // Cannot sweep safely right now (insufficient gas or unprofitable)
