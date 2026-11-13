@@ -788,23 +788,26 @@
                         </button>
                     </div>
 
-                    <a href="{{ route('listings.create') }}" class="px-4 py-2 bg-gradient-to-r from-rose-600 to-[#F20B83] text-white font-black rounded-xl text-xs transition shadow-xs hover:shadow-md self-start md:self-auto shrink-0 flex items-center gap-1.5">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                        <span>+ New Ad</span>
+                    <a href="{{ route('listings.create') }}" class="inline-flex items-center gap-1.5 whitespace-nowrap px-4 py-2.5 bg-gradient-to-r from-[#F20B83] to-rose-600 hover:from-[#d90858] hover:to-rose-700 text-white font-bold rounded-xl text-xs transition shadow-sm hover:shadow-md self-start md:self-auto shrink-0">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 4v16m8-8H4"/></svg>
+                        <span>New Ad</span>
                     </a>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-100">
-                    <input
-                        type="text"
-                        wire:model.live.debounce.300ms="listingSearch"
-                        placeholder="Search your listings by title..."
-                        class="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-[#F20B83]"
-                    >
+                    <div class="relative">
+                        <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <input
+                            type="text"
+                            wire:model.live.debounce.300ms="listingSearch"
+                            placeholder="Search your listings by title..."
+                            class="w-full bg-slate-50/80 border border-slate-200 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:border-[#F20B83] focus:ring-2 focus:ring-[#F20B83]/15 outline-none transition"
+                        >
+                    </div>
 
                     <select
                         wire:model.live="listingCategory"
-                        class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-semibold focus:ring-2 focus:ring-[#F20B83]"
+                        class="bg-slate-50/80 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-semibold focus:bg-white focus:border-[#F20B83] focus:ring-2 focus:ring-[#F20B83]/15 outline-none transition"
                     >
                         <option value="">All Categories</option>
                         @foreach($categories as $cat)
@@ -814,7 +817,7 @@
 
                     <select
                         wire:model.live="listingSort"
-                        class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-semibold focus:ring-2 focus:ring-[#F20B83]"
+                        class="bg-slate-50/80 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-semibold focus:bg-white focus:border-[#F20B83] focus:ring-2 focus:ring-[#F20B83]/15 outline-none transition"
                     >
                         <option value="newest">Sort: Newest First</option>
                         <option value="views">Sort: Most Views</option>
@@ -838,20 +841,20 @@
 
             <!-- Listings Stream -->
             @if($myListings->isNotEmpty())
-                <div class="bg-white border border-slate-200 rounded-3xl divide-y divide-slate-100 overflow-hidden shadow-xl">
+                <div class="bg-white border border-slate-200/90 rounded-2xl divide-y divide-slate-100 overflow-hidden shadow-sm">
                     @foreach($myListings as $listing)
-                        <div class="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/70 transition {{ $listing->status === 'active' ? 'border-l-4 border-l-emerald-500' : '' }}">
+                        <div class="p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 hover:bg-slate-50/60 transition {{ $listing->status === 'active' ? 'border-l-4 border-l-emerald-500' : '' }}">
                             <div class="flex items-start sm:items-center gap-4 min-w-0 flex-1">
                                 <input
                                     type="checkbox"
                                     value="{{ $listing->id }}"
                                     wire:model.live="selectedListings"
-                                    class="mt-1 sm:mt-0 rounded bg-slate-50 border-slate-300 text-[#F20B65] focus:ring-[#F20B65]"
+                                    class="mt-1 sm:mt-0 rounded-md bg-slate-50 border-slate-300 text-[#F20B83] focus:ring-[#F20B83] cursor-pointer"
                                 >
-                                <a href="{{ route('listings.show', $listing->slug) }}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-slate-900 shrink-0 border border-slate-200 flex items-center justify-center shadow-2xs hover:opacity-90 transition relative group">
+                                <a href="{{ route('listings.show', $listing->slug) }}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-slate-900 shrink-0 border border-slate-200 flex items-center justify-center shadow-2xs hover:opacity-90 transition relative group">
                                     @php $photo = $listing->primaryPhoto ?: $listing->allMedia->first(); @endphp
                                     @if($photo)
-                                        <img src="{{ $photo->thumbnail_url }}" alt="{{ $listing->title }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/featured-1.jpg') }}';" class="w-full h-full object-contain">
+                                        <img src="{{ $photo->thumbnail_url }}" alt="{{ $listing->title }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ asset('images/featured-1.jpg') }}';" class="w-full h-full object-cover">
                                     @else
                                         <div class="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-50 text-[10px] font-bold">
                                             <svg class="w-6 h-6 mb-0.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -859,21 +862,23 @@
                                         </div>
                                     @endif
                                 </a>
-                                <div class="space-y-1.5 min-w-0 flex-1">
+                                <div class="space-y-2 min-w-0 flex-1">
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase
-                                            @if($listing->status === 'active') bg-emerald-50 text-emerald-800 border border-emerald-300
-                                            @elseif($listing->status === 'pending_review') bg-amber-50 text-amber-900 border border-amber-300
-                                            @elseif($listing->status === 'rejected') bg-rose-50 text-rose-900 border border-rose-300
-                                            @elseif($listing->status === 'expired') bg-purple-50 text-purple-900 border border-purple-300
-                                            @elseif($listing->status === 'suspended') bg-red-50 text-red-900 border border-red-300
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wide
+                                            @if($listing->status === 'active') bg-emerald-50 text-emerald-700 border border-emerald-200
+                                            @elseif($listing->status === 'pending_review') bg-amber-50 text-amber-800 border border-amber-200
+                                            @elseif($listing->status === 'rejected') bg-rose-50 text-rose-800 border border-rose-200
+                                            @elseif($listing->status === 'expired') bg-purple-50 text-purple-800 border border-purple-200
+                                            @elseif($listing->status === 'suspended') bg-red-50 text-red-800 border border-red-200
                                             @else bg-slate-100 text-slate-700 border border-slate-200 @endif
                                         ">
+                                            <span class="w-1.5 h-1.5 rounded-full {{ $listing->status === 'active' ? 'bg-emerald-500' : 'bg-current' }}"></span>
                                             {{ str_replace('_', ' ', $listing->status) }}
                                         </span>
                                         @if($listing->is_featured)
-                                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-50 text-amber-900 border border-amber-300">
-                                                ★ Featured Spotlight
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200">
+                                                <svg class="w-3 h-3 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                                Featured
                                             </span>
                                         @endif
                                         @php $isPublicEmail = (bool) ($listing->contact?->show_email ?? false); @endphp
@@ -881,14 +886,20 @@
                                             type="button"
                                             wire:click="toggleListingEmailVisibility({{ $listing->id }})"
                                             title="Click to switch between Public Email and Encrypted Email"
-                                            class="px-2.5 py-0.5 rounded-full text-[10px] font-black border transition cursor-pointer {{ $isPublicEmail ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100' : 'bg-indigo-50 text-indigo-800 border-indigo-200 hover:bg-indigo-100' }}"
+                                            class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10px] font-bold border transition cursor-pointer {{ $isPublicEmail ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 'bg-indigo-50/70 text-indigo-700 border-indigo-200 hover:bg-indigo-100' }}"
                                         >
-                                            {{ $isPublicEmail ? '🌐 Email: Public (Click to Encrypt)' : '🔒 Email: Encrypted (Click to Make Public)' }}
+                                            @if($isPublicEmail)
+                                                <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                <span>Email: Public</span>
+                                            @else
+                                                <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                                <span>Email: Encrypted</span>
+                                            @endif
                                         </button>
-                                        <span class="text-xs text-slate-600 font-semibold">{{ $listing->category?->name }} &bull; {{ $listing->city?->name }}, {{ $listing->city?->state?->code }}</span>
+                                        <span class="text-[11px] text-slate-500 font-medium truncate">{{ $listing->category?->name }} &bull; {{ $listing->city?->name }}, {{ $listing->city?->state?->code }}</span>
                                     </div>
 
-                                    <h3 class="text-base font-black text-slate-950 truncate">
+                                    <h3 class="text-sm sm:text-base font-extrabold text-slate-900 truncate">
                                         <a href="{{ route('listings.show', $listing->slug) }}" class="hover:text-[#F20B83] transition">{{ $listing->title }}</a>
                                     </h3>
 
@@ -899,55 +910,70 @@
                                         </div>
                                     @endif
 
-                                    <div class="flex items-center gap-3 text-xs text-slate-700 font-semibold flex-wrap">
-                                        <span>Views: <strong class="text-slate-950 font-black">{{ $listing->view_count }}</strong></span>
-                                        <span>&bull;</span>
-                                        <span>Replies: <strong class="text-slate-950 font-black">{{ $listing->reply_count }}</strong></span>
-                                        <span>&bull;</span>
-                                        <span>Favorites: <strong class="text-slate-950 font-black">{{ $listing->favorite_count }}</strong></span>
-                                        <span>&bull;</span>
-                                        <span>Expires: <strong class="text-slate-950 font-black">{{ $listing->expires_at?->format('M d, Y') ?? 'Never' }}</strong></span>
+                                    <div class="flex items-center gap-3 text-[11px] text-slate-500 font-semibold flex-wrap">
+                                        <span class="inline-flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                            <strong class="text-slate-800">{{ number_format($listing->view_count) }}</strong> Views
+                                        </span>
+                                        <span class="inline-flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                                            <strong class="text-slate-800">{{ number_format($listing->reply_count) }}</strong> Replies
+                                        </span>
+                                        <span class="inline-flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                                            <strong class="text-slate-800">{{ number_format($listing->favorite_count) }}</strong> Saves
+                                        </span>
+                                        <span class="inline-flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                            Expires <strong class="text-slate-800">{{ $listing->expires_at?->format('M d, Y') ?? 'Never' }}</strong>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Action Buttons -->
-                            <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                            <div class="flex items-center gap-1.5 shrink-0 self-end lg:self-center flex-wrap">
                                 @if($listing->status === 'active')
-                                    <button wire:click="pauseListing({{ $listing->id }})" class="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs text-slate-800 font-bold transition shadow-2xs">
-                                        Pause
+                                    <button wire:click="pauseListing({{ $listing->id }})" class="inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-xs text-slate-700 border border-slate-200 font-bold transition shadow-2xs cursor-pointer">
+                                        <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        <span>Pause</span>
                                     </button>
                                 @elseif($listing->status === 'paused')
-                                    <button wire:click="resumeListing({{ $listing->id }})" class="px-3.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-xs text-emerald-800 border border-emerald-300 font-black transition shadow-2xs">
-                                        Resume
+                                    <button wire:click="resumeListing({{ $listing->id }})" class="inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-xs text-emerald-700 border border-emerald-200 font-bold transition shadow-2xs cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        <span>Resume</span>
                                     </button>
                                 @endif
 
                                 @if($listing->status === 'expired')
-                                    <button wire:click="renewListing({{ $listing->id }})" class="px-3.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-xs text-rose-800 border border-rose-300 font-black transition shadow-2xs">
-                                        Renew Ad
+                                    <button wire:click="renewListing({{ $listing->id }})" class="inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-xs text-rose-700 border border-rose-200 font-bold transition shadow-2xs cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                        <span>Renew</span>
                                     </button>
                                 @endif
 
                                 @if($listing->status === 'active')
-                                    <a href="{{ route('boost.checkout', $listing->id) }}" class="px-3.5 py-1.5 rounded-xl bg-pink-50 hover:bg-pink-100 text-[#F20B83] border border-pink-200 text-xs font-black transition shadow-2xs">
-                                        ⚡ Bump
+                                    <a href="{{ route('boost.checkout', $listing->id) }}" class="inline-flex items-center gap-1.5 whitespace-nowrap px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#F20B83] to-rose-600 hover:from-[#d90858] hover:to-rose-700 text-white text-xs font-bold transition shadow-xs hover:shadow-md">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                        <span>Bump</span>
                                     </a>
                                 @endif
 
                                 @if(!$listing->is_featured && $listing->status === 'active')
-                                    <button wire:click="openPromoteModal({{ $listing->id }})" class="px-3.5 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-300 text-xs font-black transition shadow-2xs">
-                                        Promote
+                                    <button wire:click="openPromoteModal({{ $listing->id }})" class="inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold transition shadow-2xs cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                                        <span>Promote</span>
                                     </button>
                                 @endif
 
-                                <a href="{{ route('listings.edit', $listing->id) }}" class="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs text-slate-800 font-bold transition shadow-2xs">
-                                    Edit
+                                <a href="{{ route('listings.edit', $listing->id) }}" class="inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-xs text-slate-700 border border-slate-200 font-bold transition shadow-2xs">
+                                    <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    <span>Edit</span>
                                 </a>
 
                                 <button
                                     wire:click="confirmDeleteListing({{ $listing->id }})"
-                                    class="p-2 rounded-xl text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition"
+                                    class="p-2 rounded-xl border border-transparent text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 transition cursor-pointer"
                                     title="Delete ad"
                                 >
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
