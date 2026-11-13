@@ -43,7 +43,16 @@ class SweepEngine
         }
 
         $treasury = $this->treasuryService->resolveAllowlistedDestination($network, $asset);
-        $estimatedFee = $this->gasManager->estimateRequiredFeeBaseUnits($network, $asset);
+        $adapter = $this->monitor->adapterFor($network);
+        $isLiveRealCustody = $broadcastLive && $this->signingGateway->provider()->providerKey() !== 'mock';
+        $feeParams = null;
+
+        if ($isLiveRealCustody && method_exists($adapter, 'getEip1559FeeParams')) {
+            $feeParams = $adapter->getEip1559FeeParams($network, $asset, $walletAddress->address, $treasury->wallet_address);
+            $estimatedFee = $feeParams['total_max_fee_base_units'];
+        } else {
+            $estimatedFee = $this->gasManager->estimateRequiredFeeBaseUnits($network, $asset);
+        }
 
         $sweep = DB::transaction(function () use ($deposit, $treasury, $network, $estimatedFee) {
             $existing = SweepTransaction::where('deposit_id', $deposit->id)->lockForUpdate()->first();
@@ -74,9 +83,17 @@ class SweepEngine
             return $this->sendToRecovery($deposit, $sweep, 'INSUFFICIENT_GAS_RESERVE');
         }
 
+        $sourceAmount = $deposit->amount_base_units;
+        if ($isLiveRealCustody && $asset->asset_type === 'native') {
+            $onChainBalance = $adapter->getAddressBalanceBaseUnits($network, $asset, $walletAddress->address);
+            if (BaseUnitMath::isPositive($onChainBalance) && BaseUnitMath::comp($onChainBalance, $sourceAmount) < 0) {
+                $sourceAmount = $onChainBalance;
+            }
+        }
+
         $netTransfer = $asset->asset_type === 'native'
-            ? BaseUnitMath::sub($deposit->amount_base_units, $estimatedFee)
-            : $deposit->amount_base_units;
+            ? BaseUnitMath::sub($sourceAmount, $estimatedFee)
+            : $sourceAmount;
 
         if (!BaseUnitMath::isPositive($netTransfer)) {
             return $this->sendToRecovery($deposit, $sweep, 'AMOUNT_BELOW_SWEEP_FEE');
@@ -112,8 +129,6 @@ class SweepEngine
         }
 
         try {
-            $adapter = $this->monitor->adapterFor($network);
-            $isLiveRealCustody = $broadcastLive && $this->signingGateway->provider()->providerKey() !== 'mock';
             $signingPayload = [
                 'chain_id' => $network->chain_id,
                 'from_address' => $walletAddress->address,
@@ -126,8 +141,7 @@ class SweepEngine
             if ($isLiveRealCustody && method_exists($adapter, 'getNextNonce')) {
                 $signingPayload['nonce'] = $adapter->getNextNonce($network, $walletAddress->address);
             }
-            if ($isLiveRealCustody && method_exists($adapter, 'getEip1559FeeParams')) {
-                $feeParams = $adapter->getEip1559FeeParams($network, $asset);
+            if ($feeParams !== null) {
                 $signingPayload['gas_limit'] = $feeParams['gas_limit'];
                 $signingPayload['max_fee_per_gas'] = $feeParams['max_fee_per_gas'];
                 $signingPayload['max_priority_fee_per_gas'] = $feeParams['max_priority_fee_per_gas'];
@@ -206,6 +220,11 @@ class SweepEngine
 
         if ($network && $asset && $sweep->transaction_hash) {
             $check = $this->monitor->adapterFor($network)->verifyTransaction($network, $asset, $sweep->transaction_hash);
+            if ($check['exists'] && $check['is_reverted'] && $sweep->deposit) {
+                $sweep->update(['transaction_hash' => null]);
+
+                return $this->sendToRecovery($sweep->deposit, $sweep->fresh(), 'SWEEP_TX_REVERTED');
+            }
             if ($check['exists'] && !$check['is_reverted'] && $check['confirmations'] >= 1) {
                 $sweep->update([
                     'status' => Deposit::STATUS_SWEPT,

@@ -170,11 +170,31 @@ class EvmAdapter implements BlockchainAdapterInterface
      *
      * @return array{gas_limit: string, max_fee_per_gas: string, max_priority_fee_per_gas: string, total_max_fee_base_units: string}
      */
-    public function getEip1559FeeParams(BlockchainNetwork $network, CryptoAsset $asset): array
-    {
-        $res = $this->rpc->jsonRpc($this->endpoints($network), 'eth_gasPrice');
+    public function getEip1559FeeParams(
+        BlockchainNetwork $network,
+        CryptoAsset $asset,
+        ?string $fromAddress = null,
+        ?string $toAddress = null
+    ): array {
+        $endpoints = $this->endpoints($network);
+        $res = $this->rpc->jsonRpc($endpoints, 'eth_gasPrice');
         $gasPriceWei = isset($res['result']) ? (int) hexdec((string) $res['result']) : 5000000000;
         $gasLimit = $asset->contract_address ? 65000 : 21000;
+
+        if ($fromAddress && $toAddress && empty($asset->contract_address)) {
+            $estRes = $this->rpc->jsonRpc($endpoints, 'eth_estimateGas', [[
+                'from' => $fromAddress,
+                'to' => $toAddress,
+                'value' => '0x1',
+            ]]);
+            if (!empty($estRes['result'])) {
+                $estimated = (int) hexdec((string) $estRes['result']);
+                if ($estimated > 21000) {
+                    $gasLimit = (int) ceil($estimated * 1.25);
+                }
+            }
+        }
+
         $priorityFee = max(100000000, min($gasPriceWei, 1500000000));
         $maxFeePerGas = max($gasPriceWei * 2, $priorityFee + 1000000000);
         $totalMaxFee = function_exists('bcmul')
