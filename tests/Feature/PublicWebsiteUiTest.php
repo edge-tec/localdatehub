@@ -205,7 +205,7 @@ class PublicWebsiteUiTest extends TestCase
     {
         $this->get(route('pages.about'))->assertStatus(200)->assertSee('Connecting Real Adults Safely');
         $this->get(route('pages.safety'))->assertStatus(200)->assertSee('Trust, Safety');
-        $this->get(route('pages.contact'))->assertStatus(200)->assertSee('Get in Touch with LocalDateHub');
+        $this->get(route('pages.contact'))->assertStatus(200)->assertSee("Need Help? We're Here for You!", false);
         $this->get(route('pages.privacy'))->assertStatus(200)->assertSee('Privacy Policy');
         $this->get(route('pages.terms'))->assertStatus(200)->assertSee('Terms of Service');
         $this->get(route('pages.pricing'))->assertStatus(200)->assertSee('Simple, Transparent Listing Options');
