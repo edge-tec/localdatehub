@@ -4035,128 +4035,152 @@
         {{-- ================= 13. PAYMENTS & REFUNDS ================= --}}
         @if($tab === 'payments')
             <!-- Platform Financial KPI Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
                 <!-- Card 1: Gross Platform Revenue -->
-                <div class="{{ $card }} p-5 border-l-4 border-l-emerald-700">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Gross Platform Revenue</span>
-                        <span class="p-2 bg-emerald-50 rounded-xl text-emerald-800">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200 p-5 relative overflow-hidden">
+                    <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500"></div>
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Gross Platform Revenue</span>
+                            <div class="mt-2 text-2xl sm:text-3xl font-black text-slate-950 font-mono tracking-tight tabular-nums">
+                                ${{ number_format($financialStats['gross_revenue'], 2) }}
+                            </div>
+                        </div>
+                        <span class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-sm shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </span>
                     </div>
-                    <div class="mt-2 text-2xl font-black text-slate-950 font-mono">
-                        ${{ number_format($financialStats['gross_revenue'], 2) }}
-                    </div>
-                    <div class="mt-1 text-xs text-slate-700 font-semibold flex items-center gap-1.5">
-                        <span class="text-emerald-800 font-bold">${{ number_format($financialStats['fiat_revenue'], 2) }} fiat</span>
-                        <span>•</span>
-                        <span class="text-amber-800 font-bold">${{ number_format($financialStats['crypto_volume'], 2) }} crypto</span>
+                    <div class="mt-3 pt-3 border-t border-slate-100 text-xs font-semibold flex flex-wrap items-center gap-2">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-bold">${{ number_format($financialStats['fiat_revenue'], 2) }} fiat</span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 font-bold">${{ number_format($financialStats['crypto_volume'], 2) }} crypto</span>
                     </div>
                 </div>
 
                 <!-- Card 2: Cryptocurrency Invoices -->
-                <div class="{{ $card }} p-5 border-l-4 border-l-amber-600">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Crypto Invoices</span>
-                        <span class="p-2 bg-amber-50 rounded-xl text-amber-800">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200 p-5 relative overflow-hidden">
+                    <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500"></div>
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Crypto Invoices</span>
+                            <div class="mt-2 text-2xl sm:text-3xl font-black text-slate-950 font-mono tracking-tight tabular-nums">
+                                ${{ number_format($financialStats['crypto_volume'], 2) }}
+                            </div>
+                        </div>
+                        <span class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-sm shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         </span>
                     </div>
-                    <div class="mt-2 text-2xl font-black text-slate-950 font-mono">
-                        ${{ number_format($financialStats['crypto_volume'], 2) }}
-                    </div>
-                    <div class="mt-1 text-xs text-slate-700 font-semibold">
-                        {{ $financialStats['crypto_orders_count'] }} Web3 blockchain orders (BTC/USDT/ETH/SOL)
+                    <div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-600 font-semibold flex items-center justify-between gap-2">
+                        <span>{{ $financialStats['crypto_orders_count'] }} Web3 blockchain orders</span>
+                        <span class="font-mono text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">Multi-Chain</span>
                     </div>
                 </div>
 
                 <!-- Card 3: Circulating Wallet Credits -->
-                <div class="{{ $card }} p-5 border-l-4 border-l-rose-700">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Circulating Credits</span>
-                        <span class="p-2 bg-rose-50 rounded-xl text-rose-800">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200 p-5 relative overflow-hidden">
+                    <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-rose-500 to-pink-600"></div>
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Circulating Credits</span>
+                            <div class="mt-2 text-2xl sm:text-3xl font-black text-slate-950 font-mono tracking-tight tabular-nums flex items-baseline gap-1.5">
+                                {{ number_format($financialStats['wallet_credits_circulation']) }}
+                                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">credits</span>
+                            </div>
+                        </div>
+                        <span class="w-11 h-11 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 text-white flex items-center justify-center shadow-sm shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
                         </span>
                     </div>
-                    <div class="mt-2 text-2xl font-black text-slate-950 font-mono">
-                        {{ number_format($financialStats['wallet_credits_circulation']) }}
-                        <span class="text-sm font-semibold text-slate-700">credits</span>
-                    </div>
-                    <div class="mt-1 text-xs text-slate-700 font-semibold">
-                        Across {{ $financialStats['wallet_txns_count'] }} ledger operations
+                    <div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-600 font-semibold">
+                        Across <span class="font-bold text-slate-900">{{ number_format($financialStats['wallet_txns_count']) }}</span> ledger operations
                     </div>
                 </div>
 
                 <!-- Card 4: Refunds & Risk Alerts -->
-                <div class="{{ $card }} p-5 border-l-4 border-l-purple-700">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Disputes & Refunds</span>
-                        <span class="p-2 bg-purple-50 rounded-xl text-purple-800">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z"></path></svg>
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200 p-5 relative overflow-hidden">
+                    <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-500 to-purple-600"></div>
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Disputes &amp; Refunds</span>
+                            <div class="mt-2 text-2xl sm:text-3xl font-black text-slate-950 font-mono tracking-tight tabular-nums">
+                                ${{ number_format($financialStats['total_refunded'], 2) }}
+                            </div>
+                        </div>
+                        <span class="w-11 h-11 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 text-white flex items-center justify-center shadow-sm shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                         </span>
                     </div>
-                    <div class="mt-2 text-2xl font-black text-slate-950 font-mono">
-                        ${{ number_format($financialStats['total_refunded'], 2) }}
-                    </div>
-                    <div class="mt-1 text-xs text-slate-700 font-semibold">
-                        {{ $financialStats['refunds_count'] }} refunds issued • {{ $financialStats['fraud_alerts_count'] }} risk flags
+                    <div class="mt-3 pt-3 border-t border-slate-100 text-xs font-semibold flex flex-wrap items-center gap-2">
+                        <span class="text-slate-600">{{ $financialStats['refunds_count'] }} refunds issued</span>
+                        <span class="text-slate-300">&bull;</span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md {{ $financialStats['fraud_alerts_count'] > 0 ? 'bg-rose-50 text-rose-700 font-bold' : 'bg-slate-100 text-slate-700 font-bold' }}">{{ $financialStats['fraud_alerts_count'] }} risk flags</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Segmented Sub-Tabs Navigation -->
-            <div class="flex items-center space-x-1 border-b border-slate-200 overflow-x-auto pb-2 mb-4 text-sm font-semibold">
-                <button wire:click="setPaymentSubTab('transactions')" class="px-3.5 py-2 rounded-xl transition flex items-center space-x-2 whitespace-nowrap {{ $paymentSubTab === 'transactions' ? 'bg-rose-600 text-white shadow' : 'text-slate-800 hover:bg-slate-100' }}">
-                    <span>All Gateway Transactions</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-xs font-mono {{ $paymentSubTab === 'transactions' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-900 font-bold' }}">{{ $transactions->total() }}</span>
-                </button>
-                <button wire:click="setPaymentSubTab('crypto')" class="px-3.5 py-2 rounded-xl transition flex items-center space-x-2 whitespace-nowrap {{ $paymentSubTab === 'crypto' ? 'bg-amber-600 text-white shadow' : 'text-slate-800 hover:bg-slate-100' }}">
-                    <span>Crypto & Web3 Orders</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-xs font-mono {{ $paymentSubTab === 'crypto' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-900 font-bold' }}">{{ $cryptoPayments->total() }}</span>
-                </button>
-                <button wire:click="setPaymentSubTab('treasury')" class="px-3.5 py-2 rounded-xl transition flex items-center space-x-2 whitespace-nowrap {{ $paymentSubTab === 'treasury' ? 'bg-emerald-600 text-white shadow' : 'text-slate-800 hover:bg-slate-100' }}">
-                    <span>Hybrid Treasury</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-xs font-mono {{ $paymentSubTab === 'treasury' ? 'bg-white/20 text-white' : ($pendingApprovals->count() > 0 ? 'bg-amber-200 text-amber-950 font-black' : 'bg-slate-200 text-slate-900 font-bold') }}">
-                        {{ $pendingApprovals->count() > 0 ? $pendingApprovals->count() . ' Pending' : 'Live' }}
-                    </span>
-                </button>
-                <button wire:click="setPaymentSubTab('wallet')" class="px-3.5 py-2 rounded-xl transition flex items-center space-x-2 whitespace-nowrap {{ $paymentSubTab === 'wallet' ? 'bg-indigo-600 text-white shadow' : 'text-slate-800 hover:bg-slate-100' }}">
-                    <span>Credit Wallet Ledger</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-xs font-mono {{ $paymentSubTab === 'wallet' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-900 font-bold' }}">{{ $walletTransactions->total() }}</span>
-                </button>
-                <button wire:click="setPaymentSubTab('packages')" class="px-3.5 py-2 rounded-xl transition flex items-center space-x-2 whitespace-nowrap {{ $paymentSubTab === 'packages' ? 'bg-[#F20B83] text-white shadow' : 'text-slate-800 hover:bg-slate-100' }}">
-                    <span>💳 Credit Packages</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-xs font-mono {{ $paymentSubTab === 'packages' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-900 font-bold' }}">{{ $creditPackages->count() }}</span>
-                </button>
-                <button wire:click="setPaymentSubTab('rules')" class="px-3.5 py-2 rounded-xl transition flex items-center space-x-2 whitespace-nowrap {{ $paymentSubTab === 'rules' ? 'bg-purple-600 text-white shadow' : 'text-slate-800 hover:bg-slate-100' }}">
-                    <span>Dynamic Pricing Rules</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-xs font-mono {{ $paymentSubTab === 'rules' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-900 font-bold' }}">{{ $pricingRules->count() }}</span>
-                </button>
-                <button wire:click="setPaymentSubTab('fraud')" class="px-3.5 py-2 rounded-xl transition flex items-center space-x-2 whitespace-nowrap {{ $paymentSubTab === 'fraud' ? 'bg-red-600 text-white shadow' : 'text-slate-800 hover:bg-slate-100' }}">
-                    <span>Fraud & Velocity Alerts</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-xs font-mono {{ $paymentSubTab === 'fraud' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-900 font-bold' }}">{{ $fraudLogs->count() }}</span>
-                </button>
-                <button wire:click="setPaymentSubTab('refunds')" class="px-3.5 py-2 rounded-xl transition flex items-center space-x-2 whitespace-nowrap {{ $paymentSubTab === 'refunds' ? 'bg-slate-800 text-white shadow' : 'text-slate-800 hover:bg-slate-100' }}">
-                    <span>Refunds Ledger</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-xs font-mono {{ $paymentSubTab === 'refunds' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-900 font-bold' }}">{{ $refunds->total() }}</span>
-                </button>
+            <!-- Responsive Segmented Sub-Tabs Navigation -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 p-2 mb-5 shadow-xs">
+                <div class="flex flex-wrap items-center gap-1.5 text-xs sm:text-sm font-semibold">
+                    <button wire:click="setPaymentSubTab('transactions')" class="px-3 py-2 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap {{ $paymentSubTab === 'transactions' ? 'bg-rose-600 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100' }}">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                        <span>All Gateway Transactions</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-[11px] font-mono {{ $paymentSubTab === 'transactions' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-800 font-bold' }}">{{ $transactions->total() }}</span>
+                    </button>
+                    <button wire:click="setPaymentSubTab('crypto')" class="px-3 py-2 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap {{ $paymentSubTab === 'crypto' ? 'bg-amber-600 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100' }}">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        <span>Crypto &amp; Web3 Orders</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-[11px] font-mono {{ $paymentSubTab === 'crypto' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-800 font-bold' }}">{{ $cryptoPayments->total() }}</span>
+                    </button>
+                    <button wire:click="setPaymentSubTab('treasury')" class="px-3 py-2 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap {{ $paymentSubTab === 'treasury' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100' }}">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        <span>Hybrid Treasury</span>
+                        <span class="px-2 py-0.5 rounded-full text-[11px] font-mono {{ $paymentSubTab === 'treasury' ? 'bg-white/20 text-white' : ($pendingApprovals->count() > 0 ? 'bg-amber-200 text-amber-950 font-black' : 'bg-emerald-100 text-emerald-800 font-bold') }}">
+                            {{ $pendingApprovals->count() > 0 ? $pendingApprovals->count() . ' Pending' : 'Live' }}
+                        </span>
+                    </button>
+                    <button wire:click="setPaymentSubTab('wallet')" class="px-3 py-2 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap {{ $paymentSubTab === 'wallet' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100' }}">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        <span>Credit Wallet Ledger</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-[11px] font-mono {{ $paymentSubTab === 'wallet' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-800 font-bold' }}">{{ $walletTransactions->total() }}</span>
+                    </button>
+                    <button wire:click="setPaymentSubTab('packages')" class="px-3 py-2 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap {{ $paymentSubTab === 'packages' ? 'bg-[#F20B83] text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100' }}">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                        <span>Credit Packages</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-[11px] font-mono {{ $paymentSubTab === 'packages' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-800 font-bold' }}">{{ $creditPackages->count() }}</span>
+                    </button>
+                    <button wire:click="setPaymentSubTab('rules')" class="px-3 py-2 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap {{ $paymentSubTab === 'rules' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100' }}">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                        <span>Dynamic Pricing Rules</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-[11px] font-mono {{ $paymentSubTab === 'rules' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-800 font-bold' }}">{{ $pricingRules->count() }}</span>
+                    </button>
+                    <button wire:click="setPaymentSubTab('fraud')" class="px-3 py-2 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap {{ $paymentSubTab === 'fraud' ? 'bg-red-600 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100' }}">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <span>Fraud &amp; Velocity Alerts</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-[11px] font-mono {{ $paymentSubTab === 'fraud' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-800 font-bold' }}">{{ $fraudLogs->count() }}</span>
+                    </button>
+                    <button wire:click="setPaymentSubTab('refunds')" class="px-3 py-2 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap {{ $paymentSubTab === 'refunds' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100' }}">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+                        <span>Refunds Ledger</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-[11px] font-mono {{ $paymentSubTab === 'refunds' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-800 font-bold' }}">{{ $refunds->total() }}</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Unified Search & Filter Toolbar -->
-            <div class="{{ $card }} p-4 mb-5">
-                <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-3.5 sm:p-4 mb-5">
+                <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
                     <!-- Search bar -->
-                    <div class="relative flex-1">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <div class="relative flex-1 min-w-0">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                         </span>
-                        <input type="text" wire:model.live.debounce.300ms="paymentSearch" placeholder="Search reference, order #, tx hash, user, email, reason..." class="{{ $input }} pl-9 text-xs sm:text-sm">
+                        <input type="text" wire:model.live.debounce.300ms="paymentSearch" placeholder="Search reference, order #, tx hash, user, email, reason..." class="{{ $input }} pl-10 text-xs sm:text-sm w-full">
                     </div>
 
                     <!-- Filters & Actions -->
                     <div class="flex flex-wrap items-center gap-2">
                         @if($paymentSubTab === 'transactions')
-                            <select wire:model.live="paymentGatewayFilter" class="{{ $input }} !w-auto text-xs sm:text-sm" aria-label="Gateway filter">
+                            <select wire:model.live="paymentGatewayFilter" class="{{ $input }} !w-full sm:!w-auto text-xs sm:text-sm" aria-label="Gateway filter">
                                 <option value="all">All Gateways</option>
                                 @foreach($gatewaysList as $g)
                                     <option value="{{ $g }}">{{ strtoupper($g) }}</option>
@@ -4165,7 +4189,7 @@
                         @endif
 
                         @if(in_array($paymentSubTab, ['transactions', 'crypto'], true))
-                            <select wire:model.live="paymentStatusFilter" class="{{ $input }} !w-auto text-xs sm:text-sm" aria-label="Payment status">
+                            <select wire:model.live="paymentStatusFilter" class="{{ $input }} !w-full sm:!w-auto text-xs sm:text-sm" aria-label="Payment status">
                                 <option value="all">All Statuses</option>
                                 <option value="completed">Completed / Confirmed</option>
                                 <option value="pending">Pending</option>
@@ -4175,27 +4199,28 @@
                         @endif
 
                         @if($paymentSearch !== '' || $paymentGatewayFilter !== 'all' || $paymentStatusFilter !== 'all')
-                            <button wire:click="resetPaymentFilters" class="{{ $btn }} bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm" title="Reset Filters">
+                            <button wire:click="resetPaymentFilters" class="{{ $btn }} bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm w-full sm:w-auto justify-center" title="Reset Filters">
                                 Reset
                             </button>
                         @endif
 
                         @if($paymentSubTab === 'packages')
-                            <button wire:click="openCreatePackageModal" class="{{ $btn }} bg-[#F20B83] hover:bg-pink-600 text-white text-xs sm:text-sm font-semibold shadow-sm flex items-center gap-1.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                + Create Credit Package
+                            <button wire:click="openCreatePackageModal" class="{{ $btn }} bg-[#F20B83] hover:bg-pink-600 text-white text-xs sm:text-sm font-semibold shadow-sm flex items-center justify-center gap-1.5 w-full sm:w-auto">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                                <span>Create Credit Package</span>
                             </button>
                         @endif
 
-                        <button wire:click="openPricingRuleModal" class="{{ $btn }} bg-purple-700 hover:bg-purple-600 text-white text-xs sm:text-sm font-semibold shadow-sm">
-                            + Dynamic Pricing Rule
+                        <button wire:click="openPricingRuleModal" class="{{ $btn }} bg-purple-700 hover:bg-purple-600 text-white text-xs sm:text-sm font-semibold shadow-sm flex items-center justify-center gap-1.5 w-full sm:w-auto">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                            <span>Dynamic Pricing Rule</span>
                         </button>
 
-                        <button wire:click="reconcileTransactions" class="{{ $btn }} bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-300 text-xs sm:text-sm font-semibold flex items-center">
-                            <svg class="w-3.5 h-3.5 mr-1.5 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                            Reconcile
+                        <button wire:click="reconcileTransactions" class="{{ $btn }} bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-300 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 w-full sm:w-auto">
+                            <svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            <span>Reconcile</span>
                             @if($unreconciledCount > 0)
-                                <span class="ml-1.5 px-1.5 py-0.5 bg-amber-500/20 text-amber-800 rounded-full text-[10px] font-mono font-bold">{{ $unreconciledCount }}</span>
+                                <span class="px-1.5 py-0.5 bg-amber-500/20 text-amber-800 rounded-full text-[10px] font-mono font-bold">{{ $unreconciledCount }}</span>
                             @endif
                         </button>
                     </div>
@@ -4394,209 +4419,326 @@
                     @endif
 
                     @if($treasuryErrorMessage)
-                        <div class="p-4 rounded-xl bg-rose-50 border-2 border-rose-400 text-rose-950 font-bold text-xs flex items-center justify-between shadow-md transition-all animate-fadeIn">
-                            <div class="flex items-center gap-2.5">
-                                <span class="text-lg">⚠️</span>
-                                <span class="font-bold leading-relaxed">{{ $treasuryErrorMessage }}</span>
+                        <div class="p-4 rounded-2xl bg-rose-50 border border-rose-300 text-rose-950 font-semibold text-xs sm:text-sm flex items-center justify-between gap-3 shadow-sm">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <span class="w-8 h-8 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                </span>
+                                <span class="font-bold leading-relaxed break-words">{{ $treasuryErrorMessage }}</span>
                             </div>
-                            <button type="button" wire:click="$set('treasuryErrorMessage', null)" class="text-rose-700 hover:text-rose-950 font-black text-base px-2 py-0.5">&times;</button>
+                            <button type="button" wire:click="$set('treasuryErrorMessage', null)" class="text-rose-700 hover:text-rose-950 p-1 rounded-lg hover:bg-rose-100 transition shrink-0" aria-label="Dismiss error">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
                         </div>
                     @endif
 
-                    <!-- 1. Emergency Pause & Global Status Ribbon -->
-                    <div class="rounded-2xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 border {{ $isEmergencyPaused ? 'bg-gradient-to-r from-red-950 via-rose-900 to-red-950 border-rose-500 text-white animate-pulse' : 'bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-slate-700 text-white' }}">
-                        <div class="space-y-1.5">
-                            <div class="flex items-center gap-2">
-                                <span class="px-2.5 py-0.5 rounded-full text-xs font-black {{ $isEmergencyPaused ? 'bg-red-500 text-white' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' }}">
-                                    {{ $isEmergencyPaused ? 'EMERGENCY PAUSE: ACTIVE' : 'TREASURY TRANSFERS: ACTIVE' }}
+                    <!-- 1. Emergency Pause & Global Status Hero -->
+                    <div class="rounded-2xl p-5 sm:p-7 shadow-xl flex flex-col lg:flex-row lg:items-center justify-between gap-6 border relative overflow-hidden {{ $isEmergencyPaused ? 'bg-gradient-to-br from-red-950 via-rose-900 to-red-950 border-rose-500/60 text-white' : 'bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 border-slate-800 text-white' }}">
+                        <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full blur-3xl pointer-events-none {{ $isEmergencyPaused ? 'bg-rose-500/20' : 'bg-emerald-500/15' }}"></div>
+                        <div class="space-y-2.5 relative z-10 min-w-0">
+                            <div class="flex flex-wrap items-center gap-2.5">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black tracking-wide uppercase {{ $isEmergencyPaused ? 'bg-red-500/90 text-white' : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' }}">
+                                    <span class="w-2 h-2 rounded-full {{ $isEmergencyPaused ? 'bg-white animate-ping' : 'bg-emerald-400 animate-pulse' }}"></span>
+                                    {{ $isEmergencyPaused ? 'Emergency Pause: Active' : 'Treasury Transfers: Active' }}
                                 </span>
                                 <span class="text-xs text-slate-300 font-mono">Hybrid Dual-Tier Trust Wallet Architecture</span>
                             </div>
-                            <h3 class="text-xl font-black text-white">Hybrid Treasury Fund Management &amp; Sweeping Engine</h3>
-                            <p class="text-xs text-slate-300 max-w-2xl leading-relaxed">
-                                Manages collection of verified deposits into your **Temporary Trust Wallet**, automatic small-amount sweeping (&le; ${{ number_format($autoSweepThreshold, 2) }} USD), large-deposit admin approval queue (&gt; ${{ number_format($autoSweepThreshold, 2) }} USD), and manual consolidation to your **Main Trust Wallet**.
+                            <h3 class="text-lg sm:text-2xl font-black text-white tracking-tight">Hybrid Treasury Fund Management &amp; Sweeping Engine</h3>
+                            <p class="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
+                                Manages collection of verified deposits into your <strong class="text-white font-bold">Temporary Trust Wallet</strong>, automatic small-amount sweeping (&le; ${{ number_format($autoSweepThreshold, 2) }} USD), large-deposit admin approval queue (&gt; ${{ number_format($autoSweepThreshold, 2) }} USD), and manual consolidation to your <strong class="text-white font-bold">Main Trust Wallet</strong>.
                             </p>
-                            <p class="text-[11px] text-emerald-400 font-bold flex items-center gap-1.5">
-                                <span>🔒</span>
+                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] sm:text-xs text-emerald-300 font-semibold">
+                                <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                                 <span>Safety Isolation: User balance credits are 100% independent of sweep transfers.</span>
-                            </p>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-3 shrink-0">
+                        <div class="flex items-center gap-3 shrink-0 relative z-10">
                             <button 
                                 wire:click="toggleTreasuryEmergencyPause" 
                                 wire:confirm="Are you sure you want to change the Global Treasury Transfer state?" 
-                                class="px-5 py-3 rounded-xl text-xs font-black transition flex items-center gap-2 shadow-lg {{ $isEmergencyPaused ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/25' : 'bg-red-600 hover:bg-red-500 text-white shadow-red-500/25' }}"
+                                class="w-full lg:w-auto justify-center px-5 py-3 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 shadow-lg {{ $isEmergencyPaused ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/25' : 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white shadow-red-500/25' }}"
                             >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                                 <span>{{ $isEmergencyPaused ? 'Resume Treasury Transfers' : 'Emergency Pause All Sweeps' }}</span>
                             </button>
                         </div>
                     </div>
 
+                    @php
+                        $activeTempWallets = $treasuryWallets->where('tier', 'temporary_trust_wallet')->filter(function ($w) {
+                            $addr = strtolower((string) $w->public_receiving_address);
+                            return $w->is_active && $addr !== '' && !str_contains($addr, 'placeholder') && !str_ends_with($addr, 'dead') && !str_ends_with($addr, 'beef');
+                        });
+                        if ($activeTempWallets->isEmpty()) {
+                            $activeTempWallets = $treasuryWallets->where('tier', 'temporary_trust_wallet');
+                        }
+                        $activeMainWallets = $treasuryWallets->where('tier', 'main_trust_wallet')->filter(function ($w) {
+                            $addr = strtolower((string) $w->public_receiving_address);
+                            return $w->is_active && $addr !== '' && !str_contains($addr, 'placeholder') && !str_ends_with($addr, 'dead') && !str_ends_with($addr, 'beef');
+                        });
+                        if ($activeMainWallets->isEmpty()) {
+                            $activeMainWallets = $treasuryWallets->where('tier', 'main_trust_wallet');
+                        }
+                    @endphp
+
                     <!-- 2. Dual-Tier Trust Wallet Cards Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
                         <!-- Temporary Treasury (Trust Wallet) -->
-                        <div class="{{ $card }} p-6 border-l-4 border-l-amber-500">
-                            <div class="flex items-center justify-between pb-3 border-b border-slate-200">
-                                <div>
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-amber-50 text-amber-900 border border-amber-200">Tier 1 Collection</span>
-                                    <h4 class="text-base font-black text-slate-950 mt-1">Temporary Treasury (Trust Wallet)</h4>
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 sm:p-6 relative overflow-hidden">
+                            <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-400 to-orange-500"></div>
+                            <div class="flex items-start justify-between gap-3 pb-4 border-b border-slate-100">
+                                <div class="min-w-0">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                        Tier 1 Collection
+                                    </span>
+                                    <h4 class="text-base sm:text-lg font-black text-slate-950 mt-1.5">Temporary Treasury (Trust Wallet)</h4>
+                                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                                        Receiving address for initial automatic &amp; approved sweeps from user deposit addresses.
+                                    </p>
                                 </div>
-                                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-800 flex items-center justify-center font-black">
-                                    🛡️
+                                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-sm shrink-0">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                                 </div>
                             </div>
-                            <p class="text-xs text-slate-600 mt-2 font-semibold">
-                                Temporary Trust Wallet receiving address used for initial automatic &amp; approved sweeps from user deposit addresses.
-                            </p>
-                            <div class="mt-4 space-y-2">
-                                @forelse($treasuryWallets->where('tier', 'temporary_trust_wallet') as $tw)
-                                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3 text-xs">
-                                        <div>
-                                            <span class="font-black text-slate-950 font-mono">{{ $tw->network_key }}</span>
-                                            <p class="text-[11px] font-mono text-slate-600 truncate max-w-xs mt-0.5">{{ $tw->public_receiving_address }}</p>
+                            <div class="mt-4 space-y-2.5">
+                                @forelse($activeTempWallets as $tw)
+                                    @php
+                                        $netKey = strtoupper($tw->network_key);
+                                        $badgeColor = match (true) {
+                                            str_contains($netKey, 'TRC') || $netKey === 'TRX' => 'bg-rose-50 text-rose-700 border-rose-200',
+                                            str_contains($netKey, 'ERC') || $netKey === 'ETH' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
+                                            str_contains($netKey, 'BEP') || $netKey === 'BNB' => 'bg-amber-50 text-amber-700 border-amber-200',
+                                            $netKey === 'BTC' => 'bg-orange-50 text-orange-700 border-orange-200',
+                                            $netKey === 'LTC' => 'bg-sky-50 text-sky-700 border-sky-200',
+                                            default => 'bg-slate-100 text-slate-700 border-slate-200',
+                                        };
+                                    @endphp
+                                    <div x-data="{ copied: false }" class="p-3.5 rounded-xl bg-slate-50/80 hover:bg-slate-50 border border-slate-200/80 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                        <div class="flex items-center gap-3 min-w-0 flex-1">
+                                            <span class="w-9 h-9 rounded-xl border flex items-center justify-center font-mono font-black text-[10px] shrink-0 {{ $badgeColor }}">
+                                                {{ $netKey }}
+                                            </span>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="font-black text-slate-900 text-xs font-mono">{{ $netKey }} Network</span>
+                                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-emerald-50 text-emerald-700">Active</span>
+                                                </div>
+                                                <div class="flex items-center gap-1.5 mt-0.5 min-w-0">
+                                                    <p class="text-[11px] font-mono text-slate-600 truncate">{{ $tw->public_receiving_address }}</p>
+                                                    <button type="button" @click="navigator.clipboard.writeText(@js($tw->public_receiving_address)); copied = true; setTimeout(() => copied = false, 1500)" class="text-slate-400 hover:text-slate-800 p-1 rounded transition shrink-0" title="Copy address">
+                                                        <svg x-show="!copied" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                                        <svg x-show="copied" x-cloak class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="text-right shrink-0">
-                                            <span class="font-black text-emerald-800 text-xs">{{ number_format($tw->available_balance, 4) }} Avail</span>
-                                            <p class="text-[10px] text-slate-500 font-bold">Total: {{ number_format($tw->total_received, 4) }}</p>
+                                        <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200/70 shrink-0">
+                                            <span class="font-black text-emerald-700 text-xs sm:text-sm font-mono tabular-nums">{{ number_format($tw->available_balance, 4) }} Avail</span>
+                                            <p class="text-[10px] text-slate-500 font-bold font-mono tabular-nums">Total: {{ number_format($tw->total_received, 4) }}</p>
                                         </div>
                                     </div>
                                 @empty
-                                    <p class="text-xs text-slate-500 italic">No Temporary Trust Wallet configured.</p>
+                                    <div class="p-6 rounded-xl bg-slate-50 border border-dashed border-slate-300 text-center text-xs text-slate-500">
+                                        No Temporary Trust Wallet configured.
+                                    </div>
                                 @endforelse
                             </div>
                         </div>
 
                         <!-- Main Treasury (Primary Trust Wallet) -->
-                        <div class="{{ $card }} p-6 border-l-4 border-l-emerald-600">
-                            <div class="flex items-center justify-between pb-3 border-b border-slate-200">
-                                <div>
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-50 text-emerald-900 border border-emerald-200">Tier 2 Cold Storage</span>
-                                    <h4 class="text-base font-black text-slate-950 mt-1">Main Treasury (Primary Trust Wallet)</h4>
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 sm:p-6 relative overflow-hidden">
+                            <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500"></div>
+                            <div class="flex items-start justify-between gap-3 pb-4 border-b border-slate-100">
+                                <div class="min-w-0">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        Tier 2 Cold Storage
+                                    </span>
+                                    <h4 class="text-base sm:text-lg font-black text-slate-950 mt-1.5">Main Treasury (Primary Trust Wallet)</h4>
+                                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                                        Primary Trust Wallet destination where collected cryptocurrency is consolidated securely.
+                                    </p>
                                 </div>
-                                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-800 flex items-center justify-center font-black">
-                                    🏦
+                                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-sm shrink-0">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/></svg>
                                 </div>
                             </div>
-                            <p class="text-xs text-slate-600 mt-2 font-semibold">
-                                Primary Trust Wallet destination where collected cryptocurrency is consolidated securely.
-                            </p>
-                            <div class="mt-4 space-y-2">
-                                @forelse($treasuryWallets->where('tier', 'main_trust_wallet') as $mw)
-                                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3 text-xs">
-                                        <div>
-                                            <span class="font-black text-slate-950 font-mono">{{ $mw->network_key }}</span>
-                                            <p class="text-[11px] font-mono text-slate-600 truncate max-w-xs mt-0.5">{{ $mw->public_receiving_address }}</p>
+                            <div class="mt-4 space-y-2.5">
+                                @forelse($activeMainWallets as $mw)
+                                    @php
+                                        $netKey = strtoupper($mw->network_key);
+                                        $badgeColor = match (true) {
+                                            str_contains($netKey, 'TRC') || $netKey === 'TRX' => 'bg-rose-50 text-rose-700 border-rose-200',
+                                            str_contains($netKey, 'ERC') || $netKey === 'ETH' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
+                                            str_contains($netKey, 'BEP') || $netKey === 'BNB' => 'bg-amber-50 text-amber-700 border-amber-200',
+                                            $netKey === 'BTC' => 'bg-orange-50 text-orange-700 border-orange-200',
+                                            $netKey === 'LTC' => 'bg-sky-50 text-sky-700 border-sky-200',
+                                            default => 'bg-slate-100 text-slate-700 border-slate-200',
+                                        };
+                                    @endphp
+                                    <div x-data="{ copied: false }" class="p-3.5 rounded-xl bg-slate-50/80 hover:bg-slate-50 border border-slate-200/80 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                        <div class="flex items-center gap-3 min-w-0 flex-1">
+                                            <span class="w-9 h-9 rounded-xl border flex items-center justify-center font-mono font-black text-[10px] shrink-0 {{ $badgeColor }}">
+                                                {{ $netKey }}
+                                            </span>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="font-black text-slate-900 text-xs font-mono">{{ $netKey }} Vault</span>
+                                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-emerald-50 text-emerald-700">Verified</span>
+                                                </div>
+                                                <div class="flex items-center gap-1.5 mt-0.5 min-w-0">
+                                                    <p class="text-[11px] font-mono text-slate-600 truncate">{{ $mw->public_receiving_address }}</p>
+                                                    <button type="button" @click="navigator.clipboard.writeText(@js($mw->public_receiving_address)); copied = true; setTimeout(() => copied = false, 1500)" class="text-slate-400 hover:text-slate-800 p-1 rounded transition shrink-0" title="Copy address">
+                                                        <svg x-show="!copied" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                                        <svg x-show="copied" x-cloak class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="text-right shrink-0">
-                                            <span class="font-black text-emerald-800 text-xs">{{ number_format($mw->available_balance, 4) }} Consolidated</span>
-                                            <p class="text-[10px] text-slate-500 font-bold">Total: {{ number_format($mw->total_received, 4) }}</p>
+                                        <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200/70 shrink-0">
+                                            <span class="font-black text-emerald-700 text-xs sm:text-sm font-mono tabular-nums">{{ number_format($mw->available_balance, 4) }} Consolidated</span>
+                                            <p class="text-[10px] text-slate-500 font-bold font-mono tabular-nums">Total: {{ number_format($mw->total_received, 4) }}</p>
                                         </div>
                                     </div>
                                 @empty
-                                    <p class="text-xs text-slate-500 italic">No Main Trust Wallet configured.</p>
+                                    <div class="p-6 rounded-xl bg-slate-50 border border-dashed border-slate-300 text-center text-xs text-slate-500">
+                                        No Main Trust Wallet configured.
+                                    </div>
                                 @endforelse
                             </div>
                         </div>
                     </div>
 
                     <!-- 3. Large Transfer Admin Approval Queue -->
-                    <div class="{{ $card }} overflow-x-auto shadow-md">
-                        <div class="p-5 border-b border-slate-200 flex items-center justify-between">
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                        <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div>
-                                <h4 class="text-base font-black text-slate-950 flex items-center gap-2">
+                                <h4 class="text-base font-black text-slate-950 flex flex-wrap items-center gap-2">
                                     <span>Large Deposit Sweep Approval Queue</span>
-                                    <span class="px-2 py-0.5 rounded-full text-xs font-black bg-purple-50 text-purple-950 border border-purple-200">
+                                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-purple-50 text-purple-900 border border-purple-200">
                                         Threshold: &gt; ${{ number_format($autoSweepThreshold, 2) }} USD
                                     </span>
                                 </h4>
-                                <p class="text-xs font-semibold text-slate-600 mt-0.5">
+                                <p class="text-xs font-medium text-slate-500 mt-1">
                                     Transfers exceeding the threshold require authorized administrator verification before moving to Trust Wallet.
                                 </p>
                             </div>
-                            <span class="px-3 py-1 rounded-xl text-xs font-black {{ $pendingApprovals->count() > 0 ? 'bg-amber-100 text-amber-950 border border-amber-300' : 'bg-emerald-50 text-emerald-800 border border-emerald-200' }}">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black self-start sm:self-auto shrink-0 {{ $pendingApprovals->count() > 0 ? 'bg-amber-100 text-amber-950 border border-amber-300' : 'bg-emerald-50 text-emerald-800 border border-emerald-200' }}">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 {{ $pendingApprovals->count() }} Awaiting Approval
                             </span>
                         </div>
 
-                        <table class="min-w-full divide-y divide-slate-200">
-                            <thead class="bg-slate-50">
-                                <tr>
-                                    <th class="{{ $th }}">Request / Invoice</th>
-                                    <th class="{{ $th }}">Customer</th>
-                                    <th class="{{ $th }}">Amount (USD &amp; Crypto)</th>
-                                    <th class="{{ $th }}">Network &amp; Destination</th>
-                                    <th class="{{ $th }}">Est. Network Fee</th>
-                                    <th class="{{ $th }} text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200 bg-white">
+                        <!-- Desktop Table -->
+                        <div class="hidden md:block overflow-x-auto">
+                            <table class="min-w-full divide-y divide-slate-200">
+                                <thead class="bg-slate-50">
+                                    <tr>
+                                        <th class="{{ $th }}">Request / Invoice</th>
+                                        <th class="{{ $th }}">Customer</th>
+                                        <th class="{{ $th }}">Amount (USD &amp; Crypto)</th>
+                                        <th class="{{ $th }}">Network &amp; Destination</th>
+                                        <th class="{{ $th }}">Est. Network Fee</th>
+                                        <th class="{{ $th }} text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-200 bg-white">
+                                @forelse($pendingApprovals as $appr)
+                                    <tr class="hover:bg-slate-50/80 transition" wire:key="appr-{{ $appr->id }}">
+                                        <td class="{{ $td }}">
+                                            <span class="font-black font-mono text-xs text-slate-950">#{{ $appr->id }}</span>
+                                            <p class="text-xs font-mono text-slate-500">{{ $appr->sweepTransaction?->invoice?->invoice_number ?? 'Direct Deposit' }}</p>
+                                        </td>
+                                        <td class="{{ $td }}">
+                                            <span class="font-black text-slate-950 text-xs">{{ $appr->sweepTransaction?->invoice?->user?->name ?? 'User #' . $appr->sweepTransaction?->invoice?->user_id }}</span>
+                                            <p class="text-[11px] text-slate-500">{{ $appr->sweepTransaction?->invoice?->user?->email }}</p>
+                                        </td>
+                                        <td class="{{ $td }}">
+                                            <span class="font-black text-slate-950 text-sm">${{ number_format($appr->requested_amount_usd, 2) }}</span>
+                                            <p class="text-xs font-bold text-emerald-700 font-mono">{{ $appr->requested_crypto_amount }} {{ $appr->sweepTransaction?->currency_symbol }}</p>
+                                        </td>
+                                        <td class="{{ $td }}">
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-slate-100 text-slate-800 border border-slate-300">
+                                                {{ $appr->network_key }}
+                                            </span>
+                                            <p class="text-[11px] font-mono text-slate-600 truncate max-w-xs mt-1">{{ $appr->destination_address }}</p>
+                                        </td>
+                                        <td class="{{ $td }}">
+                                            <span class="font-black text-slate-800 text-xs">${{ number_format($appr->estimated_fee_usd, 2) }} USD</span>
+                                        </td>
+                                        <td class="{{ $td }} text-right whitespace-nowrap space-x-2">
+                                            <button 
+                                                wire:click="approveLargeSweep({{ $appr->id }})" 
+                                                wire:confirm="Authorize transfer of ${{ number_format($appr->requested_amount_usd, 2) }} to your Temporary Trust Wallet?" 
+                                                class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-xs transition"
+                                            >
+                                                Approve &amp; Sweep
+                                            </button>
+                                            <button 
+                                                wire:click="rejectLargeSweep({{ $appr->id }})" 
+                                                wire:confirm="Reject this sweep transfer? Funds will remain in deposit address." 
+                                                class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-900 border border-rose-300 text-xs font-black transition"
+                                            >
+                                                Reject
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="{{ $td }} text-center py-8 text-slate-500 font-medium text-xs sm:text-sm">
+                                            No large sweep transfers currently awaiting admin authorization. All small deposits below ${{ number_format($autoSweepThreshold, 2) }} are swept automatically.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Mobile Card Layout -->
+                        <div class="md:hidden divide-y divide-slate-100">
                             @forelse($pendingApprovals as $appr)
-                                <tr class="hover:bg-slate-50 transition" wire:key="appr-{{ $appr->id }}">
-                                    <td class="{{ $td }}">
-                                        <span class="font-black font-mono text-xs text-slate-950">#{{ $appr->id }}</span>
-                                        <p class="text-xs font-mono text-slate-600">{{ $appr->sweepTransaction?->invoice?->invoice_number ?? 'Direct Deposit' }}</p>
-                                    </td>
-                                    <td class="{{ $td }}">
-                                        <span class="font-black text-slate-950 text-xs">{{ $appr->sweepTransaction?->invoice?->user?->name ?? 'User #' . $appr->sweepTransaction?->invoice?->user_id }}</span>
-                                        <p class="text-[11px] text-slate-500">{{ $appr->sweepTransaction?->invoice?->user?->email }}</p>
-                                    </td>
-                                    <td class="{{ $td }}">
-                                        <span class="font-black text-slate-950 text-sm">${{ number_format($appr->requested_amount_usd, 2) }}</span>
-                                        <p class="text-xs font-bold text-emerald-800">{{ $appr->requested_crypto_amount }} {{ $appr->sweepTransaction?->currency_symbol }}</p>
-                                    </td>
-                                    <td class="{{ $td }}">
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-slate-100 text-slate-800 border border-slate-300">
-                                            {{ $appr->network_key }}
-                                        </span>
-                                        <p class="text-[11px] font-mono text-slate-600 truncate max-w-xs mt-1">{{ $appr->destination_address }}</p>
-                                    </td>
-                                    <td class="{{ $td }}">
-                                        <span class="font-black text-slate-800 text-xs">${{ number_format($appr->estimated_fee_usd, 2) }} USD</span>
-                                    </td>
-                                    <td class="{{ $td }} text-right whitespace-nowrap space-x-2">
-                                        <button 
-                                            wire:click="approveLargeSweep({{ $appr->id }})" 
-                                            wire:confirm="Authorize transfer of ${{ number_format($appr->requested_amount_usd, 2) }} to your Temporary Trust Wallet?" 
-                                            class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-xs transition"
-                                        >
-                                            Approve &amp; Sweep
-                                        </button>
-                                        <button 
-                                            wire:click="rejectLargeSweep({{ $appr->id }})" 
-                                            wire:confirm="Reject this sweep transfer? Funds will remain in deposit address." 
-                                            class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-900 border border-rose-300 text-xs font-black transition"
-                                        >
-                                            Reject
-                                        </button>
-                                    </td>
-                                </tr>
+                                <div class="p-4 space-y-3" wire:key="appr-mobile-{{ $appr->id }}">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div>
+                                            <span class="font-black font-mono text-xs text-slate-950">#{{ $appr->id }}</span>
+                                            <p class="text-xs font-mono text-slate-500">{{ $appr->sweepTransaction?->invoice?->invoice_number ?? 'Direct Deposit' }}</p>
+                                        </div>
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-slate-100 text-slate-800 border border-slate-200">{{ $appr->network_key }}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-xs">
+                                        <span class="text-slate-600 font-semibold">{{ $appr->sweepTransaction?->invoice?->user?->name ?? 'User #' . $appr->sweepTransaction?->invoice?->user_id }}</span>
+                                        <span class="font-black text-slate-950">${{ number_format($appr->requested_amount_usd, 2) }} <span class="text-emerald-700 font-mono">({{ $appr->requested_crypto_amount }} {{ $appr->sweepTransaction?->currency_symbol }})</span></span>
+                                    </div>
+                                    <p class="text-[11px] font-mono text-slate-500 truncate">{{ $appr->destination_address }}</p>
+                                    <div class="flex items-center gap-2 pt-1">
+                                        <button wire:click="approveLargeSweep({{ $appr->id }})" wire:confirm="Authorize transfer of ${{ number_format($appr->requested_amount_usd, 2) }} to your Temporary Trust Wallet?" class="flex-1 py-2 rounded-xl bg-emerald-600 text-white text-xs font-black">Approve &amp; Sweep</button>
+                                        <button wire:click="rejectLargeSweep({{ $appr->id }})" wire:confirm="Reject this sweep transfer? Funds will remain in deposit address." class="px-4 py-2 rounded-xl bg-rose-50 text-rose-900 border border-rose-200 text-xs font-black">Reject</button>
+                                    </div>
+                                </div>
                             @empty
-                                <tr>
-                                    <td colspan="6" class="{{ $td }} text-center py-8 text-slate-500 font-semibold">
-                                        No large sweep transfers currently awaiting admin authorization. All small deposits below ${{ number_format($autoSweepThreshold, 2) }} are swept automatically.
-                                    </td>
-                                </tr>
+                                <div class="p-6 text-center text-xs text-slate-500 font-medium">
+                                    No large sweep transfers awaiting admin authorization.
+                                </div>
                             @endforelse
-                            </tbody>
-                        </table>
+                        </div>
                     </div>
 
                     <!-- 4. Phase 14.5: Gas Reserves & Sweep Cost Live Monitor -->
-                    <div class="{{ $card }} p-6 space-y-4">
-                        <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 sm:p-6 space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
                             <div>
-                                <h4 class="text-base font-black text-slate-950 flex items-center gap-2">
+                                <h4 class="text-base font-black text-slate-950 flex flex-wrap items-center gap-2">
                                     <span>Gas Reserve Management &amp; Sweep Cost Engine</span>
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-50 text-emerald-900 border border-emerald-300">Phase 14.5 Active</span>
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-50 text-emerald-800 border border-emerald-200">Phase 14.5 Active</span>
                                 </h4>
-                                <p class="text-xs font-semibold text-slate-600 mt-0.5">
+                                <p class="text-xs font-medium text-slate-500 mt-1">
                                     Monitors network-specific native gas reserves (TRX, ETH, BNB, BTC) and prevents sweeps when gas is low or unprofitable.
                                 </p>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                             @foreach($gasReserves as $gr)
                                 <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between space-y-3">
                                     <div>
