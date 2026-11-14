@@ -27,6 +27,9 @@
             'filters' => $filters,
         ])
 
+        {{-- Country-Targeted Search Results Advertisement --}}
+        <x-ad-banner placement="search_results" :context="['country' => $country->code]" variant="leaderboard" :limit="1" />
+
         {{-- Results Stream --}}
         <section class="space-y-4" data-country-search-results>
             <div class="flex items-center justify-between gap-4">

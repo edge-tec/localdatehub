@@ -307,6 +307,18 @@
                         @php
                             $targetDimensions = [
                                 [
+                                    'key' => 'countries',
+                                    'field' => 'target_countries',
+                                    'label' => 'Target Countries (URL Scope)',
+                                    'all_label' => 'All Countries',
+                                    'badge_all' => 'All Countries',
+                                    'placeholder' => 'Filter countries...',
+                                    'items' => ($targetingOptions['countries'] ?? collect())->map(fn ($ctry) => [
+                                        'value' => strtoupper((string) $ctry->code),
+                                        'label' => $ctry->name . ' (' . strtoupper((string) $ctry->code) . ' · /' . strtolower((string) ($ctry->slug ?: $ctry->code)) . ')',
+                                    ]),
+                                ],
+                                [
                                     'key' => 'states',
                                     'field' => 'target_states',
                                     'label' => 'Target States',
@@ -315,7 +327,7 @@
                                     'placeholder' => 'Filter states...',
                                     'items' => ($targetingOptions['states'] ?? collect())->map(fn ($st) => [
                                         'value' => (string) $st->code,
-                                        'label' => $st->name . ' (' . $st->code . ')',
+                                        'label' => $st->name . ' (' . $st->code . ($st->country ? ' · ' . $st->country->code : '') . ')',
                                     ]),
                                 ],
                                 [
@@ -345,7 +357,7 @@
                             ];
                         @endphp
 
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                             @foreach($targetDimensions as $dim)
                                 <div
                                     x-data="{

@@ -14,6 +14,7 @@ use App\Modules\Advertising\Services\AdDeliveryService;
 use App\Modules\Advertising\Services\AdUrlService;
 use App\Modules\Categories\Models\Category;
 use App\Modules\Locations\Models\City;
+use App\Modules\Locations\Models\Country;
 use App\Modules\Locations\Models\State;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
@@ -186,6 +187,7 @@ trait ManagesAdvertisingCampaigns
         $this->authorizePermission('ads.manage');
 
         $fieldMap = [
+            'countries' => 'target_countries',
             'states' => 'target_states',
             'categories' => 'target_categories',
             'cities' => 'target_cities',
@@ -202,6 +204,9 @@ trait ManagesAdvertisingCampaigns
         }
 
         $this->campaignForm[$field] = match ($dimension) {
+            'countries' => Schema::hasTable('countries')
+                ? Country::where('is_active', true)->orderBy('display_order')->orderBy('name')->pluck('code')->map(fn ($c) => strtoupper((string) $c))->all()
+                : ['US', 'GB', 'CA', 'AU', 'IE', 'NZ'],
             'states' => Schema::hasTable('states')
                 ? State::where('is_active', true)->orderBy('name')->pluck('code')->all()
                 : [],
@@ -688,7 +693,7 @@ trait ManagesAdvertisingCampaigns
                 'placementConfigs' => collect(),
                 'analyticsReport' => app(AdAnalyticsService::class)->getReport($this->adAnalyticsRange),
                 'enterpriseStats' => [],
-                'targetingOptions' => ['categories' => collect(), 'states' => collect(), 'cities' => collect()],
+                'targetingOptions' => ['countries' => collect(), 'categories' => collect(), 'states' => collect(), 'cities' => collect()],
             ];
         }
 
@@ -780,11 +785,14 @@ trait ManagesAdvertisingCampaigns
                 'pipeline_value_usd' => ((int) $allCampaigns->where('status', AdCampaign::STATUS_ACTIVE)->sum('price_cents')) / 100,
             ],
             'targetingOptions' => [
+                'countries' => Schema::hasTable('countries')
+                    ? Country::where('is_active', true)->orderBy('display_order')->orderBy('name')->get(['id', 'name', 'code', 'slug'])
+                    : collect(),
                 'categories' => Schema::hasTable('categories')
                     ? Category::where('is_active', true)->orderBy('display_order')->orderBy('name')->get(['id', 'name', 'parent_id'])
                     : collect(),
                 'states' => Schema::hasTable('states')
-                    ? State::where('is_active', true)->orderBy('name')->get(['id', 'name', 'code'])
+                    ? State::with('country:id,code')->where('is_active', true)->orderBy('name')->get(['id', 'name', 'code', 'country_id'])
                     : collect(),
                 'cities' => Schema::hasTable('cities')
                     ? City::with('state:id,code')->orderByDesc('is_popular')->orderBy('name')->take(120)->get(['id', 'name', 'state_id'])

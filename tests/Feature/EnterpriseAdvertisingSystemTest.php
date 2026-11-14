@@ -852,5 +852,57 @@ class EnterpriseAdvertisingSystemTest extends TestCase
             ->assertSee('Discover New Local Connections')
             ->assertDontSee('lg:col-span-4 space-y-6 lg:sticky lg:top-24', false);
     }
+
+    public function test_country_targeted_ad_only_displays_on_targeted_country_urls(): void
+    {
+        $ukCountry = \App\Modules\Locations\Models\Country::firstOrCreate(
+            ['code' => 'GB'],
+            ['name' => 'United Kingdom', 'slug' => 'gb', 'currency_code' => 'GBP', 'currency_symbol' => '£', 'division_label' => 'Country', 'is_active' => true, 'display_order' => 2]
+        );
+        $caCountry = \App\Modules\Locations\Models\Country::firstOrCreate(
+            ['code' => 'CA'],
+            ['name' => 'Canada', 'slug' => 'ca', 'currency_code' => 'CAD', 'currency_symbol' => 'C$', 'division_label' => 'Province', 'is_active' => true, 'display_order' => 3]
+        );
+
+        $manager = app(AdCampaignManager::class);
+        $manager->saveCampaign([
+            'name' => 'UK Exclusive Campaign',
+            'campaign_type' => AdCampaign::TYPE_BANNER,
+            'advertiser_name' => 'London Dates',
+            'creative_title' => 'Exclusive UK Singles Offer',
+            'creative_description' => 'Only visible on /gb URLs.',
+            'cta_text' => 'Join UK',
+            'destination_url' => 'https://example.com/uk-offer',
+            'desktop_banner_url' => '/storage/ad-banners/uk-only.jpg',
+            'disclosure_label' => 'Sponsored',
+            'status' => AdCampaign::STATUS_ACTIVE,
+            'priority' => 20,
+            'weight' => 100,
+            'placements' => [AdCampaign::SLOT_HOMEPAGE_TOP, AdCampaign::SLOT_SEARCH_RESULTS],
+            'target_countries' => ['GB'],
+        ], null, $this->admin->id);
+
+        // Must render on /gb and /gb/search
+        $this->withSession(['age_confirmed_18' => true])
+            ->get('/gb')
+            ->assertOk()
+            ->assertSee('Exclusive UK Singles Offer');
+
+        $this->withSession(['age_confirmed_18' => true])
+            ->get('/gb/search')
+            ->assertOk()
+            ->assertSee('Exclusive UK Singles Offer');
+
+        // Must NOT render on /ca or / (US)
+        $this->withSession(['age_confirmed_18' => true])
+            ->get('/ca')
+            ->assertOk()
+            ->assertDontSee('Exclusive UK Singles Offer');
+
+        $this->withSession(['age_confirmed_18' => true])
+            ->get('/us')
+            ->assertOk()
+            ->assertDontSee('Exclusive UK Singles Offer');
+    }
 }
 

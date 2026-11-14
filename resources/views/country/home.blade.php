@@ -4,6 +4,9 @@
     @include('country.partials.switcher-bar')
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-10" data-country-marketplace="{{ $country->code }}">
+        {{-- Country-Targeted Homepage Top Advertisement --}}
+        <x-ad-banner placement="homepage_top" :context="['country' => $country->code]" variant="leaderboard" :limit="1" />
+
         {{-- 1. Country Hero Header & Local Statistics --}}
         <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-[#1E1B3A] to-rose-950 text-white p-6 sm:p-10 shadow-lg">
             <div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">

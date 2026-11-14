@@ -415,10 +415,22 @@ class AdDeliveryService
             }
         }
 
-        if ((!array_key_exists('country', $context) || $context['country'] === null || $context['country'] === '') && $req->query('country')) {
-            $qCountry = strtoupper(trim((string) $req->query('country')));
-            if (strlen($qCountry) === 2) {
-                $context['country'] = $qCountry;
+        if (!array_key_exists('country', $context) || $context['country'] === null || $context['country'] === '') {
+            $routeCountry = strtoupper(trim((string) $req->route('countrySlug', '')));
+            if ($routeCountry !== '' && in_array($routeCountry, ['US', 'GB', 'CA', 'AU', 'IE', 'NZ'], true)) {
+                $context['country'] = $routeCountry;
+            } elseif (in_array(strtoupper((string) $req->segment(1)), ['US', 'GB', 'CA', 'AU', 'IE', 'NZ'], true)) {
+                $context['country'] = strtoupper((string) $req->segment(1));
+            } elseif ($req->query('country')) {
+                $qCountry = strtoupper(trim((string) $req->query('country')));
+                if (strlen($qCountry) === 2) {
+                    $context['country'] = $qCountry;
+                }
+            } elseif ($req->hasSession() && $req->session()->get('active_country_code')) {
+                $sessCountry = strtoupper(trim((string) $req->session()->get('active_country_code')));
+                if (strlen($sessCountry) === 2) {
+                    $context['country'] = $sessCountry;
+                }
             }
         }
 

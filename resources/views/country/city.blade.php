@@ -23,6 +23,9 @@
             @endif
         </nav>
 
+        {{-- Country & City-Targeted Banner Advertisement --}}
+        <x-ad-banner placement="location_page" :context="['country' => $country->code, 'state' => $area->code, 'city_id' => $city->id]" variant="leaderboard" :limit="1" />
+
         {{-- City Hero Header --}}
         <section class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div class="space-y-2 max-w-3xl">
