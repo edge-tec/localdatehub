@@ -8,6 +8,7 @@ use App\Modules\Listings\Models\Listing;
 use App\Modules\Listings\Services\ListingManagementService;
 use App\Modules\Listings\Services\ListingMediaService;
 use App\Modules\Locations\Models\City;
+use App\Modules\Locations\Models\Country;
 use App\Modules\Locations\Models\State;
 use App\Modules\Monetization\Services\PostingQuotaService;
 use Illuminate\Http\UploadedFile;
@@ -194,9 +195,29 @@ class CampaignAutomationService
      *     unavailable_cities: array<int, array{city_id: int, city_name: string, state_name: string, reason: string}>
      * }
      */
-    public function buildLocationChecklist(?string $stateFilter = null, ?string $cityFilter = null): array
+    public function buildLocationChecklist(?string $stateFilter = null, ?string $cityFilter = null, ?string $countryFilter = null): array
     {
         $statesQuery = State::query()->orderBy('name');
+        if ($countryFilter) {
+            $needles = collect(explode(',', $countryFilter))
+                ->map(fn ($v) => strtolower(trim($v)))
+                ->filter()
+                ->values()
+                ->all();
+
+            if (!empty($needles)) {
+                $countryIds = Country::query()
+                    ->where(function ($q) use ($needles) {
+                        $q->whereIn(\Illuminate\Support\Facades\DB::raw('LOWER(code)'), $needles)
+                            ->orWhereIn(\Illuminate\Support\Facades\DB::raw('LOWER(name)'), $needles)
+                            ->orWhereIn(\Illuminate\Support\Facades\DB::raw('LOWER(slug)'), $needles);
+                    })
+                    ->pluck('id');
+
+                $statesQuery->whereIn('country_id', $countryIds);
+            }
+        }
+
         if ($stateFilter) {
             $needle = strtolower(trim($stateFilter));
             $statesQuery->where(function ($q) use ($needle) {
@@ -421,7 +442,11 @@ class CampaignAutomationService
             throw new RuntimeException("No folders with valid images found in: {$targetPath}");
         }
 
-        $checklist = $this->buildLocationChecklist($options['state'] ?? null, $options['city'] ?? null);
+        $checklist = $this->buildLocationChecklist(
+            $options['state'] ?? null,
+            $options['city'] ?? null,
+            $options['country'] ?? null
+        );
         $eligibleCities = $checklist['eligible_cities'];
         if ($limit > 0) {
             $eligibleCities = array_slice($eligibleCities, 0, $limit);

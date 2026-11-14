@@ -14,6 +14,7 @@ class PublishFolderCampaignCommand extends Command
         {--age=25 : Advertiser age (minimum 18)}
         {--gender=female : Poster gender}
         {--intent=dating : Listing intent}
+        {--country= : Optional comma-separated country codes, names, or slugs (e.g. GB,CA,AU,IE,NZ)}
         {--state= : Optional state code, name, or slug filter}
         {--city= : Optional city name or slug filter}
         {--limit=0 : Maximum number of eligible cities to process (0 = all)}
@@ -33,6 +34,7 @@ class PublishFolderCampaignCommand extends Command
             'age' => (int) $this->option('age'),
             'gender' => (string) $this->option('gender'),
             'intent' => (string) $this->option('intent'),
+            'country' => $this->option('country'),
             'state' => $this->option('state'),
             'city' => $this->option('city'),
             'limit' => (int) $this->option('limit'),
